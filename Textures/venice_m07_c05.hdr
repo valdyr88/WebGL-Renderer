@@ -1,0 +1,6 @@
+#?RADIANCE
+# Created with CubeMapGen
+FORMAT=32-bit_rle_rgbe
+
+-Y 1 +X 1
+ƒ|ž€

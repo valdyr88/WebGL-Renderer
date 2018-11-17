@@ -1,0 +1,69 @@
+<NotepadPlus>
+    <Project name="WebGL">
+        <Folder name="GLExt">
+            <File name="GLExt\glCamera.js" />
+            <File name="GLExt\glContext.js" />
+            <File name="GLExt\GLExt.js" />
+            <File name="GLExt\glFramebuffer.js" />
+            <File name="GLExt\glLight.js" />
+            <File name="GLExt\glModel.js" />
+            <File name="GLExt\glShader.js" />
+            <File name="GLExt\glTexture.js" />
+        </Folder>
+        <Folder name="System">
+            <File name="System\globalStorage.js" />
+            <File name="System\sys.js" />
+            <File name="System\time.js" />
+            <File name="System\mouse.js" />
+            <File name="System\keyboard.js" />
+            <File name="System\zip.js" />
+        </Folder>
+        <Folder name="glMatrix">
+            <File name="glMatrix\gl-matrix.js" />
+            <File name="glMatrix\gl-matrix\common.js" />
+            <File name="glMatrix\gl-matrix\mat2.js" />
+            <File name="glMatrix\gl-matrix\mat2d.js" />
+            <File name="glMatrix\gl-matrix\mat3.js" />
+            <File name="glMatrix\gl-matrix\mat4.js" />
+            <File name="glMatrix\gl-matrix\quat.js" />
+            <File name="glMatrix\gl-matrix\quat2.js" />
+            <File name="glMatrix\gl-matrix\vec2.js" />
+            <File name="glMatrix\gl-matrix\vec3.js" />
+            <File name="glMatrix\gl-matrix\vec4.js" />
+        </Folder>
+        <File name="main.js" />
+        <File name="main_deffered.js" />
+        <File name="main_volumetric.js" />
+        <File name="index.html" />
+        <File name="index_volumetric.html" />
+        <Folder name="Shaders">
+            <File name="Shaders\atmosphere_shader.fs.glsl" />
+            <File name="Shaders\volume_clouds_shader.fs.glsl" />
+            <File name="Shaders\volume_clouds_shader.vs.glsl" />
+            <File name="Shaders\backbuffer.fs.glsl" />
+            <File name="Shaders\deferred_opaque_shade.fs.glsl" />
+            <File name="Shaders\deferred_BcNAoRSMt.fs.glsl" />
+            <File name="Shaders\deferred_skybox.fs.glsl" />
+            <File name="Shaders\pbr_shader.fs.glsl" />
+            <File name="Shaders\transparent_shader.fs.glsl" />
+            <File name="Shaders\3x3MipGen.fs.glsl" />
+            <File name="Shaders\mipmapgen.vs.glsl" />
+            <File name="Shaders\simple.fs.glsl" />
+            <File name="Shaders\simple.vs.glsl" />
+            <File name="Shaders\skybox.fs.glsl" />
+            <Folder name="include">
+				<Folder name="uniformBuffers">
+					<File name="Shaders\include\uniformBuffers\ubCamera.glsl" />
+					<File name="Shaders\include\uniformBuffers\ubLight.glsl" />
+					<File name="Shaders\include\uniformBuffers\ubMaterial.glsl" />
+					<File name="Shaders\include\uniformBuffers\ubModel.glsl" />
+				</Folder>
+                <File name="Shaders\include\defines.glsl" />
+                <File name="Shaders\include\functions.glsl" />
+                <File name="Shaders\include\sdfunctions.glsl" />
+                <File name="Shaders\include\pbr.glsl" />
+                <File name="Shaders\include\structs.glsl" />
+            </Folder>
+        </Folder>
+    </Project>
+</NotepadPlus>
