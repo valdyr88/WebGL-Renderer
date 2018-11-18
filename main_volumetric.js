@@ -278,9 +278,12 @@ export function main(){
 	var RightAdd = vMath.vec3.create();
 	var UpAdd = vMath.vec3.create();
 	
-	setInterval( function(){ window.requestAnimationFrame(renderFrame); }, 50);
-	
 	Camera.setPositionAndLookPt(eyePt, [0.0,0.0,0.0], upDir);
+	
+	var bCtrlToggle = false;
+	var bShiftToggle = false;
+	
+	setInterval( function(){ window.requestAnimationFrame(renderFrame); }, 50);
 			
 	function renderFrame()
 	{
@@ -357,8 +360,10 @@ export function main(){
 			}
 			
 		var MovementDelta = 1.0;
-		if(sys.keyboard.isCtrlPressed()) MovementDelta = 0.1;
-		if(sys.keyboard.isShiftPressed()) MovementDelta = 10.0;
+		if(sys.keyboard.isCtrlPressed()) bCtrlToggle = !bCtrlToggle;
+		if(sys.keyboard.isShiftPressed()) bShiftToggle = !bShiftToggle;
+		if(bCtrlToggle == true) MovementDelta = 0.1;
+		else if(bShiftToggle == true) MovementDelta = 10.0;
 		
 		if(sys.keyboard.isKeyPressed("w"))      Camera.MoveForward(MovementDelta);
 		else if(sys.keyboard.isKeyPressed("s")) Camera.MoveForward(-MovementDelta);

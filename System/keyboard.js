@@ -60,6 +60,11 @@ export class Keyboard{
 		return false;
 	}
 	
+	isKeyPressedCI(key){ //Case insensitive
+		if(typeof key == "string") return this.isKeyPressed(key.toLowerCase()) || this.isKeyPressed(key.toUpperCase());
+		else return this.isKeyPressed(key);
+	}
+	
 	isShiftPressed(){ return this.shiftPressed; }
 	isCtrlPressed(){ return this.ctrlPressed; }
 	isAltPressed(){ return this.altPressed; }
@@ -84,7 +89,7 @@ export function getLastPressedKey(){
 	return -1;
 }
 export function isKeyPressed(keyCode){
-	if(keyboard != null) return keyboard.isKeyPressed(keyCode);
+	if(keyboard != null) return keyboard.isKeyPressedCI(keyCode);
 	return false;
 }
 export function isShiftPressed(){

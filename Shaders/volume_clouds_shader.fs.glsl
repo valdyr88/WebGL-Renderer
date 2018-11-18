@@ -91,14 +91,27 @@ float sample_clouds(in vec3 x){
 float sdf_map(in vec3 x)
 {
 	float dist = 1e10;
+	float distA = 1e10;
+	float distB = 1e10;
 
-	vec3 pos = sdf_position(x, vec3(0.0, 0.0, 0.0));
+	/* vec3 pos = sdf_position(x, vec3(0.0, 0.0, 0.0));
 	dist = sdf_combine( dist, sdf_box(vec3(1.0,0.2,2.0), pos));
 	dist = sdf_smooth_union( dist, sdf_cylinder_capped(vec2(0.5,2.0), pos), 0.5 );
 		 pos = sdf_position(x, vec3(0.0, 0.0, 1.0));
-	dist = sdf_combine( dist, sdf_sphere(0.5, pos));	
+	dist = sdf_combine( dist, sdf_sphere(0.5, pos)); */
 	
-	return dist;
+	vec3 pos = sdf_position(x, vec3(0.0, 0.0, 0.0));
+	
+	distA = sdf_combine( distA, sdf_box(vec3(2.0,2.0,2.0), pos));
+	distA = sdf_intersect( distA, sdf_sphere(2.75, pos));
+	
+	distB = sdf_combine( distB, sdf_cylinder_capped(vec2(1.5,3.0), pos));
+	distB = sdf_union( distB, sdf_cylinder_capped(vec2(1.5,3.0), pos.yxz));
+	distB = sdf_union( distB, sdf_cylinder_capped(vec2(1.5,3.0), pos.xzy));
+	
+	dist = sdf_subtract( distB, distA );
+	
+	return distA;
 }
 
 //http://iquilezles.org/www/articles/normalsSDF/normalsSDF.htm
@@ -213,8 +226,33 @@ vec4 raymarchMulti(in vec3 start, in vec3 dir, float tstart, float treshold, in 
 		float a = T[s*2+1], b = T[s*2];
 		if(a < 0.0 || b < 0.0) continue;
 		
-		tsum += abs(a - b);
+		tsum += (a - b);
 	}
+	tsum /= 8.0;
+	
+	/* 
+	bool bIsError = false; vec3 ErrorColor = vec3(1.0,1.0,1.0);
+	for(int s = 0; s < Raymarch_NofSDFPasses/2; ++s)
+	{
+		float a = T[s*2+1], b = T[s*2];
+		if(a < 0.0 || b < 0.0) continue;
+		if(a < b){ bIsError = true; ErrorColor = vec3(a == -1.0, 0.0, 0.0); }
+		if(b < 0.0 && a > 0.0){ bIsError = true; ErrorColor = vec3(0.0,1.0,0.0); }
+	}
+	
+	vec3 rtn = vec3(tsum);
+	if(bIsError == true) rtn = ErrorColor;
+	
+	tsum = 0.0;
+	for(int s = 0; s < 1; ++s)
+	{
+		float a = T[s*2+1], b = T[s*2];
+		if(b < 0.0) b = 0.0;
+		tsum += (a - b);
+	} */
+	// tsum = T[0] / 4.0;
+	
+	// tsum = ( (T[1] - T[0]) + abs(T[3] - T[2]) ) / 8.0;
 	//---------------------------------------------------------------------------------
 	
 	//---------------------------------------------------------------------------------
@@ -231,7 +269,7 @@ vec4 raymarchMulti(in vec3 start, in vec3 dir, float tstart, float treshold, in 
 		for(int i = 0; i < Raymarch_NofSteps; ++i)
 		{
 			vec3 ray = start + t*dir;
-			float density = sample_clouds(10.0*ray);
+			float density = sample_clouds(2.5*ray);
 			// float dist = sdf_map(ray);
 			
 			partsum += density;
@@ -300,7 +338,7 @@ void main(void)
 	float tstart = raymarchSDFtfind(Position, ViewDir, 0.01, 0.1);
 	
 	if(tstart >= 0.0)
-		rtn = raymarchMulti(Position, ViewDir, 0.9*tstart, 0.001f, diffuse.xyz);
+		rtn = raymarchMulti(Position, ViewDir, 0.0, 0.00005f, diffuse.xyz);
 		
 	float frtn = raymarchSimpleCloudsSample(Position, ViewVector, 0.0);
 		
