@@ -140,7 +140,16 @@ vec3 calcNormal(in vec3 p){
 //===================================================================================================
 // Test raymarch funkcije
 //===================================================================================================
-#define Raymarch_NofSteps 64 //broj samplanja npr za cloudse
+#if defined(Quality_High)
+	#define Raymarch_NofSteps 64 //broj samplanja npr za cloudse
+	#define Raymarch_CloudShadow_NofSteps 5
+#elif defined(Quality_Med)
+	#define Raymarch_NofSteps 32 //broj samplanja npr za cloudse
+	#define Raymarch_CloudShadow_NofSteps 3
+#elif defined(Quality_Low)
+	#define Raymarch_NofSteps 24 //broj samplanja npr za cloudse
+	#define Raymarch_CloudShadow_NofSteps 2
+#endif
 
 vec4 raymarchSimpleNormal(in vec3 start, in vec3 dir, float t, float treshold)
 {	
@@ -198,13 +207,16 @@ float raymarchSimpleCloudsSample(in vec3 start, in vec3 dir, float t)
 
 float raymarchCloudShadowSample(in vec3 start, in vec3 dir)
 {
-	float shadow = 1.0;
-	float s = 0.0;
-	for(int i = 0; i < 5; ++i)
+	float s = 0.0f;
+	float shadow = 1.0f;
+	#define shadowMult (1.0f+(1.5f / float(Raymarch_CloudShadow_NofSteps)))
+	#define shadowSampleDelta (0.08f*(1.0f/float(Raymarch_CloudShadow_NofSteps)))
+
+	for(int i = 0; i < Raymarch_CloudShadow_NofSteps; ++i)
 	{
 		vec3 ray = start + s*dir;
-		shadow = shadow - sample_clouds(ray) * shadow;
-		s += 0.05f;
+		shadow = shadow - sample_clouds(ray) * shadowMult*shadow;
+		s += shadowSampleDelta;
 	}
 	
 	return shadow;

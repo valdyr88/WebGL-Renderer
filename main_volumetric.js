@@ -84,6 +84,7 @@ export function main(){
 	atmosphere_shader.InitDefaultUniformLocations();
 	
 	var volume_clouds_shader = new glext.Shader(6);
+	volume_clouds_shader.addDefine("Quality_Low","");
 	if(volume_clouds_shader.CompileFromFile("volume_clouds_vs", "volume_clouds_shader") == false) alert("nije kompajliran shader!");
 	volume_clouds_shader.InitDefaultAttribLocations();
 	volume_clouds_shader.InitDefaultUniformLocations();
@@ -546,7 +547,7 @@ export function recompileShader(fragment_name){
 		var shader = glext.ShaderList.get(i);
 		if(shader.FragmentShaderName == fragment_name)
 		{
-			shader.Recompile();
+			shader.Recompile(false);
 			shader.InitDefaultAttribLocations();
 			shader.InitDefaultUniformLocations();
 			

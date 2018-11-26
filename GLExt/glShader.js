@@ -310,9 +310,10 @@ export class Shader
 		return this.isLinked();
 	}
 	
-	Recompile(){
+	Recompile(bClearDefines){
 		
-		this.defines = new ShaderDefines();
+		if(bClearDefines == true)
+			this.defines = new ShaderDefines();
 		
 		//AttribLocation
 		this.ALVertexPosition = -1;
