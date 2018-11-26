@@ -179,7 +179,7 @@ float raymarchSimpleCloudsSample(in vec3 start, in vec3 dir, float t)
 //===================================================================================================
 // raymarchMulti pronalazi vise tocaka izmedju kojih samplira volumetric clouds
 //===================================================================================================
-// #define _DEBUG
+#define _DEBUG
 #define Raymarch_NofSDFPasses 8
 #define Raymarch_SDFPass_NofSteps 128
 
@@ -190,7 +190,7 @@ vec4 raymarchMulti(in vec3 start, in vec3 dir, float tstart, float treshold, in 
 	#endif
 	
 	//---------------------------------------------------------------------------------
-	// pronalazak vise udaljenosti T[]
+	// pronalazak vise udaljenosti T[], oblake ce samplirati izmedju dvije udaljenosti (primjerice izmedju T[0] i T[1], T[2] i T[3]...)
 	//---------------------------------------------------------------------------------
 	float T[Raymarch_NofSDFPasses];
 	T[0] = tstart; for(int s = 1; s < Raymarch_NofSDFPasses; ++s) T[s] = -1.0;
@@ -250,8 +250,8 @@ vec4 raymarchMulti(in vec3 start, in vec3 dir, float tstart, float treshold, in 
 		if(b < 0.0) b = 0.0;
 		tsum += (a - b);
 	} */
-	// tsum = T[0] / 4.0;
 	
+	// tsum = T[0] / 4.0;
 	// tsum = ( (T[1] - T[0]) + abs(T[3] - T[2]) ) / 8.0;
 	//---------------------------------------------------------------------------------
 	
@@ -289,11 +289,7 @@ vec4 raymarchMulti(in vec3 start, in vec3 dir, float tstart, float treshold, in 
 		return tovec4(vec3(tsum),1.0);
 	#else
 		float fNofStepsCount = float(NofStepsCount) / float(Raymarch_NofSDFPasses * Raymarch_SDFPass_NofSteps);
-		fNofStepsCount = fNofStepsCount * 2.0 - 1.0;
-		if(fNofStepsCount < 0.0)
-			return lerp(vec4(0.0,0.5,1.0,1.0), vec4(0.5,1.0,0.0,1.0), 1.0+fNofStepsCount); //fNofStepsCount = [-1.0,0.0]
-		else
-			return lerp(vec4(0.5,1.0,0.0,1.0), vec4(1.0,0.0,0.0,1.0), fNofStepsCount); //fNofStepsCount = [0.0,1.0]
+		return lerp3pt(vec4(0.0,0.5,1.0,1.0), vec4(0.5,1.0,0.0,1.0), vec4(1.0,0.0,0.0,1.0), fNofStepsCount);
 	#endif
 }
 //===================================================================================================

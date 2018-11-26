@@ -487,14 +487,14 @@ vec3 map3d2d(in vec3 x, const in vec2 sz, const in float bias, const in float di
 //map3d2d() - Created by inigo quilez - iq
 vec3 map3d2d(in vec3 x){ return map3d2d(x, vec2(37.0,17.0), 0.5, 256.0); }
 
+//================================================================================================================
+
+vec4 lerp3pt(vec4 a, vec4 b, vec4 c, float t){
+	t = 2.0*t-1.0;
+	if(t < 0.0) return lerp(a,b,1.0+t);
+	else return lerp(b,c,t);
+}
+
 #endif //GLSL_FUNCTIONS
-
-
-
-
-
-
-
-
 
 
