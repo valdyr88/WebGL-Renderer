@@ -4,7 +4,7 @@ export class Keyboard{
 	constructor()
 	{
 		this.lastKeyPressed = -1;
-		this.keysPressed = [];
+		this.keysPressed = new Array(256);
 		this.shiftPressed = false;
 		this.ctrlPressed = false;
 		this.altPressed = false;
@@ -24,8 +24,8 @@ export class Keyboard{
 			keynum = e.key;
 		}
 		
-		this.AttachedKeyboard.lastKeyPressed = keynum;
-		this.AttachedKeyboard.keysPressed[keynum] = true;
+		this.AttachedKeyboard.lastKeyPressed = keynum.charCodeAt(0);
+		this.AttachedKeyboard.keysPressed[keynum.charCodeAt(0)] = true;
 		this.AttachedKeyboard.shiftPressed = e.shiftKey;
 		this.AttachedKeyboard.ctrlPressed = e.ctrlKey;
 		this.AttachedKeyboard.altPressed = e.altKey;
