@@ -15,6 +15,7 @@ uniform vec3 CameraPosition;
 uniform vec3 CameraForward;
 uniform vec3 CameraRight;
 uniform vec3 CameraUp;
+uniform float PixelAspect;
 
 #define varyin out
 
@@ -33,7 +34,7 @@ void main(void)
 	PixelPosition = PixelPosition*0.5f + 0.5f;
 	
 	Position = 1.0 * CameraForward +
-			-2.0 * aVertexPosition.x * CameraRight +
+			-PixelAspect * aVertexPosition.x * CameraRight +
 			aVertexPosition.y * CameraUp + CameraPosition;
 	
 	ViewVector = Position - CameraPosition;

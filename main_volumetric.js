@@ -99,6 +99,7 @@ export function main(){
 	volume_clouds_shader.ULCameraUp = volume_clouds_shader.getUniformLocation("CameraUp");
 	volume_clouds_shader.ULMouse = volume_clouds_shader.getUniformLocation("Mouse");
 	volume_clouds_shader.ULResolution = volume_clouds_shader.getUniformLocation("Resolution");
+	volume_clouds_shader.ULPixelAspect = volume_clouds_shader.getUniformLocation("PixelAspect");
 	
 	var SkySphereModel = new glext.Model(0);
 	SkySphereModel.ImportFrom("SphereModel");
@@ -286,7 +287,7 @@ export function main(){
 	var UpAdd = vMath.vec3.create();
 	
 	Camera.setPositionAndLookPt(eyePt, [0.0,0.0,0.0], upDir);
-	Camera.setFOV(40.0);
+	Camera.setFOV(75.0);
 	
 	var bCtrlToggle = false;
 	var bShiftToggle = false;
@@ -533,6 +534,7 @@ export function main(){
 				volume_clouds_shader.setFloat3Uniform( volume_clouds_shader.ULCameraUp, Camera.UpDir );
 				volume_clouds_shader.setFloat2Uniform( volume_clouds_shader.ULMouse, mousePos );
 				volume_clouds_shader.setFloat2Uniform( volume_clouds_shader.ULResolution, [gl.viewportWidth,gl.viewportHeight] );
+				volume_clouds_shader.setFloatUniform( volume_clouds_shader.ULPixelAspect, gl.viewportWidth/gl.viewportHeight );
 				
 				volume_clouds_shader.setTimeUniform(time);
 				
@@ -635,6 +637,7 @@ export function recompileShader(fragment_name){
 					shader.ULCameraUp = shader.getUniformLocation("CameraUp");
 					shader.ULMouse = shader.getUniformLocation("Mouse");
 					shader.ULResolution = shader.getUniformLocation("Resolution");
+					shader.ULPixelAspect = shader.getUniformLocation("PixelAspect");
 				break;
 				default: break;
 			}

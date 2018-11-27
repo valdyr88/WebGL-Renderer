@@ -266,15 +266,27 @@ vec4 raymarchCloudsSample(in vec3 start, in vec3 dir, in float t){
 	return raymarchCloudsSample(start, dir, t, 0.1f, 100000.0f);
 }
 
+/* #if defined(Quality_High)
+#elif defined(Quality_Med)
+#elif defined(Quality_Low)
+#endif */
 //===================================================================================================
 // raymarchMulti pronalazi vise tocaka izmedju kojih samplira volumetric clouds
 //===================================================================================================
-// #define _DEBUG
+#define _DEBUG
 // #define _DEBUG_SDF_Density
 #define _DEBUG_SDF_StepCount
 
-#define Raymarch_NofSDFPasses 8 //koliko ima udaljenosti koje ce samplirati (treba biti parni broj, vece vrijednosti dozvoljavaju vise šupljina gizmo containera)
-#define Raymarch_SDFPass_NofSteps 128 //br sampliranja sdf mape
+#if defined(Quality_High)
+	#define Raymarch_NofSDFPasses 8 //koliko ima udaljenosti koje ce samplirati (treba biti parni broj, vece vrijednosti dozvoljavaju vise šupljina gizmo containera)
+	#define Raymarch_SDFPass_NofSteps 128 //br sampliranja sdf mape
+#elif defined(Quality_Med)
+	#define Raymarch_NofSDFPasses 8
+	#define Raymarch_SDFPass_NofSteps 64
+#elif defined(Quality_Low)
+	#define Raymarch_NofSDFPasses 8
+	#define Raymarch_SDFPass_NofSteps 32
+#endif
 
 vec4 raymarchMulti(in vec3 start, in vec3 dir, float tstart, float dither, float treshold, in vec3 background)
 {

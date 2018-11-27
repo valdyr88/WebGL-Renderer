@@ -22,6 +22,7 @@ export class Camera{
 		this.Far = 1000.0;
 		this.Height = viewHeight;
 		this.Width = viewWidth;
+		this.PixelAspect = (1.0*this.Width) / (1.0*this.Height);
 		
 		this.UpdateProjectionMatrix();
 	}
@@ -37,7 +38,7 @@ export class Camera{
 	}
 	
 	UpdateProjectionMatrix(){
-		vMath.mat4.perspective(this.ProjectionMatrix, vMath.deg2rad(this.FOV), this.Width/this.Height, this.Near, this.Far);
+		vMath.mat4.perspective(this.ProjectionMatrix, vMath.deg2rad(this.FOV), this.PixelAspect, this.Near, this.Far);
 	}
 	
 	Rotate(dx, dy){
@@ -125,6 +126,7 @@ export class Camera{
 	
 	setViewportWidthHeight(width,height){
 		this.Height = height; this.Width = width;
+		this.PixelAspect = (1.0*this.Width) / (1.0*this.Height);
 		this.UpdateProjectionMatrix();
 	}
 	
