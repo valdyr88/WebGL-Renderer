@@ -48,4 +48,11 @@ export function floatEqual(a,b,e){
 	return Math.abs(a-b) < e;
 }
 
+/*
+ lerp 
+*/
+export function lerp(a,b,t){
+	return a*(1.0-t)+b*t;
+}
+
 export { glMatrix, mat2, mat2d, mat3, mat4, quat, quat2, vec2, vec3, vec4 };

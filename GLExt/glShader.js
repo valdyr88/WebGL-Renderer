@@ -69,6 +69,22 @@ export class ShaderDefines
 		this.defines.push(str);
 	}
 	
+	RemoveDefine(name){
+		if(name == null) return false;
+		name = name.trim();
+		
+		for(var i = 0; i < this.defines.length; ++i){
+			var define = this.defines[i].split(" ");
+			if(define.length < 2) continue;
+			
+			if(define[1].trim() == name){
+				this.defines.splice(i,1);
+				return true;
+			}
+		}
+		return false;
+	}
+	
 	static CreateGlobalDefines(){
 		if(globalDefines == null) globalDefines = new ShaderDefines();
 	}
@@ -400,6 +416,10 @@ export class Shader
 		
 	addDefine(name, value){
 		this.defines.addDefine(name, value);
+	}
+	
+	RemoveDefine(name){
+		this.defines.RemoveDefine(name);
 	}
 	
 	setVertexAttribLocations(position, normal, tangent, binormal, texture){

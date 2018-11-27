@@ -42,6 +42,9 @@ export function main(){
 	
 	glext.ShaderDefines.addGlobalDefine("MAX_LIGHTS", " "+glext.MAX_LIGHTS);
 	
+	var QualitySelect = 2;
+	var strQualitySelect = ["Quality_Low", "Quality_Med", "Quality_High"];
+	
 	var shader = new glext.Shader(0);
 	if(shader.CompileFromFile("simpleVS", "deferred_BcNAoRSMt") == false) alert("nije kompajliran shader!");
 	shader.setVertexAttribLocations("aVertexPosition","aVertexNormal","aVertexTangent",null,"aTexCoords");
@@ -84,7 +87,7 @@ export function main(){
 	atmosphere_shader.InitDefaultUniformLocations();
 	
 	var volume_clouds_shader = new glext.Shader(6);
-	volume_clouds_shader.addDefine("Quality_Low","");
+	volume_clouds_shader.addDefine(strQualitySelect[QualitySelect],"");//"Quality_Low"
 	if(volume_clouds_shader.CompileFromFile("volume_clouds_vs", "volume_clouds_shader") == false) alert("nije kompajliran shader!");
 	volume_clouds_shader.InitDefaultAttribLocations();
 	volume_clouds_shader.InitDefaultUniformLocations();
@@ -251,6 +254,9 @@ export function main(){
 	var time = 0.0;
 	sys.time.init();
 	
+	var oldframe_time = -1.0;
+	var avg_frame_time = 0.0;
+	
 	shader.setFlagsUniform(1);
 	
 	var IdentityMatrix = vMath.mat4.create();
@@ -284,11 +290,24 @@ export function main(){
 	var bCtrlToggle = false;
 	var bShiftToggle = false;
 	
-	setInterval( function(){ window.requestAnimationFrame(renderFrame); }, 50);
-			
+	setInterval( function(){ window.requestAnimationFrame(renderFrame); }, 25);
+	
 	function renderFrame()
 	{
 		time = sys.time.getSecondsSinceStart();
+		
+		if(oldframe_time > 0.0){
+			var frame_time = time - oldframe_time;
+			avg_frame_time = vMath.lerp(avg_frame_time, frame_time, 1.0 / 25.0);
+			
+			if(QualitySelect > 0 && avg_frame_time > 1.0 / 20.0){
+				volume_clouds_shader.RemoveDefine(strQualitySelect[QualitySelect]);
+				QualitySelect--;
+				volume_clouds_shader.addDefine(strQualitySelect[QualitySelect],"");
+				recompileShader("volume_clouds_shader");
+			}
+		}
+				
 		var ctime = Math.cos(time);
 		var stime = Math.sin(time);
 		var ctime10 = Math.cos(10*time);
@@ -507,6 +526,8 @@ export function main(){
 		sys.keyboard.Update();
 		gl.flush();
 		gs.Update();
+		
+		oldframe_time = sys.time.getSecondsSinceStart();
 	}
 	
 	return; /* */
@@ -547,7 +568,24 @@ export function recompileShader(fragment_name){
 		var shader = glext.ShaderList.get(i);
 		if(shader.FragmentShaderName == fragment_name)
 		{
-			shader.Recompile(false);
+			var bResetDefines = true;
+			
+			switch(fragment_name){
+				case "transparent_shader":
+				break;
+				case "deferred_opaque_shade":
+				break;
+				case "deferred_BcNAoRSMt":
+				break;
+				case "atmosphere_shader":
+				break;
+				case "volume_clouds_shader":
+					bResetDefines = false;
+				break;
+				default: break;
+			}
+			
+			shader.Recompile(bResetDefines);
 			shader.InitDefaultAttribLocations();
 			shader.InitDefaultUniformLocations();
 			
