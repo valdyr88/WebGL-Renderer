@@ -83,7 +83,7 @@ float sample_clouds(in vec3 p)
 {	
 	float den = -1.0 - (abs(p.y-0.5)+0.5)/2.0;
 	
-	float time = 0.01*Time;
+	float time = 0.0*Time;
 	
 	float f = 0.0;
 	vec3 q = p*.5 - vec3(0.0,0.0,1.5)*time + vec3(sin(0.7*time),0,0);
@@ -93,7 +93,8 @@ float sample_clouds(in vec3 p)
     f += 0.06250*noise( q ); q = q*2.02 - vec3(0.0,0.0,0.0)*time;
     f += 0.03125*noise( q );
 	
-	den = clamp( den + 4.0*f, 0.0, 1.0 );
+	den += 4.0*f;
+	den = saturate(den);
 	return den;
 }
 
@@ -203,14 +204,14 @@ float raymarchSimpleCloudsSample(in vec3 start, in vec3 dir, float t)
 
 #define cloudColor (vec3(0.6,0.5,0.4))
 #define cloudShadowColor (vec3(0.4,0.47,0.6))
-#define lightDir (normalize(vec3(1.0,0.2,1.0)))
+// #define lightDir (normalize(vec3(1.0,0.2,1.0)))
 
 float raymarchCloudShadowSample(in vec3 start, in vec3 dir)
 {
 	float s = 0.0f;
 	float shadow = 1.0f;
 	#define shadowMult (1.0f+(1.5f / float(Raymarch_CloudShadow_NofSteps)))
-	#define shadowSampleDelta (0.08f*(1.0f/float(Raymarch_CloudShadow_NofSteps)))
+	#define shadowSampleDelta (0.68f*(1.0f/float(Raymarch_CloudShadow_NofSteps)))
 
 	for(int i = 0; i < Raymarch_CloudShadow_NofSteps; ++i)
 	{
@@ -233,23 +234,30 @@ vec4 raymarchCloudsSample(in vec3 start, in vec3 dir, in float t)
 		
 	Light light0 = Lights[0].light;
 	
+	#define lightDir ((light0.position.xyz - ray))
+	
+	#define sampleDelta (0.1f * (64.0f / float(Raymarch_NofSteps)))
+	
 	for(int i = 0; i < Raymarch_NofSteps; ++i)
 	{
 		if(colorsum.a > 0.99f) break;
 		
 		vec3 ray = start + t*dir;
 		float dens = sample_clouds(ray);
-		float shadow = raymarchCloudShadowSample(ray, lightDir);
+		float shadow = raymarchCloudShadowSample(ray, normalize(lightDir));
+		
+		float lited = 4.0 / length(lightDir);
 		
 		vec3 color = lerp( vec3(1.0), cloudColor, dens*0.5);
 		color *= lerp( cloudShadowColor, vec3(1.0), shadow);
+		color *= lited;
 		
 		color *= dens;
 		
 		colorsum.xyz += color*(1.0 - colorsum.a);
 		colorsum.a += dens;
 		
-		t += 0.1;
+		t += sampleDelta;
 	}
 	
 	return colorsum;

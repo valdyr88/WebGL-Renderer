@@ -300,9 +300,15 @@ export function main(){
 			var frame_time = time - oldframe_time;
 			avg_frame_time = vMath.lerp(avg_frame_time, frame_time, 1.0 / 25.0);
 			
-			if(QualitySelect > 0 && avg_frame_time > 1.0 / 20.0){
+			if(avg_frame_time > 1.0 / 20.0 && QualitySelect > 0){
 				volume_clouds_shader.RemoveDefine(strQualitySelect[QualitySelect]);
 				QualitySelect--;
+				volume_clouds_shader.addDefine(strQualitySelect[QualitySelect],"");
+				recompileShader("volume_clouds_shader");
+			}
+			else if(avg_frame_time < 1.0 / 30.0 && QualitySelect < 2){
+				volume_clouds_shader.RemoveDefine(strQualitySelect[QualitySelect]);
+				QualitySelect++;
 				volume_clouds_shader.addDefine(strQualitySelect[QualitySelect],"");
 				recompileShader("volume_clouds_shader");
 			}
@@ -490,6 +496,16 @@ export function main(){
 				
 				quad_model.RenderIndexedTriangles(backbuffer_shader);
 		}
+		else
+		{			
+			light.setPosition(-20.0*ctime, 2.0, 2.0);
+			light.setDisplaySize(5.0);
+			light.setDisplayColor(0.5,0.79,1.0,1.0);
+			light.setMatrices( Camera.ViewMatrix, Camera.ProjectionMatrix );
+			light.setIntensity(4.0);
+			light.setColor(0.5,0.79,1.0,1.0);
+			light.Update();
+		}
 		
 		if(true ) //Render volume_clouds_shader
 		{
@@ -501,6 +517,8 @@ export function main(){
 			gl.enable(gl.DEPTH_TEST);
 			gl.depthFunc(gl.LEQUAL);
 			gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+			
+			light.RenderPosition();
 						
 			volume_clouds_shader.Bind();
 				txNoiseRGB.Bind(0, volume_clouds_shader.ULTextureNoiseRGB);
