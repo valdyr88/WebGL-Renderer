@@ -316,28 +316,27 @@ vec4 raymarchMulti(in vec3 start, in vec3 dir, float tstart, float dither, float
 			vec3 ray = start + t*dir;
 			float dist = sdf_map(ray);
 			
-			if(abs(dist) <= treshold){ found = true; break; }
-			if(s == 0 && dist < 0.0 && abs(dist) > 2.0*treshold){ t = 0.0f; found = true; break; }
-			
-			if(i >= int(0.5f*float(Raymarch_NofSDFPasses))){ //ovaj dio poveca korak samplanja ako je normala okomita na ray
-				vec3 normal = sdf_calc_normal(ray, sdf_map);
-				float invdND = (1.0f - abs(dot(normal, dir)));
-				t += 40.0f*pow(invdND,4.0)*treshold; 
-				
-				#ifdef _DEBUG
-					SDF_NofNormalCalcCount++;
-				#endif
-			}
-			
-			t += max(treshold, abs(dist));
-						
 			#ifdef _DEBUG
 				SDF_NofStepsCount++;
+			#endif
+			
+			if(abs(dist) <= treshold){ found = true; break; }
+			
+			vec3 normal = sdf_calc_normal(ray, sdf_map);
+			float dND = dot(normal,dir);
+			
+			#define Aoffset (0.1f)
+			float A = dND*0.5f+0.5f; A = pow(A,16.0f); A = 1.0f/Aoffset * lerp(A,1.0f, Aoffset);
+			
+			t += A*abs(dist);
+			
+			#ifdef _DEBUG
+				SDF_NofNormalCalcCount++;
 			#endif
 		}
 		
 		if(found == false) break;
-		if(s < Raymarch_NofSDFPasses-1) T[s+1] = t+10.0*treshold;
+		if(s < Raymarch_NofSDFPasses-1) T[s+1] = t+2.0*treshold;
 		T[s] = t;
 	}
 	
@@ -439,8 +438,8 @@ void main(void)
 	vec3 ViewDir = normalize(ViewVector);
 	
 	vec4 rtn = vec4(0.0);
-	
-	float tstart = raymarchSDFfindT(Position, ViewDir, 0.01, 0.1);
+		
+	float tstart = raymarchSDFfindT(Position, ViewDir, 0.95f*sdf_map(Position), 0.1);
 	
 	if(tstart >= 0.0)
 		rtn = raymarchMulti(Position, ViewDir, 0.0, dither, 0.005f, diffuse.xyz);
