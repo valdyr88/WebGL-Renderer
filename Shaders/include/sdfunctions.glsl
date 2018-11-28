@@ -112,6 +112,13 @@ vec3 sdf_elongate2( in vec3 h, in vec3 p){ vec3 q = abs(p)-h; return max(q,0.0) 
 float sdf_combine( in float d, in float n){ return min(d,n); } //npr. dist = sdf_combine(dist, sdf_sphere(...));
 
 //=================================================================================================
+
+//http://iquilezles.org/www/articles/normalsSDF/normalsSDF.htm
+#define sdf_calc_normal(p, sdf) (normalize( vec3(1.0,-1.0,-1.0)*sdf(p + vec3(1.0,-1.0,-1.0)*1e-4) + \
+											vec3(-1.0,-1.0,1.0)*sdf(p + vec3(-1.0,-1.0,1.0)*1e-4) + \
+											vec3(-1.0,1.0,-1.0)*sdf(p + vec3(-1.0,1.0,-1.0)*1e-4) + \
+											vec3(1.0, 1.0, 1.0)*sdf(p + vec3(1.0, 1.0, 1.0)*1e-4) )) \
+
 #endif //GLSL_SDFUNCTIONS
 
 
