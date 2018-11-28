@@ -132,13 +132,15 @@ float sdf_map(in vec3 x)
 
 //http://iquilezles.org/www/articles/normalsSDF/normalsSDF.htm
 vec3 calcNormal(in vec3 p){
-	const float h = 1e-4;
+	/* const float h = 1e-4;
 	const vec2 k = vec2(1.0,-1.0);
 	return normalize( k.xyy * sdf_map( p + k.xyy*h ) +
 					  k.yyx * sdf_map( p + k.yyx*h ) +
 					  k.yxy * sdf_map( p + k.yxy*h ) +
-					  k.xxx * sdf_map( p + k.xxx*h ) );
+					  k.xxx * sdf_map( p + k.xxx*h ) ); */
+	return sdf_calc_normal(p, sdf_map);
 }
+
 
 //===================================================================================================
 // Test raymarch funkcije
@@ -275,7 +277,9 @@ vec4 raymarchCloudsSample(in vec3 start, in vec3 dir, in float t){
 //===================================================================================================
 #define _DEBUG
 // #define _DEBUG_SDF_Density
-#define _DEBUG_SDF_StepCount
+// #define _DEBUG_SDF_StepCount
+// #define _DEBUG_SDF_NormalCalcCount
+#define _DEBUG_SDF_StepCountAndNormalCalcCount
 
 #if defined(Quality_High)
 	#define Raymarch_NofSDFPasses 8 //koliko ima udaljenosti koje ce samplirati (treba biti parni broj, vece vrijednosti dozvoljavaju vise šupljina gizmo containera)
@@ -288,16 +292,19 @@ vec4 raymarchCloudsSample(in vec3 start, in vec3 dir, in float t){
 	#define Raymarch_SDFPass_NofSteps 32
 #endif
 
+float T[Raymarch_NofSDFPasses];
+
 vec4 raymarchMulti(in vec3 start, in vec3 dir, float tstart, float dither, float treshold, in vec3 background)
 {
 	#ifdef _DEBUG
-		int NofStepsCount = 0;
+		int SDF_NofStepsCount = 0;
+		int SDF_NofNormalCalcCount = 0;
 	#endif
 	
 //---------------------------------------------------------------------------------
 // pronalazak vise udaljenosti T[], oblake ce samplirati izmedju dvije udaljenosti (primjerice izmedju T[0] i T[1], T[2] i T[3]...)
 //---------------------------------------------------------------------------------
-	float T[Raymarch_NofSDFPasses];
+	// float T[Raymarch_NofSDFPasses];
 	T[0] = tstart; for(int s = 1; s < Raymarch_NofSDFPasses; ++s) T[s] = -1.0;
 	
 	for(int s = 0; s < Raymarch_NofSDFPasses; ++s)
@@ -310,54 +317,42 @@ vec4 raymarchMulti(in vec3 start, in vec3 dir, float tstart, float dither, float
 			float dist = sdf_map(ray);
 			
 			if(abs(dist) <= treshold){ found = true; break; }
+			if(s == 0 && dist < 0.0 && abs(dist) > 2.0*treshold){ t = 0.0f; found = true; break; }
 			
-			t += max(1.0*treshold, 1.0*abs(dist));
+			if(i >= int(0.5f*float(Raymarch_NofSDFPasses))){ //ovaj dio poveca korak samplanja ako je normala okomita na ray
+				vec3 normal = sdf_calc_normal(ray, sdf_map);
+				float invdND = (1.0f - abs(dot(normal, dir)));
+				t += 40.0f*pow(invdND,4.0)*treshold; 
+				
+				#ifdef _DEBUG
+					SDF_NofNormalCalcCount++;
+				#endif
+			}
 			
+			t += max(treshold, abs(dist));
+						
 			#ifdef _DEBUG
-				NofStepsCount++;
+				SDF_NofStepsCount++;
 			#endif
 		}
 		
 		if(found == false) break;
-		
-		if(s < Raymarch_NofSDFPasses-1) T[s+1] = t+100.0*treshold;
+		if(s < Raymarch_NofSDFPasses-1) T[s+1] = t+10.0*treshold;
 		T[s] = t;
-		// T[s] = (found)? t : -1.0;
 	}
 	
-	float tsum = 0.0;
-	for(int s = 0; s < Raymarch_NofSDFPasses/2; ++s)
-	{
-		float a = T[s*2+1], b = T[s*2];
-		if(a < 0.0 || b < 0.0) continue;
-		
-		tsum += (a - b);
-	}
-	tsum /= 8.0;
+	#ifdef _DEBUG_SDF_Density
+		float tsum = 0.0;
+		for(int s = 0; s < Raymarch_NofSDFPasses/2; ++s)
+		{
+			float a = T[s*2+1], b = T[s*2];
+			if(a < 0.0 || b < 0.0) continue;
+			
+			tsum += (a - b);
+		}
+		tsum /= 8.0;
+	#endif
 	
-	/* 
-	bool bIsError = false; vec3 ErrorColor = vec3(1.0,1.0,1.0);
-	for(int s = 0; s < Raymarch_NofSDFPasses/2; ++s)
-	{
-		float a = T[s*2+1], b = T[s*2];
-		if(a < 0.0 || b < 0.0) continue;
-		if(a < b){ bIsError = true; ErrorColor = vec3(a == -1.0, 0.0, 0.0); }
-		if(b < 0.0 && a > 0.0){ bIsError = true; ErrorColor = vec3(0.0,1.0,0.0); }
-	}
-	
-	vec3 rtn = vec3(tsum);
-	if(bIsError == true) rtn = ErrorColor;
-	
-	tsum = 0.0;
-	for(int s = 0; s < 1; ++s)
-	{
-		float a = T[s*2+1], b = T[s*2];
-		if(b < 0.0) b = 0.0;
-		tsum += (a - b);
-	} */
-	
-	// tsum = T[0] / 4.0;
-	// tsum = ( (T[1] - T[0]) + abs(T[3] - T[2]) ) / 8.0;
 //---------------------------------------------------------------------------------
 	
 //---------------------------------------------------------------------------------
@@ -386,9 +381,19 @@ vec4 raymarchMulti(in vec3 start, in vec3 dir, float tstart, float dither, float
 		#endif
 		
 		#ifdef _DEBUG_SDF_StepCount
-			float fNofStepsCount = float(NofStepsCount) / float(Raymarch_NofSDFPasses * Raymarch_SDFPass_NofSteps);
+			float fNofStepsCount = float(SDF_NofStepsCount) / float(Raymarch_NofSDFPasses * Raymarch_SDFPass_NofSteps);
 			return lerp3pt(vec4(0.0,0.5,1.0,1.0), vec4(0.5,1.0,0.0,1.0), vec4(1.0,0.0,0.0,1.0), fNofStepsCount);
-		#endif	
+		#endif
+		
+		#ifdef _DEBUG_SDF_NormalCalcCount
+			float fNofNormCalcCount = float(SDF_NofNormalCalcCount) / float(Raymarch_NofSDFPasses * Raymarch_SDFPass_NofSteps);
+			return lerp3pt(vec4(0.0,0.5,1.0,1.0), vec4(0.5,1.0,0.0,1.0), vec4(1.0,0.0,0.0,1.0), fNofNormCalcCount);
+		#endif
+		
+		#ifdef _DEBUG_SDF_StepCountAndNormalCalcCount
+			float fNofStepsCount = float(SDF_NofStepsCount + 4*SDF_NofNormalCalcCount) / float(Raymarch_NofSDFPasses * Raymarch_SDFPass_NofSteps); //4 jer ima 4 samplanja sdf funkcije u normal calc
+			return lerp3pt(vec4(0.0,0.5,1.0,1.0), vec4(0.5,1.0,0.0,1.0), vec4(1.0,0.0,0.0,1.0), fNofStepsCount);
+		#endif
 		
 	#endif
 }
@@ -420,15 +425,9 @@ float raymarchSDFfindT(in vec3 start, in vec3 dir, float t, float disttreshold)
 
 // #define Display_Normals
 
-float sample_dither(float2 uv){
-	float2 v = textureLod( txNoiseRGB, (uv+0.5)/256.0, 0.0 ).yx;
-	return (v.x+v.y)-1.0;
-}
-
 void main(void)
 {	
 	Light light0 = Lights[0].light;
-	// float dither = sample_dither(TexCoords);
 	float dither = rand(TexCoords)*0.125f;
 	
 	vec2 mouse = Mouse.xy / Resolution.xy;
@@ -455,6 +454,7 @@ void main(void)
 		}
 	#endif
 	
+	// gl_FragColor = tovec4(vec3( (T[1]) / 10.0), 1.0);
 	gl_FragColor = tovec4(vec3(rtn), 1.0);
 	// gl_FragColor = tovec4(normalize(ViewVector)*0.5+0.5, 1.0);
 	// gl_FragColor = tovec4((normalize(PixelPosition)), 1.0);

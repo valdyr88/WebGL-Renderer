@@ -33,7 +33,7 @@ void main(void)
 	PixelPosition = gl_Position.xyz / gl_Position.w; 
 	PixelPosition = PixelPosition*0.5f + 0.5f;
 	
-	Position = 1.0 * CameraForward +
+	Position = 2.0 * CameraForward +
 			-PixelAspect * aVertexPosition.x * CameraRight +
 			aVertexPosition.y * CameraUp + CameraPosition;
 	
