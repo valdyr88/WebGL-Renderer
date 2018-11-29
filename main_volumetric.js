@@ -308,7 +308,7 @@ export function main(){
 				volume_clouds_shader.addDefine(strQualitySelect[QualitySelect],"");
 				recompileShader("volume_clouds_shader");
 			}
-			else if(avg_frame_time < 1.0 / 60.0 && QualitySelect < 2){
+			else if(avg_frame_time < 1.0 / 30.0 && QualitySelect < 2){
 				volume_clouds_shader.RemoveDefine(strQualitySelect[QualitySelect]);
 				QualitySelect++;
 				volume_clouds_shader.addDefine(strQualitySelect[QualitySelect],"");
