@@ -297,9 +297,9 @@ export function main(){
 	function renderFrame()
 	{
 		time = sys.time.getSecondsSinceStart();
+		var frame_time = time - oldframe_time;
 		
-		if(oldframe_time > 0.0){
-			var frame_time = time - oldframe_time;
+		if(oldframe_time > 0.0 && frame_time > 1.0 / 70.0){
 			avg_frame_time = vMath.lerp(avg_frame_time, frame_time, 1.0 / 60.0);
 			
 			if(avg_frame_time > 1.0 / 20.0 && QualitySelect > 0){
@@ -308,16 +308,14 @@ export function main(){
 				volume_clouds_shader.addDefine(strQualitySelect[QualitySelect],"");
 				recompileShader("volume_clouds_shader");
 			}
-			else if(avg_frame_time < 1.0 / 30.0 && QualitySelect < 2){
+			else if(avg_frame_time < 1.0 / 40.0 && QualitySelect < 2){
 				volume_clouds_shader.RemoveDefine(strQualitySelect[QualitySelect]);
 				QualitySelect++;
 				volume_clouds_shader.addDefine(strQualitySelect[QualitySelect],"");
 				recompileShader("volume_clouds_shader");
 			}
 		}
-		
-		oldframe_time = sys.time.getSecondsSinceStart();
-				
+						
 		var ctime = Math.cos(time);
 		var stime = Math.sin(time);
 		var ctime10 = Math.cos(10*time);
@@ -549,6 +547,8 @@ export function main(){
 		sys.keyboard.Update();
 		gl.flush();
 		gs.Update();
+		
+		oldframe_time = time;
 	}
 	
 	return; /* */
