@@ -494,13 +494,13 @@ void main(void)
 	#endif
 	
 	#if defined(Quality_High)
-		if(bMaliRect == true) rtn.xyz = vec3(0.0,0.5,1.0);
+		if(bMaliRect == true) rtn.xyz = vec3(1.0,0.5,0.0);
 	#endif
 	#if defined(Quality_Med)
 		if(bMaliRect == true) rtn.xyz = vec3(0.0,1.0,0.5);
 	#endif
 	#if defined(Quality_Low)
-		if(bMaliRect == true) rtn.xyz = vec3(1.0,0.5,1.0);
+		if(bMaliRect == true) rtn.xyz = vec3(0.0,0.5,1.0);
 	#endif
 	
 	gl_FragColor = tovec4(vec3(rtn), 1.0);
