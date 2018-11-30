@@ -82,6 +82,34 @@
   	<img id="reload_texture_btn" onclick="reload_texture('txGlass_AoRS')" title="txGlass_AoRS" src="./misc/reload_ico.png"></img>
   	<img id="reload_texture_btn" onclick="reload_texture('txGlass_N')" title="txGlass_N" src="./misc/reload_ico.png"></img>
   	<img id="reload_texture_btn" onclick="reload_texture('txNoiseRGB')" title="txNoiseRGB" src="./misc/reload_ico.png"></img>
+
+	<div style="position: absolute; top: 32px; right: 32px;" >
+		<p style="font-family:verdana; color:white;" id="label_FPS">0</p>
+		<!-- <p style="font-family:verdana; color:white;">FPS</p> -->
+		
+		<div style="display: flex;">
+			<p style="font-family:verdana; color:white;" >Quality: </p>
+			<select id="select_Quality" onchange="on_shader_define_changed('volume_clouds_shader','select_Quality','Quality_Auto', null)" style=" height: 22px;  transform: translate(10%, 65%);">
+				<option value="Quality_Auto">Auto</option>
+				<option value="Quality_High">High</option>
+				<option value="Quality_Med">Medium</option>
+				<option value="Quality_Low">Low</option>
+			</select>
+		</div>
+		
+		<div style="display: flex;">
+			<p style="font-family:verdana; color:white;">Debug: </p>
+			<select id="select_Debug" onchange="on_shader_define_changed('volume_clouds_shader','select_Debug','Off', '_DEBUG')" style=" height: 22px;  transform: translate(10%, 65%);">
+				<option value="Off">Off</option>
+				<option value="_DEBUG_SDF_Density">SDF_Density</option>
+				<option value="_DEBUG_SDF_StepCount">SDF_Step</option>
+				<option value="_DEBUG_SDF_NormalCalcCount">SDF_Normal</option>
+				<option value="_DEBUG_SDF_StepCountAndNormalCalcCount">SDF_StepNormal</option>
+				<!-- <option value="_DEBUG_SDF_TDistance 1">SDF_TDist</option> - ne radi zbog razmaka, kod provjere ima li taj define ne pronalazi ga zbog splitanja razmaka -->
+				<option value="_DEBUG_Clouds_StepCount">Clouds_Step</option>
+			</select>
+		</div>
+	</div>
 	
 	<div style="background-color:#0055ff">
 	  <canvas id="glcanvas" width="1024" height="512">
@@ -90,15 +118,13 @@
 	</div>
 	
   <script type="module">
-	import { main, recompileShader, reloadTexture } from "./main_volumetric.js";
+	import { main, recompileShader, reloadTexture, onShaderDefineChanged, SetAutoQualitySelection } from "./main_volumetric.js";
 	import { fetchImage } from "./GLExt/glTexture.js";
 	function wait(ms){ const start = performance.now(); while(performance.now() - start < ms); }
 	
 	var extern_files_list = ["functions", "structs", "pbr", "defines", "sdfunctions", "ubCamera", "ubLight", "ubMaterial", "ubModel", "simpleVS", "simpleFS", "pbr_shader", "skybox_shader", "backbuffer_shader", "SphereModel", "deferred_opaque_shade", "deferred_BcNAoRSMt", "deferred_skybox", "transparent_shader", "atmosphere_shader", "volume_clouds_shader", "volume_clouds_vs", "navigatorModel", "mipmapVS", "3x3MipGenFS", "tx128"];
 	var extern_files_loaded_number = 0;
-	
-	//function recompileShader(fragment_name)
-	
+		
 	function onExternFileLoadFinish(){
 		++extern_files_loaded_number;
 		if(extern_files_loaded_number >= extern_files_list.length){
@@ -190,33 +216,25 @@
 		
 		var init = { method: 'GET', headers: header, };
 		
-		/*fetch(obj.src, init).then(
-			function(response){
-				response.arrayBuffer().then(
-					function(buffer){
-						
-						//BufferedImage img = ImageIO.read(new File(obj.src));
-						//ImageIO.write(img, "png", buffer);
-						
-						var new_image = new Image(buffer);
-						new_image.id = obj.id;
-						new_image.src = obj.src;						
-						obj.parentNode.insertBefore(new_image,obj);
-						obj.parentNode.removeChild(obj);
-						
-						var arrayBufferView = new Uint8Array(buffer);
-						var data = "data:image/png;base64,"+btoa(arrayBufferView);
-						obj.src = data;
-						
-						reloadTexture(id);
-					}
-				);
-			}
-		);*/
-		
 		obj.onload = function(){ reloadTexture(id); }
 		var str = obj.src.split('?reload=')[0];
 		obj.src = str + "?reload=" + new Date().getTime();
+	}
+	
+	window.on_shader_define_changed = function on_shader_define_changed(shader_name, select_element_id, default_value, additional_define){
+		if(select_element_id == "select_Quality"){
+			var select_element = document.getElementById(select_element_id);
+			if(select_element == null) return;
+			
+			if(select_element.value == "Quality_Auto"){
+				SetAutoQualitySelection(true); return;
+			}
+			else{
+				SetAutoQualitySelection(false);
+			}
+		}
+		
+		onShaderDefineChanged(shader_name, select_element_id, default_value, additional_define);
 	}
 	
   </script>

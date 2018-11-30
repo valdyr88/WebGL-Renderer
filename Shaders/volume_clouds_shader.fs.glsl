@@ -292,10 +292,10 @@ vec4 raymarchCloudsSample(in vec3 start, in vec3 dir, in float t){
 //===================================================================================================
 // raymarchMulti pronalazi vise tocaka izmedju kojih samplira volumetric clouds
 //===================================================================================================
-#define _DEBUG
+// #define _DEBUG
 
 #ifdef _DEBUG
-	#define _DEBUG_SDF_Density
+	// #define _DEBUG_SDF_Density
 	// #define _DEBUG_SDF_StepCount
 	// #define _DEBUG_SDF_NormalCalcCount
 	// #define _DEBUG_SDF_StepCountAndNormalCalcCount

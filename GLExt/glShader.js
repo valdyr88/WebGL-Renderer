@@ -69,8 +69,23 @@ export class ShaderDefines
 		this.defines.push(str);
 	}
 	
+	getDefineId(name){
+		if(name == null) return -1;
+		name = name.trim();
+		
+		for(var i = 0; i < this.defines.length; ++i){
+			var define = this.defines[i].split(" ");
+			if(define.length < 2) continue;
+			
+			if(define[1].trim() == name){
+				return i;
+			}
+		}
+		return -1;
+	}
+	
 	RemoveDefine(name){
-		if(name == null) return false;
+		/* if(name == null) return false;
 		name = name.trim();
 		
 		for(var i = 0; i < this.defines.length; ++i){
@@ -81,8 +96,15 @@ export class ShaderDefines
 				this.defines.splice(i,1);
 				return true;
 			}
-		}
-		return false;
+		} */
+		var i = this.getDefineId(name);
+		if(i == -1) return false;
+		this.defines.splice(i,1);
+		return true;
+	}
+	
+	HasDefine(name){
+		return this.getDefineId(name) != -1;
 	}
 	
 	static CreateGlobalDefines(){
@@ -715,6 +737,23 @@ export class ShaderList
 			return ShaderList.singleton().shaders[SlotID];
 		}
 		return null;
+	}
+	
+	static getAllWithName(name){
+		if(name == null) return null;
+		if(name == "") return null;
+		
+		var rtnList = [];
+		var shaderList = ShaderList.singleton();
+		
+		for(var i = 0; i < shaderList.shaders.length; ++i){
+			var shader = shaderList.shaders[i];
+			if(shader.FragmentShaderName == name || shader.VertexShaderName == name){
+				rtnList[rtnList.length] = shader;
+			}
+		}
+		
+		return rtnList;
 	}
 	
 	static count(){

@@ -6,6 +6,9 @@ var gl = null;
 
 var bUseHDR = false;
 var bStoreHDRinRGBA8 = true;
+var bAutoQualitySelect = true;
+var QualitySelect = 2;
+var strQualitySelect = ["Quality_Low", "Quality_Med", "Quality_High"];
 
 export function main(){
 	
@@ -41,9 +44,6 @@ export function main(){
 		glext.ShaderDefines.addGlobalDefine("USE_HDR","");
 	
 	glext.ShaderDefines.addGlobalDefine("MAX_LIGHTS", " "+glext.MAX_LIGHTS);
-	
-	var QualitySelect = 2;
-	var strQualitySelect = ["Quality_Low", "Quality_Med", "Quality_High"];
 	
 	var shader = new glext.Shader(0);
 	if(shader.CompileFromFile("simpleVS", "deferred_BcNAoRSMt") == false) alert("nije kompajliran shader!");
@@ -256,7 +256,10 @@ export function main(){
 	sys.time.init();
 	
 	var oldframe_time = -1.0;
-	var avg_frame_time = 0.0;
+	var avg_frame_time = 1.0/60.0;
+	var FPSlabel = document.getElementById("label_FPS");
+	
+	var lastRecompileTime = sys.time.getSecondsSinceStart();
 	
 	shader.setFlagsUniform(1);
 	
@@ -292,30 +295,41 @@ export function main(){
 	var bCtrlToggle = false;
 	var bShiftToggle = false;
 	
-	setInterval( function(){ window.requestAnimationFrame(renderFrame); }, 25);
+	setInterval( function(){ window.requestAnimationFrame(renderFrame); }, 17);
 	
 	function renderFrame()
 	{
 		time = sys.time.getSecondsSinceStart();
 		var frame_time = time - oldframe_time;
 		
+		var avg_FPS = 1.0 / avg_frame_time;
+		
 		if(oldframe_time > 0.0 && frame_time > 1.0 / 70.0){
-			avg_frame_time = vMath.lerp(avg_frame_time, frame_time, 1.0 / 60.0);
+			avg_frame_time = vMath.lerp(avg_frame_time, frame_time, 1.0 / 30.0);
+			avg_FPS = 1.0 / avg_frame_time;
 			
-			if(avg_frame_time > 1.0 / 20.0 && QualitySelect > 0){
-				volume_clouds_shader.RemoveDefine(strQualitySelect[QualitySelect]);
-				QualitySelect--;
-				volume_clouds_shader.addDefine(strQualitySelect[QualitySelect],"");
-				recompileShader("volume_clouds_shader");
-			}
-			else if(avg_frame_time < 1.0 / 40.0 && QualitySelect < 2){
-				volume_clouds_shader.RemoveDefine(strQualitySelect[QualitySelect]);
-				QualitySelect++;
-				volume_clouds_shader.addDefine(strQualitySelect[QualitySelect],"");
-				recompileShader("volume_clouds_shader");
+			if(bAutoQualitySelect == true && (time - lastRecompileTime) > 5.0)
+			{
+				if(avg_FPS < 20.0 && QualitySelect > 0){
+					volume_clouds_shader.RemoveDefine(strQualitySelect[QualitySelect]);
+					QualitySelect--;
+					volume_clouds_shader.addDefine(strQualitySelect[QualitySelect],"");
+					recompileShader("volume_clouds_shader");
+					lastRecompileTime = sys.time.getSecondsSinceStart();
+				}
+				else if(avg_FPS > 40.0 && QualitySelect < 2){
+					volume_clouds_shader.RemoveDefine(strQualitySelect[QualitySelect]);
+					QualitySelect++;
+					volume_clouds_shader.addDefine(strQualitySelect[QualitySelect],"");
+					recompileShader("volume_clouds_shader");
+					lastRecompileTime = sys.time.getSecondsSinceStart();
+				}
 			}
 		}
-						
+		
+		// FPSlabel.textContent = (1.0/avg_frame_time).toString();
+		FPSlabel.textContent = Number.parseFloat(avg_FPS).toFixed(2) + " FPS";
+		
 		var ctime = Math.cos(time);
 		var stime = Math.sin(time);
 		var ctime10 = Math.cos(10*time);
@@ -672,3 +686,57 @@ function checkWindowsSizeAndResizeCanvas(){
 	glext.ResizeCanvas(window.innerWidth, window.innerHeight);	
 	return true;
 }
+
+export function onShaderDefineChanged(shader_name, select_element_id, default_value, additional_define){
+	var select_element = document.getElementById(select_element_id);
+	if(select_element == null) return;
+	
+	var shaders = glext.ShaderList.getAllWithName(shader_name);
+	if(shaders.length <= 0) return;
+	
+	var setting = select_element.value;
+	var all_settings = []; for(var i = 0; i < select_element.options.length; ++i){ all_settings[i] = select_element.options[i].value; }
+	
+	for(var i = 0; i < shaders.length; ++i){
+		shaders[i].RemoveDefine(additional_define);
+		for(var j = 0; j < all_settings.length; ++j){
+			shaders[i].RemoveDefine(all_settings[j]);
+		}
+	}
+	
+	if(setting == default_value){
+		for(var i = 0; i < shaders.length; ++i)
+			recompileShader(shaders[i].FragmentShaderName);
+	}
+	else{
+		for(var i = 0; i < shaders.length; ++i){
+			shaders[i].addDefine(additional_define);
+			shaders[i].addDefine(setting);
+			recompileShader(shaders[i].FragmentShaderName);
+		}
+	}
+}
+
+export function SetAutoQualitySelection(bOn){
+	bAutoQualitySelect = bOn;
+		
+	var shaders = glext.ShaderList.getAllWithName("volume_clouds_shader");
+	if(shaders.length <= 0) return;
+	
+	for(var i = 0; i < shaders.length; ++i){
+		for(var j = 0; j < strQualitySelect.length; ++j){
+			shaders[i].RemoveDefine(strQualitySelect[j]);
+		}
+	}
+	
+}
+
+
+
+
+
+
+
+
+
+
