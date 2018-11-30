@@ -119,6 +119,15 @@ float sdf_combine( in float d, in float n){ return min(d,n); } //npr. dist = sdf
 											vec3(-1.0,1.0,-1.0)*sdf(p + vec3(-1.0,1.0,-1.0)*1e-4) + \
 											vec3(1.0, 1.0, 1.0)*sdf(p + vec3(1.0, 1.0, 1.0)*1e-4) )) \
 
+/* 
+const float h = 1e-4;
+const vec2 k = vec2(1.0,-1.0);
+return normalize( k.xyy * sdf_map( p + k.xyy*h ) +
+				  k.yyx * sdf_map( p + k.yyx*h ) +
+				  k.yxy * sdf_map( p + k.yxy*h ) +
+				  k.xxx * sdf_map( p + k.xxx*h ) );
+*/
+
 #endif //GLSL_SDFUNCTIONS
 
 
