@@ -300,6 +300,7 @@ vec4 raymarchCloudsSample(in vec3 start, in vec3 dir, in float t){
 	// #define _DEBUG_SDF_NormalCalcCount
 	// #define _DEBUG_SDF_StepCountAndNormalCalcCount
 	// #define _DEBUG_SDF_TDistance 1
+	// #define _DEBUG_SDF_Display_Normals
 #endif
 
 #if defined(Quality_High)
@@ -460,8 +461,6 @@ float raymarchSDFfindT(in vec3 start, in vec3 dir, float t, float disttreshold, 
 }
 //===================================================================================================
 
-// #define Display_Normals
-
 void main(void)
 {	
 	Light light0 = Lights[0].light;
@@ -487,7 +486,7 @@ void main(void)
 	
 	// rtn = raymarchCloudsSample(Position, ViewDir, dither);
 	
-	#ifdef Display_Normals
+	#ifdef _DEBUG_SDF_Display_Normals
 		if(tstart >= 0.0){
 			rtn = raymarchSimpleNormal(Position, ViewDir, 0.0, 0.001f);
 			rtn.xyz = rtn.xyz * 0.5 + 0.5;
@@ -505,10 +504,6 @@ void main(void)
 	#endif
 	
 	gl_FragColor = tovec4(vec3(rtn), 1.0);
-	// gl_FragColor = tovec4(vec3( (T[0]) / 10.0), 1.0);
-	// gl_FragColor = tovec4(normalize(ViewVector)*0.5+0.5, 1.0);
-	// gl_FragColor = tovec4((normalize(PixelPosition)), 1.0);
-	// gl_FragColor = tovec4(Position, 1.0);
 }
 
 
