@@ -127,7 +127,7 @@ float sdf_map(in vec3 x)
 	
 	dist = sdf_subtract( distB, distA );
 	
-	return dist;
+	return distA;
 }
 
 //http://iquilezles.org/www/articles/normalsSDF/normalsSDF.htm
@@ -249,7 +249,6 @@ vec4 RaymarchCloudsSample(in vec3 start, in vec3 dir, in float t, in float dt, i
 	#endif
 	
 	Light light0 = Lights[0].light;
-	#define lightDir ((light0.position.xyz - ray))	
 	#define sampleDelta (dt * (64.0f / float(Raymarch_NofSteps))) //dt == 0.1f
 		
 	for(int i = 0; i < Raymarch_NofSteps; ++i)
@@ -257,6 +256,8 @@ vec4 RaymarchCloudsSample(in vec3 start, in vec3 dir, in float t, in float dt, i
 		if(colorsum.a > 0.99f) break;
 		
 		vec3 ray = start + t*dir;
+		vec3 lightDir = light0.position.xyz - ray;
+		
 		float dens = sample_clouds(ray);
 		float shadow = RaymarchCloudShadowSample(ray, normalize(lightDir));
 		
@@ -452,9 +453,7 @@ vec4 RaymarchMulti2(in vec3 start, in vec3 dir, in float tstart, in float dither
 		int StepCount = 0;
 	#endif
 		
-	Light light0 = Lights[0].light;
-	#define lightDir ((light0.position.xyz - ray))
-	
+	Light light0 = Lights[0].light;	
 	
 	float t = tstart;
 	vec4 colorsum = vec4(0.0);
@@ -504,6 +503,9 @@ vec4 RaymarchMulti2(in vec3 start, in vec3 dir, in float tstart, in float dither
 			vec3 ray = start + t*dir;
 			float dist = sdf_map(ray);
 			if(dist > 0.0f) break; //ako je dist pozitivan onda smo izvan sdf containera			
+			
+			vec3 lightDir = light0.position.xyz - ray;
+			
 			float dens = sample_clouds(ray);
 			float shadow = RaymarchCloudShadowSample(ray, normalize(lightDir));
 			
@@ -511,7 +513,7 @@ vec4 RaymarchMulti2(in vec3 start, in vec3 dir, in float tstart, in float dither
 				StepCount++;
 			#endif
 			
-			float lited = 4.0 / length(lightDir); lited = clamp(lited,0.0,2.0);
+			float lited = 2.0 / pow(dot(lightDir,lightDir), 0.25f); lited = clamp(lited,0.0,2.0);
 			
 			vec3 color = lerp( vec3(1.0), cloudColor, dens*0.5);
 			color *= lerp( cloudShadowColor, vec3(1.0), shadow);
