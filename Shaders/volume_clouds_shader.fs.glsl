@@ -127,7 +127,7 @@ float sdf_map(in vec3 x)
 	
 	dist = sdf_subtract( distB, distA );
 	
-	return distA;
+	return dist;
 }
 
 //http://iquilezles.org/www/articles/normalsSDF/normalsSDF.htm
@@ -138,19 +138,25 @@ vec3 calcNormal(in vec3 p){
 #if defined(Quality_High)
 	#define Raymarch_NofSteps 64 //broj samplanja npr za cloudse
 	#define Raymarch_CloudShadow_NofSteps 5
+	#define Raymarch_DeltaStep 0.01f
+	#define Raymarch_CloudShadow_DeltaStep 0.68f
 #elif defined(Quality_Med)
 	#define Raymarch_NofSteps 48 //broj samplanja npr za cloudse
 	#define Raymarch_CloudShadow_NofSteps 3
+	#define Raymarch_DeltaStep 0.05f
+	#define Raymarch_CloudShadow_DeltaStep 0.68f
 #elif defined(Quality_Low)
 	#define Raymarch_NofSteps 32 //broj samplanja npr za cloudse
 	#define Raymarch_CloudShadow_NofSteps 2
+	#define Raymarch_DeltaStep 0.1f
+	#define Raymarch_CloudShadow_DeltaStep 0.68f
 #endif
 
 //===================================================================================================
 // Test raymarch funkcije
 //===================================================================================================
 
-vec4 raymarchSimpleNormal(in vec3 start, in vec3 dir, float t, float treshold)
+vec4 RaymarchSimpleNormal(in vec3 start, in vec3 dir, float t, float treshold)
 {	
 	for(int i = 0; i < Raymarch_NofSteps; ++i)
 	{
@@ -180,7 +186,7 @@ vec4 raymarchSimpleNormal(in vec3 start, in vec3 dir, float t, float treshold)
 	return tovec4(normal, t2-t);
 }
 
-float raymarchSimpleCloudsSample(in vec3 start, in vec3 dir, float t)
+float RaymarchSimpleCloudsSample(in vec3 start, in vec3 dir, float t)
 {	
 	float sum = 0.0;
 	
@@ -213,12 +219,12 @@ float raymarchSimpleCloudsSample(in vec3 start, in vec3 dir, float t)
 #define cloudShadowColor (vec3(0.4,0.47,0.6))
 // #define lightDir (normalize(vec3(1.0,0.2,1.0)))
 
-float raymarchCloudShadowSample(in vec3 start, in vec3 dir)
+float RaymarchCloudShadowSample(in vec3 start, in vec3 dir)
 {
 	float s = 0.0f;
 	float shadow = 1.0f;
 	#define shadowMult (1.0f+(1.5f / float(Raymarch_CloudShadow_NofSteps)))
-	#define shadowSampleDelta (0.68f*(1.0f/float(Raymarch_CloudShadow_NofSteps)))
+	#define shadowSampleDelta (Raymarch_CloudShadow_DeltaStep*(1.0f/float(Raymarch_CloudShadow_NofSteps)))
 
 	for(int i = 0; i < Raymarch_CloudShadow_NofSteps; ++i)
 	{
@@ -230,7 +236,7 @@ float raymarchCloudShadowSample(in vec3 start, in vec3 dir)
 	return shadow;
 }
 
-vec4 raymarchCloudsSample(in vec3 start, in vec3 dir, in float t, in float dt, in float tmax)
+vec4 RaymarchCloudsSample(in vec3 start, in vec3 dir, in float t, in float dt, in float tmax)
 {
 	vec4 colorsum = vec4(0.0);
 	/*
@@ -245,14 +251,14 @@ vec4 raymarchCloudsSample(in vec3 start, in vec3 dir, in float t, in float dt, i
 	Light light0 = Lights[0].light;
 	#define lightDir ((light0.position.xyz - ray))	
 	#define sampleDelta (dt * (64.0f / float(Raymarch_NofSteps))) //dt == 0.1f
-	
+		
 	for(int i = 0; i < Raymarch_NofSteps; ++i)
 	{
 		if(colorsum.a > 0.99f) break;
 		
 		vec3 ray = start + t*dir;
 		float dens = sample_clouds(ray);
-		float shadow = raymarchCloudShadowSample(ray, normalize(lightDir));
+		float shadow = RaymarchCloudShadowSample(ray, normalize(lightDir));
 		
 		#ifdef _DEBUG_Clouds_StepCount
 			StepCount++;
@@ -281,8 +287,8 @@ vec4 raymarchCloudsSample(in vec3 start, in vec3 dir, in float t, in float dt, i
 	return colorsum;
 }
 
-vec4 raymarchCloudsSample(in vec3 start, in vec3 dir, in float t){
-	return raymarchCloudsSample(start, dir, t, 0.1f, 100000.0f);
+vec4 RaymarchCloudsSample(in vec3 start, in vec3 dir, in float t){
+	return RaymarchCloudsSample(start, dir, t, 0.1f, 100000.0f);
 }
 
 /* #if defined(Quality_High)
@@ -290,7 +296,7 @@ vec4 raymarchCloudsSample(in vec3 start, in vec3 dir, in float t){
 #elif defined(Quality_Low)
 #endif */
 //===================================================================================================
-// raymarchMulti pronalazi vise tocaka izmedju kojih samplira volumetric clouds
+// RaymarchMulti pronalazi vise tocaka izmedju kojih samplira volumetric clouds
 //===================================================================================================
 // #define _DEBUG
 
@@ -313,12 +319,12 @@ vec4 raymarchCloudsSample(in vec3 start, in vec3 dir, in float t){
 	#define SDF_PrecisionTreshold 0.005f
 #elif defined(Quality_Low)
 	#define SDF_NofPasses 8
-	#define SDF_NofStepsPerPass 32
-	#define SDF_PrecisionTreshold 0.05f
+	#define SDF_NofStepsPerPass 48
+	#define SDF_PrecisionTreshold 0.005f
 #endif
 
 
-vec4 raymarchMulti(in vec3 start, in vec3 dir, in float tstart, in float dither, in float treshold, in float maxt, in vec3 background)
+vec4 RaymarchMulti(in vec3 start, in vec3 dir, in float tstart, in float dither, in float treshold, in float maxt, in vec3 background)
 {
 	#ifdef _DEBUG
 		int SDF_NofStepsCount = 0;
@@ -393,7 +399,7 @@ vec4 raymarchMulti(in vec3 start, in vec3 dir, in float tstart, in float dither,
 		float trange = (t2 - t);
 		float tstep = trange / float(Raymarch_NofSteps);
 				
-		colsum = colsum + raymarchCloudsSample(start, dir, t+dither, max(1.0f,(t/10.0f))*tstep, t2+dither);
+		colsum = colsum + RaymarchCloudsSample(start, dir, t+dither, max(1.0f,(t/10.0f))*tstep, t2+dither);
 		
 		if(colsum.a > 0.99f*float(SDF_NofPasses/2)) break;
 	}
@@ -435,14 +441,138 @@ vec4 raymarchMulti(in vec3 start, in vec3 dir, in float tstart, in float dither,
 		
 	#endif
 }
+
+vec4 RaymarchMulti2(in vec3 start, in vec3 dir, in float tstart, in float dither, in float treshold, in float maxt, in vec3 background)
+{
+	#ifdef _DEBUG
+		int SDF_NofStepsCount = 0;
+		int SDF_NofNormalCalcCount = 0;
+	#endif
+	#ifdef _DEBUG_Clouds_StepCount
+		int StepCount = 0;
+	#endif
+		
+	Light light0 = Lights[0].light;
+	#define lightDir ((light0.position.xyz - ray))
+	
+	
+	float t = tstart;
+	vec4 colorsum = vec4(0.0);
+	
+	for(int s = 0; s < SDF_NofPasses; ++s)
+	{
+		bool found = false;
+		
+		//pronalazak sdf nultocke (povrsine sdf containera)
+		//---------------------------------------------------------------------------------
+		for(int i = 0; i < SDF_NofStepsPerPass; ++i)
+		{
+			vec3 ray = start + t*dir;
+			float dist = sdf_map(ray);
+			#ifdef _DEBUG
+				SDF_NofStepsCount++;
+			#endif
+			
+			if(abs(dist) <= treshold){ found = true; break; }
+			if((sign(dist) < 0.0)){ t = 0.0f; found = true; break; }		
+			
+			if(true && i >= int(0.5f*float(SDF_NofStepsPerPass)))
+			{//ovaj dio poveca korak samplanja ako je normala okomita na ray
+				vec3 normal = sdf_calc_normal(ray, sdf_map);
+				float invdND = (1.0f - abs(dot(normal, dir)));
+				t += 100.0f*pow(invdND,16.0)*treshold; 
+				
+				#ifdef _DEBUG
+					SDF_NofNormalCalcCount++;
+				#endif
+			}
+			
+			t += max(treshold, 0.99f*abs(dist));
+			
+			if(t >= maxt) break;
+		}
+		//---------------------------------------------------------------------------------
+		
+		t += 10.0f*max(1.0f,t)*treshold;
+				
+		//raytracanje oblaka i provjera sdf predznaka
+		//---------------------------------------------------------------------------------				
+		for(int i = 0; i < Raymarch_NofSteps; ++i)
+		{
+			if(colorsum.a > 0.99f) break;
+			
+			vec3 ray = start + t*dir;
+			float dist = sdf_map(ray);
+			if(dist > 0.0f) break; //ako je dist pozitivan onda smo izvan sdf containera			
+			float dens = sample_clouds(ray);
+			float shadow = RaymarchCloudShadowSample(ray, normalize(lightDir));
+			
+			#ifdef _DEBUG_Clouds_StepCount
+				StepCount++;
+			#endif
+			
+			float lited = 4.0 / length(lightDir); lited = clamp(lited,0.0,2.0);
+			
+			vec3 color = lerp( vec3(1.0), cloudColor, dens*0.5);
+			color *= lerp( cloudShadowColor, vec3(1.0), shadow);
+			color *= lited;
+			
+			color *= dens;
+			
+			colorsum.xyz += color*(1.0 - colorsum.a);
+			colorsum.a += dens;
+			
+			float dt = max(1.0f,(t/10.0f))*Raymarch_DeltaStep*(64.0f / float(Raymarch_NofSteps));
+			
+			t += dt;
+			if(t >= maxt) break;
+		}
+		
+		if(t >= maxt) break;
+		if(colorsum.a > 0.99f*float(SDF_NofPasses/2)) break;
+		//---------------------------------------------------------------------------------
+	}
+	
+	colorsum = colorsum / float(SDF_NofPasses/2);
+	
+	#ifndef _DEBUG
+		return colorsum;
+	#else
+					
+		#ifdef _DEBUG_SDF_StepCount
+			float fNofStepsCount = float(SDF_NofStepsCount) / float(SDF_NofPasses * SDF_NofStepsPerPass);
+			return lerp3pt(vec4(0.0,0.5,1.0,1.0), vec4(0.5,1.0,0.0,1.0), vec4(1.0,0.0,0.0,1.0), fNofStepsCount);
+		#endif
+		
+		#ifdef _DEBUG_SDF_NormalCalcCount
+			float fNofNormCalcCount = float(4*SDF_NofNormalCalcCount) / float(SDF_NofPasses * SDF_NofStepsPerPass);
+			return lerp3pt(vec4(0.0,0.5,1.0,1.0), vec4(0.5,1.0,0.0,1.0), vec4(1.0,0.0,0.0,1.0), fNofNormCalcCount);
+		#endif
+		
+		#ifdef _DEBUG_SDF_StepCountAndNormalCalcCount
+			float fNofStepsCount = float(SDF_NofStepsCount + 4*SDF_NofNormalCalcCount) / float(SDF_NofPasses * SDF_NofStepsPerPass); //4 jer ima 4 samplanja sdf funkcije u normal calc
+			return lerp3pt(vec4(0.0,0.5,1.0,1.0), vec4(0.5,1.0,0.0,1.0), vec4(1.0,0.0,0.0,1.0), fNofStepsCount);
+		#endif
+		
+		#ifdef _DEBUG_Clouds_StepCount
+			float fStepCount = float(StepCount) / float( (Raymarch_NofSteps) );
+			return lerp3pt(vec4(0.0,0.5,1.0,1.0), vec4(0.5,1.0,0.0,1.0), vec4(1.0,0.0,0.0,1.0), fStepCount);
+		#endif
+		
+		return vec4(1.0,0.0,1.0,1.0);
+		
+	#endif
+	
+//---------------------------------------------------------------------------------
+}
 //===================================================================================================
 
 //===================================================================================================
-//pronalazi jeli potrebno izvrsavat raymarchMulti funkciju, i na kojoj udaljenosti gledat za t
+//pronalazi jeli potrebno izvrsavat RaymarchMulti funkciju, i na kojoj udaljenosti gledat za t
 //===================================================================================================
 #define Raymarch_SDF_Tfind_NofSteps 16
 
-float raymarchSDFfindT(in vec3 start, in vec3 dir, float t, float disttreshold, float maxt)
+float RaymarchSDFfindT(in vec3 start, in vec3 dir, float t, float disttreshold, float maxt)
 {
 	for(int i = 0; i < Raymarch_SDF_Tfind_NofSteps; ++i)
 	{
@@ -478,17 +608,18 @@ void main(void)
 	
 	vec4 rtn = vec4(0.0);
 	
-	const float maxT = 15.0f;
-	float tstart = raymarchSDFfindT(Position, ViewDir, 0.95f*sdf_map(Position), 0.1, maxT);
+	const float maxT = 30.0f;
+	float tstart = RaymarchSDFfindT(Position, ViewDir, 0.95f*sdf_map(Position), 0.1, maxT);
 	
 	if(tstart >= 0.0)
-		rtn = raymarchMulti(Position, ViewDir, 0.0, dither, SDF_PrecisionTreshold, tstart+maxT, diffuse.xyz);
+		rtn = RaymarchMulti2(Position, ViewDir, 0.0, dither, SDF_PrecisionTreshold, tstart+maxT, diffuse.xyz);
 	
-	// rtn = raymarchCloudsSample(Position, ViewDir, dither);
+	// rtn = RaymarchCloudsSample(Position, ViewDir, dither);
 	
 	#ifdef _DEBUG_SDF_Display_Normals
+		rtn = vec4(0.0);
 		if(tstart >= 0.0){
-			rtn = raymarchSimpleNormal(Position, ViewDir, 0.0, 0.001f);
+			rtn = RaymarchSimpleNormal(Position, ViewDir, 0.0, 0.001f);
 			rtn.xyz = rtn.xyz * 0.5 + 0.5;
 		}
 	#endif

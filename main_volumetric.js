@@ -6,8 +6,8 @@ var gl = null;
 
 var bUseHDR = false;
 var bStoreHDRinRGBA8 = true;
-var bAutoQualitySelect = true;
-var QualitySelect = 2;
+var bAutoQualitySelect = false;
+var QualitySelect = 0;
 var strQualitySelect = ["Quality_Low", "Quality_Med", "Quality_High"];
 
 export function main(){
