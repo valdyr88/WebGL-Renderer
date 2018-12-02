@@ -81,9 +81,10 @@ float noise(in vec3 x) //3d noise from iq
 
 float sample_clouds(in vec3 p)
 {	
-	float den = -1.0 - (abs(p.y-0.5)+0.5)/2.0;
+	float den = -2.0;//-1.0 - (abs(p.y-0.5)+0.5)/2.0;
 	
-	float time = 0.05*Time;
+	float time = 0.05f*Time;
+	time = 0.0f;
 	
 	float f = 0.0;
 	vec3 q = p*.5 - vec3(0.0,0.0,1.5)*0.0*time + vec3(sin(0.7*0.0*time),0,0);
@@ -138,17 +139,17 @@ vec3 calcNormal(in vec3 p){
 #if defined(Quality_High)
 	#define Raymarch_NofSteps 64 //broj samplanja npr za cloudse
 	#define Raymarch_CloudShadow_NofSteps 5
-	#define Raymarch_DeltaStep 0.01f
+	#define Raymarch_DeltaStep(t) 0.05f*max(1.0,(t/10.0f))*(64.0f / float(Raymarch_NofSteps))
 	#define Raymarch_CloudShadow_DeltaStep 0.68f
 #elif defined(Quality_Med)
 	#define Raymarch_NofSteps 48 //broj samplanja npr za cloudse
 	#define Raymarch_CloudShadow_NofSteps 3
-	#define Raymarch_DeltaStep 0.05f
+	#define Raymarch_DeltaStep(t) 0.1f*max(1.0,(t/10.0f))*(64.0f / float(Raymarch_NofSteps))
 	#define Raymarch_CloudShadow_DeltaStep 0.68f
 #elif defined(Quality_Low)
 	#define Raymarch_NofSteps 32 //broj samplanja npr za cloudse
 	#define Raymarch_CloudShadow_NofSteps 2
-	#define Raymarch_DeltaStep 0.1f
+	#define Raymarch_DeltaStep(t) 0.2f*max(1.0,(t/10.0f))*(64.0f / float(Raymarch_NofSteps))
 	#define Raymarch_CloudShadow_DeltaStep 0.68f
 #endif
 
@@ -492,8 +493,9 @@ vec4 RaymarchMulti2(in vec3 start, in vec3 dir, in float tstart, in float dither
 		}
 		//---------------------------------------------------------------------------------
 		
-		t += 10.0f*max(1.0f,t)*treshold;
-				
+		t += 10.0f*max(1.0f,5.0f)*treshold;
+		t += dither;
+		
 		//raytracanje oblaka i provjera sdf predznaka
 		//---------------------------------------------------------------------------------				
 		for(int i = 0; i < Raymarch_NofSteps; ++i)
@@ -513,7 +515,8 @@ vec4 RaymarchMulti2(in vec3 start, in vec3 dir, in float tstart, in float dither
 				StepCount++;
 			#endif
 			
-			float lited = 2.0 / pow(dot(lightDir,lightDir), 0.25f); lited = clamp(lited,0.0,2.0);
+			float lited = 4.0 / (sqrt(dot(lightDir,lightDir))); lited = clamp(lited,0.0,4.0);
+			// float lited = 1.0f;
 			
 			vec3 color = lerp( vec3(1.0), cloudColor, dens*0.5);
 			color *= lerp( cloudShadowColor, vec3(1.0), shadow);
@@ -524,7 +527,7 @@ vec4 RaymarchMulti2(in vec3 start, in vec3 dir, in float tstart, in float dither
 			colorsum.xyz += color*(1.0 - colorsum.a);
 			colorsum.a += dens;
 			
-			float dt = max(1.0f,(t/10.0f))*Raymarch_DeltaStep*(64.0f / float(Raymarch_NofSteps));
+			float dt = Raymarch_DeltaStep(t);
 			
 			t += dt;
 			if(t >= maxt) break;
@@ -612,6 +615,7 @@ void main(void)
 	
 	const float maxT = 30.0f;
 	float tstart = RaymarchSDFfindT(Position, ViewDir, 0.95f*sdf_map(Position), 0.1, maxT);
+	// if(tstart >= 0.0) maxT = RaymarchSDFfindT(Position, ViewDir, tstart+maxT, 0.1, tstart+100.0);
 	
 	if(tstart >= 0.0)
 		rtn = RaymarchMulti2(Position, ViewDir, 0.0, dither, SDF_PrecisionTreshold, tstart+maxT, diffuse.xyz);
