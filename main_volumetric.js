@@ -514,7 +514,7 @@ export function main(){
 		}
 		else
 		{			
-			light.setPosition(-4.0*ctime, 2.0, 2.0);
+			light.setPosition(-2.0, 2.0, 2.0); //*ctime
 			light.setDisplaySize(5.0);
 			light.setDisplayColor(0.5,0.79,1.0,1.0);
 			light.setMatrices( Camera.ViewMatrix, Camera.ProjectionMatrix );
