@@ -139,12 +139,12 @@ vec3 calcNormal(in vec3 p){
 #if defined(Quality_High)
 	#define Raymarch_NofSteps 64 //broj samplanja npr za cloudse
 	#define Raymarch_CloudShadow_NofSteps 5
-	#define Raymarch_DeltaStep(t) 0.05f*max(1.0,(t/10.0f))*(64.0f / float(Raymarch_NofSteps))
+	#define Raymarch_DeltaStep(t) 0.1f*max(1.0,(t/10.0f))*(64.0f / float(Raymarch_NofSteps))
 	#define Raymarch_CloudShadow_DeltaStep 0.68f
 #elif defined(Quality_Med)
 	#define Raymarch_NofSteps 48 //broj samplanja npr za cloudse
 	#define Raymarch_CloudShadow_NofSteps 3
-	#define Raymarch_DeltaStep(t) 0.1f*max(1.0,(t/10.0f))*(64.0f / float(Raymarch_NofSteps))
+	#define Raymarch_DeltaStep(t) 0.15f*max(1.0,(t/10.0f))*(64.0f / float(Raymarch_NofSteps))
 	#define Raymarch_CloudShadow_DeltaStep 0.68f
 #elif defined(Quality_Low)
 	#define Raymarch_NofSteps 32 //broj samplanja npr za cloudse
