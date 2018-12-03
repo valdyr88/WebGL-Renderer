@@ -504,11 +504,12 @@ vec4 RaymarchMulti2(in vec3 start, in vec3 dir, in float tstart, in float dither
 			
 			vec3 ray = start + t*dir;
 			float dist = sdf_map(ray);
-			if(dist > 0.0f) break; //ako je dist pozitivan onda smo izvan sdf containera			
+			if(dist > 0.0f) break; //ako je dist pozitivan onda smo izvan sdf containera
 			
 			vec3 lightDir = light0.position.xyz - ray;
 			
-			float dens = sample_clouds(ray);
+			float dens_sdf = saturate(abs(dist)*1.0f);			
+			float dens = dens_sdf * sample_clouds(ray);
 			float shadow = RaymarchCloudShadowSample(ray, normalize(lightDir));
 			
 			#ifdef _DEBUG_Clouds_StepCount
@@ -599,7 +600,7 @@ float RaymarchSDFfindT(in vec3 start, in vec3 dir, float t, float disttreshold, 
 void main(void)
 {	
 	Light light0 = Lights[0].light;
-	float dither = (0.5f+0.5f*rand(TexCoords))*0.125f*(64.0f / float(Raymarch_NofSteps));
+	float dither = 0.25f*(0.5f+0.5f*rand(TexCoords))*(64.0f/float(Raymarch_NofSteps));
 	
 	vec2 mouse = Mouse.xy / Resolution.xy;
 	
