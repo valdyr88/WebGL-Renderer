@@ -493,7 +493,7 @@ vec4 RaymarchMulti2(in vec3 start, in vec3 dir, in float tstart, in float dither
 		}
 		//---------------------------------------------------------------------------------
 		
-		t += 10.0f*max(1.0f,5.0f)*treshold;
+		t += 10.0f*max(1.0f,t)*treshold;
 		t += dither;
 		
 		//raytracanje oblaka i provjera sdf predznaka
@@ -599,7 +599,7 @@ float RaymarchSDFfindT(in vec3 start, in vec3 dir, float t, float disttreshold, 
 void main(void)
 {	
 	Light light0 = Lights[0].light;
-	float dither = rand(TexCoords)*0.125f*(64.0f / float(Raymarch_NofSteps));
+	float dither = (0.5f+0.5f*rand(TexCoords))*0.125f*(64.0f / float(Raymarch_NofSteps));
 	
 	vec2 mouse = Mouse.xy / Resolution.xy;
 	
