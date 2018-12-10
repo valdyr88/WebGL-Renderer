@@ -22,8 +22,6 @@ precision mediump float;
 	#define textureCubeLod textureLod
 #endif
 
-#define PI (3.14159265359)
-
 uniform sampler2D txNoiseRGB;
 uniform samplerCube txAmbient;
 uniform sampler2D txDepth;

@@ -26,6 +26,8 @@
 
 #define saturate(x) clamp(x,0.0,1.0)
 
+#define PI (3.14159265359)
+#define e  (2.71828182846)
 //================================================================================================================
 
 inline vec4 tovec4(vec3 a, float b){
@@ -398,10 +400,10 @@ inline float linef(float x, float k, float o){
 
 //================================================================================================================
 
-inline int powi(const int b, const int e){
+inline int powi(const int b, const int ex){
 	int v = b;
 	for(int i = 1; i < 100; ++i){ 
-		if(i >= e) break;
+		if(i >= ex) break;
 		v = v*b;
 	}
 	return v;
@@ -419,9 +421,9 @@ inline bool getbit(int bits, const int bitno, const int nofbits){
 //================================================================================================================
 
 //uzeto sa https://www.opengl.org/discussion_boards/showthread.php/162816-frexp
-inline float frexp(float x, out float e){
-   e = ceil(log2(x));
-   return(x * exp2(-e));
+inline float frexp(float x, out float ex){
+   ex = ceil(log2(x));
+   return(x * exp2(-ex));
 }
 //================================================================================================================
 
@@ -496,5 +498,4 @@ vec4 lerp3pt(vec4 a, vec4 b, vec4 c, float t){
 }
 
 #endif //GLSL_FUNCTIONS
-
 
