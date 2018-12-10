@@ -37,6 +37,17 @@
         <File name="index.html" />
         <File name="index_volumetric.html" />
         <Folder name="Shaders">
+			<Folder name="FluidSim">
+				<Folder name="2D">
+					<File name="Shaders\FluidSim\2D\viscosity_pass.fs.glsl" />
+					<File name="Shaders\FluidSim\2D\advection_pass.fs.glsl" />
+					<File name="Shaders\FluidSim\2D\advection_correction_pass.fs.glsl" />
+					<File name="Shaders\FluidSim\2D\divergence_pass.fs.glsl" />
+					<File name="Shaders\FluidSim\2D\pressure_calc_pass.fs.glsl" />
+					<File name="Shaders\FluidSim\2D\divfree_velocity_pass.fs.glsl" />
+					<File name="Shaders\FluidSim\2D\debug_display.fs.glsl" />
+				</Folder>
+			</Folder>
             <File name="Shaders\atmosphere_shader.fs.glsl" />
             <File name="Shaders\volume_clouds_shader.fs.glsl" />
             <File name="Shaders\volume_clouds_shader.vs.glsl" />

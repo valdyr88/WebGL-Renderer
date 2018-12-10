@@ -294,6 +294,7 @@ export function main(){
 	
 	var bCtrlToggle = false;
 	var bShiftToggle = false;
+	var bFluidSimPass = true;
 	
 	setInterval( function(){ window.requestAnimationFrame(renderFrame); }, 17);
 	
@@ -421,6 +422,11 @@ export function main(){
 		
 		Camera.CalcInverseViewMatrix();
 		//-------------------------------------------------------------------------------------
+		
+		if(bFluidSimPass == true)
+		{
+			
+		}
 		
 		if(false) //Render deferred_opaque_shade i transparent_shader
 		{
