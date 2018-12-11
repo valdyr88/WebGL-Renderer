@@ -9,6 +9,7 @@
             <File name="GLExt\glModel.js" />
             <File name="GLExt\glShader.js" />
             <File name="GLExt\glTexture.js" />
+			<File name="GLExt\fluidsim.js" />
         </Folder>
         <Folder name="System">
             <File name="System\globalStorage.js" />

@@ -1,7 +1,7 @@
 #version 300 es
 // #extension GL_EXT_shader_texture_lod : require
 precision mediump float;
-//racuna divergence free velocity
+//racuna divergence free velocity, output je velocity
 
 #global_defines
 #include "defines"

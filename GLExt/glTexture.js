@@ -360,12 +360,12 @@ export class Texture{
 	CreateEmptyRGBAubyte(width, height){ this.CreateEmpty(width, height, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE); }
 	CreateEmptyRGBubyte(width, height){  this.CreateEmpty(width, height, gl.RGB,  gl.RGB,  gl.UNSIGNED_BYTE); }
 	CreateEmptyRGubyte(width, height){   this.CreateEmpty(width, height, gl.RG,   gl.RG,   gl.UNSIGNED_BYTE); }
-	CreateEmtpyRubyte(width, height){    this.CreateEmpty(width, height, gl.R,    gl.RED,  gl.UNSIGNED_BYTE); }
+	CreateEmptyRubyte(width, height){    this.CreateEmpty(width, height, gl.R,    gl.RED,  gl.UNSIGNED_BYTE); }
 	
 	CreateEmptyRGBAfloat32(width, height){ this.CreateEmpty(width, height, gl.RGBA32F, gl.RGBA, gl.FLOAT); }
 	CreateEmptyRGBfloat32(width, height){  this.CreateEmpty(width, height, gl.RGB32F,  gl.RGB,  gl.FLOAT); }
 	CreateEmptyRGfloat32(width, height){   this.CreateEmpty(width, height, gl.RG32F,   gl.RG,   gl.FLOAT); }
-	CreateEmtpyRfloat32(width, height){    this.CreateEmpty(width, height, gl.R32F,    gl.RED,  gl.FLOAT); }
+	CreateEmptyRfloat32(width, height){    this.CreateEmpty(width, height, gl.R32F,    gl.RED,  gl.FLOAT); }
 	
 	// CreateEmptyDepthfloat(width, height){ this.CreateEmpty(width, height, gl.R32F, gl.DEPTH_COMPONENT, gl.FLOAT); }
 	// CreateEmptyDepthuint(width, height){  this.CreateEmpty(width, height, gl.R32UI, gl.DEPTH_COMPONENT, gl.UNSIGNED_INT); }

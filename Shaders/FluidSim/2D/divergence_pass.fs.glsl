@@ -1,6 +1,7 @@
 #version 300 es
 // #extension GL_EXT_shader_texture_lod : require
 precision mediump float;
+//racunanje divergencije, output je scalar
 
 #global_defines
 #include "defines"
