@@ -82,6 +82,7 @@
   
   </head>
 <body>
+	<img id="reload_shader_btn" onclick="reload_fluidsim_shader()" title="fluidsim shaders" src="./misc/reload_ico.png"></img>
 	<img id="reload_shader_btn" onclick="reload_shader('deferred_opaque_shade')" title="deferred_opaque_shade" src="./misc/reload_ico.png"></img>
 	<img id="reload_shader_btn" onclick="reload_shader('transparent_shader')" title="transparent_shader" src="./misc/reload_ico.png"></img>
 	<img id="reload_shader_btn" onclick="reload_shader('volume_clouds_shader')" title="volume_clouds_shader" src="./misc/reload_ico.png"></img>
@@ -118,6 +119,15 @@
 				<option value="_DEBUG_Clouds_StepCount">Clouds_StepCount</option>
 			</select>
 		</div>
+		
+		<div style="display: flex;">
+			<p style="font-family:verdana; color:white;" >FluidSim: </p>
+			<select id="select_FluidSimDisplay" onchange="on_fluidsim_shader_define_changed('select_FluidSimDisplay','Display_Velocity', null)" style=" height: 22px;  transform: translate(10%, 65%);">
+				<option value="_DEBUG_Display_Velocity">Display_Velocity</option>
+				<option value="_DEBUG_Display_Pressure">Display_Pressure</option>
+				<option value="_DEBUG_Display_Divergence">Display_Divergence</option>
+			</select>
+		</div>
 	</div>
 	
 	<div style="background-color:#0055ff">
@@ -127,7 +137,7 @@
 	</div>
 	
   <script type="module">
-	import { main, recompileShader, reloadTexture, onShaderDefineChanged, SetAutoQualitySelection } from "./main_volumetric.js";
+	import { main, recompileShader, reloadTexture, onShaderDefineChanged, SetAutoQualitySelection, ReloadFluidSimShaders, FluidSimDisplayChanged } from "./main_volumetric.js";
 	import { fetchImage } from "./GLExt/glTexture.js";
 	function wait(ms){ const start = performance.now(); while(performance.now() - start < ms); }
 	
@@ -247,6 +257,14 @@
 		}
 		
 		onShaderDefineChanged(shader_name, select_element_id, default_value, additional_define);
+	}
+	
+	window.reload_fluidsim_shader = function reload_fluidsim_shader(){
+		ReloadFluidSimShaders();
+	}
+	
+	window.on_fluidsim_shader_define_changed = function on_fluidsim_shader_define_changed(select_element_id, default_value, additional_define){
+		
 	}
 	
   </script>

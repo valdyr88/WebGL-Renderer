@@ -1,4 +1,4 @@
-import { gl, isWGL2 } from "./glContext.js";
+import { gl, isWGL2, glPrintError } from "./glContext.js";
 // import * as global from "./globalStorage.js"
 import * as sys from "./../System/sys.js"
 
@@ -349,7 +349,8 @@ export class Texture{
 		gl.texParameteri(this.targetType, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
 		
 		gl.texImage2D(this.targetType, 0, internalFormat, width, height, 0, format, type, null);
-	
+		glPrintError();
+		
 		gl.bindTexture(this.targetType, null);
 		
 		this.width = width; this.height = height;

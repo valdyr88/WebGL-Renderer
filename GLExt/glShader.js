@@ -507,60 +507,70 @@ export class Shader
 	
 	
 	setMatrix4Uniform(uniform_location, matrix){
+		if(uniform_location == null ||uniform_location === -1) return false;
 		if(this.program == null) return false;
 		if(this.isBinded() == false) this.Bind();
 		
         gl.uniformMatrix4fv(uniform_location, false, matrix);
 	}
 	setMatrix3Uniform(uniform_location, matrix){
+		if(uniform_location == null ||uniform_location === -1) return false;
 		if(this.program == null) return false;
 		if(this.isBinded() == false) this.Bind();
 		
         gl.uniformMatrix3fv(uniform_location, false, matrix);
 	}
 	setIntUniform(uniform_location, value){
+		if(uniform_location == null ||uniform_location === -1) return false;
 		if(this.program == null) return false;
 		if(this.isBinded() == false) this.Bind();
 		
 		gl.uniform1i(uniform_location, value);
 	}
 	setInt2Uniform(uniform_location, value){
+		if(uniform_location == null ||uniform_location === -1) return false;
 		if(this.program == null) return false;
 		if(this.isBinded() == false) this.Bind();
 		
 		gl.uniform2iv(uniform_location, value);
 	}
 	setInt3Uniform(uniform_location, value){
+		if(uniform_location == null ||uniform_location === -1) return false;
 		if(this.program == null) return false;
 		if(this.isBinded() == false) this.Bind();
 		
 		gl.uniform3iv(uniform_location, value);
 	}
 	setInt4Uniform(uniform_location, value){
+		if(uniform_location == null ||uniform_location === -1) return false;
 		if(this.program == null) return false;
 		if(this.isBinded() == false) this.Bind();
 		
 		gl.uniform4iv(uniform_location, value);
 	}
 	setFloatUniform(uniform_location, value){
+		if(uniform_location == null ||uniform_location === -1) return false;
 		if(this.program == null) return false;
 		if(this.isBinded() == false) this.Bind();
 		
 		gl.uniform1f(uniform_location, value);
 	}
 	setFloat2Uniform(uniform_location, value){
+		if(uniform_location == null ||uniform_location === -1) return false;
 		if(this.program == null) return false;
 		if(this.isBinded() == false) this.Bind();
 		
 		gl.uniform2f(uniform_location, value[0],value[1]);
 	}
 	setFloat3Uniform(uniform_location, value){
+		if(uniform_location == null ||uniform_location === -1) return false;
 		if(this.program == null) return false;
 		if(this.isBinded() == false) this.Bind();
 		
 		gl.uniform3f(uniform_location, value[0],value[1],value[2]);
 	}
 	setFloat4Uniform(uniform_location, value){
+		if(uniform_location == null ||uniform_location === -1) return false;
 		if(this.program == null) return false;
 		if(this.isBinded() == false) this.Bind();
 		
@@ -690,7 +700,8 @@ export class Shader
 	
 	getUniformLocation(UniformName){
 		if(this.program == null) return null;
-		return gl.getUniformLocation(this.program, UniformName);
+		var rtn = gl.getUniformLocation(this.program, UniformName);
+		if(rtn == null) return -1;
 	}
 	getAttribLocation(AttribLocation){
 		if(this.program == null) return null;

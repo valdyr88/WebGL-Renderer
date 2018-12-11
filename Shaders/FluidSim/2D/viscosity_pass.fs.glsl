@@ -23,6 +23,7 @@ precision mediump float;
 
 uniform vec2 aspect; //odnos dimenzija teksture i svijeta
 uniform float dT;
+uniform float Time;
 uniform float k; //kinematic viscosity, = viscosity / density
 uniform sampler2D txVelocity;
 //------------------------------------------------------------------------------
@@ -45,6 +46,16 @@ vec4 sampleLinear(sampler2D tx, vec2 x){
 	return texture2D(tx, toTexSpace(x));
 }
 
+vec4 velocityFromAdditionalForces(vec2 x, float t, float dt){
+	vec2 tc = toTexSpace(x);
+	
+	if( (tc.x > 0.1 && tc.x < 0.2) && (tc.y > 0.1 && tc.y < 0.9) ){
+		return dt*2000.0*vec4(sin(t), cos(t), 0.0, 0.0);
+	}
+	
+	return vec4(0.0,0.0,0.0,0.0);
+}
+
 //racuna diffuziju zbog viscosity
 void main(void)
 {	
@@ -57,12 +68,16 @@ void main(void)
 	
 	vec4 us[4];
 	//za 3D treba 6 susjednih samplirat
-	us[0] = samplePoint(txVelocity, size, x + vec2(dx.x, 0.0));
+	us[0] = samplePoint(txVelocity, size, x + vec2( dx.x,0.0));
 	us[1] = samplePoint(txVelocity, size, x + vec2(-dx.x,0.0));
 	us[2] = samplePoint(txVelocity, size, x + vec2(0.0, dx.y));
 	us[3] = samplePoint(txVelocity, size, x + vec2(0.0,-dx.y));
 	
 	vec4 unew = u + dt*k*(us[0] + us[1] + us[2] + us[3] - 4.0*u);
+	
+	//dodatne sile
+	unew += velocityFromAdditionalForces(x, Time, dT);
+	//
 	
 	out_FragColor = unew;
 }

@@ -10,6 +10,7 @@ var bStoreHDRinRGBA8 = true;
 var bAutoQualitySelect = false;
 var QualitySelect = 0;
 var strQualitySelect = ["Quality_Low", "Quality_Med", "Quality_High"];
+var gFluidSim = null;
 
 export function main(){
 	
@@ -240,6 +241,9 @@ export function main(){
 		);
 	fluidSim.setKinematicViscosity(1.0);
 	fluidSim.setDisplayType("_DEBUG_Display_Velocity");
+	fluidSim.ClearBuffers();
+	
+	gFluidSim = fluidSim;
 	
 	vMath.mat4.perspective(projectionMatrix, vMath.deg2rad(40.0), gl.viewportWidth/gl.viewportHeight, 0.1, 1000.0);
 	
@@ -440,11 +444,11 @@ export function main(){
 			glext.Framebuffer.BindMainFB();	
 			gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);		
 			
-			gl.clearColor(0.0, 0.0, 0.0, 1.0);
+			/* gl.clearColor(0.0, 0.0, 0.0, 1.0);
 			gl.clearDepth(1.0);
 			gl.enable(gl.DEPTH_TEST);
 			gl.depthFunc(gl.LEQUAL);
-			gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+			gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT); */
 			
 			fluidSim.Display();
 		}
@@ -593,6 +597,19 @@ export function main(){
 	}
 	
 	return; /* */
+}
+
+export function ReloadFluidSimShaders(){
+	if(gFluidSim == null) return;
+	gFluidSim.RecompileShaders();
+}
+export function FluidSimDisplayChanged(select_element_id, default_value, additional_define){
+	if(gFluidSim == null) return;
+	var select_element = document.getElementById(select_element_id);
+	if(select_element == null) return
+	
+	var setting = select_element.value;
+	gFluidSim.setDisplayType(setting);
 }
 
 function RenderModels(fbo, bClearFBO, time, camera, models){
