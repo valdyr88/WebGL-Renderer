@@ -18,9 +18,12 @@ export function main(){
 	sys.mouse.InitMouse(document);
 	sys.keyboard.InitKeyboard(document);
 	
+	//glext.isWGL2 && 
+	
 	gl = glext.glInit("glcanvas");
-		 if(glext.isWGL2 && glext.glEnableExtension('OES_texture_float') == false) alert("no extension: OES_texture_float");
-		 if(glext.isWGL2 && glext.glEnableExtension('EXT_shader_texture_lod') == false) alert("no extension: EXT_shader_texture_lod");
+		 if(glext.glEnableExtension('OES_texture_float') == false) alert("no extension: OES_texture_float");
+		 if(glext.glEnableExtension('EXT_shader_texture_lod') == false) alert("no extension: EXT_shader_texture_lod");
+		 if(glext.glEnableExtension('EXT_color_buffer_float') == false) alert("no extension: EXT_color_buffer_float");
 		 if(glext.glEnableExtension('OES_texture_float_linear') == false) alert("no extension: OES_texture_float_linear");
 	if(gl == null) return;
 	

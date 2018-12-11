@@ -25,6 +25,7 @@ function glInitWebGLContext(canvas){
 			gl = canvas.getContext(contextNames[i]);
 			gl.windowCanvas = canvas;
 			glContextName = contextNames[i];
+			gl.contextName = glContextName;
 		
             gl.viewportWidth = canvas.width;
             gl.viewportHeight = canvas.height;
