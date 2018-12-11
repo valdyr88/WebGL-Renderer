@@ -38,15 +38,19 @@ vec2 toWorldSpace(vec2 x){ return x/aspect; }
 
 vec4 samplePoint(sampler2D tx, vec2 x){
 	ivec2 txSize = textureSize(tx, 0);
-	return texelFetch(tx, ivec2(toTexSpace(x)*txSize)); //sample point
+	return texelFetch(tx, ivec2(toTexSpace(x)*vec2(txSize)),0); //sample point
+}
+vec4 samplePoint(sampler2D tx, ivec2 txSize, vec2 x){
+	return texelFetch(tx, ivec2(toTexSpace(x)*vec2(txSize)),0);
 }
 vec4 sampleLinear(sampler2D tx, vec2 x){
 	return texture2D(tx, toTexSpace(x));
 }
 
+
 vec4 advectReverse(sampler2D u, vec2 x, float dt){
-	vec3 uadv = samplePoint(u, x); //sample point
-	return sampleLinear(u, x + dt*uadv); //sample linear
+	vec4 uadv = samplePoint(u, x); //sample point
+	return sampleLinear(u, x + dt*uadv.xy); //sample linear
 }
 
 //===================================================================================================

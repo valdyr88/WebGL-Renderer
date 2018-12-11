@@ -64,6 +64,9 @@ export class ShaderDefines
 	
 	addDefine(name, value){
 		if(name == null) return;
+		name = name.trim();
+		if(name == "") return;
+		
 		if(value == null || value == "") value = " ";
 		var str = "#define " + name + " " + value;
 		this.defines.push(str);

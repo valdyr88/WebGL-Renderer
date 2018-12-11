@@ -36,27 +36,27 @@ vec2 toWorldSpace(vec2 x){ return x/aspect; }
 
 vec4 samplePoint(sampler2D tx, vec2 x){
 	ivec2 txSize = textureSize(tx, 0);
-	return texelFetch(tx, ivec2(toTexSpace(x)*txSize)); //sample point
+	return texelFetch(tx, ivec2(toTexSpace(x)*vec2(txSize)),0); //sample point
 }
 vec4 samplePoint(sampler2D tx, ivec2 txSize, vec2 x){
-	return texelFetch(tx, ivec2(toTexSpace(x)*txSize));
+	return texelFetch(tx, ivec2(toTexSpace(x)*vec2(txSize)),0);
 }
 vec4 sampleLinear(sampler2D tx, vec2 x){
 	return texture2D(tx, toTexSpace(x));
 }
 
 
-float divergence(sampler2D u, vec2 x){
+float divergence(sampler2D tx, vec2 x){
 	//za 3D treba 6 susjednih samplirat
 	
 	vec4 u[4];
 	ivec2 size = textureSize(tx, 0);
 	const vec2 dx = vec2(1.0,1.0);
 	
-	u[0] = samplePoint(u, size, x + vec2(dx.x, 0.0));
-	u[1] = samplePoint(u, size, x + vec2(-dx.x,0.0));
-	u[2] = samplePoint(u, size, x + vec2(0.0, dx.y));
-	u[3] = samplePoint(u, size, x + vec2(0.0,-dx.y));
+	u[0] = samplePoint(tx, size, x + vec2(dx.x, 0.0));
+	u[1] = samplePoint(tx, size, x + vec2(-dx.x,0.0));
+	u[2] = samplePoint(tx, size, x + vec2(0.0, dx.y));
+	u[3] = samplePoint(tx, size, x + vec2(0.0,-dx.y));
 	
 	return 0.5*((u[0].x - u[1].x) + (u[2].y - u[3].y));
 }
@@ -67,7 +67,7 @@ void main(void)
 {	
 	vec2 x = toWorldSpace(TexCoords);
 	
-	float udiv = divergence(txTexture, x, dT);
+	float udiv = divergence(txTexture, x);
 	
-	gl_FragColor = tovec4(vec3(udiv), 1.0f);
+	gl_FragColor = udiv;
 }

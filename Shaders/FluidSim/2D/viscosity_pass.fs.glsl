@@ -36,10 +36,10 @@ vec2 toWorldSpace(vec2 x){ return x/aspect; }
 
 vec4 samplePoint(sampler2D tx, vec2 x){
 	ivec2 txSize = textureSize(tx, 0);
-	return texelFetch(tx, ivec2(toTexSpace(x)*txSize)); //sample point
+	return texelFetch(tx, ivec2(toTexSpace(x)*vec2(txSize)),0); //sample point
 }
 vec4 samplePoint(sampler2D tx, ivec2 txSize, vec2 x){
-	return texelFetch(tx, ivec2(toTexSpace(x)*txSize));
+	return texelFetch(tx, ivec2(toTexSpace(x)*vec2(txSize)),0);
 }
 vec4 sampleLinear(sampler2D tx, vec2 x){
 	return texture2D(tx, toTexSpace(x));
@@ -50,10 +50,10 @@ void main(void)
 {	
 	ivec2 size = textureSize(txVelocity, 0);
 	vec2 x = toWorldSpace(TexCoords);
-	const float dt = dT;	
+	float dt = dT;	
 	const vec2 dx = vec2(1.0,1.0);
 	
-	float u = samplePoint(txVelocity, size, x);	
+	vec4 u = samplePoint(txVelocity, size, x);	
 	
 	vec4 us[4];
 	//za 3D treba 6 susjednih samplirat

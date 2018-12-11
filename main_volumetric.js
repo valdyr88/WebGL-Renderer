@@ -1,6 +1,7 @@
 import * as glext from "./GLExt/GLExt.js"
 import * as sys from "./System/sys.js"
 import * as vMath from "../glMatrix/gl-matrix.js";
+import * as sim from "./GLExt/fluidsim.js"
 
 var gl = null;
 
@@ -231,6 +232,15 @@ export function main(){
 	txfbHdrMipBlur.setMinMagFilterLinearMipMapLinear();
 	//------------------------------------------------------------------------
 	
+	var fluidSim = new sim.FluidSim2D(200,200,
+		/* vertex, viscosity, advection, advection_correction,
+				divergence, pressure, divfree_velocity, display */
+		"simpleVS", "fluidsim_viscosity_shader", "fluidsim_advection_shader", "fluidsim_advection_correction_shader",
+		"fluidsim_divergence_shader", "fluidsim_pressure_shader", "fluidsim_divfree_velocity_shader", "fluidsim_display_shader"
+		);
+	fluidSim.setKinematicViscosity(1.0);
+	fluidSim.setDisplayType("_DEBUG_Display_Velocity");
+	
 	vMath.mat4.perspective(projectionMatrix, vMath.deg2rad(40.0), gl.viewportWidth/gl.viewportHeight, 0.1, 1000.0);
 	
 	vMath.mat4.lookAt(viewMatrix, eyePt, centerPt, upDir);
@@ -425,7 +435,18 @@ export function main(){
 		
 		if(bFluidSimPass == true)
 		{
+			fluidSim.SimStep(0.01);
 			
+			glext.Framebuffer.BindMainFB();	
+			gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);		
+			
+			gl.clearColor(0.0, 0.0, 0.0, 1.0);
+			gl.clearDepth(1.0);
+			gl.enable(gl.DEPTH_TEST);
+			gl.depthFunc(gl.LEQUAL);
+			gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+			
+			fluidSim.Display();
 		}
 		
 		if(false) //Render deferred_opaque_shade i transparent_shader
@@ -529,7 +550,7 @@ export function main(){
 			light.Update();
 		}
 		
-		if(true ) //Render volume_clouds_shader
+		if(true && bFluidSimPass == false) //Render volume_clouds_shader
 		{
 			glext.Framebuffer.BindMainFB();	
 			gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);		
