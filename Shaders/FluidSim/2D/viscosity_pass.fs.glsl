@@ -1,7 +1,7 @@
 #version 300 es
 // #extension GL_EXT_shader_texture_lod : require
 precision mediump float;
-//diffuzija zbog viscosity. output je brzina
+//diffuzija zbog viscosity. input je stara brzina, output je nova brzina
 
 #global_defines
 #include "defines"

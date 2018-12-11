@@ -1,6 +1,6 @@
 #version 300 es
 // #extension GL_EXT_shader_texture_lod : require
-//Advekcija brzine, (jedan pass), nakon ovog moze ici MacCormack korekcija, output je brzina
+//Advekcija brzine, (jedan pass), nakon ovog moze ici MacCormack korekcija. input je brzina nakon viscosity, output je advected brzina
 
 precision mediump float;
 

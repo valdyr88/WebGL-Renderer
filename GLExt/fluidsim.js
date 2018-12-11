@@ -100,23 +100,85 @@ export class FluidSim2D
 				Pressure_0,Pressure_1 : x float
 		*/
 		
-		this.txVelocity0 = new Texture(-1); txVelocity0.CreateEmptyRGBfloat32(this.width, this.height);
-		this.txVelocity1 = new Texture(-1); txVelocity1.CreateEmptyRGBfloat32(this.width, this.height);
-		this.txVelocity2 = new Texture(-1); txVelocity2.CreateEmptyRGBfloat32(this.width, this.height);
+		this.txVelocity0 = new Texture(-1); this.txVelocity0.CreateEmptyRGBfloat32(this.width, this.height);
+		this.txVelocity1 = new Texture(-1); this.txVelocity1.CreateEmptyRGBfloat32(this.width, this.height);
+		this.txVelocity2 = new Texture(-1); this.txVelocity2.CreateEmptyRGBfloat32(this.width, this.height);
 		
 		//ovo swappa 
-		this.txDivergentVelocity = this.txVelocity0;
+		this.txDiffusedVelocity = this.txVelocity0;
 		this.txAdvectedVelocity = this.txVelocity1;
 		this.txVelocity = this.txVelocity2;
+		this.txOldVelocity = this.txVelocity0;
 		
 		//ovo mozda optimizirat i strpat ove tri teksture kao komponente txAdvectedVelocity (ili one koja se ne koristi)?
-		this.txDivergence = new Texture(-1); txDivergence.CreateEmptyRfloat32(this.width, this.height);
-		this.txPressure0 = new Texture(-1); txPressure0.CreateEmptyRfloat32(this.width, this.height);
-		this.txPressure1 = new Texture(-1); txPressure1.CreateEmptyRfloat32(this.width, this.height);
-				
+		this.txDivergence = new Texture(-1); this.txDivergence.CreateEmptyRfloat32(this.width, this.height);
+		this.txPressure0 = new Texture(-1); this.txPressure0.CreateEmptyRfloat32(this.width, this.height);
+		this.txPressure1 = new Texture(-1); this.txPressure1.CreateEmptyRfloat32(this.width, this.height);
+		
+		this.txPressure = this.txPressure0;
+		this.txOldPressure = this.txPressure1;
 	}
 	
-	
+	SimStep(dT){
+		/* 
+		swap textura: velocity i pressure
+		viscosity pass: input je txOldVelocity, output je txDiffusedVelocity
+		force add pass -> zasad ne
+		advection pass: input je txDiffusedVelocity, output je txAdvectedVelocity
+		advection correction pass: input je txAdvectedVelocity, output je txAdvectedCorrectedVelocity
+		divergence pass na velocity: input je txAdvectedCorrectedVelocity, output je txDivergence
+		pressure calc pass: input je txDivergence i txOldPressure, output je txPressure
+		divergence free velocity pass: input je txPressure i txAdvectedCorrectedVelocity, output je txVelocity
+		display u mainu
+		*/
+		
+		//0. swap textura: velocity i pressure
+		{
+			var temp = this.txVelocity0;
+			this.txVelocity0 = this.txVelocity2;
+			this.txVelocity2 = temp;
+			
+			this.txOldVelocity = this.txVelocity0;
+			this.txOldPressure = this.txPressure0;
+		}
+		
+		//1. viscosity pass: input je txOldVelocity, output je txDiffusedVelocity
+		{
+			this.txDiffusedVelocity = this.txVelocity1;
+		
+		}
+		
+		//2. advection pass: input je txDiffusedVelocity, output je txAdvectedVelocity
+		{
+			this.txAdvectedVelocity = this.txVelocity2;
+		
+		}
+		
+		//3. advection correction pass: input je txAdvectedVelocity, output je txAdvectedCorrectedVelocity
+		{
+			this.txAdvectedCorrectedVelocity = this.txVelocity0;
+		
+		}
+		
+		//4. divergence pass na velocity: input je txAdvectedCorrectedVelocity, output je txDivergence
+		{
+			this.txDivergence;
+		
+		}
+		
+		//5. pressure calc pass: input je txDivergence i txOldPressure, output je txPressure
+		{
+			this.txPressure = this.txPressure1;
+		
+		}
+		
+		//6. divergence free velocity pass: input je txPressure i txAdvectedCorrectedVelocity, output je txVelocity
+		{
+			this.txVelocity = this.txVelocity2;
+		
+		}
+		
+	}
 }
 
 
