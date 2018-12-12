@@ -622,6 +622,10 @@ export function FluidSimSetKinematicViscosity(element_id){
 	var value = parseFloat(obj.value);
 	gFluidSim.setKinematicViscosity(value);
 }
+export function FluidSimReset(){
+	if(gFluidSim == null) return;
+	gFluidSim.ClearBuffers();
+}
 
 function RenderModels(fbo, bClearFBO, time, camera, models){
 	

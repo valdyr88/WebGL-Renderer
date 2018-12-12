@@ -129,6 +129,7 @@
 				<option value="_DEBUG_Display_Divergence">Display_Divergence</option>
 			</select>
 		</div>
+			<button id="reset_fluidsim", onclick="on_fluidsim_reset()"  style="transform: translate(100%, -15%);">Reset FluidSim</button>
 	</div>
 	
 	<div style="background-color:#0055ff">
@@ -138,7 +139,7 @@
 	</div>
 	
   <script type="module">
-	import { main, recompileShader, reloadTexture, onShaderDefineChanged, SetAutoQualitySelection, ReloadFluidSimShaders, FluidSimDisplayChanged, FluidSimSetKinematicViscosity } from "./main_volumetric.js";
+	import { main, recompileShader, reloadTexture, onShaderDefineChanged, SetAutoQualitySelection, ReloadFluidSimShaders, FluidSimDisplayChanged, FluidSimSetKinematicViscosity, FluidSimReset } from "./main_volumetric.js";
 	import { fetchImage } from "./GLExt/glTexture.js";
 	function wait(ms){ const start = performance.now(); while(performance.now() - start < ms); }
 	
@@ -314,6 +315,10 @@
 	
 	window.on_kinematic_viscosity_changed = function on_kinematic_viscosity_changed(id){
 		FluidSimSetKinematicViscosity(id);
+	}
+	
+	window.on_fluidsim_reset = function on_fluidsim_reset(){
+		FluidSimReset();
 	}
 	
   </script>
