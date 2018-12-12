@@ -15,7 +15,7 @@ export class FluidSim2D
 		
 		this.width = w;
 		this.height = h;
-		this.aspect = w / h;
+		this.aspect = (w / h) / w;
 		
 		this.viscosity_shader = new Shader(-1);
 		this.viscosity_shader.addDefine("","");
@@ -148,7 +148,7 @@ export class FluidSim2D
 		this.txPressure = this.txPressure0;
 		this.txOldPressure = this.txPressure1;
 		
-		this.txDepth = new Texture(-1); this.txDepth.CreateEmptyDepthfloat(this.width, this.height);
+		// this.txDepth = new Texture(-1); this.txDepth.CreateEmptyDepthfloat(this.width, this.height);
 		
 		TextureList.addTexture(this.txVelocity0);
 		TextureList.addTexture(this.txVelocity1);
@@ -156,11 +156,18 @@ export class FluidSim2D
 		TextureList.addTexture(this.txDivergence);
 		TextureList.addTexture(this.txPressure0);
 		TextureList.addTexture(this.txPressure1);
-		TextureList.addTexture(this.txDepth);
+		// TextureList.addTexture(this.txDepth);
+		
+		this.txVelocity0.setMinMagFilterLinearLinear();
+		this.txVelocity1.setMinMagFilterLinearLinear();
+		this.txVelocity2.setMinMagFilterLinearLinear();
+		this.txDivergence.setMinMagFilterLinearLinear();
+		this.txPressure0.setMinMagFilterLinearLinear();
+		this.txPressure1.setMinMagFilterLinearLinear();
 		
 		//framebuffer
 		this.framebuffer = new Framebuffer(false); this.framebuffer.Create();
-		this.framebuffer.AttachDepth(this.txDepth);
+		// this.framebuffer.AttachDepth(this.txDepth);
 		
 		this.kinematicViscosity = 1.0;
 		
@@ -173,8 +180,8 @@ export class FluidSim2D
 	{
 		var oldFB = gl.currentFramebuffer;
 		this.framebuffer.Bind();
-		this.framebuffer.AttachDepth(this.txDepth);
-		this.framebuffer.CheckStatus();
+		// this.framebuffer.AttachDepth(this.txDepth);
+		// this.framebuffer.CheckStatus();
 		
 		gl.viewport(0, 0, this.width, this.height);
 		
@@ -271,7 +278,7 @@ export class FluidSim2D
 				this.quad_model.RenderIndexedTriangles(this.advection_shader);
 		}
 		
-		//3. advection correction pass: input je txAdvectedVelocity, output je txAdvectedCorrectedVelocity
+		//3. advection correction pass: input je txAdvectedVelocity i txDiffusedVelocity, output je txAdvectedCorrectedVelocity
 		{
 			this.txAdvectedCorrectedVelocity = this.txVelocity0;
 			this.framebuffer.AttachTexture(this.txAdvectedCorrectedVelocity, 0);
@@ -335,8 +342,8 @@ export class FluidSim2D
 		
 		this.display_shader.Bind();
 			this.txPressure.Bind(0, this.display_shader.ULTexturePressure);
-			this.txDivergence.Bind(1, this.display_shader.ULTextureVelocity);
-			this.txVelocity.Bind(2, this.display_shader.ULTextureDivergence);
+			this.txVelocity.Bind(1, this.display_shader.ULTextureVelocity);
+			this.txDivergence.Bind(2, this.display_shader.ULTextureDivergence);
 			this.display_shader.setFloatUniform( this.display_shader.ULdT, this.dt);
 			this.display_shader.setFloatUniform( this.display_shader.ULaspect, this.aspect);
 			this.display_shader.setFloatUniform( this.display_shader.ULk, this.kinematicViscosity);
@@ -425,7 +432,8 @@ export class FluidSim2D
 		this.divfree_velocity_shader.ULTexturePressure = this.divfree_velocity_shader.getUniformLocation("txPressure");
 		this.divfree_velocity_shader.ULTextureVelocity = this.divfree_velocity_shader.getUniformLocation("txVelocity");
 		
-		this.display_shader.addDefine("_DEBUG_Display_Velocity","");
+		this.display_shader.RemoveAllDefines();
+		this.display_shader.addDefine(this.strDisplayType,"");
 		if(this.display_shader.Recompile(false) == false) alert("nije kompajliran shader!");
 		this.display_shader.InitDefaultAttribLocations();
 		this.display_shader.InitDefaultUniformLocations();

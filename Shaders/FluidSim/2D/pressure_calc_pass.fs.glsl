@@ -68,6 +68,6 @@ void main(void)
 	ps[3] = samplePoint(txPressure, size, x + vec2(0.0,-dx.y)).PressureComp;
 	
 	float pnew = p + (divu - (ps[0] + ps[1] + ps[2] + ps[3] - 4.0*p));
-	
+		
 	out_FragColor = pnew;
 }

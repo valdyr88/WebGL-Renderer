@@ -66,7 +66,7 @@ void main(void)
 	
 	#if defined(_DEBUG_Display_Velocity)	
 		vec4 v = texture2D(txVelocity, TexCoords);
-		rtn.xyz = (1000.0*v.xyz)*0.5f + 0.5f;
+		rtn.xyz = (1.0*v.xyz)*0.5f + 0.5f;
 		
 	#elif defined(_DEBUG_Display_Pressure)
 		float p = texture2D(txPressure, TexCoords).x;
@@ -78,7 +78,7 @@ void main(void)
 		
 	#endif
 	
-	rtn.a = 1.0;
+	rtn.a = 1.0; 
 	
 	out_FragColor = rtn;
 }

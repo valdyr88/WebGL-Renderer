@@ -50,10 +50,9 @@ vec4 velocityFromAdditionalForces(vec2 x, float t, float dt){
 	vec2 tc = toTexSpace(x);
 	
 	if( (tc.x > 0.1 && tc.x < 0.2) && (tc.y > 0.1 && tc.y < 0.9) ){
-		return dt*2000.0*vec4(sin(t), cos(t), 0.0, 0.0);
+		return tovec4(dt*200.0*vec3(1.0, cos(t), 0.2), 1.0);
 	}
-	
-	return vec4(0.0,0.0,0.0,0.0);
+	return vec4(0.0,0.0,0.0,1.0);
 }
 
 //racuna diffuziju zbog viscosity

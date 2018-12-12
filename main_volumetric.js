@@ -614,6 +614,14 @@ export function FluidSimDisplayChanged(select_element_id, default_value, additio
 	var setting = select_element.value;
 	gFluidSim.setDisplayType(setting);
 }
+export function FluidSimSetKinematicViscosity(element_id){
+	if(gFluidSim == null) return;
+	var obj = document.getElementById(element_id);
+	if(obj == null) return;
+	
+	var value = parseFloat(obj.value);
+	gFluidSim.setKinematicViscosity(value);
+}
 
 function RenderModels(fbo, bClearFBO, time, camera, models){
 	

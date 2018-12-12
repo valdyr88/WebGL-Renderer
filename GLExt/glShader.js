@@ -446,6 +446,9 @@ export class Shader
 	RemoveDefine(name){
 		this.defines.RemoveDefine(name);
 	}
+	RemoveAllDefines(){
+		this.defines = new ShaderDefines();		
+	}
 	
 	setVertexAttribLocations(position, normal, tangent, binormal, texture){
 		

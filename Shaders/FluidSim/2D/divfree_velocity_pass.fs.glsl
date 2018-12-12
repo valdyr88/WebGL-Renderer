@@ -75,5 +75,6 @@ void main(void)
 	
 	vec4 u = oldU - gradP;
 	
+	u.a = 1.0;
 	gl_FragColor = u;
 }

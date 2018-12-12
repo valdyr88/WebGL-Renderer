@@ -138,7 +138,7 @@
 	</div>
 	
   <script type="module">
-	import { main, recompileShader, reloadTexture, onShaderDefineChanged, SetAutoQualitySelection, ReloadFluidSimShaders, FluidSimDisplayChanged } from "./main_volumetric.js";
+	import { main, recompileShader, reloadTexture, onShaderDefineChanged, SetAutoQualitySelection, ReloadFluidSimShaders, FluidSimDisplayChanged, FluidSimSetKinematicViscosity } from "./main_volumetric.js";
 	import { fetchImage } from "./GLExt/glTexture.js";
 	function wait(ms){ const start = performance.now(); while(performance.now() - start < ms); }
 	
@@ -312,8 +312,13 @@
 		FluidSimDisplayChanged(select_element_id, default_value, additional_define);
 	}
 	
+	window.on_kinematic_viscosity_changed = function on_kinematic_viscosity_changed(id){
+		FluidSimSetKinematicViscosity(id);
+	}
+	
   </script>
   
+  <textarea id="kinematic_viscosity" style="width:48px; height:16px;" onchange="on_kinematic_viscosity_changed('kinematic_viscosity')"> 1.0 </textarea>
   <textarea id="debug_text" style="display: none"> </textarea>
   
 </body>
