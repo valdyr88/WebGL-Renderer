@@ -38,6 +38,7 @@
   <script id="volume_clouds_shader" src="./Shaders/volume_clouds_shader.fs.glsl" type="shader/fragment"></script>
   <script id="volume_clouds_vs" src="./Shaders/volume_clouds_shader.vs.glsl" type="shader/vertex"></script>
   
+  <script id="fluidsim_quad_surface_shader" src="./Shaders/FluidSim/2D/quad_surface.vs.glsl" type="shader/vertex"></script>
   <script id="fluidsim_viscosity_shader" src="./Shaders/FluidSim/2D/viscosity_pass.fs.glsl" type="shader/fragment"></script>
   <script id="fluidsim_advection_shader" src="./Shaders/FluidSim/2D/advection_pass.fs.glsl" type="shader/fragment"></script>
   <script id="fluidsim_advection_correction_shader" src="./Shaders/FluidSim/2D/advection_correction_pass.fs.glsl" type="shader/fragment"></script>
@@ -141,10 +142,12 @@
 	import { fetchImage } from "./GLExt/glTexture.js";
 	function wait(ms){ const start = performance.now(); while(performance.now() - start < ms); }
 	
-	var extern_files_list = ["functions", "structs", "pbr", "defines", "sdfunctions", "ubCamera", "ubLight", "ubMaterial", "ubModel", "simpleVS", "simpleFS", "pbr_shader", "skybox_shader", "backbuffer_shader", "SphereModel", "deferred_opaque_shade", "deferred_BcNAoRSMt", "deferred_skybox", "transparent_shader", "atmosphere_shader", "volume_clouds_shader", "volume_clouds_vs", "navigatorModel", "mipmapVS", "3x3MipGenFS",
-							 "fluidsim_viscosity_shader", "fluidsim_advection_shader", "fluidsim_advection_correction_shader",
-							 "fluidsim_divergence_shader", "fluidsim_pressure_shader", "fluidsim_divfree_velocity_shader", "fluidsim_display_shader"
+	var extern_files_list = ["functions", "structs", "pbr", "defines", "sdfunctions", "ubCamera", "ubLight", "ubMaterial", "ubModel", 
+							"simpleVS", "simpleFS", "pbr_shader", "skybox_shader", "backbuffer_shader", "SphereModel", "deferred_opaque_shade", "deferred_BcNAoRSMt", "deferred_skybox", "transparent_shader", 
+							"atmosphere_shader", "volume_clouds_shader", "volume_clouds_vs", "navigatorModel", "mipmapVS", "3x3MipGenFS",
 							];//, "tx128"
+	var fluidsim_shader_files_list = ["fluidsim_quad_surface_shader", "fluidsim_viscosity_shader", "fluidsim_advection_shader", "fluidsim_advection_correction_shader",
+							 "fluidsim_divergence_shader", "fluidsim_pressure_shader", "fluidsim_divfree_velocity_shader", "fluidsim_display_shader"];
 	var extern_files_loaded_number = 0;
 		
 	function onExternFileLoadFinish(){
@@ -187,7 +190,11 @@
 		}
 	}
 	
-	function loadAllExternFiles(){
+	function loadAllExternFiles()
+	{
+		//dodajemo fileove sa odvojene liste
+		extern_files_list = extern_files_list.concat(fluidsim_shader_files_list);
+		
 		extern_files_loaded_number = 0;
 		for(var i = 0; i < extern_files_list.length; ++i){
 			fetchAndStore(extern_files_list[i]);
@@ -203,6 +210,33 @@
 			main(); }
 		else{
 			setTimeout(delayedMain,1000); }
+	}
+	
+	function fetchTextFile(obj, callback){
+		if(typeof obj === 'string'){
+			var id = obj;
+			obj = document.getElementById(id);
+			if(obj == null) alert("fetchTextFile() obj == null, id == " + id);
+			if(typeof obj.type === 'undefined' || obj.type == null)
+				extractTypeFromOuterHTML(obj);
+		}
+		
+		var header = new Headers();
+		header.append('pragma', 'no-cache');
+		header.append('cache-control', 'no-cache');
+		
+		var init = { method: 'GET', headers: header, };
+		
+		fetch(obj.src, init).then(
+			function(response){
+				response.text().then(
+					function(text){
+						obj.text = text;
+						callback(obj.id);
+					}
+				);
+			}
+		);	
 	}
 	
 	window.reload_shader = function reload_shader(id){
@@ -260,7 +294,18 @@
 	}
 	
 	window.reload_fluidsim_shader = function reload_fluidsim_shader(){
-		ReloadFluidSimShaders();
+		var reload_count = 0;
+		
+		for(var i = 0; i < fluidsim_shader_files_list.length; ++i){
+			fetchTextFile(fluidsim_shader_files_list[i], 
+					function(id){
+						++reload_count;
+						if(reload_count == fluidsim_shader_files_list.length){
+							ReloadFluidSimShaders();
+						}				
+					}
+			);
+		}
 	}
 	
 	window.on_fluidsim_shader_define_changed = function on_fluidsim_shader_define_changed(select_element_id, default_value, additional_define){

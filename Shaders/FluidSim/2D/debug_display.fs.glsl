@@ -68,15 +68,13 @@ void main(void)
 		vec4 v = texture2D(txVelocity, TexCoords);
 		rtn.xyz = (1000.0*v.xyz)*0.5f + 0.5f;
 		
-		rtn.xyz = vec3(0.0,1.0,0.0);
-		
 	#elif defined(_DEBUG_Display_Pressure)
 		float p = texture2D(txPressure, TexCoords).x;
-		rtn.xyz = p;
+		rtn.xyz = vec3(p);
 		
 	#elif defined(_DEBUG_Display_Divergence)
 		float div = texture2D(txVelocityDivergence, TexCoords).x;
-		rtn.xyz = div;
+		rtn.xyz = vec3(div);
 		
 	#endif
 	

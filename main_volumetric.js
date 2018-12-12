@@ -239,7 +239,7 @@ export function main(){
 	var fluidSim = new sim.FluidSim2D(200,200,
 		/* vertex, viscosity, advection, advection_correction,
 				divergence, pressure, divfree_velocity, display */
-		"simpleVS", "fluidsim_viscosity_shader", "fluidsim_advection_shader", "fluidsim_advection_correction_shader",
+		"fluidsim_quad_surface_shader", "fluidsim_viscosity_shader", "fluidsim_advection_shader", "fluidsim_advection_correction_shader",
 		"fluidsim_divergence_shader", "fluidsim_pressure_shader", "fluidsim_divfree_velocity_shader", "fluidsim_display_shader"
 		);
 	fluidSim.setKinematicViscosity(1.0);

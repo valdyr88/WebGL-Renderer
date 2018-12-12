@@ -702,6 +702,7 @@ export class Shader
 		if(this.program == null) return null;
 		var rtn = gl.getUniformLocation(this.program, UniformName);
 		if(rtn == null) return -1;
+		return rtn;
 	}
 	getAttribLocation(AttribLocation){
 		if(this.program == null) return null;
