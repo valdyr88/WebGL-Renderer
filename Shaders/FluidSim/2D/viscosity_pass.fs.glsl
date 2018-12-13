@@ -36,11 +36,18 @@ varyin vec2 TexCoords;
 #include "fluidsim2d_include"
 
 vec4 velocityFromAdditionalForces(vec2 x, float t, float dt){
-	vec2 tc = toTexSpace(x);
+	// vec2 tc = toTexSpace(x);
+	vec2 tc = TexCoords;
 	
-	if( (tc.x > 0.1 && tc.x < 0.2) && (tc.y > 0.4 && tc.y < 0.6) ){
-		return tovec4(dt*1.0*vec3(sin(t), cos(t), 0.2), 1.0);
-	}
+	/* if( (tc.x > 0.1 && tc.x < 0.2) && (tc.y > 0.4 && tc.y < 0.6) ){
+		return tovec4(dt*50.0*vec3(sin(t), cos(t), 0.2), 1.0);
+	} */
+	
+	tc.y += 0.25*cos(t)+0.5;
+		
+	if( (tc.x > 0.0 && tc.x < 0.05) && (tc.y > 0.2 && tc.y < 0.4) )
+		return tovec4(dt*5.0*vec3(1.0,0.0,0.0), 1.0);
+	
 	return vec4(0.0,0.0,0.0,1.0);
 }
 
@@ -67,6 +74,7 @@ void main(void)
 	//dodatne sile
 	unew += velocityFromAdditionalForces(x, Time, dT);
 	//
+	if(isAtBorder(x)) unew = u;
 	
 	gl_FragColor = unew;
 	gl_FragColor.a = 1.0;

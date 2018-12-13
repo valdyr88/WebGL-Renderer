@@ -15,4 +15,10 @@ vec4 sampleLinear(sampler2D tx, vec2 x){
 	return texture2DLod(tx, toTexSpace(x), 0.0);
 }
 
+bool isAtBorder(vec2 x){
+	if(int(x.x) <= 0 || int(x.y) <= 0 || int(x.x) >= int(Resolution.x) || int(x.y) >= int(Resolution.y))
+		return true;
+	return false;
+}
+
 #endif //GLSL_FLUIDSIM2D_INCLUDE

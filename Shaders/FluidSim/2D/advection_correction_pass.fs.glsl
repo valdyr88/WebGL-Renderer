@@ -72,6 +72,8 @@ void main(void)
 	vec4 vMin, vMax; getMinMaxNearestNeighborValues(txVelocity, x, vMin, vMax);
 	urtn = max(min(urtn, vMax), vMin);
 	
+	if(isAtBorder(x)) urtn = uadv;
+	
 	gl_FragColor = urtn;
 	gl_FragColor.a = 1.0;
 }

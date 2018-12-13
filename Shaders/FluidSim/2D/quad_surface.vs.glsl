@@ -44,5 +44,5 @@ void main(void)
 	Tangent = normalize((ModelMatrix * vec4(aVertexTangent,0.0))).xyz;
 	Bitangent = normalize(cross(Tangent, Normal));
 	
-	TexCoords = vec2(aTexCoords.x, 1.0-aTexCoords.y);
+	TexCoords = vec2(aTexCoords.x, aTexCoords.y);
 }

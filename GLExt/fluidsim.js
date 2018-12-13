@@ -168,6 +168,13 @@ export class FluidSim2D
 		this.txPressure0.setMinMagFilterLinearLinear();
 		this.txPressure1.setMinMagFilterLinearLinear();
 		
+		this.txVelocity0.setWrapTypeClampToEdge();
+		this.txVelocity1.setWrapTypeClampToEdge();
+		this.txVelocity2.setWrapTypeClampToEdge();
+		this.txDivergence.setWrapTypeClampToEdge();
+		this.txPressure0.setWrapTypeClampToEdge();
+		this.txPressure1.setWrapTypeClampToEdge();
+		
 		//framebuffer
 		this.framebuffer = new Framebuffer(false); this.framebuffer.Create();
 		// this.framebuffer.AttachDepth(this.txDepth);

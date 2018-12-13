@@ -46,6 +46,8 @@ void main(void)
 {	
 	vec2 x = toWorldSpace(TexCoords);
 	vec4 uadv = advect(txVelocity, x, dT);
+		
+	if(isAtBorder(x)) uadv = samplePoint(txVelocity, x);
 	
 	gl_FragColor = uadv;
 	gl_FragColor.a = 1.0;
