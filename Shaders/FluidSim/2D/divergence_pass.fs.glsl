@@ -57,7 +57,5 @@ void main(void)
 	
 	float udiv = divergence(txTexture, x);
 	
-	if(isAtBorder(x)) udiv = 0.0;
-	
 	gl_FragColor = udiv;
 }
