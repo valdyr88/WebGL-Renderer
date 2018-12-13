@@ -17,16 +17,15 @@ export function main(){
 	var gs = sys.storage.GlobalStorage.getSingleton();
 	sys.mouse.InitMouse(document);
 	sys.keyboard.InitKeyboard(document);
-	
-	//glext.isWGL2 && 
-	
+		
 	gl = glext.glInit("glcanvas");
+	if(gl == null) return;
+	
 		 if(gl.isWGL2 == false && glext.glEnableExtension('OES_texture_float') == false) alert("no extension: OES_texture_float");
 		 if(gl.isWGL2 == false && glext.glEnableExtension('EXT_shader_texture_lod') == false) alert("no extension: EXT_shader_texture_lod");
 		 if(glext.glEnableExtension('EXT_color_buffer_float') == false) alert("no extension: EXT_color_buffer_float");
 		 if(glext.glEnableExtension('OES_texture_float_linear') == false) alert("no extension: OES_texture_float_linear");
-	if(gl == null) return;
-	
+		
 	glext.InitDebugTextDOM("debug_text");
 			
 	gl.clearColor(0.0, 1.0, 1.0, 1.0);
