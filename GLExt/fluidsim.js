@@ -15,7 +15,8 @@ export class FluidSim2D
 		
 		this.width = w;
 		this.height = h;
-		this.aspect = (w / h) / w;
+		// this.aspect = (w / h) / w;
+		this.aspect = [1.0 / w, 1.0 / h];
 		
 		this.viscosity_shader = new Shader(-1);
 		this.viscosity_shader.addDefine("","");
@@ -259,7 +260,7 @@ export class FluidSim2D
 				this.txOldVelocity.Bind(0, this.viscosity_shader.ULTextureVelocity);
 				this.viscosity_shader.setFloatUniform( this.viscosity_shader.ULdT, dT);
 				this.viscosity_shader.setFloatUniform( this.viscosity_shader.ULk, this.kinematicViscosity);
-				this.viscosity_shader.setFloatUniform( this.viscosity_shader.ULaspect, this.aspect );
+				this.viscosity_shader.setFloat2Uniform( this.viscosity_shader.ULaspect, this.aspect );
 				this.viscosity_shader.setFloatUniform( this.viscosity_shader.ULTime, this.time);
 				
 				this.quad_model.RenderIndexedTriangles(this.viscosity_shader);	
@@ -273,7 +274,7 @@ export class FluidSim2D
 			this.advection_shader.Bind();
 				this.txDiffusedVelocity.Bind(0, this.advection_shader.ULTextureVelocity);
 				this.advection_shader.setFloatUniform( this.advection_shader.ULdT, dT);
-				this.advection_shader.setFloatUniform( this.advection_shader.ULaspect, this.aspect);
+				this.advection_shader.setFloat2Uniform( this.advection_shader.ULaspect, this.aspect);
 				
 				this.quad_model.RenderIndexedTriangles(this.advection_shader);
 		}
@@ -287,7 +288,7 @@ export class FluidSim2D
 				this.txAdvectedVelocity.Bind(0, this.advection_correction_shader.ULTextureAdvectedVelocity);
 				this.txDiffusedVelocity.Bind(1, this.advection_correction_shader.ULTextureVelocity);
 				this.advection_correction_shader.setFloatUniform( this.advection_correction_shader.ULdT, dT);
-				this.advection_correction_shader.setFloatUniform( this.advection_correction_shader.ULaspect, this.aspect);
+				this.advection_correction_shader.setFloat2Uniform( this.advection_correction_shader.ULaspect, this.aspect);
 				
 				this.quad_model.RenderIndexedTriangles(this.advection_correction_shader);
 		}
@@ -300,7 +301,7 @@ export class FluidSim2D
 			this.divergence_shader.Bind();
 				this.txAdvectedCorrectedVelocity.Bind(0, this.divergence_shader.ULTexture);
 				this.divergence_shader.setFloatUniform( this.divergence_shader.ULdT, dT);
-				this.divergence_shader.setFloatUniform( this.divergence_shader.ULaspect, this.aspect);
+				this.divergence_shader.setFloat2Uniform( this.divergence_shader.ULaspect, this.aspect);
 				
 				this.quad_model.RenderIndexedTriangles(this.divergence_shader);
 		}
@@ -314,7 +315,7 @@ export class FluidSim2D
 				this.txDivergence.Bind(0, this.pressure_shader.ULTextureDivergence);
 				this.txOldPressure.Bind(1, this.pressure_shader.ULTexturePressure);
 				this.pressure_shader.setFloatUniform( this.pressure_shader.ULdT, dT);
-				this.pressure_shader.setFloatUniform( this.pressure_shader.ULaspect, this.aspect);
+				this.pressure_shader.setFloat2Uniform( this.pressure_shader.ULaspect, this.aspect);
 				
 				this.quad_model.RenderIndexedTriangles(this.pressure_shader);
 		}
@@ -328,7 +329,7 @@ export class FluidSim2D
 				this.txPressure.Bind(0, this.divfree_velocity_shader.ULTexturePressure);
 				this.txAdvectedCorrectedVelocity.Bind(1, this.divfree_velocity_shader.ULTextureVelocity);
 				this.divfree_velocity_shader.setFloatUniform( this.divfree_velocity_shader.ULdT, dT);
-				this.divfree_velocity_shader.setFloatUniform( this.divfree_velocity_shader.ULaspect, this.aspect);
+				this.divfree_velocity_shader.setFloat2Uniform( this.divfree_velocity_shader.ULaspect, this.aspect);
 				
 				this.quad_model.RenderIndexedTriangles(this.divfree_velocity_shader);
 		}
@@ -345,7 +346,7 @@ export class FluidSim2D
 			this.txVelocity.Bind(1, this.display_shader.ULTextureVelocity);
 			this.txDivergence.Bind(2, this.display_shader.ULTextureDivergence);
 			this.display_shader.setFloatUniform( this.display_shader.ULdT, this.dt);
-			this.display_shader.setFloatUniform( this.display_shader.ULaspect, this.aspect);
+			this.display_shader.setFloat2Uniform( this.display_shader.ULaspect, this.aspect);
 			this.display_shader.setFloatUniform( this.display_shader.ULk, this.kinematicViscosity);
 				
 			this.quad_model.RenderIndexedTriangles(this.display_shader);

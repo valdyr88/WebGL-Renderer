@@ -20,6 +20,7 @@ precision mediump float;
 	#define texture2D texture
 	#define textureCube texture
 	#define textureCubeLod textureLod
+	#define texture2DLod textureLod
 #endif
 
 uniform vec2 aspect; //odnos dimenzija teksture i svijeta
@@ -44,9 +45,8 @@ vec4 samplePoint(sampler2D tx, ivec2 txSize, vec2 x){
 	return texelFetch(tx, ivec2(toTexSpace(x)*vec2(txSize)),0);
 }
 vec4 sampleLinear(sampler2D tx, vec2 x){
-	return texture2D(tx, toTexSpace(x));
+	return texture2DLod(tx, toTexSpace(x), 0.0);
 }
-
 
 vec4 advectReverse(sampler2D u, vec2 x, float dt){
 	vec4 uadv = samplePoint(u, x); //sample point
@@ -67,4 +67,5 @@ void main(void)
 	//treba clampat urtn ovdje!
 	
 	gl_FragColor = urtn;
+	gl_FragColor.a = 1.0;
 }

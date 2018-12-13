@@ -19,6 +19,7 @@ precision mediump float;
 	#define texture2D texture
 	#define textureCube texture
 	#define textureCubeLod textureLod
+	#define texture2DLod textureLod
 #endif
 
 uniform vec2 aspect; //odnos dimenzija teksture i svijeta
@@ -45,7 +46,7 @@ vec4 samplePoint(sampler2D tx, ivec2 txSize, vec2 x){
 	return texelFetch(tx, ivec2(toTexSpace(x)*vec2(txSize)),0);
 }
 vec4 sampleLinear(sampler2D tx, vec2 x){
-	return texture2D(tx, toTexSpace(x));
+	return texture2DLod(tx, toTexSpace(x), 0.0);
 }
 
 //racuna pressure
@@ -67,7 +68,8 @@ void main(void)
 	ps[2] = samplePoint(txPressure, size, x + vec2(0.0, dx.y)).PressureComp;
 	ps[3] = samplePoint(txPressure, size, x + vec2(0.0,-dx.y)).PressureComp;
 	
-	float pnew = p + (divu - (ps[0] + ps[1] + ps[2] + ps[3] - 4.0*p));
+	// float pnew = p + (divu - (ps[0] + ps[1] + ps[2] + ps[3] - 4.0*p));
+	float pnew = (ps[0] + ps[1] + ps[2] + ps[3] - divu) / 4.0;
 		
 	out_FragColor = pnew;
 }
