@@ -17,9 +17,10 @@ export class FluidSim2D
 		this.height = h;
 		// this.aspect = (w / h) / w;
 		this.aspect = [1.0 / w, 1.0 / h];
+		this.str_vec2Res = "vec2(" + w.toString()+ ".0," + h.toString() + ".0)"
 		
 		this.viscosity_shader = new Shader(-1);
-		this.viscosity_shader.addDefine("","");
+		this.viscosity_shader.addDefine("Resolution",this.str_vec2Res);
 		if(this.viscosity_shader.CompileFromFile(vertex, viscosity) == false) alert("nije kompajliran shader!");
 		this.viscosity_shader.InitDefaultAttribLocations();
 		this.viscosity_shader.InitDefaultUniformLocations();
@@ -33,7 +34,7 @@ export class FluidSim2D
 		this.viscosity_shader.ULTextureVelocity = this.viscosity_shader.getUniformLocation("txVelocity");
 				
 		this.advection_shader = new Shader(-1);
-		this.advection_shader.addDefine("","");
+		this.advection_shader.addDefine("Resolution",this.str_vec2Res);
 		if(this.advection_shader.CompileFromFile(vertex, advection) == false) alert("nije kompajliran shader!");
 		this.advection_shader.InitDefaultAttribLocations();
 		this.advection_shader.InitDefaultUniformLocations();
@@ -45,7 +46,7 @@ export class FluidSim2D
 		this.advection_shader.ULTextureVelocity = this.advection_shader.getUniformLocation("txVelocity");
 				
 		this.advection_correction_shader = new Shader(-1);
-		this.advection_correction_shader.addDefine("","");
+		this.advection_correction_shader.addDefine("Resolution",this.str_vec2Res);
 		if(this.advection_correction_shader.CompileFromFile(vertex, advection_correction) == false) alert("nije kompajliran shader!");
 		this.advection_correction_shader.InitDefaultAttribLocations();
 		this.advection_correction_shader.InitDefaultUniformLocations();
@@ -59,7 +60,7 @@ export class FluidSim2D
 		this.advection_correction_shader.ULTextureAdvectedVelocity = this.advection_correction_shader.getUniformLocation("txAdvectedVelocity");
 				
 		this.divergence_shader = new Shader(-1);
-		this.divergence_shader.addDefine("","");
+		this.divergence_shader.addDefine("Resolution",this.str_vec2Res);
 		if(this.divergence_shader.CompileFromFile(vertex, divergence) == false) alert("nije kompajliran shader!");
 		this.divergence_shader.InitDefaultAttribLocations();
 		this.divergence_shader.InitDefaultUniformLocations();
@@ -71,7 +72,7 @@ export class FluidSim2D
 		this.divergence_shader.ULTexture = this.divergence_shader.getUniformLocation("txTexture");
 				
 		this.pressure_shader = new Shader(-1);
-		this.pressure_shader.addDefine("","");
+		this.pressure_shader.addDefine("Resolution",this.str_vec2Res);
 		if(this.pressure_shader.CompileFromFile(vertex, pressure) == false) alert("nije kompajliran shader!");
 		this.pressure_shader.InitDefaultAttribLocations();
 		this.pressure_shader.InitDefaultUniformLocations();
@@ -85,7 +86,7 @@ export class FluidSim2D
 		this.pressure_shader.ULTextureDivergence = this.pressure_shader.getUniformLocation("txDivergence");
 				
 		this.divfree_velocity_shader = new Shader(-1);
-		this.divfree_velocity_shader.addDefine("","");
+		this.divfree_velocity_shader.addDefine("Resolution",this.str_vec2Res);
 		if(this.divfree_velocity_shader.CompileFromFile(vertex, divfree_velocity) == false) alert("nije kompajliran shader!");
 		this.divfree_velocity_shader.InitDefaultAttribLocations();
 		this.divfree_velocity_shader.InitDefaultUniformLocations();
@@ -100,6 +101,7 @@ export class FluidSim2D
 				
 		this.display_shader = new Shader(-1);
 		this.display_shader.addDefine("_DEBUG_Display_Velocity","");
+		this.display_shader.addDefine("Resolution",this.str_vec2Res);
 		if(this.display_shader.CompileFromFile(vertex, display) == false) alert("nije kompajliran shader!");
 		this.display_shader.InitDefaultAttribLocations();
 		this.display_shader.InitDefaultUniformLocations();
@@ -381,7 +383,7 @@ export class FluidSim2D
 	
 	RecompileShaders()
 	{
-		this.viscosity_shader.addDefine("","");
+		// this.viscosity_shader.addDefine("","");
 		if(this.viscosity_shader.Recompile(false) == false) alert("nije kompajliran shader!");
 		this.viscosity_shader.InitDefaultAttribLocations();
 		this.viscosity_shader.InitDefaultUniformLocations();
@@ -390,7 +392,7 @@ export class FluidSim2D
 		this.viscosity_shader.ULk = this.viscosity_shader.getUniformLocation("k");
 		this.viscosity_shader.ULTextureVelocity = this.viscosity_shader.getUniformLocation("txVelocity");
 		
-		this.advection_shader.addDefine("","");
+		// this.advection_shader.addDefine("","");
 		if(this.advection_shader.Recompile(false) == false) alert("nije kompajliran shader!");
 		this.advection_shader.InitDefaultAttribLocations();
 		this.advection_shader.InitDefaultUniformLocations();
@@ -398,7 +400,7 @@ export class FluidSim2D
 		this.advection_shader.ULdT = this.advection_shader.getUniformLocation("dT");
 		this.advection_shader.ULTextureVelocity = this.advection_shader.getUniformLocation("txVelocity");
 		
-		this.advection_correction_shader.addDefine("","");
+		// this.advection_correction_shader.addDefine("","");
 		if(this.advection_correction_shader.Recompile(false) == false) alert("nije kompajliran shader!");
 		this.advection_correction_shader.InitDefaultAttribLocations();
 		this.advection_correction_shader.InitDefaultUniformLocations();
@@ -407,7 +409,7 @@ export class FluidSim2D
 		this.advection_correction_shader.ULTextureVelocity = this.advection_correction_shader.getUniformLocation("txVelocity");
 		this.advection_correction_shader.ULTextureAdvectedVelocity = this.advection_correction_shader.getUniformLocation("txAdvectedVelocity");
 		
-		this.divergence_shader.addDefine("","");
+		// this.divergence_shader.addDefine("","");
 		if(this.divergence_shader.Recompile(false) == false) alert("nije kompajliran shader!");
 		this.divergence_shader.InitDefaultAttribLocations();
 		this.divergence_shader.InitDefaultUniformLocations();
@@ -415,7 +417,7 @@ export class FluidSim2D
 		this.divergence_shader.ULdT = this.divergence_shader.getUniformLocation("dT");
 		this.divergence_shader.ULTexture = this.divergence_shader.getUniformLocation("txTexture");
 		
-		this.pressure_shader.addDefine("","");
+		// this.pressure_shader.addDefine("","");
 		if(this.pressure_shader.Recompile(false) == false) alert("nije kompajliran shader!");
 		this.pressure_shader.InitDefaultAttribLocations();
 		this.pressure_shader.InitDefaultUniformLocations();
@@ -424,7 +426,7 @@ export class FluidSim2D
 		this.pressure_shader.ULTexturePressure = this.pressure_shader.getUniformLocation("txPressure");
 		this.pressure_shader.ULTextureDivergence = this.pressure_shader.getUniformLocation("txDivergence");
 		
-		this.divfree_velocity_shader.addDefine("","");
+		// this.divfree_velocity_shader.addDefine("","");
 		if(this.divfree_velocity_shader.Recompile(false) == false) alert("nije kompajliran shader!");
 		this.divfree_velocity_shader.InitDefaultAttribLocations();
 		this.divfree_velocity_shader.InitDefaultUniformLocations();
@@ -435,6 +437,7 @@ export class FluidSim2D
 		
 		this.display_shader.RemoveAllDefines();
 		this.display_shader.addDefine(this.strDisplayType,"");
+		this.display_shader.addDefine("Resolution",this.str_vec2Res);
 		if(this.display_shader.Recompile(false) == false) alert("nije kompajliran shader!");
 		this.display_shader.InitDefaultAttribLocations();
 		this.display_shader.InitDefaultUniformLocations();

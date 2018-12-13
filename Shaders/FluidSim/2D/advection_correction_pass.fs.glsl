@@ -34,19 +34,7 @@ uniform float dT;
 varyin vec2 TexCoords;
 //------------------------------------------------------------------------------
 
-vec2 toTexSpace(vec2 x){ return x*aspect; }
-vec2 toWorldSpace(vec2 x){ return x/aspect; }
-
-vec4 samplePoint(sampler2D tx, vec2 x){
-	ivec2 txSize = textureSize(tx, 0);
-	return texelFetch(tx, ivec2(toTexSpace(x)*vec2(txSize)),0); //sample point
-}
-vec4 samplePoint(sampler2D tx, ivec2 txSize, vec2 x){
-	return texelFetch(tx, ivec2(toTexSpace(x)*vec2(txSize)),0);
-}
-vec4 sampleLinear(sampler2D tx, vec2 x){
-	return texture2DLod(tx, toTexSpace(x), 0.0);
-}
+#include "fluidsim2d_include"
 
 vec4 advectReverse(sampler2D u, vec2 x, float dt){
 	vec4 uadv = samplePoint(u, x); //sample point

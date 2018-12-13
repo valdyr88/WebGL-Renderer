@@ -19,6 +19,7 @@ precision mediump float;
 	#define texture2D texture
 	#define textureCube texture
 	#define textureCubeLod textureLod
+	#define texture2DLod textureLod
 #endif
 
 uniform vec2 aspect; //odnos dimenzija teksture i svijeta
@@ -35,19 +36,7 @@ uniform sampler2D txVelocityDivergence;
 varyin vec2 TexCoords;
 //------------------------------------------------------------------------------
 
-vec2 toTexSpace(vec2 x){ return x*aspect; }
-vec2 toWorldSpace(vec2 x){ return x/aspect; }
-
-vec4 samplePoint(sampler2D tx, vec2 x){
-	ivec2 txSize = textureSize(tx, 0);
-	return texelFetch(tx, ivec2(toTexSpace(x)*vec2(txSize)),0); //sample point
-}
-vec4 samplePoint(sampler2D tx, ivec2 txSize, vec2 x){
-	return texelFetch(tx, ivec2(toTexSpace(x)*vec2(txSize)),0);
-}
-vec4 sampleLinear(sampler2D tx, vec2 x){
-	return texture2D(tx, toTexSpace(x));
-}
+#include "fluidsim2d_include"
 
 /* 
 	#define _DEBUG_Display_Velocity
@@ -70,11 +59,11 @@ void main(void)
 		
 	#elif defined(_DEBUG_Display_Pressure)
 		float p = texture2D(txPressure, TexCoords).x;
-		rtn.xyz = vec3(p);
+		rtn.xyz = vec3(p*0.5+0.5);
 		
 	#elif defined(_DEBUG_Display_Divergence)
 		float div = texture2D(txVelocityDivergence, TexCoords).x;
-		rtn.xyz = vec3(div);
+		rtn.xyz = vec3(div*0.5+0.5);
 		
 	#endif
 	
