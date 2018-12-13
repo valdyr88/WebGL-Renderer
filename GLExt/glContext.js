@@ -1,8 +1,8 @@
 
 var gl = null; // A global variable for the WebGL context
 var glContextName = "";
-var glExtensions = [];
-var isWGL2 = false;
+// var glExtensions = [];
+// var isWGL2 = false;
 var debug_text_dom = null;
 
 /*
@@ -26,12 +26,18 @@ function glInitWebGLContext(canvas){
 			gl.windowCanvas = canvas;
 			glContextName = contextNames[i];
 			gl.contextName = glContextName;
+			
+			if(glContextName == "webgl2")
+				gl.isWGL2 = true;
+			else
+				gl.isWGL2 = false;
 		
             gl.viewportWidth = canvas.width;
             gl.viewportHeight = canvas.height;
 			
 			gl.currentShaderProgram = -1;
 			gl.currentFramebuffer = -1;
+			gl.enabledExtensions = [];
 		}
 		catch(e){ continue; }
 		if(gl != null) break;
@@ -42,8 +48,8 @@ function glInitWebGLContext(canvas){
 		return null;
 	}
 	
-	if(glContextName == "webgl2")
-		isWGL2 = true;
+	// if(glContextName == "webgl2")
+		// isWGL2 = true;
 	
 	return gl;
 }
@@ -52,7 +58,7 @@ export function glEnableExtension(extension_name){
 	if(gl == null) return false;
 	var ext = gl.getExtension(extension_name);
 	if(ext == null) return false;
-	glExtensions[glExtensions.length] = ext;
+	gl.enabledExtensions[gl.enabledExtensions.length] = ext;
 }
 
 export function glPrintError(){
@@ -147,5 +153,5 @@ export function getContentsFromFile(id){
 		return source;
 	}
 
-export {gl, glContextName, glExtensions, isWGL2};
+export {gl, glContextName}; //isWGL2
 // export { glInit };

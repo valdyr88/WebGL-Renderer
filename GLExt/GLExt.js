@@ -1,5 +1,5 @@
 // import * as glsh from "./glShader.js";
-import { glInit, glEnableExtension, isWGL2, InitDebugTextDOM, WriteDebug, ResizeCanvas } from "./glContext.js"
+import { glInit, glEnableExtension, InitDebugTextDOM, WriteDebug, ResizeCanvas } from "./glContext.js"
 import { Shader, ShaderList, ShaderDefines } from "./glShader.js";
 import { Model, GenCubeModel, GenQuadModel, BlendMode, BlendModeColorAttachments } from "./glModel.js";
 import { BlendMode_AlphaBlend, BlendMode_Additive, BlendMode_SrcOverride, BlendMode_Default } from "./glModel.js";

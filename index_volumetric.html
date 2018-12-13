@@ -191,7 +191,7 @@
 		}
 	}
 	
-	function loadAllExternFiles()
+	function LoadAllExternFiles()
 	{
 		//dodajemo fileove sa odvojene liste
 		extern_files_list = extern_files_list.concat(fluidsim_shader_files_list);
@@ -202,9 +202,6 @@
 		}
 	}
 	
-	window.onload = function(){
-		loadAllExternFiles();
-	}
 	
 	function delayedMain(){
 		if(extern_files_loaded_number >= extern_files_list.length){
@@ -313,17 +310,40 @@
 		FluidSimDisplayChanged(select_element_id, default_value, additional_define);
 	}
 	
-	window.on_kinematic_viscosity_changed = function on_kinematic_viscosity_changed(id){
+	/*window.on_kinematic_viscosity_changed = function on_kinematic_viscosity_changed(id){
 		FluidSimSetKinematicViscosity(id);
+	}*/
+	
+	function InitKinematicViscosityEventListener(){
+		var obj = document.getElementById("kinematic_viscosity");
+		if(obj == null) return;
+		obj.addEventListener("keyup", function(event){
+				event.preventDefault();
+				if(event.keyCode === 13){//enter
+					FluidSimSetKinematicViscosity("kinematic_viscosity");
+				}
+			}
+		);
 	}
 	
 	window.on_fluidsim_reset = function on_fluidsim_reset(){
 		FluidSimReset();
 	}
+
+//-------------------------------------------------------------------------------------------
+//Window onload	
+//-------------------------------------------------------------------------------------------
+	window.onload = function(){
+		InitKinematicViscosityEventListener();
+		LoadAllExternFiles();
+	}
+//-------------------------------------------------------------------------------------------
 	
   </script>
   
-  <textarea id="kinematic_viscosity" style="width:48px; height:16px;" onchange="on_kinematic_viscosity_changed('kinematic_viscosity')"> 1.0 </textarea>
-  <textarea id="debug_text" style="display: none"> </textarea>
+  <!-- <textarea id="kinematic_viscosity" style="width:48px; height:16px;" onchange="on_kinematic_viscosity_changed('kinematic_viscosity')"> 1.0 </textarea> -->
+  <input id="kinematic_viscosity" style="width:48px; height:16px;" value="1.0"></input>
+  <br/>
+  <textarea id="debug_text" style="display: none; width:768px; height:2048px;"> </textarea>
   
 </body>

@@ -1,4 +1,4 @@
-import { gl, isWGL2 } from "./glContext.js";
+import { gl } from "./glContext.js";
 import { Model, GenCubeModel, GenQuadModel } from "./glModel.js";
 import { Texture, TextureCube, TextureList, CalcNofMipLevels, FormatFromInternalFormat, TypeFromInternalFormat } from "./glTexture.js"
 import { Shader, ShaderList } from "./glShader.js";

@@ -40,6 +40,7 @@
         <Folder name="Shaders">
 			<Folder name="FluidSim">
 				<Folder name="2D">
+					<File name="Shaders\FluidSim\2D\quad_surface.vs.glsl" />
 					<File name="Shaders\FluidSim\2D\viscosity_pass.fs.glsl" />
 					<File name="Shaders\FluidSim\2D\advection_pass.fs.glsl" />
 					<File name="Shaders\FluidSim\2D\advection_correction_pass.fs.glsl" />

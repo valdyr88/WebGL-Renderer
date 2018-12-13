@@ -1,4 +1,4 @@
-import { gl, isWGL2, glPrintError } from "./glContext.js";
+import { gl, glPrintError } from "./glContext.js";
 // import * as global from "./globalStorage.js"
 import * as sys from "./../System/sys.js"
 
@@ -553,11 +553,11 @@ export class TextureCube{
 		
 		gl.texParameteri(this.targetType, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
 		gl.texParameteri(this.targetType, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-		isWGL2 && gl.texParameteri(this.targetType, gl.TEXTURE_WRAP_R, gl.CLAMP_TO_EDGE);
-		(!isWGL2) && gl.texParameteri(this.targetType, gl.TEXTURE_MIN_FILTER, gl.NEAREST_MIPMAP_LINEAR); //LINEAR_MIPMAP_LINEAR
-		(!isWGL2) && gl.texParameteri(this.targetType, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
-		isWGL2 && gl.texParameteri(this.targetType, gl.TEXTURE_MIN_FILTER, gl.LINEAR); //LINEAR_MIPMAP_LINEAR
-		isWGL2 && gl.texParameteri(this.targetType, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+		gl.isWGL2 && gl.texParameteri(this.targetType, gl.TEXTURE_WRAP_R, gl.CLAMP_TO_EDGE);
+		(!gl.isWGL2) && gl.texParameteri(this.targetType, gl.TEXTURE_MIN_FILTER, gl.NEAREST_MIPMAP_LINEAR); //LINEAR_MIPMAP_LINEAR
+		(!gl.isWGL2) && gl.texParameteri(this.targetType, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+		gl.isWGL2 && gl.texParameteri(this.targetType, gl.TEXTURE_MIN_FILTER, gl.LINEAR); //LINEAR_MIPMAP_LINEAR
+		gl.isWGL2 && gl.texParameteri(this.targetType, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
 		
 		for(var i = 0; i < 6; ++i){
 			gl.texImage2D(gl.TEXTURE_CUBE_MAP_POSITIVE_X+i, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, tx[i]);
@@ -576,14 +576,14 @@ export class TextureCube{
 		
 		gl.texParameteri(this.targetType, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
 		gl.texParameteri(this.targetType, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-		isWGL2 && gl.texParameteri(this.targetType, gl.TEXTURE_WRAP_R, gl.CLAMP_TO_EDGE);
-		(!isWGL2) && gl.texParameteri(this.targetType, gl.TEXTURE_MIN_FILTER, gl.NEAREST_MIPMAP_LINEAR); //LINEAR_MIPMAP_LINEAR
-		(!isWGL2) && gl.texParameteri(this.targetType, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
-		isWGL2 && gl.texParameteri(this.targetType, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR); //LINEAR_MIPMAP_LINEAR
-		isWGL2 && gl.texParameteri(this.targetType, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+		gl.isWGL2 && gl.texParameteri(this.targetType, gl.TEXTURE_WRAP_R, gl.CLAMP_TO_EDGE);
+		(!gl.isWGL2) && gl.texParameteri(this.targetType, gl.TEXTURE_MIN_FILTER, gl.NEAREST_MIPMAP_LINEAR); //LINEAR_MIPMAP_LINEAR
+		(!gl.isWGL2) && gl.texParameteri(this.targetType, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+		gl.isWGL2 && gl.texParameteri(this.targetType, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR); //LINEAR_MIPMAP_LINEAR
+		gl.isWGL2 && gl.texParameteri(this.targetType, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
 		
 		var internal_format = format;
-		if(isWGL2 == true && datatype == gl.FLOAT){
+		if(gl.isWGL2 == true && datatype == gl.FLOAT){
 			switch(format){
 				case gl.RED: internal_format = gl.R32F; break;
 				case gl.RG: internal_format = gl.RG32F; break;
