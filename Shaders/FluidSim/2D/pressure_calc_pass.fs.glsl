@@ -1,7 +1,7 @@
 #version 300 es
 // #extension GL_EXT_shader_texture_lod : require
 precision mediump float;
-//racuna pressure, output je scalar
+//racuna pressure, output je scalar. Jacobi iteration.
 
 #global_defines
 #include "defines"

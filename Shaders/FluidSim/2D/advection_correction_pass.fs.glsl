@@ -41,6 +41,21 @@ vec4 advectReverse(sampler2D u, vec2 x, float dt){
 	return sampleLinear(u, x + dt*uadv.xy); //sample linear
 }
 
+void getMinMaxNearestNeighborValues(sampler2D u, vec2 x, out vec4 vMin, out vec4 vMax){
+	//za 3D treba 8 susjednih samplirat
+	vec2 h = vec2(0.5,0.5);
+	x = floor(x + h);
+	
+	vec4 v[4];
+	v[0] = samplePoint(u, x + vec2(-h.x, 0.0));
+	v[1] = samplePoint(u, x + vec2( h.x, 0.0));
+	v[2] = samplePoint(u, x + vec2( 0.0,-h.y));
+	v[3] = samplePoint(u, x + vec2( 0.0, h.y));
+	
+	vMin = min(min(min(v[0],v[1]),v[2]),v[3]);
+	vMax = max(max(max(v[0],v[1]),v[2]),v[3]);
+}
+
 //===================================================================================================
 
 void main(void)
@@ -53,6 +68,9 @@ void main(void)
 		
 	vec4 urtn = uadv + 0.5f*(u - uradv);
 	//treba clampat urtn ovdje!
+	
+	vec4 vMin, vMax; getMinMaxNearestNeighborValues(txVelocity, x, vMin, vMax);
+	urtn = max(min(urtn, vMax), vMin);
 	
 	gl_FragColor = urtn;
 	gl_FragColor.a = 1.0;
