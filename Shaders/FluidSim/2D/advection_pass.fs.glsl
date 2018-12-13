@@ -36,7 +36,7 @@ varyin vec2 TexCoords;
 #include "fluidsim2d_include"
 
 vec4 advect(sampler2D u, vec2 x, float dt){
-	vec4 v = samplePoint(u, x); //sample point
+	vec4 v = sampleLinear(u, x); //sample point
 	return sampleLinear(u, x - dt*v.xy); //sample linear
 }
 
@@ -47,7 +47,7 @@ void main(void)
 	vec2 x = toWorldSpace(TexCoords);
 	vec4 uadv = advect(txVelocity, x, dT);
 		
-	if(isAtBorder(x)) uadv = samplePoint(txVelocity, x);
+	if(isAtBorder(x)) uadv = vec4(0.0,0.0,0.0,0.0);
 	
 	gl_FragColor = uadv;
 	gl_FragColor.a = 1.0;

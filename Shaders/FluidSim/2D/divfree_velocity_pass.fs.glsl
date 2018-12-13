@@ -64,7 +64,7 @@ void main(void)
 	
 	vec4 u = oldU - gradP;
 	
-	if(isAtBorder(x)) u = oldU;
+	if(isAtBorder(x)) u = vec4(0.0,0.0,0.0,0.0);
 	
 	gl_FragColor = u;
 	gl_FragColor.a = 1.0;

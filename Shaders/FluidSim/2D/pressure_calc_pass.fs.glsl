@@ -59,7 +59,7 @@ void main(void)
 	// float pnew = p + (divu - (ps[0] + ps[1] + ps[2] + ps[3] - 4.0*p));
 	float pnew = (ps[0] + ps[1] + ps[2] + ps[3] - divu) / 4.0;
 	
-	if(isAtBorder(x)) pnew = p;
+	if(isAtBorder(x)) pnew = 0.0;
 		
 	out_FragColor = pnew;
 }
