@@ -247,16 +247,22 @@ export function main(){
 	
 	gFluidSim = fluidSim;
 	
-	var fluidsimContrastSlider = document.getElementById("fluidsim_contrast_slider");
-	fluidsimContrastSlider.fvalue = function(){
+	var fluidsimBrightnessSlider = document.getElementById("fluidsim_brightness_slider");
+	fluidsimBrightnessSlider.fvalue = function(){
 		var v = this.value; //1, 100
 		v = v - 50.0; //-49, 50
 		v = v / 5.0; //5: -9.8, 10.0 //10: -4.9, 5.0
 		v = Math.pow(2.0, v); //5: 0.0011, 1024 //10: 0.0335, 32.0
 		return v;
 	}
-	
 	var fluidsimPressureIterationCountSlider = document.getElementById("fluidsim_pressure_iteration_count_slider");
+	var fluidsimViscositySlider = document.getElementById("fluidsim_viscosity_slider");
+	fluidsimViscositySlider.fvalue = function(){
+		var v = this.value; //0, 99
+		v = v / 3.3; //0, 30
+		return v;
+	}
+	
 	
 	vMath.mat4.perspective(projectionMatrix, vMath.deg2rad(40.0), gl.viewportWidth/gl.viewportHeight, 0.1, 1000.0);
 	
@@ -452,21 +458,26 @@ export function main(){
 		
 		if(bFluidSimPass == true)
 		{
-			var c = fluidsimPressureIterationCountSlider.value;
-			fluidSim.setPressureIterationNumber(c);
+			//slideri
+			//-------------------------------------------------------
+				var c = fluidsimPressureIterationCountSlider.value;
+				fluidsimPressureIterationCountSlider.title = "pressure iteration count: " + c.toString();
+				fluidSim.setPressureIterationNumber(c);
+				
+				var viscosity = fluidsimViscositySlider.fvalue(); //Number.parseFloat(avg_FPS).toFixed(2)
+				fluidsimViscositySlider.title = "viscosity: " + Number.parseFloat(viscosity).toFixed(3);
+				fluidSim.setKinematicViscosity(viscosity);
+				
+				var brightness = fluidsimBrightnessSlider.fvalue();
+				fluidsimBrightnessSlider.title = "brightness: " + Number.parseFloat(brightness).toFixed(4);
+				fluidSim.setDisplayBrightness(brightness);
+			//-------------------------------------------------------
+						
 			
 			fluidSim.SimStep(0.01);
 			
 			glext.Framebuffer.BindMainFB();	
 			gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);		
-			
-			/* gl.clearColor(0.0, 0.0, 0.0, 1.0);
-			gl.clearDepth(1.0);
-			gl.enable(gl.DEPTH_TEST);
-			gl.depthFunc(gl.LEQUAL);
-			gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT); */
-			var v = fluidsimContrastSlider.fvalue();
-			fluidSim.setDisplayBrightness(v);
 			
 			fluidSim.Display();
 		}

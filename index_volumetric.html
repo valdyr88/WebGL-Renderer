@@ -133,13 +133,16 @@
 				<option value="_DEBUG_Display_Divergence">Display_Divergence</option>
 			</select>
 		</div>
-			<div class="slidecontainer" title="contrast">
-			  <input type="range" min="1" max="100" value="50" class="slider" id="fluidsim_contrast_slider">
+			<div class="slidecontainer" title="brightness">
+			  <input type="range" min="1" max="100" value="50" class="slider" id="fluidsim_brightness_slider">
 			  <!-- <p>Value: <span id="demo"></span></p> -->
 			</div>
 			<button id="reset_fluidsim", onclick="on_fluidsim_reset()"  style="transform: translate(100%, -15%);">Reset FluidSim</button>
 			<div class="slidecontainer" title="pressure iteration count">
 			  <input type="range" min="1" max="50" value="1" class="slider" id="fluidsim_pressure_iteration_count_slider">
+			</div>
+			<div class="slidecontainer" title="viscosity">
+			  <input type="range" min="0" max="99" value="3.3" class="slider" id="fluidsim_viscosity_slider">
 			</div>
 	</div>
 	
@@ -353,7 +356,7 @@
   </script>
   
   <!-- <textarea id="kinematic_viscosity" style="width:48px; height:16px;" onchange="on_kinematic_viscosity_changed('kinematic_viscosity')"> 1.0 </textarea> -->
-  <input id="kinematic_viscosity" style="width:48px; height:16px;" value="1.0"></input>
+  <!-- <input id="kinematic_viscosity" style="width:48px; height:16px;" value="1.0"></input> zamjenjeno sliderom -->
   <br/>
   <textarea id="debug_text" style="display: none; width:768px; height:2048px;"> </textarea>
   
