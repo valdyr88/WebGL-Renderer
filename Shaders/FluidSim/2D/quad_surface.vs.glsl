@@ -24,21 +24,12 @@ varyin vec3 Tangent;
 varyin vec3 Bitangent;
 varyin vec3 PixelPosition;
 varyin vec2 TexCoords;
-/* varyin vec3 Position;
-varyin vec3 ViewVector; */
 
 void main(void)
 {
 	gl_Position = aVertexPosition;
 	PixelPosition = gl_Position.xyz / gl_Position.w; 
-	PixelPosition = PixelPosition*0.5f + 0.5f;
-	
-	/* Position = 2.0 * CameraForward +
-			-PixelAspect * aVertexPosition.x * CameraRight +
-			aVertexPosition.y * CameraUp + CameraPosition;
-	
-	ViewVector = Position - CameraPosition; */
-	
+	PixelPosition = PixelPosition*0.5f + 0.5f;	
 	
 	Normal = normalize((ModelMatrix * vec4(aVertexNormal,0.0))).xyz;
 	Tangent = normalize((ModelMatrix * vec4(aVertexTangent,0.0))).xyz;

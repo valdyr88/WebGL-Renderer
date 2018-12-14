@@ -14,6 +14,8 @@
   <meta name="twitter:site" content="@NewOnMDN">
   <meta name="twitter:creator" content="@NewOnMDN">
   
+  <link rel="stylesheet" type="text/css" href="styles/default/slider.css">
+  
   <script id="functions" src="./Shaders/include/functions.glsl" type="shader/fragment"></script>
   <script id="structs" src="./Shaders/include/structs.glsl" type="shader/fragment"></script>
   <script id="pbr" src="./Shaders/include/pbr.glsl" type="shader/fragment"></script>
@@ -126,15 +128,20 @@
 			<p style="font-family:verdana; color:white;" >FluidSim: </p>
 			<select id="select_FluidSimDisplay" onchange="on_fluidsim_shader_define_changed('select_FluidSimDisplay','Display_Velocity', null)" style=" height: 22px;  transform: translate(10%, 65%);">
 				<option value="_DEBUG_Display_Velocity">Display_Velocity</option>
+				<option value="_DEBUG_Display_VelocitySize">Display_VelocitySize</option>
 				<option value="_DEBUG_Display_Pressure">Display_Pressure</option>
 				<option value="_DEBUG_Display_Divergence">Display_Divergence</option>
 			</select>
 		</div>
+			<div class="""slidecontainer">
+			  <input type="range" min="1" max="100" value="50" class="slider" id="myRange">
+			  <!-- <p>Value: <span id="demo"></span></p> -->
+			</div>
 			<button id="reset_fluidsim", onclick="on_fluidsim_reset()"  style="transform: translate(100%, -15%);">Reset FluidSim</button>
 	</div>
 	
 	<div style="background-color:#0055ff">
-	  <canvas id="glcanvas" width="1024" height="512">
+	  <canvas id="glcanvas" width="640" height="480">
 		Your browser doesn't appear to support the HTML5 <code>&lt;canvas&gt;</code> element.
 	  </canvas>
 	</div>

@@ -372,6 +372,7 @@ export class FluidSim2D
 			this.strDisplayType = strDisplay;
 			
 			this.display_shader.RemoveDefine("_DEBUG_Display_Velocity");
+			this.display_shader.RemoveDefine("_DEBUG_Display_VelocitySize");
 			this.display_shader.RemoveDefine("_DEBUG_Display_Pressure");
 			this.display_shader.RemoveDefine("_DEBUG_Display_Divergence");
 			this.display_shader.addDefine(strDisplay,"");

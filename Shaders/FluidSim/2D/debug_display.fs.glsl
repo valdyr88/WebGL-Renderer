@@ -40,6 +40,7 @@ varyin vec2 TexCoords;
 
 /* 
 	#define _DEBUG_Display_Velocity
+	#define _DEBUG_Display_VelocitySize
 	#define _DEBUG_Display_Pressure
 	#define _DEBUG_Display_Divergence
 */
@@ -55,7 +56,11 @@ void main(void)
 	
 	#if defined(_DEBUG_Display_Velocity)	
 		vec4 v = texture2D(txVelocity, TexCoords);
-		rtn.xyz = (v.xyz)*0.5f + 0.5f;
+		rtn.xyz = (0.1*v.xyz)*0.5f + 0.5f;
+		
+	#elif defined(_DEBUG_Display_VelocitySize)	
+		vec4 v = texture2D(txVelocity, TexCoords);
+		rtn.xyz = vec3(0.1*length(v.xyz));
 		
 	#elif defined(_DEBUG_Display_Pressure)
 		float p = texture2D(txPressure, TexCoords).x;

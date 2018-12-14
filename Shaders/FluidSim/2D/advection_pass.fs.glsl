@@ -36,7 +36,7 @@ varyin vec2 TexCoords;
 #include "fluidsim2d_include"
 
 vec4 advect(sampler2D u, vec2 x, float dt){
-	vec4 v = sampleLinear(u, x); //sample point
+	vec4 v = samplePoint(u, x); //sample point
 	return sampleLinear(u, x - dt*v.xy); //sample linear
 }
 
