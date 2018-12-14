@@ -187,6 +187,8 @@ export class FluidSim2D
 		this.dt = 0.01;
 		this.time = 0.0;
 		this.displayBrightness = 1.0;
+		
+		this.NofPressureIterations = 1;
 	}
 	
 	ClearBuffers()
@@ -318,7 +320,8 @@ export class FluidSim2D
 				this.quad_model.RenderIndexedTriangles(this.divergence_shader);
 		}
 		
-		//5. pressure calc pass: input je txDivergence i txOldPressure, output je txPressure
+		//5. pressure calc pass: input je txDivergence i txOldPressure, output je txPressure. Jacobi iteration. (vise puta izvrsavanje)
+		for(var i = this.NofPressureIterations; i > 0; --i)
 		{
 			this.txPressure = this.txPressure1;
 			this.framebuffer.AttachTexture(this.txPressure, 0);
@@ -330,6 +333,15 @@ export class FluidSim2D
 				this.pressure_shader.setFloat2Uniform( this.pressure_shader.ULaspect, this.aspect);
 				
 				this.quad_model.RenderIndexedTriangles(this.pressure_shader);
+				
+			//swap pressure
+			if(i > 1){
+				var temp = this.txPressure0;
+				this.txPressure0 = this.txPressure1;
+				this.txPressure1 = temp;
+				
+				this.txOldPressure = this.txPressure0;
+			}
 		}
 		
 		//6. divergence free velocity pass: input je txPressure i txAdvectedCorrectedVelocity, output je txVelocity
@@ -370,6 +382,11 @@ export class FluidSim2D
 	}
 	setDisplayBrightness(v){
 		this.displayBrightness = v;
+	}
+	setPressureIterationNumber(count){
+		if(count < 1) count = 1;
+		if(count > 50) count = 50;
+		this.NofPressureIterations = count;
 	}
 	
 	setDisplayType(strDisplay)

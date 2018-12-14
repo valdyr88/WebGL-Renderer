@@ -133,11 +133,14 @@
 				<option value="_DEBUG_Display_Divergence">Display_Divergence</option>
 			</select>
 		</div>
-			<div class="""slidecontainer">
+			<div class="slidecontainer" title="contrast">
 			  <input type="range" min="1" max="100" value="50" class="slider" id="fluidsim_contrast_slider">
 			  <!-- <p>Value: <span id="demo"></span></p> -->
 			</div>
 			<button id="reset_fluidsim", onclick="on_fluidsim_reset()"  style="transform: translate(100%, -15%);">Reset FluidSim</button>
+			<div class="slidecontainer" title="pressure iteration count">
+			  <input type="range" min="1" max="50" value="1" class="slider" id="fluidsim_pressure_iteration_count_slider">
+			</div>
 	</div>
 	
 	<div style="background-color:#0055ff">

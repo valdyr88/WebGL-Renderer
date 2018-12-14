@@ -256,6 +256,8 @@ export function main(){
 		return v;
 	}
 	
+	var fluidsimPressureIterationCountSlider = document.getElementById("fluidsim_pressure_iteration_count_slider");
+	
 	vMath.mat4.perspective(projectionMatrix, vMath.deg2rad(40.0), gl.viewportWidth/gl.viewportHeight, 0.1, 1000.0);
 	
 	vMath.mat4.lookAt(viewMatrix, eyePt, centerPt, upDir);
@@ -450,6 +452,9 @@ export function main(){
 		
 		if(bFluidSimPass == true)
 		{
+			var c = fluidsimPressureIterationCountSlider.value;
+			fluidSim.setPressureIterationNumber(c);
+			
 			fluidSim.SimStep(0.01);
 			
 			glext.Framebuffer.BindMainFB();	
