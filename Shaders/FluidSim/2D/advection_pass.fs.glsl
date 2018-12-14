@@ -48,5 +48,4 @@ void main(void)
 	vec4 uadv = advect(txVelocity, x, dT);
 			
 	gl_FragColor = uadv;
-	gl_FragColor.a = 1.0;
 }

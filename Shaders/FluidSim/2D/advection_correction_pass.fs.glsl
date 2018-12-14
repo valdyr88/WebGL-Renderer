@@ -41,6 +41,11 @@ vec4 advectReverse(sampler2D u, vec2 x, float dt){
 	return sampleLinear(u, x + dt*uadv.xy); //sample linear
 }
 
+vec2 advectPosition(sampler2D u, vec2 x, float dt){
+	vec4 v = samplePoint(u, x); //sample point
+	return x - dt*v.xy;
+}
+
 void getMinMaxNearestNeighborValues(sampler2D u, vec2 x, out vec4 vMin, out vec4 vMax){
 	//za 3D treba 8 susjednih samplirat
 	vec2 h = vec2(0.5,0.5);
@@ -56,6 +61,12 @@ void getMinMaxNearestNeighborValues(sampler2D u, vec2 x, out vec4 vMin, out vec4
 	vMax = max(max(max(v[0],v[1]),v[2]),v[3]);
 }
 
+vec4 clampVelocity(vec4 v, sampler2D u, vec2 x, float dt){
+	vec2 xv = advectPosition(u, x, dt);
+	vec4 vMin, vMax; getMinMaxNearestNeighborValues(u, xv, vMin, vMax);
+	return max(min(v, vMax), vMin);
+}
+
 //===================================================================================================
 
 void main(void)
@@ -67,11 +78,9 @@ void main(void)
 	vec4 uradv = advectReverse(txAdvectedVelocity, x, dT);
 		
 	vec4 urtn = uadv + 0.5f*(u - uradv);
-	//treba clampat urtn ovdje!
 	
-	vec4 vMin, vMax; getMinMaxNearestNeighborValues(txVelocity, x, vMin, vMax);
-	urtn = max(min(urtn, vMax), vMin);
-		
+	//treba clampat urtn ovdje!
+	urtn = clampVelocity(urtn, txVelocity, x, dT);
+	
 	gl_FragColor = urtn;
-	gl_FragColor.a = 1.0;
 }

@@ -249,10 +249,10 @@ export function main(){
 	
 	var fluidsimContrastSlider = document.getElementById("fluidsim_contrast_slider");
 	fluidsimContrastSlider.fvalue = function(){
-		var v = this.value; //1 - 100
-		v = v - 50.0; //-49 - 50
-		v = v / 10.0; //-4.9 - 5.0
-		v = Math.pow(2.0, v); //0.0335 - 32.0
+		var v = this.value; //1, 100
+		v = v - 50.0; //-49, 50
+		v = v / 5.0; //5: -9.8, 10.0 //10: -4.9, 5.0
+		v = Math.pow(2.0, v); //5: 0.0011, 1024 //10: 0.0335, 32.0
 		return v;
 	}
 	

@@ -65,11 +65,11 @@ void main(void)
 		
 	#elif defined(_DEBUG_Display_Pressure)
 		float p = texture2D(txPressure, TexCoords).x;
-		rtn.xyz = vec3(displayBrightness*(p*0.5+0.5));
+		rtn.xyz = vec3((displayBrightness*p*0.5+0.5));
 		
 	#elif defined(_DEBUG_Display_Divergence)
 		float div = texture2D(txVelocityDivergence, TexCoords).x;
-		rtn.xyz = vec3(displayBrightness*(div*0.5+0.5));
+		rtn.xyz = vec3((displayBrightness*div*0.5+0.5));
 		
 	#endif
 	
