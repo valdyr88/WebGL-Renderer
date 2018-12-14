@@ -16,8 +16,9 @@ vec4 sampleLinear(sampler2D tx, vec2 x){
 }
 
 bool isAtBorder(vec2 x){
-	if(int(x.x) <= 0 || int(x.y) <= 0 || int(x.x) >= int(Resolution.x)-1 || int(x.y) >= int(Resolution.y)-1)
-		return false;
+#define border_size (1)
+	if(int(x.x) < border_size || int(x.y) < border_size || int(x.x) >= int(Resolution.x)-border_size || int(x.y) >= int(Resolution.y)-border_size)
+		return true;
 	return false;
 }
 

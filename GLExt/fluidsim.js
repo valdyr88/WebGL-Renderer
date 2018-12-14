@@ -13,11 +13,11 @@ export class FluidSim2D
 		this.quad_model = new Model(-1);
 		GenQuadModel(this.quad_model);
 		
-		this.width = w;
-		this.height = h;
+		this.width = Math.floor(w);
+		this.height = Math.floor(h);
 		// this.aspect = (w / h) / w;
-		this.aspect = [1.0 / w, 1.0 / h];
-		this.str_vec2Res = "vec2(" + w.toString()+ ".0," + h.toString() + ".0)"
+		this.aspect = [1.0 / this.width, 1.0 / this.height];
+		this.str_vec2Res = "vec2(" + this.width.toString()+ ".0," + this.height.toString() + ".0)"
 		
 		this.viscosity_shader = new Shader(-1);
 		this.viscosity_shader.addDefine("Resolution",this.str_vec2Res);

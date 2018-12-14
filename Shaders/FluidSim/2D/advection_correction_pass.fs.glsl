@@ -46,10 +46,10 @@ vec2 advectPosition(sampler2D u, vec2 x, float dt){
 	return x - dt*v.xy;
 }
 
-void getMinMaxNearestNeighborValues(sampler2D u, vec2 x, out vec4 vMin, out vec4 vMax){
+void getMinMaxNearestNeighbourValues(sampler2D u, vec2 x, out vec4 vMin, out vec4 vMax){
 	//za 3D treba 8 susjednih samplirat
 	vec2 h = vec2(0.5,0.5);
-	x = floor(x + h);
+	// x = floor(x + h);
 	
 	vec4 v[4];
 	v[0] = samplePoint(u, x + vec2(-h.x, 0.0));
@@ -63,7 +63,7 @@ void getMinMaxNearestNeighborValues(sampler2D u, vec2 x, out vec4 vMin, out vec4
 
 vec4 clampVelocity(vec4 v, sampler2D u, vec2 x, float dt){
 	vec2 xv = advectPosition(u, x, dt);
-	vec4 vMin, vMax; getMinMaxNearestNeighborValues(u, xv, vMin, vMax);
+	vec4 vMin, vMax; getMinMaxNearestNeighbourValues(u, xv, vMin, vMax);
 	return max(min(v, vMax), vMin);
 }
 

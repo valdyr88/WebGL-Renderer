@@ -73,7 +73,8 @@ void main(void)
 		
 	#endif
 	
-	rtn.a = 1.0; 
+	rtn.a = 1.0;
+	if(isAtBorder(x) == true) rtn.xyz = vec3(1.0,0.0,1.0);
 	
 	out_FragColor = rtn;
 }
