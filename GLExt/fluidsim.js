@@ -108,12 +108,14 @@ export class FluidSim2D
 		this.display_shader.ULaspect = -1;
 		this.display_shader.ULdT = -1;
 		this.display_shader.ULk = -1;
+		this.display_shader.ULdisplayBrightness = -1;
 		this.display_shader.ULTexturePressure = -1;
 		this.display_shader.ULTextureVelocity = -1;
 		this.display_shader.ULTextureDivergence = -1;
 		this.display_shader.ULaspect = this.display_shader.getUniformLocation("aspect");
 		this.display_shader.ULdT = this.display_shader.getUniformLocation("dT");
 		this.display_shader.ULk = this.display_shader.getUniformLocation("k");
+		this.display_shader.ULdisplayBrightness = this.display_shader.getUniformLocation("displayBrightness");
 		this.display_shader.ULTexturePressure = this.display_shader.getUniformLocation("txPressure");
 		this.display_shader.ULTextureVelocity = this.display_shader.getUniformLocation("txVelocity");
 		this.display_shader.ULTextureDivergence = this.display_shader.getUniformLocation("txVelocityDivergence");
@@ -184,6 +186,7 @@ export class FluidSim2D
 		this.strDisplayType = "";
 		this.dt = 0.01;
 		this.time = 0.0;
+		this.displayBrightness = 1.0;
 	}
 	
 	ClearBuffers()
@@ -354,6 +357,7 @@ export class FluidSim2D
 			this.txPressure.Bind(0, this.display_shader.ULTexturePressure);
 			this.txVelocity.Bind(1, this.display_shader.ULTextureVelocity);
 			this.txDivergence.Bind(2, this.display_shader.ULTextureDivergence);
+			this.display_shader.setFloatUniform( this.display_shader.ULdisplayBrightness, this.displayBrightness);
 			this.display_shader.setFloatUniform( this.display_shader.ULdT, this.dt);
 			this.display_shader.setFloat2Uniform( this.display_shader.ULaspect, this.aspect);
 			this.display_shader.setFloatUniform( this.display_shader.ULk, this.kinematicViscosity);
@@ -363,6 +367,9 @@ export class FluidSim2D
 
 	setKinematicViscosity(v){
 		this.kinematicViscosity = v;
+	}
+	setDisplayBrightness(v){
+		this.displayBrightness = v;
 	}
 	
 	setDisplayType(strDisplay)
@@ -381,6 +388,7 @@ export class FluidSim2D
 			this.display_shader.InitDefaultUniformLocations();
 				
 			this.display_shader.ULaspect = this.display_shader.getUniformLocation("aspect");
+			this.display_shader.ULdisplayBrightness = this.display_shader.getUniformLocation("displayBrightness");
 			this.display_shader.ULdT = this.display_shader.getUniformLocation("dT");
 			this.display_shader.ULk = this.display_shader.getUniformLocation("k");
 			this.display_shader.ULTexturePressure = this.display_shader.getUniformLocation("txPressure");
@@ -452,6 +460,7 @@ export class FluidSim2D
 		this.display_shader.ULaspect = this.display_shader.getUniformLocation("aspect");
 		this.display_shader.ULdT = this.display_shader.getUniformLocation("dT");
 		this.display_shader.ULk = this.display_shader.getUniformLocation("k");
+		this.display_shader.ULdisplayBrightness = this.display_shader.getUniformLocation("displayBrightness");
 		this.display_shader.ULTexturePressure = this.display_shader.getUniformLocation("txPressure");
 		this.display_shader.ULTextureVelocity = this.display_shader.getUniformLocation("txVelocity");
 		this.display_shader.ULTextureDivergence = this.display_shader.getUniformLocation("txVelocityDivergence");		

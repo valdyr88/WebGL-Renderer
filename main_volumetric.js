@@ -247,6 +247,15 @@ export function main(){
 	
 	gFluidSim = fluidSim;
 	
+	var fluidsimContrastSlider = document.getElementById("fluidsim_contrast_slider");
+	fluidsimContrastSlider.fvalue = function(){
+		var v = this.value; //1 - 100
+		v = v - 50.0; //-49 - 50
+		v = v / 10.0; //-4.9 - 5.0
+		v = Math.pow(2.0, v); //0.0335 - 32.0
+		return v;
+	}
+	
 	vMath.mat4.perspective(projectionMatrix, vMath.deg2rad(40.0), gl.viewportWidth/gl.viewportHeight, 0.1, 1000.0);
 	
 	vMath.mat4.lookAt(viewMatrix, eyePt, centerPt, upDir);
@@ -451,6 +460,8 @@ export function main(){
 			gl.enable(gl.DEPTH_TEST);
 			gl.depthFunc(gl.LEQUAL);
 			gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT); */
+			var v = fluidsimContrastSlider.fvalue();
+			fluidSim.setDisplayBrightness(v);
 			
 			fluidSim.Display();
 		}

@@ -25,6 +25,7 @@ precision mediump float;
 uniform vec2 aspect; //odnos dimenzija teksture i svijeta
 uniform float dT;
 uniform float k; //kinematic viscosity, = viscosity / density
+uniform float displayBrightness;
 
 // uniform sampler2D txAdvectedVelocity;
 uniform sampler2D txVelocity;
@@ -56,19 +57,19 @@ void main(void)
 	
 	#if defined(_DEBUG_Display_Velocity)	
 		vec4 v = texture2D(txVelocity, TexCoords);
-		rtn.xyz = (0.1*v.xyz)*0.5f + 0.5f;
+		rtn.xyz = (displayBrightness*v.xyz)*0.5f + 0.5f;
 		
 	#elif defined(_DEBUG_Display_VelocitySize)	
 		vec4 v = texture2D(txVelocity, TexCoords);
-		rtn.xyz = vec3(0.1*length(v.xyz));
+		rtn.xyz = vec3(displayBrightness*length(v.xyz));
 		
 	#elif defined(_DEBUG_Display_Pressure)
 		float p = texture2D(txPressure, TexCoords).x;
-		rtn.xyz = vec3(p*0.5+0.5);
+		rtn.xyz = vec3(displayBrightness*(p*0.5+0.5));
 		
 	#elif defined(_DEBUG_Display_Divergence)
 		float div = texture2D(txVelocityDivergence, TexCoords).x;
-		rtn.xyz = vec3(div*0.5+0.5);
+		rtn.xyz = vec3(displayBrightness*(div*0.5+0.5));
 		
 	#endif
 	
