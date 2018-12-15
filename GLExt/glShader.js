@@ -40,6 +40,11 @@ function getSourceFromFile(id, bParseForIncludes){
 	}
 	else{ return null; }
 	
+	if(source.match(/[^\x00-\x7F]/g) != null){
+		alert("source: " + id + " contains non ASCII: \n" + source.match(/[^\x00-\x7F]/g));
+		source.replace(/[^\x00-\x7F]/g, "");
+	}
+	
 	if(bParseForIncludes == true) source = parseForIncludes(source);
 	
 	return source;

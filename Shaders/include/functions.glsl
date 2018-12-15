@@ -210,7 +210,7 @@ matrix getTransformForNormalsMatrix(in matrix W){
 
 - world kopirati,
 - clearati translaciju
-- izvući vektore iz stupaca
+- izvuci vektore iz stupaca
 - izracunati kvadratni length vektora
 - konstruirati kvadratnu scale matricu
 - vratiti umnozak kvadratnog scalea i kopiranog worlda

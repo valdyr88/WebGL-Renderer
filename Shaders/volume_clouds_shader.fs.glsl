@@ -310,7 +310,7 @@ vec4 RaymarchCloudsSample(in vec3 start, in vec3 dir, in float t){
 #endif
 
 #if defined(Quality_High)
-	#define SDF_NofPasses 8 //koliko ima udaljenosti koje ce samplirati (treba biti parni broj, vece vrijednosti dozvoljavaju vise šupljina gizmo containera)
+	#define SDF_NofPasses 8 //koliko ima udaljenosti koje ce samplirati (treba biti parni broj, vece vrijednosti dozvoljavaju vise supljina gizmo containera)
 	#define SDF_NofStepsPerPass 128 //br sampliranja sdf mape
 	#define SDF_PrecisionTreshold 0.0005f
 #elif defined(Quality_Med)

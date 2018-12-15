@@ -15,7 +15,6 @@ export class FluidSim2D
 		
 		this.width = Math.floor(w);
 		this.height = Math.floor(h);
-		// this.aspect = (w / h) / w;
 		this.aspect = [1.0 / this.width, 1.0 / this.height];
 		this.str_vec2Res = "vec2(" + this.width.toString()+ ".0," + this.height.toString() + ".0)"
 		
