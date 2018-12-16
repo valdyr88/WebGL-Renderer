@@ -49,7 +49,7 @@ vec2 advectPosition(sampler2D u, vec2 x, float dt){
 void getMinMaxNearestNeighbourValues(sampler2D u, vec2 x, out vec4 vMin, out vec4 vMax){
 	//za 3D treba 8 susjednih samplirat
 	vec2 h = vec2(0.5,0.5);
-	// x = floor(x + h);
+	//x = floor(x + h);
 	
 	vec4 v[4];
 	v[0] = samplePoint(u, x + vec2(-h.x, 0.0));

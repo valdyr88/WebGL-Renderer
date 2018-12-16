@@ -48,8 +48,8 @@ vec4 velocityFromAdditionalForces(vec2 x, float t, float dt){
 void modifyVelocity(vec2 x, float t, float dt, inout vec4 u){
 	u += velocityFromAdditionalForces(x, t, dt);
 	
-	vec2 centar = toWorldSpace(vec2(0.2,0.5+cos(2.0*t)*0.25));
-	if(length(x - centar) < 10.0) u = vec4(0.0,0.0,0.0,0.0);
+	vec2 centar = toWorldSpace(vec2(0.2,0.5+cos(0.2*t)*0.25));
+	// if(length(x - centar) < 10.0) u = vec4(0.0,0.0,0.0,0.0);
 }
 
 //racuna diffuziju zbog viscosity
@@ -60,18 +60,18 @@ void main(void)
 	const vec2 dx = vec2(1.0,1.0);
 	
 	vec4 u = samplePoint(txVelocity, x);	
+	const vec4 borderValue = vec4(0.0,0.0,0.0,0.0);
 		
 	vec4 us[4];
 	//za 3D treba 6 susjednih samplirat
-	us[0] = samplePoint(txVelocity, x + vec2( dx.x,0.0));
-	us[1] = samplePoint(txVelocity, x + vec2(-dx.x,0.0));
-	us[2] = samplePoint(txVelocity, x + vec2(0.0, dx.y));
-	us[3] = samplePoint(txVelocity, x + vec2(0.0,-dx.y));
+	us[0] = samplePoint(txVelocity, x + vec2( dx.x,0.0), borderValue);
+	us[1] = samplePoint(txVelocity, x + vec2(-dx.x,0.0), borderValue);
+	us[2] = samplePoint(txVelocity, x + vec2(0.0, dx.y), borderValue);
+	us[3] = samplePoint(txVelocity, x + vec2(0.0,-dx.y), borderValue);
 	
 	vec4 unew = u + dt*k*(us[0] + us[1] + us[2] + us[3] - 4.0*u);
 	
 	//dodatne sile
-	// unew += velocityFromAdditionalForces(x, Time, dT);
 	modifyVelocity(x, Time, dT, unew);
 	
 	// if(isAtBorder(x) == true){ unew = vec4(0.0,0.0,0.0,0.0); }

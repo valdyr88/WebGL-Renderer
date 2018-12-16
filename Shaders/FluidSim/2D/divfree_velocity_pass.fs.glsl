@@ -56,8 +56,6 @@ void main(void)
 {
 	vec2 x = toWorldSpace(TexCoords);
 	
-	ivec2 size = textureSize(txPressure, 0);
-	
 	vec4 gradP = gradient(txPressure, x);
 	vec4 oldU = samplePoint(txVelocity, x);
 	
