@@ -38,13 +38,12 @@ float divergence(sampler2D tx, vec2 x){
 	//za 3D treba 6 susjednih samplirat
 	
 	vec4 u[4];
-	ivec2 size = textureSize(tx, 0);
 	const vec2 dx = vec2(1.0,1.0);
 	
-	u[0] = samplePoint(tx, size, x + vec2(dx.x, 0.0));
-	u[1] = samplePoint(tx, size, x + vec2(-dx.x,0.0));
-	u[2] = samplePoint(tx, size, x + vec2(0.0, dx.y));
-	u[3] = samplePoint(tx, size, x + vec2(0.0,-dx.y));
+	u[0] = samplePoint(tx, x + vec2(dx.x, 0.0));
+	u[1] = samplePoint(tx, x + vec2(-dx.x,0.0));
+	u[2] = samplePoint(tx, x + vec2(0.0, dx.y));
+	u[3] = samplePoint(tx, x + vec2(0.0,-dx.y));
 	
 	return 0.5*((u[0].x - u[1].x) + (u[2].y - u[3].y));
 }

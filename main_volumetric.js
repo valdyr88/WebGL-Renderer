@@ -258,8 +258,11 @@ export function main(){
 	var fluidsimPressureIterationCountSlider = document.getElementById("fluidsim_pressure_iteration_count_slider");
 	var fluidsimViscositySlider = document.getElementById("fluidsim_viscosity_slider");
 	fluidsimViscositySlider.fvalue = function(){
-		var v = this.value; //0, 99
-		v = v / 3.3; //0, 30
+		var v = this.value; //0, 90
+		v = v - 60.0; //-60, 30
+		v = v / 6; //-10, 5
+		if(v == -10) v = 0.0;
+		else v = Math.pow(2.0, v); //0.0011, 32
 		return v;
 	}
 	
@@ -465,7 +468,7 @@ export function main(){
 				fluidSim.setPressureIterationNumber(c);
 				
 				var viscosity = fluidsimViscositySlider.fvalue(); //Number.parseFloat(avg_FPS).toFixed(2)
-				fluidsimViscositySlider.title = "viscosity: " + Number.parseFloat(viscosity).toFixed(3);
+				fluidsimViscositySlider.title = "viscosity: " + Number.parseFloat(viscosity).toFixed(5);
 				fluidSim.setKinematicViscosity(viscosity);
 				
 				var brightness = fluidsimBrightnessSlider.fvalue();

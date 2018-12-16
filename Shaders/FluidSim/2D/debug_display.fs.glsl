@@ -73,8 +73,10 @@ void main(void)
 		
 	#endif
 	
+	rtn.xyz += 0.01275f*vec3(rand(TexCoords.xy));
+	
 	rtn.a = 1.0;
-	if(isAtBorder(x) == true) rtn.xyz = vec3(1.0,0.0,1.0);
+	// if(isAtBorder(x) == true) rtn.xyz = vec3(1.0,0.0,1.0);
 	
 	out_FragColor = rtn;
 }

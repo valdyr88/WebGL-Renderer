@@ -37,16 +37,15 @@ varyin vec2 TexCoords;
 
 #define GradComp x
 vec4 gradient(sampler2D tx, vec2 x){
-	ivec2 size = textureSize(tx, 0);
 	
 	const vec2 dx = vec2(1.0,1.0);
 	
 	float u[4];
 	//za 3D treba 6 susjednih samplirat
-	u[0] = samplePoint(tx, size, x + vec2(dx.x, 0.0)).GradComp;
-	u[1] = samplePoint(tx, size, x + vec2(-dx.x,0.0)).GradComp;
-	u[2] = samplePoint(tx, size, x + vec2(0.0, dx.y)).GradComp;
-	u[3] = samplePoint(tx, size, x + vec2(0.0,-dx.y)).GradComp;
+	u[0] = samplePoint(tx, x + vec2(dx.x, 0.0)).GradComp;
+	u[1] = samplePoint(tx, x + vec2(-dx.x,0.0)).GradComp;
+	u[2] = samplePoint(tx, x + vec2(0.0, dx.y)).GradComp;
+	u[3] = samplePoint(tx, x + vec2(0.0,-dx.y)).GradComp;
 	
 	vec4 grad = 0.5*vec4( u[0]-u[1], u[2]-u[3], 0.0, 0.0 );
 	return grad;

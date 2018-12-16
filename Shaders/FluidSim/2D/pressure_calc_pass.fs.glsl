@@ -42,23 +42,23 @@ void main(void)
 {	
 	vec2 x = toWorldSpace(TexCoords);
 	
-	ivec2 size = textureSize(txDivergence, 0);
-	
-	float divu = samplePoint(txDivergence, size, x).DivergenceComp;
-	float p = samplePoint(txPressure, size, x).PressureComp;
+	float divu = samplePoint(txDivergence, x).DivergenceComp;
+	float p = samplePoint(txPressure, x).PressureComp;
 	
 	const vec2 dx = vec2(1.0,1.0);
 	
 	float ps[4];
 	//za 3D treba 6 susjednih samplirat
-	ps[0] = samplePoint(txPressure, size, x + vec2( dx.x, 0.0)).PressureComp;
-	ps[1] = samplePoint(txPressure, size, x + vec2(-dx.x, 0.0)).PressureComp;
-	ps[2] = samplePoint(txPressure, size, x + vec2( 0.0, dx.y)).PressureComp;
-	ps[3] = samplePoint(txPressure, size, x + vec2( 0.0,-dx.y)).PressureComp;
+	ps[0] = samplePoint(txPressure, x + vec2( dx.x, 0.0)).PressureComp;
+	ps[1] = samplePoint(txPressure, x + vec2(-dx.x, 0.0)).PressureComp;
+	ps[2] = samplePoint(txPressure, x + vec2( 0.0, dx.y)).PressureComp;
+	ps[3] = samplePoint(txPressure, x + vec2( 0.0,-dx.y)).PressureComp;
 	
 	// float pnew = p + (divu - (ps[0] + ps[1] + ps[2] + ps[3] - 4.0*p));
 	float pnew = (ps[0] + ps[1] + ps[2] + ps[3] - divu) / 4.0;
-	if(isAtBorder(x) == true){ pnew = -divu / 4.0; }
+	// if(isAtBorder(x) == true){ pnew =  -divu / 4.0; }
+	// if(isAtBorder(x) == true){ pnew = p; }
+	if(isAtBorder(x) == true){ pnew = 0.0; }
 		
 	out_FragColor = pnew;
 }
