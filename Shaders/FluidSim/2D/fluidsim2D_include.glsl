@@ -24,4 +24,16 @@ vec4 sampleLinear(sampler2D tx, vec2 x){
 	return texture2DLod(tx, toTexSpace(x), 0.0);
 }
 
+
+// #define ProjectDDX(v,c,p) v = 2.0*c - p
+// #define ProjectDDX(v,c,p) v = c - (p - c)
+#define ProjectDDX(v,c,p) v = c - 0.5*(p-c)
+
+#define gradientBorderCorrect(x,dx,c,l,r,d,t)					\
+		if(x.x + dx.x >= Resolution.x){ ProjectDDX(r,c,l); }		\
+		else if(x.x - dx.x < 0.0){ ProjectDDX(l,c,r); }				\
+		if(x.y + dx.y >= Resolution.y){ ProjectDDX(t,c,d); }		\
+		else if(x.y - dx.y < 0.0){ ProjectDDX(d,c,t); }				\
+
+
 #endif //GLSL_FLUIDSIM2D_INCLUDE
