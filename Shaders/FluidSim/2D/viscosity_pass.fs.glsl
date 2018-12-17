@@ -59,22 +59,19 @@ void main(void)
 	float dt = dT;	
 	const vec2 dx = vec2(1.0,1.0);
 	
-	vec4 u = samplePoint(txVelocity, x);	
-	const vec4 borderValue = vec4(0.0,0.0,0.0,0.0);
+	vec4 u = samplePoint(txVelocity, x);
 		
 	vec4 us[4];
 	//za 3D treba 6 susjednih samplirat
-	us[0] = samplePoint(txVelocity, x + vec2( dx.x,0.0), borderValue);
-	us[1] = samplePoint(txVelocity, x + vec2(-dx.x,0.0), borderValue);
-	us[2] = samplePoint(txVelocity, x + vec2(0.0, dx.y), borderValue);
-	us[3] = samplePoint(txVelocity, x + vec2(0.0,-dx.y), borderValue);
+	us[0] = samplePoint(txVelocity, x + vec2( dx.x,0.0));
+	us[1] = samplePoint(txVelocity, x + vec2(-dx.x,0.0));
+	us[2] = samplePoint(txVelocity, x + vec2(0.0, dx.y));
+	us[3] = samplePoint(txVelocity, x + vec2(0.0,-dx.y));
 	
 	vec4 unew = u + dt*k*(us[0] + us[1] + us[2] + us[3] - 4.0*u);
 	
 	//dodatne sile
 	modifyVelocity(x, Time, dT, unew);
-	
-	// if(isAtBorder(x) == true){ unew = vec4(0.0,0.0,0.0,0.0); }
-		
+			
 	gl_FragColor = unew;
 }
