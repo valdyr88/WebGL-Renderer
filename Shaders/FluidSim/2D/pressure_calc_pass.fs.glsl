@@ -26,6 +26,7 @@ uniform vec2 aspect; //odnos dimenzija teksture i svijeta
 uniform sampler2D txPressure;
 uniform sampler2D txDivergence;
 uniform float dT;
+uniform float Time;
 
 #define PressureComp x
 #define DivergenceComp x
@@ -41,6 +42,7 @@ varyin vec2 TexCoords;
 void main(void)
 {	
 	vec2 x = toWorldSpace(TexCoords);
+	float dt = dT; float t = Time;
 	
 	float divu = samplePoint(txDivergence, x).DivergenceComp;
 	float p = samplePoint(txPressure, x).PressureComp;
@@ -58,6 +60,8 @@ void main(void)
 	// // if(isAtBorder(x) == true){ pnew =  -divu / 4.0; }
 	// if(isAtBorder(x) == true){ pnew = p; }
 	// if(isAtBorder(x) == true){ pnew = 0.0; }
+	vec2 centar = toWorldSpace(vec2(0.2,0.5+cos(0.7*t)*0.25));
+	if(length(x - centar) < 10.0) pnew = 0.0;
 		
 	out_FragColor = pnew;
 }

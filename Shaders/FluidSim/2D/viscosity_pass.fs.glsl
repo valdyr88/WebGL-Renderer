@@ -38,17 +38,18 @@ varyin vec2 TexCoords;
 vec4 velocityFromAdditionalForces(vec2 x, float t, float dt){
 	vec2 tc = toTexSpace(x);
 		
-	if( (tc.x > 0.0 && tc.x < 0.05) && (tc.y > 0.2 && tc.y < 0.8) )
+	if( (tc.x > 0.05 && tc.x < 0.1) && (tc.y > 0.2 && tc.y < 0.8) )
 		return tovec4(dt*25.0*vec3(1.0,0.0,0.0), 0.0);
 	
 	return vec4(0.0,0.0,0.0,0.0);
 }
 
 void modifyVelocity(vec2 x, float t, float dt, inout vec4 u){
-	u += velocityFromAdditionalForces(x, t, dt);
+	// u += velocityFromAdditionalForces(x, t, dt);
 	
 	vec2 centar = toWorldSpace(vec2(0.2,0.5+cos(0.7*t)*0.25));
-	if(length(x - centar) < 10.0) u = vec4(0.0,0.0,0.0,0.0);
+	if(length(x - centar) < 14.0) u = 2048.0*dt*vec4(0.0,-sin(0.7*t),0.0,0.0);
+	// if(length(x - centar) < 10.0) u = vec4(0.0,0.0,0.0,0.0);
 }
 
 //racuna diffuziju zbog viscosity
