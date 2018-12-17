@@ -40,7 +40,7 @@ float divergence(sampler2D tx, vec2 x){
 	vec4 u[4];
 	const vec2 dx = vec2(1.0,1.0);
 	
-	u[0] = samplePoint(tx, x + vec2(dx.x, 0.0));
+	u[0] = samplePoint(tx, x + vec2( dx.x,0.0));
 	u[1] = samplePoint(tx, x + vec2(-dx.x,0.0));
 	u[2] = samplePoint(tx, x + vec2(0.0, dx.y));
 	u[3] = samplePoint(tx, x + vec2(0.0,-dx.y));

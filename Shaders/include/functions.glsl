@@ -28,6 +28,8 @@
 
 #define PI (3.14159265359)
 #define e  (2.71828182846)
+#define FLT_MIN (1.175494351e-38)
+#define FLT_MAX (3.402823466e+38)
 //================================================================================================================
 
 inline vec4 tovec4(vec3 a, float b){
@@ -475,7 +477,6 @@ vec3 PositionFromDepth(in vec2 texCoord, in float depth, in mat4 InvVPMat){
 	vec4 homogenousLocation = InvVPMat * clipSpaceLocation;
 	return homogenousLocation.xyz / homogenousLocation.w;
 }
-
 //================================================================================================================
 
 //map3d2d() - Created by inigo quilez - iq. returns: xy - tex coord, z - smoothstep for lerping. 
@@ -496,6 +497,4 @@ vec4 lerp3pt(vec4 a, vec4 b, vec4 c, float t){
 	if(t < 0.0) return lerp(a,b,1.0+t);
 	else return lerp(b,c,t);
 }
-
 #endif //GLSL_FUNCTIONS
-

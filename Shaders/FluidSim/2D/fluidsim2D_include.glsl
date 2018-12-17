@@ -6,7 +6,7 @@ vec2 toTexSpace(vec2 x){ return (x + vec2(0.5,0.5))/Resolution; }
 vec2 toWorldSpace(vec2 x){ return x*Resolution - vec2(0.5,0.5); }
 
 bool isAtBorder(vec2 x){
-#define border_size (1)
+#define border_size (0)
 	if(int(x.x) < border_size || int(x.x) >= int(Resolution.x)-border_size || 
 	   int(x.y) < border_size || int(x.y) >= int(Resolution.y)-border_size)
 		return true;
