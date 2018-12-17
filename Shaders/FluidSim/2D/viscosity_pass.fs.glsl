@@ -36,8 +36,7 @@ varyin vec2 TexCoords;
 #include "fluidsim2d_include"
 
 vec4 velocityFromAdditionalForces(vec2 x, float t, float dt){
-	// vec2 tc = toTexSpace(x);
-	vec2 tc = TexCoords;
+	vec2 tc = toTexSpace(x);
 		
 	if( (tc.x > 0.0 && tc.x < 0.05) && (tc.y > 0.2 && tc.y < 0.8) )
 		return tovec4(dt*5.0*vec3(1.0,0.0,0.0), 0.0);

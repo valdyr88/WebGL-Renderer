@@ -49,10 +49,10 @@ void main(void)
 	
 	float ps[4];
 	//za 3D treba 6 susjednih samplirat
-	ps[0] = samplePoint(txPressure, x + vec2( dx.x, 0.0)).PressureComp;
-	ps[1] = samplePoint(txPressure, x + vec2(-dx.x, 0.0)).PressureComp;
-	ps[2] = samplePoint(txPressure, x + vec2( 0.0, dx.y)).PressureComp;
-	ps[3] = samplePoint(txPressure, x + vec2( 0.0,-dx.y)).PressureComp;
+	ps[0] = samplePoint(txPressure, x + vec2( dx.x, 0.0), vec4(0.0)).PressureComp;
+	ps[1] = samplePoint(txPressure, x + vec2(-dx.x, 0.0), vec4(0.0)).PressureComp;
+	ps[2] = samplePoint(txPressure, x + vec2( 0.0, dx.y), vec4(0.0)).PressureComp;
+	ps[3] = samplePoint(txPressure, x + vec2( 0.0,-dx.y), vec4(0.0)).PressureComp;
 		
 	float pnew = (ps[0] + ps[1] + ps[2] + ps[3] - divu) / 4.0;
 	// // if(isAtBorder(x) == true){ pnew =  -divu / 4.0; }
