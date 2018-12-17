@@ -325,10 +325,14 @@ export class FluidSim2D
 			this.txPressure = this.txPressure1;
 			this.framebuffer.AttachTexture(this.txPressure, 0);
 			
+			var dt = dT / this.NofPressureIterations;
+			var itime = this.time + dt;
+			
 			this.pressure_shader.Bind();
 				this.txDivergence.Bind(0, this.pressure_shader.ULTextureDivergence);
 				this.txOldPressure.Bind(1, this.pressure_shader.ULTexturePressure);
-				this.pressure_shader.setFloatUniform( this.pressure_shader.ULdT, dT/this.NofPressureIterations);
+				this.pressure_shader.setFloatUniform( this.pressure_shader.ULdT, dt);
+				this.pressure_shader.setFloatUniform( this.pressure_shader.ULTime, itime);
 				this.pressure_shader.setFloat2Uniform( this.pressure_shader.ULaspect, this.aspect);
 				
 				this.quad_model.RenderIndexedTriangles(this.pressure_shader);
