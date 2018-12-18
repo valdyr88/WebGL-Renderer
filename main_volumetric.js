@@ -266,7 +266,6 @@ export function main(){
 		return v;
 	}
 	
-	
 	vMath.mat4.perspective(projectionMatrix, vMath.deg2rad(40.0), gl.viewportWidth/gl.viewportHeight, 0.1, 1000.0);
 	
 	vMath.mat4.lookAt(viewMatrix, eyePt, centerPt, upDir);
@@ -477,7 +476,7 @@ export function main(){
 			//-------------------------------------------------------
 						
 			
-			fluidSim.SimStep(0.01);
+			fluidSim.SimStep(0.1);
 			
 			glext.Framebuffer.BindMainFB();	
 			gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);		
