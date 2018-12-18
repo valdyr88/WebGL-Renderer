@@ -259,10 +259,7 @@ export function main(){
 	var fluidsimViscositySlider = document.getElementById("fluidsim_viscosity_slider");
 	fluidsimViscositySlider.fvalue = function(){
 		var v = this.value; //0, 90
-		v = v - 60.0; //-60, 30
-		v = v / 6; //-10, 5
-		if(v == -10) v = 0.0;
-		else v = Math.pow(2.0, v); //0.0011, 32
+		v = v / 30.0; //0.0, 3.0
 		return v;
 	}
 	

@@ -60,7 +60,7 @@ void main(void)
 	// // if(isAtBorder(x) == true){ pnew =  -divu / 4.0; }
 	// if(isAtBorder(x) == true){ pnew = p; }
 	// if(isAtBorder(x) == true){ pnew = 0.0; }
-	vec2 centar = toWorldSpace(vec2(0.2,0.5+cos(0.7*t)*0.25));
+	vec2 centar = toWorldSpace(vec2(0.2,0.5+cos(0.25*t)*0.25));
 	if(length(x - centar) < 10.0) pnew = 0.0;
 		
 	out_FragColor = pnew;
