@@ -40,6 +40,22 @@ export class Framebuffer{
 		this.AttachTextureLevel(texture, slot, 0);
 	}
 	
+	AttachTextureLayerLevel(texture, slot, nlayer, level){
+		var oldFBO = gl.currentFramebuffer;
+		Framebuffer.Bind(this.framebuffer);
+		
+		gl.framebufferTextureLayer(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0+slot, texture.texture, level, nlayer);
+		this.attachedTextures[slot] = texture.SlotID;
+		this.width = texture.width; this.height = texture.height;
+		this.SetupUsage();
+		
+		if(this.bRestorePrevFB === true) Framebuffer.Bind(oldFBO);
+	}
+	
+	AttachTextureLayer(texture, slot, nlayer){
+		this.AttachTextureLayerLevel(texture, slot, nlayer, 0);
+	}
+	
 	DetachTextureLevel(slot, level){
 		var oldFBO = gl.currentFramebuffer;
 		Framebuffer.Bind(this.framebuffer);

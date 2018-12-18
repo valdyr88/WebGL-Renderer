@@ -734,6 +734,25 @@ export class Texture3D{
 		this.levels = 1;
 	}
 	
+	CreateEmptyRGBAubyte(width, height, depth){ this.CreateEmpty(width, height, depth, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE); }
+	CreateEmptyRGBubyte(width, height, depth){  this.CreateEmpty(width, height, depth, gl.RGB,  gl.RGB,  gl.UNSIGNED_BYTE); }
+	CreateEmptyRGubyte(width, height, depth){   this.CreateEmpty(width, height, depth, gl.RG,   gl.RG,   gl.UNSIGNED_BYTE); }
+	CreateEmptyRubyte(width, height, depth){    this.CreateEmpty(width, height, depth, gl.R,    gl.RED,  gl.UNSIGNED_BYTE); }
+	
+	CreateEmptyRGBAfloat32(width, height, depth){ this.CreateEmpty(width, height, depth, gl.RGBA32F, gl.RGBA, gl.FLOAT); }
+	CreateEmptyRGBfloat32(width, height, depth){  this.CreateEmpty(width, height, depth, gl.RGB32F,  gl.RGB,  gl.FLOAT); }
+	CreateEmptyRGfloat32(width, height, depth){   this.CreateEmpty(width, height, depth, gl.RG32F,   gl.RG,   gl.FLOAT); }
+	CreateEmptyRfloat32(width, height, depth){    this.CreateEmpty(width, height, depth, gl.R32F,    gl.RED,  gl.FLOAT); }
+	
+	// CreateEmptyDepthfloat(width, height, depth){ this.CreateEmpty(width, height, depth, gl.R32F, gl.DEPTH_COMPONENT, gl.FLOAT); }
+	// CreateEmptyDepthuint(width, height, depth){  this.CreateEmpty(width, height, depth, gl.R32UI, gl.DEPTH_COMPONENT, gl.UNSIGNED_INT); }
+	
+	CreateEmptyDepthfloat(width, height, depth){ this.CreateEmpty(width, height, depth, gl.DEPTH_COMPONENT32F, gl.DEPTH_COMPONENT, gl.FLOAT); }
+	CreateEmptyDepthuint(width, height, depth){  this.CreateEmpty(width, height, depth, gl.DEPTH_COMPONENT24, gl.DEPTH_COMPONENT, gl.UNSIGNED_INT); }
+	CreateEmptyDepthushort(width, height, depth){  this.CreateEmpty(width, height, depth, gl.DEPTH_COMPONENT24, gl.DEPTH_COMPONENT, gl.UNSIGNED_SHORT); }
+	
+	CreateEmptyDepthStencil(width, height, depth){ this.CreateEmpty(width, height, depth, gl.DEPTH_COMPONENT24, gl.DEPTH_STENCIL, gl.UNSIGNED_INT_24_8); }
+	
 	CreateFromZip(id)
 	{
 		var obj = sys.storage.GlobalStorage.get(id);

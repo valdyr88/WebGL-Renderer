@@ -1,13 +1,7 @@
-import { gl, WriteDebug } from "./glContext.js";
-import { Shader, ShaderList } from "./glShader.js";
-import * as vMath from "../glMatrix/gl-matrix.js";
-import { Texture, TextureList } from "./glTexture.js";
-import { Model, GenQuadModel } from "./glModel.js"
-import { Framebuffer } from "./glFramebuffer.js";
 
-export class FluidSim2D
+export class FluidSim3D
 {
-	constructor(w, h, vertex, viscosity, advection, advection_correction,
+	constructor(w, h, d, vertex, viscosity, advection, advection_correction,
 				divergence, pressure, divfree_velocity, display)
 	{
 		this.quad_model = new Model(-1);
@@ -15,11 +9,13 @@ export class FluidSim2D
 		
 		this.width = Math.floor(w);
 		this.height = Math.floor(h);
-		this.aspect = [1.0 / this.width, 1.0 / this.height];
+		this.depth = Math.floor(d);
+		this.aspect = [1.0 / this.width, 1.0 / this.height, 1.0 / this.depth];
 		this.str_vec2Res = "vec2(" + this.width.toString()+ ".0," + this.height.toString() + ".0)";
+		this.str_vec3Res = "vec2(" + this.width.toString()+ ".0," + this.height.toString() + ".0," + this.depth.toString() + ".0)";
 		
 		this.viscosity_shader = new Shader(-1);
-		this.viscosity_shader.addDefine("Resolution",this.str_vec2Res);
+		this.viscosity_shader.addDefine("Resolution",this.str_vec3Res);
 		if(this.viscosity_shader.CompileFromFile(vertex, viscosity) == false) alert("nije kompajliran shader!");
 		this.viscosity_shader.InitDefaultAttribLocations();
 		this.viscosity_shader.InitDefaultUniformLocations();
@@ -33,7 +29,7 @@ export class FluidSim2D
 		this.viscosity_shader.ULTextureVelocity = this.viscosity_shader.getUniformLocation("txVelocity");
 				
 		this.advection_shader = new Shader(-1);
-		this.advection_shader.addDefine("Resolution",this.str_vec2Res);
+		this.advection_shader.addDefine("Resolution",this.str_vec3Res);
 		if(this.advection_shader.CompileFromFile(vertex, advection) == false) alert("nije kompajliran shader!");
 		this.advection_shader.InitDefaultAttribLocations();
 		this.advection_shader.InitDefaultUniformLocations();
@@ -45,7 +41,7 @@ export class FluidSim2D
 		this.advection_shader.ULTextureVelocity = this.advection_shader.getUniformLocation("txVelocity");
 				
 		this.advection_correction_shader = new Shader(-1);
-		this.advection_correction_shader.addDefine("Resolution",this.str_vec2Res);
+		this.advection_correction_shader.addDefine("Resolution",this.str_vec3Res);
 		if(this.advection_correction_shader.CompileFromFile(vertex, advection_correction) == false) alert("nije kompajliran shader!");
 		this.advection_correction_shader.InitDefaultAttribLocations();
 		this.advection_correction_shader.InitDefaultUniformLocations();
@@ -59,7 +55,7 @@ export class FluidSim2D
 		this.advection_correction_shader.ULTextureAdvectedVelocity = this.advection_correction_shader.getUniformLocation("txAdvectedVelocity");
 				
 		this.divergence_shader = new Shader(-1);
-		this.divergence_shader.addDefine("Resolution",this.str_vec2Res);
+		this.divergence_shader.addDefine("Resolution",this.str_vec3Res);
 		if(this.divergence_shader.CompileFromFile(vertex, divergence) == false) alert("nije kompajliran shader!");
 		this.divergence_shader.InitDefaultAttribLocations();
 		this.divergence_shader.InitDefaultUniformLocations();
@@ -71,7 +67,7 @@ export class FluidSim2D
 		this.divergence_shader.ULTexture = this.divergence_shader.getUniformLocation("txTexture");
 				
 		this.pressure_shader = new Shader(-1);
-		this.pressure_shader.addDefine("Resolution",this.str_vec2Res);
+		this.pressure_shader.addDefine("Resolution",this.str_vec3Res);
 		if(this.pressure_shader.CompileFromFile(vertex, pressure) == false) alert("nije kompajliran shader!");
 		this.pressure_shader.InitDefaultAttribLocations();
 		this.pressure_shader.InitDefaultUniformLocations();
@@ -85,7 +81,7 @@ export class FluidSim2D
 		this.pressure_shader.ULTextureDivergence = this.pressure_shader.getUniformLocation("txDivergence");
 				
 		this.divfree_velocity_shader = new Shader(-1);
-		this.divfree_velocity_shader.addDefine("Resolution",this.str_vec2Res);
+		this.divfree_velocity_shader.addDefine("Resolution",this.str_vec3Res);
 		if(this.divfree_velocity_shader.CompileFromFile(vertex, divfree_velocity) == false) alert("nije kompajliran shader!");
 		this.divfree_velocity_shader.InitDefaultAttribLocations();
 		this.divfree_velocity_shader.InitDefaultUniformLocations();
@@ -100,7 +96,7 @@ export class FluidSim2D
 				
 		this.display_shader = new Shader(-1);
 		this.display_shader.addDefine("_DEBUG_Display_Velocity","");
-		this.display_shader.addDefine("Resolution",this.str_vec2Res);
+		this.display_shader.addDefine("Resolution",this.str_vec3Res);
 		if(this.display_shader.CompileFromFile(vertex, display) == false) alert("nije kompajliran shader!");
 		this.display_shader.InitDefaultAttribLocations();
 		this.display_shader.InitDefaultUniformLocations();
@@ -134,9 +130,9 @@ export class FluidSim2D
 				Pressure_0,Pressure_1 : x float
 		*/
 		
-		this.txVelocity0 = new Texture(-1); this.txVelocity0.CreateEmptyRGBAfloat32(this.width, this.height);
-		this.txVelocity1 = new Texture(-1); this.txVelocity1.CreateEmptyRGBAfloat32(this.width, this.height);
-		this.txVelocity2 = new Texture(-1); this.txVelocity2.CreateEmptyRGBAfloat32(this.width, this.height);
+		this.txVelocity0 = new Texture3D(-1); this.txVelocity0.CreateEmptyRGBAfloat32(this.width, this.height, this.depth);
+		this.txVelocity1 = new Texture3D(-1); this.txVelocity1.CreateEmptyRGBAfloat32(this.width, this.height, this.depth);
+		this.txVelocity2 = new Texture3D(-1); this.txVelocity2.CreateEmptyRGBAfloat32(this.width, this.height, this.depth);
 		
 		//ovo swappa 
 		this.txDiffusedVelocity = this.txVelocity0;
@@ -145,9 +141,9 @@ export class FluidSim2D
 		this.txOldVelocity = this.txVelocity0;
 		
 		//ovo mozda optimizirat i strpat ove tri teksture kao komponente txAdvectedVelocity (ili one koja se ne koristi)?
-		this.txDivergence = new Texture(-1); this.txDivergence.CreateEmptyRfloat32(this.width, this.height);
-		this.txPressure0 = new Texture(-1); this.txPressure0.CreateEmptyRfloat32(this.width, this.height);
-		this.txPressure1 = new Texture(-1); this.txPressure1.CreateEmptyRfloat32(this.width, this.height);
+		this.txDivergence = new Texture3D(-1);this.txDivergence.CreateEmptyRfloat32(this.width, this.height, this.depth);
+		this.txPressure0 = new Texture3D(-1);  this.txPressure0.CreateEmptyRfloat32(this.width, this.height, this.depth);
+		this.txPressure1 = new Texture3D(-1);  this.txPressure1.CreateEmptyRfloat32(this.width, this.height, this.depth);
 		
 		this.txPressure = this.txPressure0;
 		this.txOldPressure = this.txPressure1;
@@ -203,29 +199,33 @@ export class FluidSim2D
 		gl.clearColor(0.0, 0.0, 0.0, 1.0);
 		// gl.clearDepth(1.0);
 		
-		this.framebuffer.AttachTexture(this.txVelocity0, 0);
-		this.framebuffer.CheckStatus();
-		gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+		for(let z = 0; z < this.depth; ++z){
+			
+			this.framebuffer.AttachTextureLayer(this.txVelocity0, 0, z);
+			this.framebuffer.CheckStatus();
+			gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+			
+			this.framebuffer.AttachTextureLayer(this.txVelocity1, 0, z);
+			this.framebuffer.CheckStatus();
+			gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+			
+			this.framebuffer.AttachTextureLayer(this.txVelocity2, 0, z);
+			this.framebuffer.CheckStatus();
+			gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+			
+			this.framebuffer.AttachTextureLayer(this.txDivergence, 0, z);
+			this.framebuffer.CheckStatus();
+			gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+			
+			this.framebuffer.AttachTextureLayer(this.txPressure0, 0, z);
+			this.framebuffer.CheckStatus();
+			gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+			
+			this.framebuffer.AttachTextureLayer(this.txPressure1, 0, z);
+			this.framebuffer.CheckStatus();
+			gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 		
-		this.framebuffer.AttachTexture(this.txVelocity1, 0);
-		this.framebuffer.CheckStatus();
-		gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-		
-		this.framebuffer.AttachTexture(this.txVelocity2, 0);
-		this.framebuffer.CheckStatus();
-		gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-		
-		this.framebuffer.AttachTexture(this.txDivergence, 0);
-		this.framebuffer.CheckStatus();
-		gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-		
-		this.framebuffer.AttachTexture(this.txPressure0, 0);
-		this.framebuffer.CheckStatus();
-		gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-		
-		this.framebuffer.AttachTexture(this.txPressure1, 0);
-		this.framebuffer.CheckStatus();
-		gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+		}
 		
 		Framebuffer.Bind(oldFB);
 	}
@@ -248,8 +248,8 @@ export class FluidSim2D
 		gl.viewport(0, 0, this.width, this.height);
 		this.dt = dT;
 		gl.disable(gl.BLEND);
-		
-		//0. swap textura: velocity i pressure
+	
+		//0. swap textura: velocity i pressure. ovo je na pocetku SimStep samo.
 		{
 			var temp = this.txVelocity0;
 			this.txVelocity0 = this.txVelocity2;
@@ -264,79 +264,94 @@ export class FluidSim2D
 			this.txOldPressure = this.txPressure0;
 		}
 		
-		//1. viscosity pass: input je txOldVelocity, output je txDiffusedVelocity
+		for(let z = 0; z < this.depth; z += 8)
 		{
-			this.txDiffusedVelocity = this.txVelocity1;
-			this.framebuffer.AttachTexture(this.txDiffusedVelocity, 0);
-			
-			this.viscosity_shader.Bind();
-				this.txOldVelocity.Bind(0, this.viscosity_shader.ULTextureVelocity);
-				this.viscosity_shader.setFloatUniform( this.viscosity_shader.ULdT, dT);
-				this.viscosity_shader.setFloatUniform( this.viscosity_shader.ULk, this.kinematicViscosity);
-				this.viscosity_shader.setFloat2Uniform( this.viscosity_shader.ULaspect, this.aspect );
-				this.viscosity_shader.setFloatUniform( this.viscosity_shader.ULTime, this.time);
+			//1. viscosity pass: input je txOldVelocity, output je txDiffusedVelocity
+			{
+				this.txDiffusedVelocity = this.txVelocity1;
+				this.framebuffer.AttachTextureLayer(this.txDiffusedVelocity, 0);
 				
-				this.quad_model.RenderIndexedTriangles(this.viscosity_shader);	
+				this.viscosity_shader.Bind();
+					this.txOldVelocity.Bind(0, this.viscosity_shader.ULTextureVelocity);
+					this.viscosity_shader.setFloatUniform( this.viscosity_shader.ULdT, dT);
+					this.viscosity_shader.setFloatUniform( this.viscosity_shader.ULk, this.kinematicViscosity);
+					this.viscosity_shader.setFloat2Uniform( this.viscosity_shader.ULaspect, this.aspect );
+					this.viscosity_shader.setFloatUniform( this.viscosity_shader.ULTime, this.time);
+					
+					this.quad_model.RenderIndexedTriangles(this.viscosity_shader);	
+			}
 		}
 		
-		//2. advection pass: input je txDiffusedVelocity, output je txAdvectedVelocity
+		for(let z = 0; z < this.depth; z += 8)
 		{
-			this.txAdvectedVelocity = this.txVelocity2;
-			this.framebuffer.AttachTexture(this.txAdvectedVelocity, 0);
-			
-			this.advection_shader.Bind();
-				this.txDiffusedVelocity.Bind(0, this.advection_shader.ULTextureVelocity);
-				this.advection_shader.setFloatUniform( this.advection_shader.ULdT, dT);
-				this.advection_shader.setFloat2Uniform( this.advection_shader.ULaspect, this.aspect);
+			//2. advection pass: input je txDiffusedVelocity, output je txAdvectedVelocity
+			{
+				this.txAdvectedVelocity = this.txVelocity2;
+				this.framebuffer.AttachTextureLayer(this.txAdvectedVelocity, 0);
 				
-				this.quad_model.RenderIndexedTriangles(this.advection_shader);
+				this.advection_shader.Bind();
+					this.txDiffusedVelocity.Bind(0, this.advection_shader.ULTextureVelocity);
+					this.advection_shader.setFloatUniform( this.advection_shader.ULdT, dT);
+					this.advection_shader.setFloat2Uniform( this.advection_shader.ULaspect, this.aspect);
+					
+					this.quad_model.RenderIndexedTriangles(this.advection_shader);
+			}
 		}
 		
-		//3. advection correction pass: input je txAdvectedVelocity i txDiffusedVelocity, output je txAdvectedCorrectedVelocity
-		{
-			this.txAdvectedCorrectedVelocity = this.txVelocity0;
-			this.framebuffer.AttachTexture(this.txAdvectedCorrectedVelocity, 0);
-			
-			this.advection_correction_shader.Bind();
-				this.txAdvectedVelocity.Bind(0, this.advection_correction_shader.ULTextureAdvectedVelocity);
-				this.txDiffusedVelocity.Bind(1, this.advection_correction_shader.ULTextureVelocity);
-				this.advection_correction_shader.setFloatUniform( this.advection_correction_shader.ULdT, dT);
-				this.advection_correction_shader.setFloat2Uniform( this.advection_correction_shader.ULaspect, this.aspect);
+		for(let z = 0; z < this.depth; z += 8)
+		{	
+			//3. advection correction pass: input je txAdvectedVelocity i txDiffusedVelocity, output je txAdvectedCorrectedVelocity
+			{
+				this.txAdvectedCorrectedVelocity = this.txVelocity0;
+				this.framebuffer.AttachTextureLayer(this.txAdvectedCorrectedVelocity, 0);
 				
-				this.quad_model.RenderIndexedTriangles(this.advection_correction_shader);
+				this.advection_correction_shader.Bind();
+					this.txAdvectedVelocity.Bind(0, this.advection_correction_shader.ULTextureAdvectedVelocity);
+					this.txDiffusedVelocity.Bind(1, this.advection_correction_shader.ULTextureVelocity);
+					this.advection_correction_shader.setFloatUniform( this.advection_correction_shader.ULdT, dT);
+					this.advection_correction_shader.setFloat2Uniform( this.advection_correction_shader.ULaspect, this.aspect);
+					
+					this.quad_model.RenderIndexedTriangles(this.advection_correction_shader);
+			}
 		}
 		
-		//4. divergence pass na velocity: input je txAdvectedCorrectedVelocity, output je txDivergence
-		{
-			this.txDivergence;
-			this.framebuffer.AttachTexture(this.txDivergence, 0);
-			
-			this.divergence_shader.Bind();
-				this.txAdvectedCorrectedVelocity.Bind(0, this.divergence_shader.ULTexture);
-				this.divergence_shader.setFloatUniform( this.divergence_shader.ULdT, dT);
-				this.divergence_shader.setFloat2Uniform( this.divergence_shader.ULaspect, this.aspect);
+		for(let z = 0; z < this.depth; z += 8)
+		{	
+			//4. divergence pass na velocity: input je txAdvectedCorrectedVelocity, output je txDivergence
+			{
+				this.txDivergence;
+				this.framebuffer.AttachTextureLayer(this.txDivergence, 0);
 				
-				this.quad_model.RenderIndexedTriangles(this.divergence_shader);
+				this.divergence_shader.Bind();
+					this.txAdvectedCorrectedVelocity.Bind(0, this.divergence_shader.ULTexture);
+					this.divergence_shader.setFloatUniform( this.divergence_shader.ULdT, dT);
+					this.divergence_shader.setFloat2Uniform( this.divergence_shader.ULaspect, this.aspect);
+					
+					this.quad_model.RenderIndexedTriangles(this.divergence_shader);
+			}
 		}
-		
+			
 		//5. pressure calc pass: input je txDivergence i txOldPressure, output je txPressure. Jacobi iteration. (vise puta izvrsavanje)
-		for(var i = this.NofPressureIterations; i > 0; --i)
+		for(let i = this.NofPressureIterations; i > 0; --i)
 		{
-			this.txPressure = this.txPressure1;
-			this.framebuffer.AttachTexture(this.txPressure, 0);
-			
-			var dt = dT / this.NofPressureIterations;
-			var itime = this.time + dt;
-			
-			this.pressure_shader.Bind();
-				this.txDivergence.Bind(0, this.pressure_shader.ULTextureDivergence);
-				this.txOldPressure.Bind(1, this.pressure_shader.ULTexturePressure);
-				this.pressure_shader.setFloatUniform( this.pressure_shader.ULdT, dt);
-				this.pressure_shader.setFloatUniform( this.pressure_shader.ULTime, itime);
-				this.pressure_shader.setFloat2Uniform( this.pressure_shader.ULaspect, this.aspect);
+			for(let z = 0; z < this.depth; z += 8)
+			{
+				this.txPressure = this.txPressure1;
+				this.framebuffer.AttachTextureLayer(this.txPressure, 0);
 				
-				this.quad_model.RenderIndexedTriangles(this.pressure_shader);
+				var dt = dT / this.NofPressureIterations;
+				var itime = this.time + dt;
 				
+				this.pressure_shader.Bind();
+					this.txDivergence.Bind(0, this.pressure_shader.ULTextureDivergence);
+					this.txOldPressure.Bind(1, this.pressure_shader.ULTexturePressure);
+					this.pressure_shader.setFloatUniform( this.pressure_shader.ULdT, dt);
+					this.pressure_shader.setFloatUniform( this.pressure_shader.ULTime, itime);
+					this.pressure_shader.setFloat2Uniform( this.pressure_shader.ULaspect, this.aspect);
+					
+					this.quad_model.RenderIndexedTriangles(this.pressure_shader);
+					
+			}
 			//swap pressure
 			if(i > 1){
 				var temp = this.txPressure0;
@@ -347,18 +362,21 @@ export class FluidSim2D
 			}
 		}
 		
-		//6. divergence free velocity pass: input je txPressure i txAdvectedCorrectedVelocity, output je txVelocity
-		{
-			this.txVelocity = this.txVelocity2;
-			this.framebuffer.AttachTexture(this.txVelocity, 0);
-			
-			this.divfree_velocity_shader.Bind();
-				this.txPressure.Bind(0, this.divfree_velocity_shader.ULTexturePressure);
-				this.txAdvectedCorrectedVelocity.Bind(1, this.divfree_velocity_shader.ULTextureVelocity);
-				this.divfree_velocity_shader.setFloatUniform( this.divfree_velocity_shader.ULdT, dT);
-				this.divfree_velocity_shader.setFloat2Uniform( this.divfree_velocity_shader.ULaspect, this.aspect);
+		for(let z = 0; z < this.depth; z += 8)
+		{	
+			//6. divergence free velocity pass: input je txPressure i txAdvectedCorrectedVelocity, output je txVelocity
+			{
+				this.txVelocity = this.txVelocity2;
+				this.framebuffer.AttachTextureLayer(this.txVelocity, 0);
 				
-				this.quad_model.RenderIndexedTriangles(this.divfree_velocity_shader);
+				this.divfree_velocity_shader.Bind();
+					this.txPressure.Bind(0, this.divfree_velocity_shader.ULTexturePressure);
+					this.txAdvectedCorrectedVelocity.Bind(1, this.divfree_velocity_shader.ULTextureVelocity);
+					this.divfree_velocity_shader.setFloatUniform( this.divfree_velocity_shader.ULdT, dT);
+					this.divfree_velocity_shader.setFloat2Uniform( this.divfree_velocity_shader.ULaspect, this.aspect);
+					
+					this.quad_model.RenderIndexedTriangles(this.divfree_velocity_shader);
+			}		
 		}
 		
 		Framebuffer.Bind(oldFB);
@@ -473,7 +491,7 @@ export class FluidSim2D
 		
 		this.display_shader.RemoveAllDefines();
 		this.display_shader.addDefine(this.strDisplayType,"");
-		this.display_shader.addDefine("Resolution",this.str_vec2Res);
+		this.display_shader.addDefine("Resolution",this.str_vec3Res);
 		if(this.display_shader.Recompile(false) == false) alert("nije kompajliran shader!");
 		this.display_shader.InitDefaultAttribLocations();
 		this.display_shader.InitDefaultUniformLocations();
