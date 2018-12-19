@@ -687,34 +687,35 @@ export class FluidSim3D
 		gl.clearColor(0.0, 0.95, 0.6, 1.0);
 		// gl.clearDepth(1.0);
 		
-		for(let z = 0; z < this.depth; ++z){
-			
-			this.framebuffer.AttachTextureLayer(this.txVelocity0, 0, z);
-			this.framebuffer.CheckStatus();
-			gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-			
-			this.framebuffer.AttachTextureLayer(this.txVelocity1, 0, z);
-			this.framebuffer.CheckStatus();
-			gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-			
-			this.framebuffer.AttachTextureLayer(this.txVelocity2, 0, z);
-			this.framebuffer.CheckStatus();
-			gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-			
-			this.framebuffer.AttachTextureLayer(this.txDivergence, 0, z);
-			this.framebuffer.CheckStatus();
-			gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-			
-			this.framebuffer.AttachTextureLayer(this.txPressure0, 0, z);
-			this.framebuffer.CheckStatus();
-			gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-			
-			this.framebuffer.AttachTextureLayer(this.txPressure1, 0, z);
-			this.framebuffer.CheckStatus();
-			gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+		var buffers = [this.txVelocity0, this.txVelocity1, this.txVelocity2,
+						this.txDivergence, this.txPressure0, this.txPressure1];
 		
+		for(let z = 0; z < this.depth; ++z)
+		{	
+			/* this.framebuffer.AttachTextureLayer(this.txVelocity0, 0, z);
+			gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+			
+			this.framebuffer.AttachTextureLayer(this.txVelocity1, 1, z);
+			gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+			
+			this.framebuffer.AttachTextureLayer(this.txVelocity2, 2, z);
+			gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+			
+			this.framebuffer.AttachTextureLayer(this.txDivergence, 3, z);
+			gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+			
+			this.framebuffer.AttachTextureLayer(this.txPressure0, 4, z);
+			gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+			
+			this.framebuffer.AttachTextureLayer(this.txPressure1, 5, z);
+			gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT); */
+			
+			this.framebuffer.AttachMultipleLayer(buffers, z);
+			gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 		}
-		
+		this.framebuffer.CheckStatus();
+		this.framebuffer.DetachAllTextures();
+				
 		Framebuffer.Bind(oldFB);
 	}
 	

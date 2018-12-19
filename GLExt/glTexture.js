@@ -779,6 +779,75 @@ export class Texture3D{
 			}
 		}
 	}
+	
+	//------------------------------------------------------------------------------------------------------------------------------------------------
+		
+	setWrapTypeClampToEdge(){
+		gl.bindTexture(this.targetType, this.texture);
+		
+		gl.texParameteri(this.targetType, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+		gl.texParameteri(this.targetType, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+		
+		gl.bindTexture(this.targetType, null);
+	}
+	
+	setWrapTypeRepeat(){
+		gl.bindTexture(this.targetType, this.texture);
+		
+		gl.texParameteri(this.targetType, gl.TEXTURE_WRAP_S, gl.REPEAT);
+		gl.texParameteri(this.targetType, gl.TEXTURE_WRAP_T, gl.REPEAT);
+		
+		gl.bindTexture(this.targetType, null);
+	}
+	
+	setMinMagFilterLinearMipMapLinear(){
+		gl.bindTexture(this.targetType, this.texture);
+		
+		gl.texParameteri(this.targetType, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR); //LINEAR_MIPMAP_LINEAR
+		gl.texParameteri(this.targetType, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+		
+		gl.bindTexture(this.targetType, null);
+	}
+	
+	setMinMagFilterLinearLinear(){
+		gl.bindTexture(this.targetType, this.texture);
+		
+		gl.texParameteri(this.targetType, gl.TEXTURE_MIN_FILTER, gl.LINEAR); //LINEAR_MIPMAP_LINEAR
+		gl.texParameteri(this.targetType, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+		
+		gl.bindTexture(this.targetType, null);
+	}
+	
+	setMinMagFilterNearestNearest(){
+		gl.bindTexture(this.targetType, this.texture);
+		
+		gl.texParameteri(this.targetType, gl.TEXTURE_MIN_FILTER, gl.NEAREST); //LINEAR_MIPMAP_LINEAR
+		gl.texParameteri(this.targetType, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+		
+		gl.bindTexture(this.targetType, null);
+	}
+	
+	Bind(slot, uniformLocation){
+		if(uniformLocation === -1) return false;
+		
+		gl.activeTexture(gl.TEXTURE0 + slot);
+		gl.bindTexture(this.targetType, this.texture);
+		gl.uniform1i(uniformLocation, slot);
+		this.activeSlot = slot;
+		
+		return true;
+	}
+	
+	Unbind(){
+		gl.activeTexture(gl.TEXTURE0 + this.activeSlot);
+		gl.bindTexture(this.targetType, null);
+	}
+	
+	static Unbind(slot){
+		gl.activeTexture(gl.TEXTURE0 + slot);
+		gl.bindTexture(this.targetType, null);
+	}
+	
 }
 
 var globalTextureList = null;

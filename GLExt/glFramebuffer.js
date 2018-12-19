@@ -40,7 +40,28 @@ export class Framebuffer{
 		this.AttachTextureLevel(texture, slot, 0);
 	}
 	
+	AttachMultipleLevel(textures, level){
+		if(textures == null || texture.length == 0) return;
+		var oldFBO = gl.currentFramebuffer;
+		Framebuffer.Bind(this.framebuffer);
+		
+		for(let slot = 0; slot < textures.length; ++slot){
+			let texture = textures[slot];
+			gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0+slot, gl.TEXTURE_2D, texture.texture, level);
+			this.attachedTextures[slot] = texture.SlotID;
+		}
+		this.width = textures[0].width; this.height = textures[0].height;
+		this.SetupUsage();
+		
+		if(this.bRestorePrevFB === true) Framebuffer.Bind(oldFBO);
+	}
+	
+	AttachMultiple(textures){
+		this.AttachMultipleLevel(textures, 0);
+	}
+	
 	AttachTextureLayerLevel(texture, slot, nlayer, level){
+		if(textures == null || texture.length == 0) return;
 		var oldFBO = gl.currentFramebuffer;
 		Framebuffer.Bind(this.framebuffer);
 		
@@ -54,6 +75,25 @@ export class Framebuffer{
 	
 	AttachTextureLayer(texture, slot, nlayer){
 		this.AttachTextureLayerLevel(texture, slot, nlayer, 0);
+	}
+	
+	AttachMultipleLayerLevel(textures, nlayer, level){
+		var oldFBO = gl.currentFramebuffer;
+		Framebuffer.Bind(this.framebuffer);
+		
+		for(let slot = 0; slot < textures.length; ++slot){
+			let texture = textures[slot];
+			gl.framebufferTextureLayer(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0+slot, texture.texture, level, nlayer);
+			this.attachedTextures[slot] = texture.SlotID;
+		}
+		this.width = textures[0].width; this.height = textures[0].height;
+		this.SetupUsage();
+		
+		if(this.bRestorePrevFB === true) Framebuffer.Bind(oldFBO);
+	}
+	
+	AttachMultipleLayer(textures, nlayer){
+		this.AttachMultipleLayerLevel(textures, nlayer, 0);
 	}
 	
 	DetachTextureLevel(slot, level){
@@ -70,6 +110,24 @@ export class Framebuffer{
 	
 	DetachTexture(slot){
 		this.DetachTextureLevel(slot, 0);
+	}
+	
+	DetachAllTextures(lvl){
+		var oldFBO = gl.currentFramebuffer;
+		Framebuffer.Bind(this.framebuffer);
+		
+		if(lvl != undefined || lvl != null) level = lvl;
+		var level = 0; 
+			
+		for(let slot = 0; slot < this.attachedTextures.length; ++slot){
+			gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0+slot, gl.TEXTURE_2D, null, level);
+			// this.attachedTextures[slot] = -1;
+		}
+		this.attachedTextures = [];
+		this.SetupUsage();
+		this.width = -1; this.height = -1;
+		
+		if(this.bRestorePrevFB === true) Framebuffer.Bind(oldFBO);
 	}
 	
 	AttachDepth(texture){
@@ -94,7 +152,7 @@ export class Framebuffer{
 	
 	SetupUsage(){
 		var buffers = [];
-		for(var i = 0; i < this.attachedTextures.length; ++i)
+		for(let i = 0; i < this.attachedTextures.length; ++i)
 			buffers[buffers.length] = gl.COLOR_ATTACHMENT0+i;
 		gl.drawBuffers(buffers);
 	}
