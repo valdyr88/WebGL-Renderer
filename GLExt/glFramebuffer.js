@@ -41,7 +41,7 @@ export class Framebuffer{
 	}
 	
 	AttachMultipleLevel(textures, level){
-		if(textures == null || texture.length == 0) return;
+		if(textures == null || textures.length == 0) return;
 		var oldFBO = gl.currentFramebuffer;
 		Framebuffer.Bind(this.framebuffer);
 		
@@ -61,7 +61,6 @@ export class Framebuffer{
 	}
 	
 	AttachTextureLayerLevel(texture, slot, nlayer, level){
-		if(textures == null || texture.length == 0) return;
 		var oldFBO = gl.currentFramebuffer;
 		Framebuffer.Bind(this.framebuffer);
 		
@@ -78,6 +77,7 @@ export class Framebuffer{
 	}
 	
 	AttachMultipleLayerLevel(textures, nlayer, level){
+		if(textures == null || textures.length == 0) return;
 		var oldFBO = gl.currentFramebuffer;
 		Framebuffer.Bind(this.framebuffer);
 		
