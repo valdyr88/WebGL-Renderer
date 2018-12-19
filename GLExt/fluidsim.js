@@ -713,7 +713,6 @@ export class FluidSim3D
 			this.framebuffer.AttachMultipleLayer(buffers, z);
 			gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 		}
-		this.framebuffer.CheckStatus();
 		this.framebuffer.DetachAllTextures();
 				
 		Framebuffer.Bind(oldFB);
@@ -895,6 +894,50 @@ export class FluidSim3D
 			this.quad_model.RenderIndexedTriangles(this.display_shader);
 	}
 
+	CreateTest3DRenderShader(fragment_shader)
+	{
+		if(this.viscosity_shader == 'undefined' || this.viscosity_shader == null) return false;
+		
+		this.shader3DRender = new Shader(-1);//test_3d_texture_render "fluidsim_quad_surface_shader", "test_3d_texture_render"
+		this.shader3DRender.addDefine("Resolution",this.str_vec3Res);
+		if(this.shader3DRender.CompileFromFile(this.viscosity_shader.VertexShaderName, fragment_shader) == false) alert("nije kompajliran shader!");
+		this.shader3DRender.InitDefaultAttribLocations();
+		this.shader3DRender.InitDefaultUniformLocations();
+		this.shader3DRender.ULz = this.shader3DRender.getUniformLocation("z");
+		this.shader3DRender.ULdT = this.shader3DRender.getUniformLocation("dT");
+		
+		ShaderList.addShader(this.shader3DRender);
+		
+		return true;
+	}
+	
+	Test3DRender()
+	{
+		if(this.shader3DRender == 'undefined' || this.shader3DRender == null) return;
+		
+		var oldFB = gl.currentFramebuffer;
+		this.framebuffer.Bind();
+		
+		gl.viewport(0, 0, this.width, this.height);
+		
+		this.shader3DRender.Bind();
+		this.shader3DRender.setFloatUniform(this.shader3DRender.ULTime, this.time);
+		this.shader3DRender.setFloatUniform(this.shader3DRender.ULdT, 0.1);
+		
+		for(let z = 0; z < this.depth; z += 8)
+		{
+			for(let l = 0; l < 8; ++l)
+				this.framebuffer.AttachTextureLayer(this.txVelocity0, l, z+l);
+			this.framebuffer.CheckStatus();
+			
+			this.shader3DRender.setIntUniform(this.shader3DRender.ULz, z);			
+			this.quad_model.RenderIndexedTriangles(this.shader3DRender);	
+		}
+		this.framebuffer.DetachAllTextures(); //potrebno je kod sljedecih poziva framebuffer.Bind() moze ostat bindane teksture na out
+				
+		Framebuffer.Bind(oldFB);
+	}
+	
 	setKinematicViscosity(v){
 		this.kinematicViscosity = v;
 	}

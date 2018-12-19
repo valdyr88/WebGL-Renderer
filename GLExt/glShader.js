@@ -496,6 +496,10 @@ export class Shader
 		if(typeof view !== 'undefined' && view != null)
 			this.ULMatrixView = gl.getUniformLocation(this.program, view);
 		
+		if(this.ULMatrixProjection == null) this.ULMatrixProjection = -1;
+		if(this.ULMatrixModel == null) this.ULMatrixModel = -1;
+		if(this.ULMatrixView == null) this.ULMatrixView = -1;
+		
 		return true;
 	}
 	
@@ -601,6 +605,10 @@ export class Shader
 		if(typeof AoRS !== 'undefined' && AoRS != null)
 			this.ULTextureAoRS = gl.getUniformLocation(this.program, AoRS);
 		
+		if(this.ULTextureD == null) this.ULTextureD == -1;
+		if(this.ULTextureN == null) this.ULTextureN == -1;
+		if(this.ULTextureAoRS == null) this.ULTextureAoRS == -1;
+		
 		return true;
 	}	
 	
@@ -613,16 +621,22 @@ export class Shader
 		if(typeof BRDFLUT !== 'undefined' && BRDFLUT != null)
 			this.ULTextureBRDF_LUT = gl.getUniformLocation(this.program, BRDFLUT);
 		
+		if(this.ULTextureBRDF_LUT == null) this. ULTextureBRDF_LUT = -1;
+		
 		return true;
 	}
 	
 	setFlagsUniformLocation(Flags){
 		
-		if(this.program == null) return false;		
+		if(this.program == null) return false;
+
+		this.ULFlags = -1;
 		
 		if(typeof Flags !== 'undefined' && Flags != null)
 			this.ULFlags = gl.getUniformLocation(this.program, Flags);
 		else return false;
+		
+		if(this.ULFlags == null) this.ULFlags = -1;
 		
 		return true;
 	}
@@ -631,9 +645,13 @@ export class Shader
 		
 		if(this.program == null) return false;
 		
+		this.ULTime = -1;
+		
 		if(typeof Time !== 'undefined' && Time != null)
 			this.ULTime = gl.getUniformLocation(this.program, Time);
 		else return false;
+		
+		if(this.ULTime == null) this.ULTime = -1;
 		
 		return true;
 	}
@@ -642,9 +660,13 @@ export class Shader
 		
 		if(this.program == null) return false;
 		
+		this.ULCameraPosition = -1;
+		
 		if(typeof CameraPosition !== 'undefined' && CameraPosition != null)
 			this.ULCameraPosition = gl.getUniformLocation(this.program, CameraPosition);
 		else return false;
+		
+		if(this.ULCameraPosition == null) this.ULCameraPosition = -1;
 		
 		return true;
 		
