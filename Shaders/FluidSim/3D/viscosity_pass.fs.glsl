@@ -50,8 +50,8 @@ void modifyVelocity(vec3 x, float t, float dt, inout vec4 u){
 	// u += velocityFromAdditionalForces(x, t, dt);
 	
 	vec3 centar = toWorldSpace(vec3(0.2,0.5+cos(0.25*t)*0.25,0.5));
-	if(length(x - centar) < 14.0) u = 256.0*dt*vec4(0.0,-sin(0.25*t),0.0,0.0);
-	// if(length(x - centar) < 10.0) u = vec4(0.0,0.0,0.0,0.0);
+	if(length(x - centar) < 0.07f*Resolution.x) u = 256.0*dt*vec4(0.0,-sin(0.25*t),0.0,0.0);
+	// if(length(x - centar) < 0.05f*Resolution.x) u = vec4(0.0,0.0,0.0,0.0);
 }
 
 //racuna diffuziju zbog viscosity

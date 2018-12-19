@@ -247,7 +247,7 @@ export function main(){
 			);
 	}
 	else{
-		fluidSim = new sim.FluidSim3D(200,200,200,
+		fluidSim = new sim.FluidSim3D(128,128,128,
 			/* vertex, viscosity, advection, advection_correction,
 					divergence, pressure, divfree_velocity, display */
 			"fluidsim_quad_surface_shader", "fluidsim_viscosity_shader", "fluidsim_advection_shader", "fluidsim_advection_correction_shader",
