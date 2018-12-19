@@ -11,6 +11,7 @@ var bAutoQualitySelect = false;
 var QualitySelect = 0;
 var strQualitySelect = ["Quality_Low", "Quality_Med", "Quality_High"];
 var gFluidSim = null;
+var b3DFluidSim = false;
 
 export function main(){
 	
@@ -235,12 +236,24 @@ export function main(){
 	txfbHdrMipBlur.setMinMagFilterLinearMipMapLinear();
 	//------------------------------------------------------------------------
 	
-	var fluidSim = new sim.FluidSim2D(200,200,
-		/* vertex, viscosity, advection, advection_correction,
-				divergence, pressure, divfree_velocity, display */
-		"fluidsim_quad_surface_shader", "fluidsim_viscosity_shader", "fluidsim_advection_shader", "fluidsim_advection_correction_shader",
-		"fluidsim_divergence_shader", "fluidsim_pressure_shader", "fluidsim_divfree_velocity_shader", "fluidsim_display_shader"
-		);
+	var fluidSim = null;
+	
+	if(b3DFluidSim == false){
+		fluidSim = new sim.FluidSim2D(200,200,
+			/* vertex, viscosity, advection, advection_correction,
+					divergence, pressure, divfree_velocity, display */
+			"fluidsim_quad_surface_shader", "fluidsim_viscosity_shader", "fluidsim_advection_shader", "fluidsim_advection_correction_shader",
+			"fluidsim_divergence_shader", "fluidsim_pressure_shader", "fluidsim_divfree_velocity_shader", "fluidsim_display_shader"
+			);
+	}
+	else{
+		fluidSim = new sim.FluidSim3D(200,200,200,
+			/* vertex, viscosity, advection, advection_correction,
+					divergence, pressure, divfree_velocity, display */
+			"fluidsim_quad_surface_shader", "fluidsim_viscosity_shader", "fluidsim_advection_shader", "fluidsim_advection_correction_shader",
+			"fluidsim_divergence_shader", "fluidsim_pressure_shader", "fluidsim_divfree_velocity_shader", "fluidsim_display_shader"
+			);
+	}
 	fluidSim.setKinematicViscosity(1.0);
 	fluidSim.setDisplayType("_DEBUG_Display_Velocity");
 	fluidSim.ClearBuffers();
@@ -262,6 +275,9 @@ export function main(){
 		v = v / 30.0; //0.0, 3.0
 		return v;
 	}
+	
+	if(b3DFluidSim == true)
+		fluidSim.CreateTest3DRenderShader("test_3d_texture_render");
 	
 	vMath.mat4.perspective(projectionMatrix, vMath.deg2rad(40.0), gl.viewportWidth/gl.viewportHeight, 0.1, 1000.0);
 	
@@ -327,7 +343,7 @@ export function main(){
 	var bCtrlToggle = false;
 	var bShiftToggle = false;
 	var bFluidSimPass = true;
-	
+		
 	setInterval( function(){ window.requestAnimationFrame(renderFrame); }, 17);
 	
 	function renderFrame()
@@ -471,14 +487,19 @@ export function main(){
 				fluidsimBrightnessSlider.title = "brightness: " + Number.parseFloat(brightness).toFixed(4);
 				fluidSim.setDisplayBrightness(brightness);
 			//-------------------------------------------------------
-						
 			
-			fluidSim.SimStep(0.1);
-			
-			glext.Framebuffer.BindMainFB();	
-			gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);		
-			
-			fluidSim.Display();
+			if(b3DFluidSim == false){
+				
+				fluidSim.SimStep(0.1);
+				
+				glext.Framebuffer.BindMainFB();	
+				gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);		
+				
+				fluidSim.Display();
+			}
+			else {//test 3d, shader3DRender
+				fluidSim.Test3DRender();
+			}
 		}
 		
 		if(false) //Render deferred_opaque_shade i transparent_shader
