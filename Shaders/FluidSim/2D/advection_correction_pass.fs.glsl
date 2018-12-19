@@ -52,10 +52,18 @@ void getMinMaxNearestNeighbourValues(sampler2D u, vec2 x, out vec4 vMin, out vec
 	//x = floor(x + h);
 	
 	vec4 v[4];
-	v[0] = samplePoint(u, x + vec2(-h.x, 0.0));
-	v[1] = samplePoint(u, x + vec2( h.x, 0.0));
-	v[2] = samplePoint(u, x + vec2( 0.0,-h.y));
-	v[3] = samplePoint(u, x + vec2( 0.0, h.y));
+	/* 
+	v[0] = samplePoint(u, x + vec2(-h.x, 0.0)); //  x
+	v[1] = samplePoint(u, x + vec2( h.x, 0.0)); //x   x
+	v[2] = samplePoint(u, x + vec2( 0.0,-h.y)); //  x
+	v[3] = samplePoint(u, x + vec2( 0.0, h.y)); //
+	*/
+	
+	v[0] = samplePoint(u, x + vec2(-h.x,-h.y)); //
+	v[1] = samplePoint(u, x + vec2(-h.x, h.y)); // xx
+	v[2] = samplePoint(u, x + vec2( h.x,-h.y)); // xx
+	v[3] = samplePoint(u, x + vec2( h.x, h.y)); //
+	
 	
 	vMin = min(min(min(v[0],v[1]),v[2]),v[3]);
 	vMax = max(max(max(v[0],v[1]),v[2]),v[3]);
