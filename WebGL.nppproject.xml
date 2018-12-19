@@ -50,6 +50,17 @@
 					<File name="Shaders\FluidSim\2D\divfree_velocity_pass.fs.glsl" />
 					<File name="Shaders\FluidSim\2D\debug_display.fs.glsl" />
 				</Folder>
+				<Folder name="3D">
+					<File name="Shaders\FluidSim\3D\quad_surface.vs.glsl" />
+					<File name="Shaders\FluidSim\3D\fluidsim3D_include.glsl" />
+					<File name="Shaders\FluidSim\3D\viscosity_pass.fs.glsl" />
+					<File name="Shaders\FluidSim\3D\advection_pass.fs.glsl" />
+					<File name="Shaders\FluidSim\3D\advection_correction_pass.fs.glsl" />
+					<File name="Shaders\FluidSim\3D\divergence_pass.fs.glsl" />
+					<File name="Shaders\FluidSim\3D\pressure_calc_pass.fs.glsl" />
+					<File name="Shaders\FluidSim\3D\divfree_velocity_pass.fs.glsl" />
+					<File name="Shaders\FluidSim\3D\debug_display.fs.glsl" />
+				</Folder>
 			</Folder>
             <File name="Shaders\atmosphere_shader.fs.glsl" />
             <File name="Shaders\volume_clouds_shader.fs.glsl" />
