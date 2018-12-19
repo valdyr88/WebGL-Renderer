@@ -37,7 +37,7 @@ uniform float Time;
 varyin vec2 TexCoords;
 //------------------------------------------------------------------------------
 
-#include "fluidsim2d_include"
+#include "fluidsim3d_include"
 
 //racuna pressure
 void main(void)

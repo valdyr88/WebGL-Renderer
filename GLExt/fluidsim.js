@@ -502,8 +502,16 @@ export class FluidSim3D
 		this.str_vec2Res = "vec2(" + this.width.toString()+ ".0," + this.height.toString() + ".0)";
 		this.str_vec3Res = "vec3(" + this.width.toString()+ ".0," + this.height.toString() + ".0," + this.depth.toString() + ".0)";
 		
+		this.NumOutBuffers = 8;
+		this.str_WriteOutBuffers = "";
+		for(let i = 0; i < this.NumOutBuffers; ++i){
+			this.str_WriteOutBuffers += "out_buffer[" + i.toString() + "] = out_variable[" + i.toString() + "];";
+		}
+		
 		this.viscosity_shader = new Shader(-1);
 		this.viscosity_shader.addDefine("Resolution",this.str_vec3Res);
+		this.viscosity_shader.addDefine("NUM_OUT_BUFFERS", this.NumOutBuffers.toString());
+		this.viscosity_shader.addDefine("WriteOutput(out_buffer, out_variable)", this.str_WriteOutBuffers);
 		if(this.viscosity_shader.CompileFromFile(vertex, viscosity) == false) alert("nije kompajliran shader!");
 		this.viscosity_shader.InitDefaultAttribLocations();
 		this.viscosity_shader.InitDefaultUniformLocations();
@@ -511,6 +519,8 @@ export class FluidSim3D
 		this.viscosity_shader.ULdT = -1;
 		this.viscosity_shader.ULk = -1;
 		this.viscosity_shader.ULTextureVelocity = -1;
+		this.viscosity_shader.ULz = -1;
+		this.viscosity_shader.ULz = this.viscosity_shader.getUniformLocation("z");
 		this.viscosity_shader.ULaspect = this.viscosity_shader.getUniformLocation("aspect");
 		this.viscosity_shader.ULdT = this.viscosity_shader.getUniformLocation("dT");
 		this.viscosity_shader.ULk = this.viscosity_shader.getUniformLocation("k");
@@ -518,18 +528,24 @@ export class FluidSim3D
 				
 		this.advection_shader = new Shader(-1);
 		this.advection_shader.addDefine("Resolution",this.str_vec3Res);
+		this.advection_shader.addDefine("NUM_OUT_BUFFERS", this.NumOutBuffers.toString());
+		this.advection_shader.addDefine("WriteOutput(out_buffer, out_variable)", this.str_WriteOutBuffers);
 		if(this.advection_shader.CompileFromFile(vertex, advection) == false) alert("nije kompajliran shader!");
 		this.advection_shader.InitDefaultAttribLocations();
 		this.advection_shader.InitDefaultUniformLocations();
 		this.advection_shader.ULaspect = -1;
 		this.advection_shader.ULdT = -1;
 		this.advection_shader.ULTextureVelocity = -1;
+		this.advection_shader.ULz = -1;
+		this.advection_shader.ULz = this.advection_shader.getUniformLocation("z");
 		this.advection_shader.ULaspect = this.advection_shader.getUniformLocation("aspect");
 		this.advection_shader.ULdT = this.advection_shader.getUniformLocation("dT");
 		this.advection_shader.ULTextureVelocity = this.advection_shader.getUniformLocation("txVelocity");
 				
 		this.advection_correction_shader = new Shader(-1);
 		this.advection_correction_shader.addDefine("Resolution",this.str_vec3Res);
+		this.advection_correction_shader.addDefine("NUM_OUT_BUFFERS", this.NumOutBuffers.toString());
+		this.advection_correction_shader.addDefine("WriteOutput(out_buffer, out_variable)", this.str_WriteOutBuffers);
 		if(this.advection_correction_shader.CompileFromFile(vertex, advection_correction) == false) alert("nije kompajliran shader!");
 		this.advection_correction_shader.InitDefaultAttribLocations();
 		this.advection_correction_shader.InitDefaultUniformLocations();
@@ -537,6 +553,8 @@ export class FluidSim3D
 		this.advection_correction_shader.ULdT = -1;
 		this.advection_correction_shader.ULTextureVelocity = -1;
 		this.advection_correction_shader.ULTextureAdvectedVelocity = -1;
+		this.advection_correction_shader.ULz = -1;
+		this.advection_correction_shader.ULz = this.advection_correction_shader.getUniformLocation("z");
 		this.advection_correction_shader.ULaspect = this.advection_correction_shader.getUniformLocation("aspect");
 		this.advection_correction_shader.ULdT = this.advection_correction_shader.getUniformLocation("dT");
 		this.advection_correction_shader.ULTextureVelocity = this.advection_correction_shader.getUniformLocation("txVelocity");
@@ -544,18 +562,24 @@ export class FluidSim3D
 				
 		this.divergence_shader = new Shader(-1);
 		this.divergence_shader.addDefine("Resolution",this.str_vec3Res);
+		this.divergence_shader.addDefine("NUM_OUT_BUFFERS", this.NumOutBuffers.toString());
+		this.divergence_shader.addDefine("WriteOutput(out_buffer, out_variable)", this.str_WriteOutBuffers);
 		if(this.divergence_shader.CompileFromFile(vertex, divergence) == false) alert("nije kompajliran shader!");
 		this.divergence_shader.InitDefaultAttribLocations();
 		this.divergence_shader.InitDefaultUniformLocations();
 		this.divergence_shader.ULaspect = -1;
 		this.divergence_shader.ULdT = -1;
 		this.divergence_shader.ULTexture = -1;
+		this.divergence_shader.ULz = -1;
+		this.divergence_shader.ULz = this.divergence_shader.getUniformLocation("z");
 		this.divergence_shader.ULaspect = this.divergence_shader.getUniformLocation("aspect");
 		this.divergence_shader.ULdT = this.divergence_shader.getUniformLocation("dT");
 		this.divergence_shader.ULTexture = this.divergence_shader.getUniformLocation("txTexture");
 				
 		this.pressure_shader = new Shader(-1);
 		this.pressure_shader.addDefine("Resolution",this.str_vec3Res);
+		this.pressure_shader.addDefine("NUM_OUT_BUFFERS", this.NumOutBuffers.toString());
+		this.pressure_shader.addDefine("WriteOutput(out_buffer, out_variable)", this.str_WriteOutBuffers);
 		if(this.pressure_shader.CompileFromFile(vertex, pressure) == false) alert("nije kompajliran shader!");
 		this.pressure_shader.InitDefaultAttribLocations();
 		this.pressure_shader.InitDefaultUniformLocations();
@@ -563,6 +587,8 @@ export class FluidSim3D
 		this.pressure_shader.ULdT = -1;
 		this.pressure_shader.ULTexturePressure = -1;
 		this.pressure_shader.ULTextureDivergence = -1;
+		this.pressure_shader.ULz = -1;
+		this.pressure_shader.ULz = this.pressure_shader.getUniformLocation("z");
 		this.pressure_shader.ULaspect = this.pressure_shader.getUniformLocation("aspect");
 		this.pressure_shader.ULdT = this.pressure_shader.getUniformLocation("dT");
 		this.pressure_shader.ULTexturePressure = this.pressure_shader.getUniformLocation("txPressure");
@@ -570,6 +596,8 @@ export class FluidSim3D
 				
 		this.divfree_velocity_shader = new Shader(-1);
 		this.divfree_velocity_shader.addDefine("Resolution",this.str_vec3Res);
+		this.divfree_velocity_shader.addDefine("NUM_OUT_BUFFERS", this.NumOutBuffers.toString());
+		this.divfree_velocity_shader.addDefine("WriteOutput(out_buffer, out_variable)", this.str_WriteOutBuffers);
 		if(this.divfree_velocity_shader.CompileFromFile(vertex, divfree_velocity) == false) alert("nije kompajliran shader!");
 		this.divfree_velocity_shader.InitDefaultAttribLocations();
 		this.divfree_velocity_shader.InitDefaultUniformLocations();
@@ -577,6 +605,8 @@ export class FluidSim3D
 		this.divfree_velocity_shader.ULdT = -1;
 		this.divfree_velocity_shader.ULTexturePressure = -1;
 		this.divfree_velocity_shader.ULTextureVelocity = -1;
+		this.divfree_velocity_shader.ULz = -1;
+		this.divfree_velocity_shader.ULz = this.divfree_velocity_shader.getUniformLocation("z");
 		this.divfree_velocity_shader.ULaspect = this.divfree_velocity_shader.getUniformLocation("aspect");
 		this.divfree_velocity_shader.ULdT = this.divfree_velocity_shader.getUniformLocation("dT");
 		this.divfree_velocity_shader.ULTexturePressure = this.divfree_velocity_shader.getUniformLocation("txPressure");
@@ -585,6 +615,7 @@ export class FluidSim3D
 		this.display_shader = new Shader(-1);
 		this.display_shader.addDefine("_DEBUG_Display_Velocity","");
 		this.display_shader.addDefine("Resolution",this.str_vec3Res);
+		this.display_shader.addDefine("NUM_OUT_BUFFERS", this.NumOutBuffers.toString());
 		if(this.display_shader.CompileFromFile(vertex, display) == false) alert("nije kompajliran shader!");
 		this.display_shader.InitDefaultAttribLocations();
 		this.display_shader.InitDefaultUniformLocations();
@@ -684,32 +715,14 @@ export class FluidSim3D
 		gl.viewport(0, 0, this.width, this.height);
 		
 		gl.disable(gl.DEPTH_TEST);
-		gl.clearColor(0.0, 0.95, 0.6, 1.0);
+		gl.clearColor(0.0, 0.0, 0.0, 1.0);
 		// gl.clearDepth(1.0);
 		
 		var buffers = [this.txVelocity0, this.txVelocity1, this.txVelocity2,
 						this.txDivergence, this.txPressure0, this.txPressure1];
 		
 		for(let z = 0; z < this.depth; ++z)
-		{	
-			/* this.framebuffer.AttachTextureLayer(this.txVelocity0, 0, z);
-			gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-			
-			this.framebuffer.AttachTextureLayer(this.txVelocity1, 1, z);
-			gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-			
-			this.framebuffer.AttachTextureLayer(this.txVelocity2, 2, z);
-			gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-			
-			this.framebuffer.AttachTextureLayer(this.txDivergence, 3, z);
-			gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-			
-			this.framebuffer.AttachTextureLayer(this.txPressure0, 4, z);
-			gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-			
-			this.framebuffer.AttachTextureLayer(this.txPressure1, 5, z);
-			gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT); */
-			
+		{				
 			this.framebuffer.AttachMultipleLayer(buffers, z);
 			gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 		}
@@ -731,7 +744,7 @@ export class FluidSim3D
 			display u mainu
 		*/
 		
-		//ToDo: kad proradi za 3D, pokusati izbaciti postavljanje uniformova iz loop-ova (uglavnom je moguce sve skroz izvan loopova)
+		//ToDo: kad proradi za 3D, pokusati izbaciti postavljanje uniformova iz loop-ova (moguce je skoro sve skroz izvan loopova (samo ULz treba u loopu))
 		
 		var oldFB = gl.currentFramebuffer;
 		this.framebuffer.Bind();
@@ -754,16 +767,17 @@ export class FluidSim3D
 			this.txOldPressure = this.txPressure0;
 		}
 		
-		for(let z = 0; z < this.depth; z += 8)
+		for(let z = 0; z < this.depth; z += this.NumOutBuffers)
 		{
 			//1. viscosity pass: input je txOldVelocity, output je txDiffusedVelocity
 			{
 				this.txDiffusedVelocity = this.txVelocity1;
-				for(let l = 0; l < 8; ++l)
+				for(let l = 0; l < this.NumOutBuffers; ++l)
 					this.framebuffer.AttachTextureLayer(this.txDiffusedVelocity, l, z+l);
 				
 				this.viscosity_shader.Bind();
 					this.txOldVelocity.Bind(0, this.viscosity_shader.ULTextureVelocity);
+					this.viscosity_shader.setIntUniform(this.viscosity_shader.ULz, z);
 					this.viscosity_shader.setFloatUniform( this.viscosity_shader.ULdT, dT);
 					this.viscosity_shader.setFloatUniform( this.viscosity_shader.ULk, this.kinematicViscosity);
 					this.viscosity_shader.setFloat3Uniform( this.viscosity_shader.ULaspect, this.aspect );
@@ -773,16 +787,17 @@ export class FluidSim3D
 			}
 		}
 		
-		for(let z = 0; z < this.depth; z += 8)
+		for(let z = 0; z < this.depth; z += this.NumOutBuffers)
 		{
 			//2. advection pass: input je txDiffusedVelocity, output je txAdvectedVelocity
 			{
 				this.txAdvectedVelocity = this.txVelocity2;
-				for(let l = 0; l < 8; ++l)
+				for(let l = 0; l < this.NumOutBuffers; ++l)
 					this.framebuffer.AttachTextureLayer(this.txAdvectedVelocity, l, z+l);
 				
 				this.advection_shader.Bind();
 					this.txDiffusedVelocity.Bind(0, this.advection_shader.ULTextureVelocity);
+					this.advection_shader.setIntUniform(this.advection_shader.ULz, z);
 					this.advection_shader.setFloatUniform( this.advection_shader.ULdT, dT);
 					this.advection_shader.setFloat3Uniform( this.advection_shader.ULaspect, this.aspect);
 					
@@ -790,17 +805,18 @@ export class FluidSim3D
 			}
 		}
 		
-		for(let z = 0; z < this.depth; z += 8)
+		for(let z = 0; z < this.depth; z += this.NumOutBuffers)
 		{	
 			//3. advection correction pass: input je txAdvectedVelocity i txDiffusedVelocity, output je txAdvectedCorrectedVelocity
 			{
 				this.txAdvectedCorrectedVelocity = this.txVelocity0;
-				for(let l = 0; l < 8; ++l)
+				for(let l = 0; l < this.NumOutBuffers; ++l)
 					this.framebuffer.AttachTextureLayer(this.txAdvectedCorrectedVelocity, l, z+l);
 				
 				this.advection_correction_shader.Bind();
 					this.txAdvectedVelocity.Bind(0, this.advection_correction_shader.ULTextureAdvectedVelocity);
 					this.txDiffusedVelocity.Bind(1, this.advection_correction_shader.ULTextureVelocity);
+					this.advection_correction_shader.setIntUniform(this.advection_correction_shader.ULz, z);
 					this.advection_correction_shader.setFloatUniform( this.advection_correction_shader.ULdT, dT);
 					this.advection_correction_shader.setFloat3Uniform( this.advection_correction_shader.ULaspect, this.aspect);
 					
@@ -808,16 +824,17 @@ export class FluidSim3D
 			}
 		}
 		
-		for(let z = 0; z < this.depth; z += 8)
+		for(let z = 0; z < this.depth; z += this.NumOutBuffers)
 		{	
 			//4. divergence pass na velocity: input je txAdvectedCorrectedVelocity, output je txDivergence
 			{
 				this.txDivergence;
-				for(let l = 0; l < 8; ++l)
+				for(let l = 0; l < this.NumOutBuffers; ++l)
 					this.framebuffer.AttachTextureLayer(this.txDivergence, l, z+l);
 				
 				this.divergence_shader.Bind();
 					this.txAdvectedCorrectedVelocity.Bind(0, this.divergence_shader.ULTexture);
+					this.divergence_shader.setIntUniform(this.divergence_shader.ULz, z);
 					this.divergence_shader.setFloatUniform( this.divergence_shader.ULdT, dT);
 					this.divergence_shader.setFloat3Uniform( this.divergence_shader.ULaspect, this.aspect);
 					
@@ -828,10 +845,10 @@ export class FluidSim3D
 		//5. pressure calc pass: input je txDivergence i txOldPressure, output je txPressure. Jacobi iteration. (vise puta izvrsavanje)
 		for(let i = this.NofPressureIterations; i > 0; --i)
 		{
-			for(let z = 0; z < this.depth; z += 8)
+			for(let z = 0; z < this.depth; z += this.NumOutBuffers)
 			{
 				this.txPressure = this.txPressure1;
-				for(let l = 0; l < 8; ++l)
+				for(let l = 0; l < this.NumOutBuffers; ++l)
 					this.framebuffer.AttachTextureLayer(this.txPressure, l, z+l);
 				
 				var dt = dT / this.NofPressureIterations;
@@ -840,6 +857,7 @@ export class FluidSim3D
 				this.pressure_shader.Bind();
 					this.txDivergence.Bind(0, this.pressure_shader.ULTextureDivergence);
 					this.txOldPressure.Bind(1, this.pressure_shader.ULTexturePressure);
+					this.pressure_shader.setIntUniform(this.pressure_shader.ULz, z);
 					this.pressure_shader.setFloatUniform( this.pressure_shader.ULdT, dt);
 					this.pressure_shader.setFloatUniform( this.pressure_shader.ULTime, itime);
 					this.pressure_shader.setFloat3Uniform( this.pressure_shader.ULaspect, this.aspect);
@@ -857,17 +875,18 @@ export class FluidSim3D
 			}
 		}
 		
-		for(let z = 0; z < this.depth; z += 8)
+		for(let z = 0; z < this.depth; z += this.NumOutBuffers)
 		{	
 			//6. divergence free velocity pass: input je txPressure i txAdvectedCorrectedVelocity, output je txVelocity
 			{
 				this.txVelocity = this.txVelocity2;
-				for(let l = 0; l < 8; ++l)
+				for(let l = 0; l < this.NumOutBuffers; ++l)
 					this.framebuffer.AttachTextureLayer(this.txVelocity, l, z+l);
 				
 				this.divfree_velocity_shader.Bind();
 					this.txPressure.Bind(0, this.divfree_velocity_shader.ULTexturePressure);
 					this.txAdvectedCorrectedVelocity.Bind(1, this.divfree_velocity_shader.ULTextureVelocity);
+					this.divfree_velocity_shader.setIntUniform(this.divfree_velocity_shader.ULz, z);
 					this.divfree_velocity_shader.setFloatUniform( this.divfree_velocity_shader.ULdT, dT);
 					this.divfree_velocity_shader.setFloat3Uniform( this.divfree_velocity_shader.ULaspect, this.aspect);
 					
@@ -900,6 +919,8 @@ export class FluidSim3D
 		
 		this.shader3DRender = new Shader(-1);//test_3d_texture_render "fluidsim_quad_surface_shader", "test_3d_texture_render"
 		this.shader3DRender.addDefine("Resolution",this.str_vec3Res);
+		this.shader3DRender.addDefine("NUM_OUT_BUFFERS", this.NumOutBuffers.toString());
+		this.shader3DRender.addDefine("WriteOutput(out_buffer, out_variable)", this.str_WriteOutBuffers);
 		if(this.shader3DRender.CompileFromFile(this.viscosity_shader.VertexShaderName, fragment_shader) == false) alert("nije kompajliran shader!");
 		this.shader3DRender.InitDefaultAttribLocations();
 		this.shader3DRender.InitDefaultUniformLocations();
@@ -924,9 +945,9 @@ export class FluidSim3D
 		this.shader3DRender.setFloatUniform(this.shader3DRender.ULTime, this.time);
 		this.shader3DRender.setFloatUniform(this.shader3DRender.ULdT, 0.1);
 		
-		for(let z = 0; z < this.depth; z += 8)
+		for(let z = 0; z < this.depth; z += this.NumOutBuffers)
 		{
-			for(let l = 0; l < 8; ++l)
+			for(let l = 0; l < this.NumOutBuffers; ++l)
 				this.framebuffer.AttachTextureLayer(this.txVelocity0, l, z+l);
 			this.framebuffer.CheckStatus();
 			

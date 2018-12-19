@@ -34,7 +34,7 @@ uniform float dT;
 varyin vec2 TexCoords;
 //------------------------------------------------------------------------------
 
-#include "fluidsim2d_include"
+#include "fluidsim3d_include"
 
 #define GradComp x
 vec4 gradient(sampler2D tx, vec2 x){

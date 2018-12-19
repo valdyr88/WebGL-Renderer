@@ -22,7 +22,6 @@ precision mediump float;
 	#define texture2DLod textureLod
 #endif
 
-uniform int z;
 uniform vec3 aspect; //odnos dimenzija teksture i svijeta
 uniform float dT;
 uniform float k; //kinematic viscosity, = viscosity / density
@@ -38,7 +37,7 @@ uniform sampler2D txVelocityDivergence;
 varyin vec2 TexCoords;
 //------------------------------------------------------------------------------
 
-#include "fluidsim2d_include"
+#include "fluidsim3d_include"
 
 /* 
 	#define _DEBUG_Display_Velocity
@@ -49,6 +48,7 @@ varyin vec2 TexCoords;
 
 void main(void)
 {	
+	int z = 0;
 	ivec2 size = textureSize(txVelocity, 0);
 	vec3 x = toWorldSpace(TexCoords, z);
 	float dt = dT;	

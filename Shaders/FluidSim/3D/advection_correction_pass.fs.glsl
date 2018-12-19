@@ -35,7 +35,7 @@ uniform float dT;
 varyin vec2 TexCoords;
 //------------------------------------------------------------------------------
 
-#include "fluidsim2d_include"
+#include "fluidsim3d_include"
 
 vec4 advectReverse(sampler2D u, vec2 x, float dt){
 	vec4 uadv = samplePoint(u, x); //sample point

@@ -12,8 +12,6 @@ precision mediump float;
 #if __VERSION__ >= 300
 	#define gl_FragColor out_FragColor
 	layout(location = 0) out vec4 out_FragColor;
-	// layout(location = 1) out vec4 out_Normal;
-	// layout(location = 2) out vec4 out_AoRSMt;
 #endif
 
 #if __VERSION__ >= 120
@@ -34,7 +32,7 @@ uniform float dT;
 varyin vec2 TexCoords;
 //------------------------------------------------------------------------------
 
-#include "fluidsim2d_include"
+#include "fluidsim3d_include"
 
 vec4 advect(sampler2D u, vec2 x, float dt){
 	vec4 v = samplePoint(u, x); //sample point

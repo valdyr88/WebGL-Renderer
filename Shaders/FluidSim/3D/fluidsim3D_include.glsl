@@ -4,7 +4,7 @@
 
 vec3 toTexSpace(vec3 x){ return (x + vec3(0.5,0.5,0.5))/Resolution; }
 vec3 toWorldSpace(vec3 x){ return x*Resolution - vec3(0.5,0.5,0.5); }
-vec3 toWorldSpace(vec2 x, int z){ vec3 r = toWorldSpace(vec3(x.x,x.y,0.0f)); r.z = float(z); }
+vec3 toWorldSpace(vec2 x, int z){ vec3 r = toWorldSpace(vec3(x.x,x.y,0.0f)); r.z = float(z)-0.5; }
 
 bool isAtBorder(vec3 x){
 #define border_size (0)

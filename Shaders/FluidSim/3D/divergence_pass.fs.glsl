@@ -33,7 +33,7 @@ uniform float dT;
 varyin vec2 TexCoords;
 //------------------------------------------------------------------------------
 
-#include "fluidsim2d_include"
+#include "fluidsim3d_include"
 
 float divergence(sampler2D tx, vec2 x){
 	//za 3D treba 6 susjednih samplirat
