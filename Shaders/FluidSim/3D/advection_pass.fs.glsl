@@ -11,7 +11,7 @@ precision mediump float;
 
 #if __VERSION__ >= 300
 	#define gl_FragColor out_FragColor
-	layout(location = 0) out vec4 out_FragColor;
+	layout(location = 0) out vec4 out_FragColor[NUM_OUT_BUFFERS];
 #endif
 
 #if __VERSION__ >= 120
@@ -23,7 +23,7 @@ precision mediump float;
 
 uniform int z;
 uniform vec3 aspect; //odnos dimenzija teksture i svijeta
-uniform sampler2D txVelocity;
+uniform sampler3D txVelocity;
 uniform float dT;
 
 //------------------------------------------------------------------------------
@@ -34,7 +34,7 @@ varyin vec2 TexCoords;
 
 #include "fluidsim3d_include"
 
-vec4 advect(sampler2D u, vec2 x, float dt){
+vec4 advect(sampler3D u, vec3 x, float dt){
 	vec4 v = samplePoint(u, x); //sample point
 	return sampleLinear(u, x - dt*v.xy); //sample linear
 }
@@ -42,9 +42,15 @@ vec4 advect(sampler2D u, vec2 x, float dt){
 //===================================================================================================
 
 void main(void)
-{	
-	vec3 x = toWorldSpace(TexCoords, z);
-	vec4 uadv = advect(txVelocity, x, dT);
+{
+	vec4 uadv[NUM_OUT_BUFFERS];
+
+	for(int i = 0; i < NUM_OUT_BUFFERS; ++i)
+	{	
+		vec3 x = toWorldSpace(TexCoords, z+i);
+		uadv[i] = advect(txVelocity, x, dT);
+	}
 			
-	gl_FragColor = uadv;
+	// gl_FragColor = uadv;
+	WriteOutput(gl_FragColor, uadv);
 }

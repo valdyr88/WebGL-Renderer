@@ -10,7 +10,7 @@ precision mediump float;
 
 #if __VERSION__ >= 300
 	#define gl_FragColor out_FragColor
-	layout(location = 0) out vec4 out_FragColor;
+	layout(location = 0) out vec4 out_FragColor[NUM_OUT_BUFFERS];
 #endif
 
 #if __VERSION__ >= 120
@@ -27,7 +27,7 @@ uniform vec3 aspect; //odnos dimenzija teksture i svijeta
 uniform float dT;
 uniform float Time;
 uniform float k; //kinematic viscosity, = viscosity / density
-uniform sampler2D txVelocity;
+uniform sampler3D txVelocity;
 //------------------------------------------------------------------------------
 #define varyin in
 
@@ -56,23 +56,30 @@ void modifyVelocity(vec3 x, float t, float dt, inout vec4 u){
 //racuna diffuziju zbog viscosity
 void main(void)
 {	
-	vec3 x = toWorldSpace(TexCoords, z);
 	float dt = dT;	
 	const vec3 dx = vec3(1.0,1.0,1.0);
+	vec4 unew[NUM_OUT_BUFFERS];
 	
-	vec4 u = samplePoint(txVelocity, x);
-		
-	vec4 us[4];
-	//za 3D treba 6 susjednih samplirat
-	us[0] = samplePoint(txVelocity, x + vec2( dx.x,0.0));
-	us[1] = samplePoint(txVelocity, x + vec2(-dx.x,0.0));
-	us[2] = samplePoint(txVelocity, x + vec2(0.0, dx.y));
-	us[3] = samplePoint(txVelocity, x + vec2(0.0,-dx.y));
-	
-	vec4 unew = u + dt*k*(us[0] + us[1] + us[2] + us[3] - 4.0*u);
-	
-	//dodatne sile
-	modifyVelocity(x, Time, dT, unew);
+	for(int i = 0; i < NUM_OUT_BUFFERS; ++i)
+	{
+		vec3 x = toWorldSpace(TexCoords, z+i);
+		vec4 u = samplePoint(txVelocity, x);
 			
-	gl_FragColor = unew;
+		vec4 us[6];
+		//za 3D treba 6 susjednih samplirat
+		us[0] = samplePoint(txVelocity, x + vec3( dx.x,0.0,0.0));
+		us[1] = samplePoint(txVelocity, x + vec3(-dx.x,0.0,0.0));
+		us[2] = samplePoint(txVelocity, x + vec3(0.0, dx.y,0.0));
+		us[3] = samplePoint(txVelocity, x + vec3(0.0,-dx.y,0.0));
+		us[4] = samplePoint(txVelocity, x + vec3(0.0,0.0, dx.z));
+		us[5] = samplePoint(txVelocity, x + vec3(0.0,0.0,-dx.z));
+		
+		unew[i] = u + dt*k*(us[0] + us[1] + us[2] + us[3] + us[4] + us[5] - 6.0*u);
+		
+		//dodatne sile
+		modifyVelocity(x, Time, dT, unew);
+	}
+	
+	// gl_FragColor = unew;
+	WriteOutput(gl_FragColor, unew);
 }

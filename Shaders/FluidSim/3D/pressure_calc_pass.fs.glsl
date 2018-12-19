@@ -10,7 +10,7 @@ precision mediump float;
 
 #if __VERSION__ >= 300
 	#define gl_FragColor out_FragColor
-	layout(location = 0) out float out_FragColor;
+	layout(location = 0) out float out_FragColor[NUM_OUT_BUFFERS];
 	// layout(location = 1) out vec4 out_Normal;
 	// layout(location = 2) out vec4 out_AoRSMt;
 #endif
@@ -24,8 +24,8 @@ precision mediump float;
 
 uniform int z;
 uniform vec3 aspect; //odnos dimenzija teksture i svijeta
-uniform sampler2D txPressure;
-uniform sampler2D txDivergence;
+uniform sampler3D txPressure;
+uniform sampler3D txDivergence;
 uniform float dT;
 uniform float Time;
 
@@ -42,27 +42,35 @@ varyin vec2 TexCoords;
 //racuna pressure
 void main(void)
 {	
-	vec3 x = toWorldSpace(TexCoords, z);
 	float dt = dT; float t = Time;
+	float pnew[NUM_OUT_BUFFERS];
 	
-	float divu = samplePoint(txDivergence, x).DivergenceComp;
-	float p = samplePoint(txPressure, x).PressureComp;
-	
-	const vec3 dx = vec3(1.0,1.0,1.0);
-	
-	float ps[4];
-	//za 3D treba 6 susjednih samplirat
-	ps[0] = samplePoint(txPressure, x + vec2( dx.x, 0.0), vec4(0.0)).PressureComp;
-	ps[1] = samplePoint(txPressure, x + vec2(-dx.x, 0.0), vec4(0.0)).PressureComp;
-	ps[2] = samplePoint(txPressure, x + vec2( 0.0, dx.y), vec4(0.0)).PressureComp;
-	ps[3] = samplePoint(txPressure, x + vec2( 0.0,-dx.y), vec4(0.0)).PressureComp;
+	for(int i = 0; i < NUM_OUT_BUFFERS; ++i)
+	{
+		vec3 x = toWorldSpace(TexCoords, z+i);
 		
-	float pnew = (ps[0] + ps[1] + ps[2] + ps[3] - divu) / 4.0;
-	// // if(isAtBorder(x) == true){ pnew =  -divu / 4.0; }
-	// if(isAtBorder(x) == true){ pnew = p; }
-	// if(isAtBorder(x) == true){ pnew = 0.0; }
-	vec2 centar = toWorldSpace(vec2(0.2,0.5+cos(0.25*t)*0.25));
-	if(length(x - centar) < 10.0) pnew = 0.0;
+		float divu = samplePoint(txDivergence, x).DivergenceComp;
+		float p = samplePoint(txPressure, x).PressureComp;
 		
-	out_FragColor = pnew;
+		const vec3 dx = vec3(1.0,1.0,1.0);
+		
+		float ps[6];
+		//za 3D treba 6 susjednih samplirat
+		ps[0] = samplePoint(txPressure, x + vec3( dx.x,  0.0,  0.0), vec4(0.0)).PressureComp;
+		ps[1] = samplePoint(txPressure, x + vec3(-dx.x,  0.0,  0.0), vec4(0.0)).PressureComp;
+		ps[2] = samplePoint(txPressure, x + vec3(  0.0, dx.y,  0.0), vec4(0.0)).PressureComp;
+		ps[3] = samplePoint(txPressure, x + vec3(  0.0,-dx.y,  0.0), vec4(0.0)).PressureComp;
+		ps[4] = samplePoint(txPressure, x + vec3(  0.0,  0.0, dx.z), vec4(0.0)).PressureComp;
+		ps[5] = samplePoint(txPressure, x + vec3(  0.0,  0.0,-dx.z), vec4(0.0)).PressureComp;
+			
+		pnew[i] = (ps[0] + ps[1] + ps[2] + ps[3] + ps[4] + ps[5] - divu) / 6.0;
+		// // if(isAtBorder(x) == true){ pnew[i] =  -divu / 6.0; }
+		// if(isAtBorder(x) == true){ pnew[i] = p; }
+		// if(isAtBorder(x) == true){ pnew[i] = 0.0; }
+		vec2 centar = toWorldSpace(vec2(0.2,0.5+cos(0.25*t)*0.25));
+		if(length(x - centar) < 10.0) pnew[i] = 0.0;
+	}
+		
+	// out_FragColor = pnew;
+	WriteOutput(out_FragColor, pnew);
 }
