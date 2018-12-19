@@ -1,6 +1,7 @@
 #version 300 es
 // #extension GL_EXT_shader_texture_lod : require
 precision mediump float;
+precision mediump sampler3D;
 //racuna pressure, output je scalar. Jacobi iteration.
 
 #global_defines
@@ -20,6 +21,7 @@ precision mediump float;
 	#define textureCube texture
 	#define textureCubeLod textureLod
 	#define texture2DLod textureLod
+	#define texture3DLod textureLod
 #endif
 
 uniform int z;
@@ -67,7 +69,7 @@ void main(void)
 		// // if(isAtBorder(x) == true){ pnew[i] =  -divu / 6.0; }
 		// if(isAtBorder(x) == true){ pnew[i] = p; }
 		// if(isAtBorder(x) == true){ pnew[i] = 0.0; }
-		vec2 centar = toWorldSpace(vec2(0.2,0.5+cos(0.25*t)*0.25));
+		vec3 centar = toWorldSpace(vec3(0.2,0.5+cos(0.25*t)*0.25,0.5));
 		if(length(x - centar) < 10.0) pnew[i] = 0.0;
 	}
 		

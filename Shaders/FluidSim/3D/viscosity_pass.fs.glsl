@@ -1,6 +1,7 @@
 #version 300 es
 // #extension GL_EXT_shader_texture_lod : require
 precision mediump float;
+precision mediump sampler3D;
 //diffuzija zbog viscosity. input je stara brzina, output je nova brzina
 
 #global_defines
@@ -77,7 +78,7 @@ void main(void)
 		unew[i] = u + dt*k*(us[0] + us[1] + us[2] + us[3] + us[4] + us[5] - 6.0*u);
 		
 		//dodatne sile
-		modifyVelocity(x, Time, dT, unew);
+		modifyVelocity(x, Time, dT, unew[i]);
 	}
 	
 	// gl_FragColor = unew;

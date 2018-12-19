@@ -1,6 +1,7 @@
 #version 300 es
 // #extension GL_EXT_shader_texture_lod : require
 precision mediump float;
+precision mediump sampler3D;
 //racunanje divergencije, output je scalar
 
 #global_defines
@@ -20,6 +21,7 @@ precision mediump float;
 	#define textureCube texture
 	#define textureCubeLod textureLod
 	#define texture2DLod textureLod
+	#define texture3DLod textureLod
 #endif
 
 uniform int z;

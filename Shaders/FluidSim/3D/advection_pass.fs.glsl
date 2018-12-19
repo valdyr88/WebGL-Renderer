@@ -3,6 +3,7 @@
 //Advekcija brzine, (jedan pass), nakon ovog moze ici MacCormack korekcija. input je brzina nakon viscosity, output je advected brzina
 
 precision mediump float;
+precision mediump sampler3D;
 
 #global_defines
 #include "defines"
@@ -19,6 +20,7 @@ precision mediump float;
 	#define textureCube texture
 	#define textureCubeLod textureLod
 	#define texture2DLod textureLod
+	#define texture3DLod textureLod
 #endif
 
 uniform int z;
@@ -36,7 +38,7 @@ varyin vec2 TexCoords;
 
 vec4 advect(sampler3D u, vec3 x, float dt){
 	vec4 v = samplePoint(u, x); //sample point
-	return sampleLinear(u, x - dt*v.xy); //sample linear
+	return sampleLinear(u, x - dt*v.xyz); //sample linear
 }
 
 //===================================================================================================

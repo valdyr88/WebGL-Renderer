@@ -11,7 +11,7 @@ var bAutoQualitySelect = false;
 var QualitySelect = 0;
 var strQualitySelect = ["Quality_Low", "Quality_Med", "Quality_High"];
 var gFluidSim = null;
-var b3DFluidSim = false;
+var b3DFluidSim = true;
 
 export function main(){
 	
@@ -488,7 +488,7 @@ export function main(){
 				fluidSim.setDisplayBrightness(brightness);
 			//-------------------------------------------------------
 			
-			if(b3DFluidSim == false){
+			if(true){
 				
 				fluidSim.SimStep(0.1);
 				

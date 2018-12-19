@@ -3,6 +3,7 @@
 //MacCormack korekcija advekcije (advekcija je napravljena u prethodnom koraku). input je advected brzina, output je brzina
 
 precision mediump float;
+precision mediump sampler3D;
 
 #global_defines
 #include "defines"
@@ -21,6 +22,7 @@ precision mediump float;
 	#define textureCube texture
 	#define textureCubeLod textureLod
 	#define texture2DLod textureLod
+	#define texture3DLod textureLod
 #endif
 
 uniform int z;
@@ -39,12 +41,12 @@ varyin vec2 TexCoords;
 
 vec4 advectReverse(sampler3D u, vec3 x, float dt){
 	vec4 uadv = samplePoint(u, x); //sample point
-	return sampleLinear(u, x + dt*uadv.xy); //sample linear
+	return sampleLinear(u, x + dt*uadv.xyz); //sample linear
 }
 
-vec2 advectPosition(sampler3D u, vec3 x, float dt){
+vec3 advectPosition(sampler3D u, vec3 x, float dt){
 	vec4 v = samplePoint(u, x); //sample point
-	return x - dt*v.xy;
+	return x - dt*v.xyz;
 }
 
 void getMinMaxNearestNeighbourValues(sampler3D u, vec3 x, out vec4 vMin, out vec4 vMax){
@@ -67,7 +69,7 @@ void getMinMaxNearestNeighbourValues(sampler3D u, vec3 x, out vec4 vMin, out vec
 }
 
 vec4 clampVelocity(vec4 v, sampler3D u, vec3 x, float dt){
-	vec2 xv = advectPosition(u, x, dt);
+	vec3 xv = advectPosition(u, x, dt);
 	vec4 vMin, vMax; getMinMaxNearestNeighbourValues(u, xv, vMin, vMax);
 	return max(min(v, vMax), vMin);
 }
