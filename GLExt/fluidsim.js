@@ -785,11 +785,12 @@ export class FluidSim3D
 					for(let l = 0; l < this.NumOutBuffers; ++l)
 						this.framebuffer.AttachTextureLayer(this.txDiffusedVelocity, l, z+l);
 					
-						this.viscosity_shader.setIntUniform(this.viscosity_shader.ULz, z);
-						this.quad_model.RenderIndexedTriangles(this.viscosity_shader);	
+					this.viscosity_shader.setIntUniform(this.viscosity_shader.ULz, z);
+					this.quad_model.RenderIndexedTriangles(this.viscosity_shader);	
 				}
 			}
 		}
+		this.framebuffer.DetachAllTextures();
 		
 		//2. advection pass: input je txDiffusedVelocity, output je txAdvectedVelocity
 		{
@@ -806,11 +807,12 @@ export class FluidSim3D
 					for(let l = 0; l < this.NumOutBuffers; ++l)
 						this.framebuffer.AttachTextureLayer(this.txAdvectedVelocity, l, z+l);
 						
-						this.advection_shader.setIntUniform(this.advection_shader.ULz, z);
-						this.quad_model.RenderIndexedTriangles(this.advection_shader);
+					this.advection_shader.setIntUniform(this.advection_shader.ULz, z);
+					this.quad_model.RenderIndexedTriangles(this.advection_shader);
 				}
 			}
 		}
+		this.framebuffer.DetachAllTextures();
 		
 		//3. advection correction pass: input je txAdvectedVelocity i txDiffusedVelocity, output je txAdvectedCorrectedVelocity
 		{
@@ -828,11 +830,12 @@ export class FluidSim3D
 					for(let l = 0; l < this.NumOutBuffers; ++l)
 						this.framebuffer.AttachTextureLayer(this.txAdvectedCorrectedVelocity, l, z+l);
 						
-						this.advection_correction_shader.setIntUniform(this.advection_correction_shader.ULz, z);
-						this.quad_model.RenderIndexedTriangles(this.advection_correction_shader);
+					this.advection_correction_shader.setIntUniform(this.advection_correction_shader.ULz, z);
+					this.quad_model.RenderIndexedTriangles(this.advection_correction_shader);
 				}
 			}
 		}
+		this.framebuffer.DetachAllTextures();
 		
 		//4. divergence pass na velocity: input je txAdvectedCorrectedVelocity, output je txDivergence
 		{
@@ -849,36 +852,37 @@ export class FluidSim3D
 					for(let l = 0; l < this.NumOutBuffers; ++l)
 						this.framebuffer.AttachTextureLayer(this.txDivergence, l, z+l);
 						
-						this.divergence_shader.setIntUniform(this.divergence_shader.ULz, z);
-						this.quad_model.RenderIndexedTriangles(this.divergence_shader);
+					this.divergence_shader.setIntUniform(this.divergence_shader.ULz, z);
+					this.quad_model.RenderIndexedTriangles(this.divergence_shader);
 				}
 			}
 		}
+		this.framebuffer.DetachAllTextures();
 		
 		//5. pressure calc pass: input je txDivergence i txOldPressure, output je txPressure. Jacobi iteration. (vise puta izvrsavanje)
 		{
-			
+			var dt = dT / this.NofPressureIterations;
+			var itime = this.time - dt;
 			this.pressure_shader.Bind();
 				this.txDivergence.Bind(0, this.pressure_shader.ULTextureDivergence);
-				this.txOldPressure.Bind(1, this.pressure_shader.ULTexturePressure);
 				this.pressure_shader.setFloat3Uniform( this.pressure_shader.ULaspect, this.aspect);
-				
+				this.pressure_shader.setFloatUniform( this.pressure_shader.ULdT, dt);
+			
 			for(let i = this.NofPressureIterations; i > 0; --i)
 			{
 				this.txPressure = this.txPressure1;
+				this.txOldPressure.Bind(1, this.pressure_shader.ULTexturePressure);
+				
+				itime = itime + dt;
+				this.pressure_shader.setFloatUniform( this.pressure_shader.ULTime, itime);
 				
 				for(let z = 0; z < this.depth; z += this.NumOutBuffers)
 				{
 					for(let l = 0; l < this.NumOutBuffers; ++l)
-						this.framebuffer.AttachTextureLayer(this.txPressure, l, z+l);
-					
-					var dt = dT / this.NofPressureIterations;
-					var itime = this.time + dt;
+						this.framebuffer.AttachTextureLayer(this.txPressure, l, z+l);					
 						
-						this.pressure_shader.setFloatUniform( this.pressure_shader.ULdT, dt);
-						this.pressure_shader.setFloatUniform( this.pressure_shader.ULTime, itime);
-						this.pressure_shader.setIntUniform(this.pressure_shader.ULz, z);
-						this.quad_model.RenderIndexedTriangles(this.pressure_shader);
+					this.pressure_shader.setIntUniform(this.pressure_shader.ULz, z);
+					this.quad_model.RenderIndexedTriangles(this.pressure_shader);
 						
 				}
 				//swap pressure
@@ -891,6 +895,7 @@ export class FluidSim3D
 				}
 			}
 		}
+		this.framebuffer.DetachAllTextures();
 		
 		//6. divergence free velocity pass: input je txPressure i txAdvectedCorrectedVelocity, output je txVelocity
 		{
@@ -908,11 +913,12 @@ export class FluidSim3D
 					for(let l = 0; l < this.NumOutBuffers; ++l)
 						this.framebuffer.AttachTextureLayer(this.txVelocity, l, z+l);
 						
-						this.divfree_velocity_shader.setIntUniform(this.divfree_velocity_shader.ULz, z);
-						this.quad_model.RenderIndexedTriangles(this.divfree_velocity_shader);
+					this.divfree_velocity_shader.setIntUniform(this.divfree_velocity_shader.ULz, z);
+					this.quad_model.RenderIndexedTriangles(this.divfree_velocity_shader);
 				}		
 			}
 		}
+		this.framebuffer.DetachAllTextures();
 		
 		Framebuffer.Bind(oldFB);
 		
