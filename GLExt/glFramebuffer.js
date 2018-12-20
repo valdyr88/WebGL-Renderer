@@ -96,6 +96,29 @@ export class Framebuffer{
 		this.AttachMultipleLayerLevel(textures, nlayer, 0);
 	}
 	
+	AttachTextureMultipleLayersLevel(texture, slots, nlayers, level){
+		if(nlayers == null || nlayers.length == 0) return;
+		if(slots == null) return;
+		if(nlayers.length != slots.length) return;
+		
+		var oldFBO = gl.currentFramebuffer;
+		Framebuffer.Bind(this.framebuffer);
+		
+		for(let s = 0; s < slots.length; ++s){
+			let slot = slots[s]; let nlayer = nlayers[s];
+			gl.framebufferTextureLayer(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0+slot, texture.texture, level, nlayer);
+			this.attachedTextures[slot] = texture.SlotID;
+		}
+		this.width = texture.width; this.height = texture.height;
+		this.SetupUsage();
+		
+		if(this.bRestorePrevFB === true) Framebuffer.Bind(oldFBO);
+	}
+	
+	AttachTextureMultipleLayers(texture, slots, nlayers){
+		this.AttachTextureMultipleLayersLevel(texture, slots, nlayers, 0);
+	}
+	
 	DetachTextureLevel(slot, level){
 		var oldFBO = gl.currentFramebuffer;
 		Framebuffer.Bind(this.framebuffer);
