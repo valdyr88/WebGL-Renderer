@@ -372,6 +372,7 @@ export class FluidSim2D
 			this.txPressure.Bind(0, this.display_shader.ULTexturePressure);
 			this.txVelocity.Bind(1, this.display_shader.ULTextureVelocity);
 			this.txDivergence.Bind(2, this.display_shader.ULTextureDivergence);
+			this.display_shader.setFloatUniform( this.display_shader.ULTime, this.time);
 			this.display_shader.setFloatUniform( this.display_shader.ULdisplayBrightness, this.displayBrightness);
 			this.display_shader.setFloatUniform( this.display_shader.ULdT, this.dt);
 			this.display_shader.setFloat2Uniform( this.display_shader.ULaspect, this.aspect);
@@ -922,6 +923,7 @@ export class FluidSim3D
 			this.txPressure.Bind(0, this.display_shader.ULTexturePressure);
 			this.txVelocity.Bind(1, this.display_shader.ULTextureVelocity);
 			this.txDivergence.Bind(2, this.display_shader.ULTextureDivergence);
+			this.display_shader.setFloatUniform( this.display_shader.ULTime, this.time);
 			this.display_shader.setFloatUniform( this.display_shader.ULdisplayBrightness, this.displayBrightness);
 			this.display_shader.setFloatUniform( this.display_shader.ULdT, this.dt);
 			this.display_shader.setFloat3Uniform( this.display_shader.ULaspect, this.aspect);

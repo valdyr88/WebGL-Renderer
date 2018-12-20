@@ -52,8 +52,8 @@ varyin vec2 TexCoords;
 
 void main_OneLayer(void)
 {	
-	// int z = int((cos(Time)*0.25+0.5)*Resolution.z);
-	int z = int(0.5*Resolution.z);
+	float z = ((cos(Time*0.1)*0.25+0.5)*Resolution.z);
+	// float z = (0.5*Resolution.z);
 	vec3 x = toTexSpace(toWorldSpace(TexCoords, z));
 	float dt = dT;
 	const vec3 dx = vec3(1.0,1.0,1.0);
