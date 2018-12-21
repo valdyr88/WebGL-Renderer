@@ -14,6 +14,7 @@ export class Framebuffer{
 		this.width = -1;
 		this.height = -1;
 		this.bRestorePrevFB = bindPrevFB;
+		this.bAutoSetupUsage = true;
 	}
 	
 	Create(){
@@ -31,7 +32,7 @@ export class Framebuffer{
 		gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0+slot, gl.TEXTURE_2D, texture.texture, level);
 		this.attachedTextures[slot] = texture.SlotID;
 		this.width = texture.width; this.height = texture.height;
-		this.SetupUsage();
+		if(this.bAutoSetupUsage == true) this.SetupUsage();
 		
 		if(this.bRestorePrevFB === true) Framebuffer.Bind(oldFBO);
 	}
@@ -51,7 +52,7 @@ export class Framebuffer{
 			this.attachedTextures[slot] = texture.SlotID;
 		}
 		this.width = textures[0].width; this.height = textures[0].height;
-		this.SetupUsage();
+		if(this.bAutoSetupUsage == true) this.SetupUsage();
 		
 		if(this.bRestorePrevFB === true) Framebuffer.Bind(oldFBO);
 	}
@@ -67,7 +68,7 @@ export class Framebuffer{
 		gl.framebufferTextureLayer(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0+slot, texture.texture, level, nlayer);
 		this.attachedTextures[slot] = texture.SlotID;
 		this.width = texture.width; this.height = texture.height;
-		this.SetupUsage();
+		if(this.bAutoSetupUsage == true) this.SetupUsage();
 		
 		if(this.bRestorePrevFB === true) Framebuffer.Bind(oldFBO);
 	}
@@ -87,7 +88,7 @@ export class Framebuffer{
 			this.attachedTextures[slot] = texture.SlotID;
 		}
 		this.width = textures[0].width; this.height = textures[0].height;
-		this.SetupUsage();
+		if(this.bAutoSetupUsage == true) this.SetupUsage();
 		
 		if(this.bRestorePrevFB === true) Framebuffer.Bind(oldFBO);
 	}
@@ -110,7 +111,7 @@ export class Framebuffer{
 			this.attachedTextures[slot] = texture.SlotID;
 		}
 		this.width = texture.width; this.height = texture.height;
-		this.SetupUsage();
+		if(this.bAutoSetupUsage == true) this.SetupUsage();
 		
 		if(this.bRestorePrevFB === true) Framebuffer.Bind(oldFBO);
 	}
@@ -126,7 +127,7 @@ export class Framebuffer{
 		gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0+slot, gl.TEXTURE_2D, null, level);
 		this.attachedTextures[slot] = -1;
 		
-		this.SetupUsage();
+		if(this.bAutoSetupUsage == true) this.SetupUsage();
 		
 		if(this.bRestorePrevFB === true) Framebuffer.Bind(oldFBO);
 	}
@@ -147,7 +148,7 @@ export class Framebuffer{
 			// this.attachedTextures[slot] = -1;
 		}
 		this.attachedTextures = [];
-		this.SetupUsage();
+		if(this.bAutoSetupUsage == true) this.SetupUsage();
 		this.width = -1; this.height = -1;
 		
 		if(this.bRestorePrevFB === true) Framebuffer.Bind(oldFBO);
