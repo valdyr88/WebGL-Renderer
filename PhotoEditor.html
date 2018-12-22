@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en-US" dir="ltr" class="redesign no-js">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=Chrome">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="index, follow">
+  <!-- common social tags -->
+  <meta property="og:type" content="website">
+  <meta property="og:image" content="https://developer.mozilla.org/media/img/opengraph-logo.png">
+  <meta property="og:site_name" content="Mozilla Developer Network">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:image" content="https://developer.mozilla.org/media/img/opengraph-logo.png">
+  <meta name="twitter:site" content="@NewOnMDN">
+  <meta name="twitter:creator" content="@NewOnMDN">
+  
+  <script type="module">
+	import { inlineHTMLfile } from "./System/html.js"
+	document.inline_HTML_file = inlineHTMLfile;
+  </script>
+  
+  <link rel="stylesheet" type="text/css" href="styles/default/slider.css">
+  
+  <script id="functions" src="./Shaders/include/functions.glsl" type="shader/fragment"></script>
+  <script id="structs" src="./Shaders/include/structs.glsl" type="shader/fragment"></script>
+  <script id="pbr" src="./Shaders/include/pbr.glsl" type="shader/fragment"></script>
+  <script id="defines" src="./Shaders/include/defines.glsl" type="shader/fragment"></script>
+  <script id="sdfunctions" src="./Shaders/include/sdfunctions.glsl" type="shader/fragment"></script>
+  
+  <script id="ubCamera" src="./Shaders/include/uniformBuffers/ubCamera.glsl" type="shader/fragment"></script>
+  <script id="ubLight" src="./Shaders/include/uniformBuffers/ubLight.glsl" type="shader/fragment"></script>
+  <script id="ubMaterial" src="./Shaders/include/uniformBuffers/ubMaterial.glsl" type="shader/fragment"></script>
+  <script id="ubModel" src="./Shaders/include/uniformBuffers/ubModel.glsl" type="shader/fragment"></script>
+  
+  <script id="simpleVS" src="./Shaders/simple.vs.glsl" type="shader/vertex"></script>
+  <script id="simpleFS" src="./Shaders/simple.fs.glsl" type="shader/fragment"></script>
+  <script id="pbr_shader" src="./Shaders/pbr_shader.fs.glsl" type="shader/fragment"></script>
+  <script id="skybox_shader" src="./Shaders/skybox.fs.glsl" type="shader/fragment"></script>
+  <script id="backbuffer_shader" src="./Shaders/backbuffer.fs.glsl" type="shader/fragment"></script>
+  <script id="deferred_opaque_shade" src="./Shaders/deferred_opaque_shade.fs.glsl" type="shader/fragment"></script>
+  <script id="deferred_BcNAoRSMt" src="./Shaders/deferred_BcNAoRSMt.fs.glsl" type="shader/fragment"></script>
+  <script id="deferred_skybox" src="./Shaders/deferred_skybox.fs.glsl" type="shader/fragment"></script>
+  <script id="transparent_shader" src="./Shaders/transparent_shader.fs.glsl" type="shader/fragment"></script>
+  <script id="atmosphere_shader" src="./Shaders/atmosphere_shader.fs.glsl" type="shader/fragment"></script>
+  <script id="volume_clouds_shader" src="./Shaders/volume_clouds_shader.fs.glsl" type="shader/fragment"></script>
+  <script id="volume_clouds_vs" src="./Shaders/volume_clouds_shader.vs.glsl" type="shader/vertex"></script>
+    
+  <script id="mipmapVS" src="./Shaders/mipmapgen.vs.glsl" type="shader/vertex"></script>
+  <script id="3x3MipGenFS" src="./Shaders/3x3MipGen.fs.glsl" type="shader/fragment"></script>
+  
+  <!-- <script id="navigatorModel" src="./Models/Rock_6.OBJ" type="model/obj"></script> -->
+  <!--<script id="navigatorModel" src="./Models/quadNT.obj" type="model/obj"></script>-->
+  <script id="SphereModel" src="./Models/Sphere.obj" type="model/obj"></script>
+  <script id="navigatorModel" src="./Models/navigatorModel.obj" type="model/obj"></script>
+  
+  <!-- <img id="txRock_D" src="./Models/Rock_6_D.png" type="tx2D/D" style="display: none;"></img>
+  <img id="txRock_AoRS" src="./Models/Rock_6_AoRS.png" type="tx2D/AoRS" style="display: none;"></img>
+  <img id="txRock_N" src="./Models/Rock_6_N.png" type="tx2D/N" style="display: none;"></img> -->
+  
+  <img id="txRock_D" src="./Models/gerasy_metal_pan_Bc.png" type="tx2D/D" style="display: none;"></img>
+  <img id="txRock_AoRS" src="./Models/gerasy_metal_pan_AoRMt.png" type="tx2D/AoRMt" style="display: none;"></img>
+  <img id="txRock_N" src="./Models/gerasy_metal_pan_N.png" type="tx2D/N" style="display: none;"></img>
+  
+  <img id="txGlass_AoRS" src="./Models/glass_AoRS.png" type="tx2D/AoRS" style="display: none;"></img>
+  <img id="txGlass_N" src="./Models/glass_N.png" type="tx2D/N" style="display: none;"></img>
+  
+  <img id="txAtmosphere" src="./Models/atmosphere.png" type="tx2D/D" style="display: none;"></img>
+  <!-- <img id="txcAmbient_xp" src="./Textures/Ambients/Ambient01_xp.png" -->
+					   <!-- srcset="./Textures/Ambients/Ambient01_xp.png" -->
+										<!-- style="display: none"></img> -->
+	
+  <img id="txNoiseRGB" src="./Textures/NoiseFromShaderToy.png" type="tx2D/D" style="display: none;"></img>
+	
+  <!--<img id="tx128" src="./Textures/128.png"></img>-->
+  <img id="tx128" src="./Textures/venice.hdr" style="display: none" type="txC/Amb:128/hdr"></img>
+  
+  <img id="txBRDF_LUT" src="./Textures/BRDF_LUT.png" style="display: none" type="tx2D/LUT"></img>
+  
+  <script src="./GLExt/GLExt.js" type="module" ></script>
+  <script src="./main.js" type="script"></script>
+  
+  </head>
+<body>
+	<img id="reload_shader_btn" onclick="reload_shader('deferred_opaque_shade')" title="deferred_opaque_shade" src="./misc/reload_ico.png"></img>
+	<img id="reload_shader_btn" onclick="reload_shader('transparent_shader')" title="transparent_shader" src="./misc/reload_ico.png"></img>
+	<img id="reload_shader_btn" onclick="reload_shader('volume_clouds_shader')" title="volume_clouds_shader" src="./misc/reload_ico.png"></img>
+	<img id="reload_shader_btn" onclick="reload_shader('volume_clouds_vs')" title="volume_clouds_vs" src="./misc/reload_ico.png"></img>
+	<img id="reload_shader_btn" onclick="reload_shader('deferred_skybox')" title="deferred_skybox" src="./misc/reload_ico.png"></img>
+  	<img id="reload_texture_btn" onclick="reload_texture('txGlass_AoRS')" title="txGlass_AoRS" src="./misc/reload_ico.png"></img>
+  	<img id="reload_texture_btn" onclick="reload_texture('txGlass_N')" title="txGlass_N" src="./misc/reload_ico.png"></img>
+  	<img id="reload_texture_btn" onclick="reload_texture('txNoiseRGB')" title="txNoiseRGB" src="./misc/reload_ico.png"></img>
+
+	<script type="module" id="inlinedHTMLFile">
+		document.inline_HTML_file("./inlineHTMLFile.html","inlinedHTMLFile");
+	</script>
+	
+	<div style="position: absolute; top: 32px; right: 32px;" >
+		<p style="font-family:verdana; color:white;" id="label_FPS">0</p>
+		<!-- <p style="font-family:verdana; color:white;">FPS</p> -->
+		
+		<div style="display: flex;">
+			<p style="font-family:verdana; color:white;" >Quality: </p>
+			<select id="select_Quality" onchange="on_shader_define_changed('volume_clouds_shader','select_Quality','Quality_Auto', null)" style=" height: 22px;  transform: translate(10%, 65%);">
+				<option value="Quality_Auto">Auto</option>
+				<option value="Quality_High">High</option>
+				<option value="Quality_Med">Medium</option>
+				<option value="Quality_Low">Low</option>
+			</select>
+		</div>
+		
+		<div style="display: flex;">
+			<p style="font-family:verdana; color:white;">Debug: </p>
+			<select id="select_Debug" onchange="on_shader_define_changed('volume_clouds_shader','select_Debug','Off', '_DEBUG')" style=" height: 22px;  transform: translate(10%, 65%);">
+				<option value="Off">Off</option>
+				<option value="_DEBUG_SDF_Density">SDF_Density</option>
+				<option value="_DEBUG_SDF_Display_Normals">SDF_SurfaceNormal</option>
+				<option value="_DEBUG_SDF_StepCount">SDF_StepCount</option>
+				<option value="_DEBUG_SDF_NormalCalcCount">SDF_NormalCount</option>
+				<option value="_DEBUG_SDF_StepCountAndNormalCalcCount">SDF_StepNormalCount</option>
+				<!-- <option value="_DEBUG_SDF_TDistance 1">SDF_TDist</option> - ne radi zbog razmaka, kod provjere ima li taj define ne pronalazi ga zbog splitanja razmaka -->
+				<option value="_DEBUG_Clouds_StepCount">Clouds_StepCount</option>
+			</select>
+		</div>
+		
+		<div style="display: flex;">
+			<p style="font-family:verdana; color:white;" >FluidSim: </p>
+			<select id="select_FluidSimDisplay" onchange="on_fluidsim_shader_define_changed('select_FluidSimDisplay','Display_Velocity', null)" style=" height: 22px;  transform: translate(10%, 65%);">
+				<option value="_DEBUG_Display_Velocity">Display_Velocity</option>
+				<option value="_DEBUG_Display_VelocitySize">Display_VelocitySize</option>
+				<option value="_DEBUG_Display_Pressure">Display_Pressure</option>
+				<option value="_DEBUG_Display_Divergence">Display_Divergence</option>
+			</select>
+		</div>
+			<div class="slidecontainer" title="brightness">
+			  <input type="range" min="1" max="100" value="50" class="slider" id="fluidsim_brightness_slider">
+			  <!-- <p>Value: <span id="demo"></span></p> -->
+			</div>
+			<div class="slidecontainer" title="pressure iteration count">
+			  <input type="range" min="1" max="125" value="1" class="slider" id="fluidsim_pressure_iteration_count_slider">
+			</div>
+			<div class="slidecontainer" title="viscosity">
+			  <input type="range" min="0" max="90" value="0" class="slider" id="fluidsim_viscosity_slider">
+			</div>
+			<button id="reset_fluidsim", onclick="on_fluidsim_reset()"  style="transform: translate(50%, 0%);">Reset FluidSim</button>
+	</div>
+	
+	<div style="background-color:#0055ff">
+	  <canvas id="glcanvas" width="640" height="480">
+		Your browser doesn't appear to support the HTML5 <code>&lt;canvas&gt;</code> element.
+	  </canvas>
+	</div>
+	
+  <script type="module">
+	import { main, recompileShader, reloadTexture, onShaderDefineChanged } from "./main_PhotoEditor.js";
+	import { fetchImage } from "./GLExt/glTexture.js";
+	function wait(ms){ const start = performance.now(); while(performance.now() - start < ms); }
+	
+	var extern_files_list = ["functions", "structs", "pbr", "defines", "sdfunctions", "ubCamera", "ubLight", "ubMaterial", "ubModel", 
+							"simpleVS", "simpleFS", "pbr_shader", "skybox_shader", "backbuffer_shader", "SphereModel", "deferred_opaque_shade", "deferred_BcNAoRSMt", "deferred_skybox", "transparent_shader", 
+							"atmosphere_shader", "volume_clouds_shader", "volume_clouds_vs", "navigatorModel", "mipmapVS", "3x3MipGenFS",
+							];//, "tx128"
+	var extern_files_loaded_number = 0;
+	
+	function onExternFileLoadFinish(){
+		++extern_files_loaded_number;
+		if(extern_files_loaded_number >= extern_files_list.length){
+			main();
+		}
+	}
+	
+	function fetchDefaultFile(obj, onLoadFinish){
+		fetch(obj.src).then(
+			function(response){
+				response.text().then(
+					function(text){
+						obj.text = text;
+						onLoadFinish();
+					}
+				);
+			}
+		);
+	}
+	
+	function extractTypeFromOuterHTML(obj){
+		var strArray = obj.outerHTML.split("type");
+		if(strArray.length < 2) return false;
+		var strTypeArray = strArray[1].split("\"");
+		if(strTypeArray.length < 2) return false;
+		obj.type = strTypeArray[1]; return true;		
+	}
+	
+	function fetchAndStore(id){
+		var obj = document.getElementById(id);
+		if(obj == null) alert("fetchAndStore() obj == null, id == " + id);
+		if(typeof obj.type === 'undefined' || obj.type == null)
+			extractTypeFromOuterHTML(obj);
+		
+		switch(obj.tagName){
+			default: fetchDefaultFile(obj, onExternFileLoadFinish); break;
+			case "IMG": fetchImage(obj, onExternFileLoadFinish); break;
+		}
+	}
+	
+	function LoadAllExternFiles(){
+		//dodajemo fileove sa odvojene liste
+		//extern_files_list = extern_files_list.concat(fluidsim_shader_files_list);
+		
+		extern_files_loaded_number = 0;
+		for(var i = 0; i < extern_files_list.length; ++i){
+			fetchAndStore(extern_files_list[i]);
+		}
+	}
+		
+	function delayedMain(){
+		if(extern_files_loaded_number >= extern_files_list.length){
+			main(); }
+		else{
+			setTimeout(delayedMain,1000); }
+	}
+	
+	function fetchTextFile(obj, callback){
+		if(typeof obj === 'string'){
+			var id = obj;
+			obj = document.getElementById(id);
+			if(obj == null) alert("fetchTextFile() obj == null, id == " + id);
+			if(typeof obj.type === 'undefined' || obj.type == null)
+				extractTypeFromOuterHTML(obj);
+		}
+		
+		var header = new Headers();
+		header.append('pragma', 'no-cache');
+		header.append('cache-control', 'no-cache');
+		
+		var init = { method: 'GET', headers: header, };
+		
+		fetch(obj.src, init).then(
+			function(response){
+				response.text().then(
+					function(text){
+						obj.text = text;
+						callback(obj.id);
+					}
+				);
+			}
+		);	
+	}
+	
+	window.reload_shader = function reload_shader(id){
+		var obj = document.getElementById(id);
+		if(obj == null) alert("fetchAndStore() obj == null, id == " + id);
+		if(typeof obj.type === 'undefined' || obj.type == null)
+			extractTypeFromOuterHTML(obj);
+		
+		var header = new Headers();
+		header.append('pragma', 'no-cache');
+		header.append('cache-control', 'no-cache');
+		
+		var init = { method: 'GET', headers: header, };
+		
+		fetch(obj.src, init).then(
+			function(response){
+				response.text().then(
+					function(text){
+						obj.text = text;
+						recompileShader(id);
+					}
+				);
+			}
+		);
+	}
+	
+	window.reload_texture = function reload_texture(id){
+		var obj = document.getElementById(id);
+		
+		var header = new Headers();
+		header.append('pragma', 'no-cache');
+		header.append('cache-control', 'no-cache');
+		
+		var init = { method: 'GET', headers: header, };
+		
+		obj.onload = function(){ reloadTexture(id); }
+		var str = obj.src.split('?reload=')[0];
+		obj.src = str + "?reload=" + new Date().getTime();
+	}
+	
+	window.on_shader_define_changed = function on_shader_define_changed(shader_name, select_element_id, default_value, additional_define){		
+		onShaderDefineChanged(shader_name, select_element_id, default_value, additional_define);
+	}
+	
+	window.fetch_text_file = fetchTextFile;
+//-------------------------------------------------------------------------------------------
+//Window onload	
+//-------------------------------------------------------------------------------------------
+	window.onload = function(){
+		LoadAllExternFiles();
+	}
+//-------------------------------------------------------------------------------------------
+	
+  </script>
+  
+  <!-- <textarea id="kinematic_viscosity" style="width:48px; height:16px;" onchange="on_kinematic_viscosity_changed('kinematic_viscosity')"> 1.0 </textarea> -->
+  <!-- <input id="kinematic_viscosity" style="width:48px; height:16px;" value="1.0"></input> zamjenjeno sliderom -->
+  <br/>
+  <textarea id="debug_text" style="display: none; width:768px; height:2048px;"> </textarea>
+  
+</body>

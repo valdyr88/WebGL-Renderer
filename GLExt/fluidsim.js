@@ -750,6 +750,7 @@ export class FluidSim3D
 		
 		var oldFB = gl.currentFramebuffer;
 		this.framebuffer.Bind();
+		this.framebuffer.bAutoSetupUsage = false;
 		gl.viewport(0, 0, this.width, this.height);
 		this.dt = dT;
 		gl.disable(gl.BLEND);
@@ -784,6 +785,7 @@ export class FluidSim3D
 			{
 				for(let l = 0; l < this.NumOutBuffers; ++l)
 					this.framebuffer.AttachTextureLayer(this.txDiffusedVelocity, l, z+l);
+				this.framebuffer.SetupUsage();
 				
 				this.viscosity_shader.setIntUniform(this.viscosity_shader.ULz, z);
 				this.quad_model.RenderIndexedTriangles(this.viscosity_shader);	
@@ -804,6 +806,7 @@ export class FluidSim3D
 			{
 				for(let l = 0; l < this.NumOutBuffers; ++l)
 					this.framebuffer.AttachTextureLayer(this.txAdvectedVelocity, l, z+l);
+				this.framebuffer.SetupUsage();
 					
 				this.advection_shader.setIntUniform(this.advection_shader.ULz, z);
 				this.quad_model.RenderIndexedTriangles(this.advection_shader);
@@ -825,6 +828,7 @@ export class FluidSim3D
 			{	
 				for(let l = 0; l < this.NumOutBuffers; ++l)
 					this.framebuffer.AttachTextureLayer(this.txAdvectedCorrectedVelocity, l, z+l);
+				this.framebuffer.SetupUsage();
 					
 				this.advection_correction_shader.setIntUniform(this.advection_correction_shader.ULz, z);
 				this.quad_model.RenderIndexedTriangles(this.advection_correction_shader);
@@ -845,6 +849,7 @@ export class FluidSim3D
 			{	
 				for(let l = 0; l < this.NumOutBuffers; ++l)
 					this.framebuffer.AttachTextureLayer(this.txDivergence, l, z+l);
+				this.framebuffer.SetupUsage();
 					
 				this.divergence_shader.setIntUniform(this.divergence_shader.ULz, z);
 				this.quad_model.RenderIndexedTriangles(this.divergence_shader);
@@ -873,7 +878,8 @@ export class FluidSim3D
 				for(let z = 0; z < this.depth; z += this.NumOutBuffers)
 				{
 					for(let l = 0; l < this.NumOutBuffers; ++l)
-						this.framebuffer.AttachTextureLayer(this.txPressure, l, z+l);					
+						this.framebuffer.AttachTextureLayer(this.txPressure, l, z+l);
+					this.framebuffer.SetupUsage();					
 						
 					this.pressure_shader.setIntUniform(this.pressure_shader.ULz, z);
 					this.quad_model.RenderIndexedTriangles(this.pressure_shader);
@@ -905,12 +911,14 @@ export class FluidSim3D
 			{	
 				for(let l = 0; l < this.NumOutBuffers; ++l)
 					this.framebuffer.AttachTextureLayer(this.txVelocity, l, z+l);
+				this.framebuffer.SetupUsage();
 					
 				this.divfree_velocity_shader.setIntUniform(this.divfree_velocity_shader.ULz, z);
 				this.quad_model.RenderIndexedTriangles(this.divfree_velocity_shader);
 			}
 		}
 		this.framebuffer.DetachAllTextures();
+		this.framebuffer.bAutoSetupUsage = true;
 		
 		Framebuffer.Bind(oldFB);
 		
