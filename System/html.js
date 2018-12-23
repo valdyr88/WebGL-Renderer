@@ -1,37 +1,9 @@
 import * as fetch from "./fetch.js"
-/* 
-export function inlineHTMLfile(id,write_id){
-	var strHTML = null;
-	
-	var file = document.getElementById(id);
-	var write_file = document.getElementById(write_id);
-	if(write_file == null) return;
-	if(write_file.innerHTML == undefined) return;
-	
-	if(file != null){
-		if(file.value != undefined)
-			strHTML = file.value;
-		else if(file.text != undefined && file.text != "")
-			strHTML = file.text;
-		else{
-			fetch.fetchTextFile(id, function(fid){
-				var file = document.getElementById(fid);
-				// document.write(file.text);
-				write_file.innerHTML = file.text;
-			});			
-			return;}
-	}
-	else if(id.value != undefined){
-		strHTML = id.value; }
-	else if(id.text != undefined){
-		strHTML = id.text; }
-	else
-		return;	
-	
-	// document.write(strHTML);
-	write_file.innerHTML = strHTML;
-}
- */
+
+
+//----------------------------------------------------------------------------------------------------
+// inline HTML file. potrebno je dodat attribut data-inline-html (moze i neki drugi isto) i pozvat ParseForHTMLIncludes(document, 'data-inline-html')
+//----------------------------------------------------------------------------------------------------
 
 export function inlineHTMLfile(src, obj){
 	fetch.fetchTextFileSrc(src, function(txt){
@@ -57,3 +29,61 @@ export function ParseForHTMLIncludes(doc, strAttribute){
 		}
 	}
 }
+
+//----------------------------------------------------------------------------------------------------
+
+
+//----------------------------------------------------------------------------------------------------
+// movable elements
+//----------------------------------------------------------------------------------------------------
+
+function movable_OnMouseDown(e){
+	e = e || window.event;
+	e.preventDefault();
+	
+	this.oldMouseX = e.clientX;
+	this.oldMouseY = e.clientY;
+	
+	this.onmouseup = movable_StopMovement;
+	this.onmousemove = movable_DragElement;
+}
+
+function movable_DragElement(e){
+	e = e || window.event;
+	e.preventDefault();
+	
+	var dX = this.oldMouseX - e.clientX;
+	var dY = this.oldMouseY - e.clientY;
+	
+	this.style.top = (this.offsetTop - dY) + "px";
+	this.style.left = (this.offsetLeft - dX) + "px";
+	
+	this.oldMouseX = e.clientX;
+	this.oldMouseY = e.clientY;
+}
+
+function movable_StopMovement(e){
+	this.onmouseup = null;
+	this.onmousemove = null;
+}
+
+export function MakeElementMovable(elem){
+	var obj = elem;
+	if(typeof elem === 'string'){ obj = document.getElementById(elem); }
+	
+	obj.onmousedown = movable_OnMouseDown;
+	
+	obj.oldMouseX = 0;
+	obj.oldMouseY = 0;
+}
+
+export function MakeElementsMovable(elems){
+	if(elems == null) return;
+	if(typeof elems == 'string') MakeElementMovable(elems);
+	else{
+		if(elems.length == undefined) MakeElementMovable(elems);
+		for(let i = 0; i < elems.length; ++i) MakeElementMovable(elems[i]);
+	}
+}
+
+//----------------------------------------------------------------------------------------------------

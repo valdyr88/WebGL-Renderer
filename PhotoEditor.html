@@ -95,6 +95,7 @@
 	</script> -->
 	
 	<div id="inlineHTMLFile" data-inline-html="./inlineHTMLFile.html"></div>
+	<div id="inlineMovableHTMLFile" style="position: absolute;" data-inline-html="./inlineMovableHTMLFile.html"></div>
 	
 	<div style="position: absolute; top: 32px; right: 32px;" >
 		<p style="font-family:verdana; color:white;" id="label_FPS">0</p>
@@ -153,7 +154,7 @@
 	</div>
 	
   <script type="module">
-	import { ParseForHTMLIncludes } from "./System/html.js"
+	import { ParseForHTMLIncludes, MakeElementsMovable } from "./System/html.js"
 	import { main, recompileShader, reloadTexture, onShaderDefineChanged } from "./main_PhotoEditor.js";
 	import { fetchImage } from "./GLExt/glTexture.js";
 	function wait(ms){ const start = performance.now(); while(performance.now() - start < ms); }
@@ -296,6 +297,7 @@
 //-------------------------------------------------------------------------------------------
 	window.onload = function(){
 		ParseForHTMLIncludes(document, "data-inline-html");
+		MakeElementsMovable("inlineMovableHTMLFile");
 		LoadAllExternFiles();
 	}
 //-------------------------------------------------------------------------------------------
