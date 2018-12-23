@@ -44,27 +44,30 @@ function movable_OnMouseDown(e){
 	this.oldMouseX = e.clientX;
 	this.oldMouseY = e.clientY;
 	
-	this.onmouseup = movable_StopMovement;
-	this.onmousemove = movable_DragElement;
+	/* this.onmouseup = movable_StopMovement;
+	this.onmousemove = movable_DragElement; */
+	document.onmouseup = movable_StopMovement;
+	document.onmousemove = movable_DragElement;
+	document.movable_element = this;
 }
 
 function movable_DragElement(e){
 	e = e || window.event;
 	e.preventDefault();
 	
-	var dX = this.oldMouseX - e.clientX;
-	var dY = this.oldMouseY - e.clientY;
+	var dX = document.movable_element.oldMouseX - e.clientX;
+	var dY = document.movable_element.oldMouseY - e.clientY;
 	
-	this.style.top = (this.offsetTop - dY) + "px";
-	this.style.left = (this.offsetLeft - dX) + "px";
+	document.movable_element.style.top = (document.movable_element.offsetTop - dY) + "px";
+	document.movable_element.style.left = (document.movable_element.offsetLeft - dX) + "px";
 	
-	this.oldMouseX = e.clientX;
-	this.oldMouseY = e.clientY;
+	document.movable_element.oldMouseX = e.clientX;
+	document.movable_element.oldMouseY = e.clientY;
 }
 
 function movable_StopMovement(e){
-	this.onmouseup = null;
-	this.onmousemove = null;
+	document.onmouseup = null;
+	document.onmousemove = null;
 }
 
 export function MakeElementMovable(elem){
