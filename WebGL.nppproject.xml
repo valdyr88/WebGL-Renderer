@@ -18,6 +18,8 @@
             <File name="System\mouse.js" />
             <File name="System\keyboard.js" />
             <File name="System\zip.js" />
+            <File name="System\html.js" />
+            <File name="System\fetch.js" />
         </Folder>
         <Folder name="glMatrix">
             <File name="glMatrix\gl-matrix.js" />

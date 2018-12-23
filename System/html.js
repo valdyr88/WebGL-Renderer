@@ -33,9 +33,27 @@ export function inlineHTMLfile(id,write_id){
 }
  */
 
-export function inlineHTMLfile(src, write_id){
+export function inlineHTMLfile(src, obj){
 	fetch.fetchTextFileSrc(src, function(txt){
-		var write_file = document.getElementById(write_id);
+		var write_file = null;
+		write_file = (typeof obj === 'string')? document.getElementById(obj) : obj;
 		write_file.innerHTML = txt;
 	});
+}
+
+export function ParseForHTMLIncludes(doc, strAttribute){
+	var allElements = doc.getElementsByTagName("*");
+	
+	if(strAttribute == undefined || strAttribute == null) strAttribute = "data-inline-html";
+	
+	for(let i = 0; i < allElements.length; ++i){
+		
+		let el = allElements[i];
+		let file_src = el.getAttribute(strAttribute);
+		
+		if(file_src != null){
+			el.removeAttribute(strAttribute);
+			inlineHTMLfile(file_src, el);
+		}
+	}
 }
