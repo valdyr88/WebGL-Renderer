@@ -54,6 +54,7 @@ function movable_OnMouseDown(e){
 function movable_DragElement(e){
 	e = e || window.event;
 	e.preventDefault();
+	if(document.movable_element == null) return;
 	
 	var dX = document.movable_element.oldMouseX - e.clientX;
 	var dY = document.movable_element.oldMouseY - e.clientY;
@@ -68,11 +69,13 @@ function movable_DragElement(e){
 function movable_StopMovement(e){
 	document.onmouseup = null;
 	document.onmousemove = null;
+	document.movable_element = null;
 }
 
 export function MakeElementMovable(elem){
 	var obj = elem;
 	if(typeof elem === 'string'){ obj = document.getElementById(elem); }
+	if(obj == null) return;
 	
 	obj.onmousedown = movable_OnMouseDown;
 	
