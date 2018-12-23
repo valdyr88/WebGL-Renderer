@@ -51,10 +51,6 @@ export function main(){
 	Camera.setPositionAndDir(eyePt, [1.0,0.0,0.0], upDir);
 	Camera.UpdateProjectionMatrix();
 	
-	vMath.mat4.identity(model.Transform);
-	// vMath.mat4.scale(model.Transform, model.Transform, [4.0,4.0,4.0]);
-	vMath.mat4.rotate(model.Transform, model.Transform, vMath.deg2rad(-90.0), [1,0,0]);
-	
 	vMath.mat4.identity(AtmoSphereModel.Transform); var atmoScale = 1.012;
 	vMath.mat4.scale(AtmoSphereModel.Transform, AtmoSphereModel.Transform, [atmoScale,atmoScale,atmoScale]);
 	
@@ -121,10 +117,7 @@ export function main(){
 		}
 		
 		FPSlabel.textContent = Number.parseFloat(avg_FPS).toFixed(2) + " FPS";
-				
-		vMath.mat4.identity(model.Transform);
-		vMath.mat4.rotate(model.Transform, model.Transform, vMath.deg2rad(time*10), [0,0,1]);/*  */
-		
+						
 		vMath.mat4.identity(navigatorModel.Transform);
 		vMath.mat4.setTranslation(navigatorModel.Transform, navigatorModel.Transform, [ -1.0, -ctime*0.5, 0.0]);
 		vMath.mat4.rotate(navigatorModel.Transform, navigatorModel.Transform, vMath.deg2rad(90), [0,1,0]);
