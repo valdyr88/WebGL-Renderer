@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en-US" dir="ltr" class="redesign no-js">
+<html class="main" lang="en-US" dir="ltr" class="redesign no-js">
 <head>
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=Chrome">
@@ -19,7 +19,9 @@
 	document.inline_HTML_file = inlineHTMLfile;
   </script>
   
+  <link rel="stylesheet" type="text/css" href="./../styles/default/main.css">
   <link rel="stylesheet" type="text/css" href="./../styles/default/slider.css">
+  <link rel="stylesheet" type="text/css" href="./../styles/default/panel.css">
   
   <script id="functions" src="./../Shaders/include/functions.glsl" type="shader/fragment"></script>
   <script id="structs" src="./../Shaders/include/structs.glsl" type="shader/fragment"></script>
@@ -81,22 +83,14 @@
   
   </head>
 <body>
-	<img id="reload_shader_btn" onclick="reload_shader('deferred_opaque_shade')" title="deferred_opaque_shade" src="./../misc/reload_ico.png"></img>
-	<img id="reload_shader_btn" onclick="reload_shader('transparent_shader')" title="transparent_shader" src="./../misc/reload_ico.png"></img>
-	<img id="reload_shader_btn" onclick="reload_shader('volume_clouds_shader')" title="volume_clouds_shader" src="./../misc/reload_ico.png"></img>
-	<img id="reload_shader_btn" onclick="reload_shader('volume_clouds_vs')" title="volume_clouds_vs" src="./../misc/reload_ico.png"></img>
-	<img id="reload_shader_btn" onclick="reload_shader('deferred_skybox')" title="deferred_skybox" src="./../misc/reload_ico.png"></img>
-  	<img id="reload_texture_btn" onclick="reload_texture('txGlass_AoRS')" title="txGlass_AoRS" src="./../misc/reload_ico.png"></img>
-  	<img id="reload_texture_btn" onclick="reload_texture('txGlass_N')" title="txGlass_N" src="./../misc/reload_ico.png"></img>
-  	<img id="reload_texture_btn" onclick="reload_texture('txNoiseRGB')" title="txNoiseRGB" src="./../misc/reload_ico.png"></img>
-
 	<!-- <script type="module" id="inlinedHTMLFile">
 		document.inline_HTML_file("./../inlineHTMLFile.html","inlinedHTMLFile");
 	</script> -->
 	
-	<div id="inlineHTMLFile" data-inline-html="./inlineHTMLFile.html"></div>
+	<!-- <div id="inlineHTMLFile" data-inline-html="./inlineHTMLFile.html"></div>
 	<div id="inlineMovableHTMLFile" style="position: absolute;" data-inline-html="./inlineMovableHTMLFile.html"></div>
-	<div id="inlineMovableHTMLFile2" style="position: absolute;" data-inline-html="./inlineMovableHTMLFile.html"></div>
+	<div id="inlineMovableHTMLFile2" style="position: absolute;" data-inline-html="./inlineMovableHTMLFile.html"></div> -->
+	<div id="toolbar" style="position: absolute;" data-inline-html="./panels/toolbar.html"></div>
 	
 	<div style="position: absolute; top: 32px; right: 32px;" >
 		<p style="font-family:verdana; color:white;" id="label_FPS">0</p>
@@ -298,7 +292,7 @@
 //-------------------------------------------------------------------------------------------
 	window.onload = function(){
 		ParseForHTMLIncludes(document, "data-inline-html");
-		MakeElementsMovable(["inlineMovableHTMLFile","inlineMovableHTMLFile2"]);
+		MakeElementsMovable(["toolbar"]);
 		LoadAllExternFiles();
 	}
 //-------------------------------------------------------------------------------------------

@@ -39,68 +39,14 @@ export function main(){
 	var projectionMatrix = vMath.mat4.create();
 	var viewMatrix = vMath.mat4.create();
 	
-	var eyePt = vMath.vec3.fromValues(-7.0,0.0,0.0);
-	var centerPt = vMath.vec3.fromValues(0.0,0.0,0.0);
-	var upDir = vMath.vec3.fromValues(0.0,0.0,1.0);
-		
-	vMath.mat4.perspective(projectionMatrix, vMath.deg2rad(40.0), gl.viewportWidth/gl.viewportHeight, 0.1, 1000.0);
-	
-	vMath.mat4.lookAt(viewMatrix, eyePt, centerPt, upDir);
-	
-	var Camera = new glext.Camera(0, gl.viewportWidth, gl.viewportHeight);
-	Camera.setPositionAndDir(eyePt, [1.0,0.0,0.0], upDir);
-	Camera.UpdateProjectionMatrix();
-	
-	vMath.mat4.identity(AtmoSphereModel.Transform); var atmoScale = 1.012;
-	vMath.mat4.scale(AtmoSphereModel.Transform, AtmoSphereModel.Transform, [atmoScale,atmoScale,atmoScale]);
-	
-	vMath.mat4.identity(SkySphereModel.Transform);
-	vMath.mat4.scale(SkySphereModel.Transform, SkySphereModel.Transform, [10.0,10.0,10.0]);
-	vMath.mat4.rotate(SkySphereModel.Transform, SkySphereModel.Transform, vMath.deg2rad(-90.0), [1,0,0]);
-	
 	var time = 0.0;
 	sys.time.init();
 	
 	var oldframe_time = -1.0;
 	var avg_frame_time = 1.0/60.0;
 	var FPSlabel = document.getElementById("label_FPS");
-	
-	var lastRecompileTime = sys.time.getSecondsSinceStart();
-	
-	shader.setFlagsUniform(1);
-	
-	var IdentityMatrix = vMath.mat4.create();
-	vMath.mat4.identity(IdentityMatrix);
-	
-	var MipGen = new glext.MipMapGen();
-	if((bUseHDR == false) || (bUseHDR == true && bStoreHDRinRGBA8 == true))
-		MipGen.Create(gl.viewportWidth, gl.viewportHeight, gl.RGBA8, "mipmapVS", "3x3MipGenFS");
-	else
-		MipGen.Create(gl.viewportWidth, gl.viewportHeight, gl.RGBA16F, "mipmapVS", "3x3MipGenFS");
-	
-	// var Flags = 1;
-	// var time_of_start = sys.time.getTimeµs();
-	glext.BlendMode.Enable();
 		
-	// var circularMov = [0.0, 0.0]; //azimuth, inclination
-	// var distFromObject = 7.0;
-	
-	var orbital = [];
-	orbital.radius = 7.0;
-	orbital.inclination = 0.0;
-	orbital.azimuth = 0.0;
-	orbital.dinclination = 0.0;
-	orbital.dazimuth = 0.0;
-	
-	var RightAdd = vMath.vec3.create();
-	var UpAdd = vMath.vec3.create();
-	
-	Camera.setPositionAndLookPt(eyePt, [0.0,0.0,0.0], upDir);
-	Camera.setFOV(75.0);
-	
-	var bCtrlToggle = false;
-	var bShiftToggle = false;
-	var bFluidSimPass = true;
+	glext.BlendMode.Enable();
 		
 	setInterval( function(){ window.requestAnimationFrame(renderFrame); }, 17);
 	
@@ -118,45 +64,6 @@ export function main(){
 		
 		FPSlabel.textContent = Number.parseFloat(avg_FPS).toFixed(2) + " FPS";
 						
-		vMath.mat4.identity(navigatorModel.Transform);
-		vMath.mat4.setTranslation(navigatorModel.Transform, navigatorModel.Transform, [ -1.0, -ctime*0.5, 0.0]);
-		vMath.mat4.rotate(navigatorModel.Transform, navigatorModel.Transform, vMath.deg2rad(90), [0,1,0]);
-		// glext.Framebuffer.BindMainFB();
-		
-		//Calc camera view i proj
-		//-------------------------------------------------------------------------------------
-		var bUpdateCamera = false;
-		
-		var mousePos = sys.mouse.getPosition();
-		var mouseDelta = sys.mouse.getDeltaPosition();
-		
-		if(sys.mouse.get().btnLeft == true)
-			if(sys.mouse.get().dx != 0 || sys.mouse.get().dy != 0){
-				Camera.Rotate(sys.mouse.get().dx / 100.0, sys.mouse.get().dy / 100.0);
-				Camera.CalcInverseViewProjectionMatrix();
-			}
-			
-		var MovementDelta = 1.0;
-		if(sys.keyboard.isCtrlPressed()) bCtrlToggle = !bCtrlToggle;
-		if(sys.keyboard.isShiftPressed()) bShiftToggle = !bShiftToggle;
-		if(bCtrlToggle == true) MovementDelta = 0.1;
-		else if(bShiftToggle == true) MovementDelta = 10.0;
-		
-		if(sys.keyboard.isKeyPressed("w"))      Camera.MoveForward(MovementDelta);
-		else if(sys.keyboard.isKeyPressed("s")) Camera.MoveForward(-MovementDelta);
-		
-		if(sys.keyboard.isKeyPressed("a"))      Camera.MoveRight(MovementDelta);
-		else if(sys.keyboard.isKeyPressed("d")) Camera.MoveRight(-MovementDelta);
-		
-		if(sys.keyboard.isKeyPressed("r"))      Camera.MoveUp(MovementDelta);
-		else if(sys.keyboard.isKeyPressed("f")) Camera.MoveUp(-MovementDelta);
-		
-		if(sys.keyboard.isKeyPressed("e"))      Camera.Tilt(0.1*MovementDelta);
-		else if(sys.keyboard.isKeyPressed("q")) Camera.Tilt(-0.1*MovementDelta);
-		
-		Camera.CalcInverseViewMatrix();
-		//-------------------------------------------------------------------------------------
-				
 		sys.mouse.Update();
 		sys.keyboard.Update();
 		gl.flush();
