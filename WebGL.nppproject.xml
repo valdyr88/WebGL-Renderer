@@ -37,10 +37,14 @@
         <File name="main.js" />
         <File name="main_deffered.js" />
         <File name="main_volumetric.js" />
-        <File name="main_PhotoEditor.js" />
         <File name="index.html" />
         <File name="index_volumetric.html" />
-        <File name="PhotoEditor.html" />
+		<Folder name="apps">
+			<Folder name="appPhotoEditor">
+				<File name="appPhotoEditor\main_PhotoEditor.js" />
+				<File name="appPhotoEditor\PhotoEditor.html" />
+			</Folder>
+		</Folder>
         <Folder name="Shaders">
 			<Folder name="FluidSim">
 				<Folder name="2D">
