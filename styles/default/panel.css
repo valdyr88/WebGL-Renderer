@@ -15,9 +15,9 @@
 /* Style navigation menu links */
 .paneltop a {
   color: white;
-  padding: 14px 16px;
+  padding: 1.1rem 1.6rem;
   text-decoration: none;
-  font-size: 17px;
+   font-size: 1.0rem;
   display: block;
 }
 
@@ -40,9 +40,9 @@
 .paneltop text {
   background-color: #4CAF50;
   color: white;
-  padding: 14px 16px;
+  padding: 1.1rem 1.6rem;
   text-decoration: none;
-  font-size: 17px;
+   font-size: 1.0rem;
   display: block;
 } 
 /*----------------------------------------------------------------------------------------------------------------*/ 
@@ -54,6 +54,5 @@
   margin: auto;
   background-color: #555;
   color: white;
-  border-radius: 10px;
 }
 /*----------------------------------------------------------------------------------------------------------------*/ 

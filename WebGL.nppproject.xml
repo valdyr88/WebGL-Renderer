@@ -43,6 +43,9 @@
 			<Folder name="appPhotoEditor">
 				<File name="appPhotoEditor\main_PhotoEditor.js" />
 				<File name="appPhotoEditor\PhotoEditor.html" />
+				<Folder name="toolbar">
+					<File name="appPhotoEditor\toolbar\toolbar.html"/>
+				</Folder>
 			</Folder>
 		</Folder>
         <Folder name="Shaders">
