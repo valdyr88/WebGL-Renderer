@@ -73,15 +73,16 @@
 .menubar li{
 	float: left;
 }
-.menubar li a, text, .dropbtn{
+.menubar li a, .menubar li text, .dropbtn{
   display: inline-block;
   color: white;
   text-align: center;
   padding: 14px 16px;
   text-decoration: none;
 }
-.menubar li a:hover, text:hover, .dropdown:hover .dropbtn{
-  background-color: red;
+.menubar li a:hover, .menubar li text:hover, .dropdown:hover .dropbtn{
+  background-color: white;
+  color: #555;
 }
 .menubar li.dropbtn{
 	display: inline-block;
@@ -104,7 +105,7 @@
   text-align: left;
 }
 
-.dropdown-content a:hover, text:hover {background-color: #f1f1f1}
+.dropdown-content a:hover, .dropdown-content text:hover {background-color: #f1f1f1}
 
 .dropdown:hover .dropdown-content {
   display: block;
