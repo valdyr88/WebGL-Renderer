@@ -103,7 +103,37 @@ function movable_StopMovement(e){
 	document.movable_element = null;
 }
 
-export function MakeElementMovable(elem, rect){
+function movable_findMovableRectFromAttrib(obj, strAttribute){
+	if(strAttribute == undefined || strAttribute == null) return;
+	var allElements = obj.getElementsByTagName("*");
+	
+	var objRect = obj.getBoundingClientRect();
+	var Rects = [];
+	
+	for(let i = 0; i < allElements.length; ++i)
+	{
+		let el = allElements[i];
+		let bHasAttrib = el.getAttribute(strAttribute) != null;		
+		if(bHasAttrib == false){ continue; }
+		
+		el.removeAttribute(strAttribute);
+		let elRect = el.getBoundingClientRect();
+		
+		let x0 = elRect.left - objRect.left;
+		let x1 = x0 + elRect.width;
+		let y0 = elRect.top - objRect.top;
+		let y1 = y0 + elRect.height;
+				
+		Rects[Rects.length] = new Rect(x0,y0,x1,y1);
+	}
+	return Rects;	
+}
+
+/*
+prima element <elem> kojem ce postaviti onmousedown handler za movement.
+<handle> je ili attribut DOM elementa unutar <elem>, ili lista rect koordinata (relativno u odnosu na <elem> koje definiraju area koji pomiče element. ako ovaj parametar nije predan onda se element može pomaknut na bilo kojem mjestu
+*/
+export function MakeElementMovable(elem, handle){
 	var obj = elem;
 	if(typeof elem === 'string'){ obj = document.getElementById(elem); }
 	if(obj == null) return;
@@ -113,26 +143,32 @@ export function MakeElementMovable(elem, rect){
 	obj.oldMouseX = 0;
 	obj.oldMouseY = 0;
 	
-	if(rect == null){
+	if(handle == null){
 		obj.selectRect = [];}
-	else if(rect[0].length == undefined){
-		obj.selectRect = [new Rect(rect[0],rect[1],rect[2],rect[3])];}
+	else if(typeof handle == 'string'){
+		obj.selectRect = movable_findMovableRectFromAttrib(obj, handle);}
+	else if(handle[0].length == undefined){
+		obj.selectRect = [new Rect(handle[0],handle[1],handle[2],handle[3])];}
 	else{
 		obj.selectRect = [];
-		for(let i = 0; i < rect.length; ++i){
-			let r = rect[i];
+		for(let i = 0; i < handle.length; ++i){
+			let r = handle[i];
 			obj.selectRect[i] = new Rect(r[0],r[1],r[2],r[3]);
 		}
 	}
 	
 }
 
-export function MakeElementsMovable(elems){
+/*
+prima elemente <elems> kojima ce postaviti onmousedown handler za movement.
+<handle_attrib> je attribut pomocu kojeg se definira da taj element je handle za movement
+*/
+export function MakeElementsMovable(elems, handle_attrib){
 	if(elems == null) return;
-	if(typeof elems == 'string') MakeElementMovable(elems,null);
+	if(typeof elems == 'string') MakeElementMovable(elems,handle_attrib);
 	else{
-		if(elems.length == undefined) MakeElementMovable(elems,null);
-		for(let i = 0; i < elems.length; ++i) MakeElementMovable(elems[i],null);
+		if(elems.length == undefined) MakeElementMovable(elems,handle_attrib);
+		for(let i = 0; i < elems.length; ++i) MakeElementMovable(elems[i],handle_attrib);
 	}
 }
 

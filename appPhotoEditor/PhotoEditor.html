@@ -292,7 +292,7 @@
 //-------------------------------------------------------------------------------------------
 	window.onload = function(){
 		ParseForHTMLIncludes(document, "data-inline-html");
-		MakeElementMovable("toolbar");
+		MakeElementsMovable(["toolbar"], "data-movable-element-handle");
 		LoadAllExternFiles();
 	}
 //-------------------------------------------------------------------------------------------
