@@ -160,10 +160,10 @@
 							];//, "tx128"
 	var extern_files_loaded_number = 0;
 	
-	function onExternFileLoadFinish(){
+	function onExternFileLoadFinish(callback){
 		++extern_files_loaded_number;
 		if(extern_files_loaded_number >= extern_files_list.length){
-			main();
+			callback();
 		}
 	}
 	
@@ -188,25 +188,25 @@
 		obj.type = strTypeArray[1]; return true;		
 	}
 	
-	function fetchAndStore(id){
+	function fetchAndStore(id, callback){
 		var obj = document.getElementById(id);
 		if(obj == null) alert("fetchAndStore() obj == null, id == " + id);
 		if(typeof obj.type === 'undefined' || obj.type == null)
 			extractTypeFromOuterHTML(obj);
 		
 		switch(obj.tagName){
-			default: fetchDefaultFile(obj, onExternFileLoadFinish); break;
-			case "IMG": fetchImage(obj, onExternFileLoadFinish); break;
+			default: fetchDefaultFile(obj, callback); break;
+			case "IMG": fetchImage(obj, callback); break;
 		}
 	}
 	
-	function LoadAllExternFiles(){
+	function LoadAllExternFiles(callback){
 		//dodajemo fileove sa odvojene liste
 		//extern_files_list = extern_files_list.concat(fluidsim_shader_files_list);
 		
 		extern_files_loaded_number = 0;
 		for(var i = 0; i < extern_files_list.length; ++i){
-			fetchAndStore(extern_files_list[i]);
+			fetchAndStore(extern_files_list[i], function(){ onExternFileLoadFinish(callback); });
 		}
 	}
 		
@@ -291,9 +291,12 @@
 //Window onload	
 //-------------------------------------------------------------------------------------------
 	window.onload = function(){
-		ParseForHTMLIncludes(document, "data-inline-html");
-		MakeElementsMovable(["toolbar"], "data-movable-element-handle");
-		LoadAllExternFiles();
+		ParseForHTMLIncludes(document, "data-inline-html", function(){
+			MakeElementsMovable(["toolbar"], "data-movable-element-handle");
+		});
+		LoadAllExternFiles(function(){
+			main();
+		});
 	}
 //-------------------------------------------------------------------------------------------
 	

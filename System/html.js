@@ -4,19 +4,25 @@ import * as fetch from "./fetch.js"
 //----------------------------------------------------------------------------------------------------
 // inline HTML file. potrebno je dodat attribut data-inline-html (moze i neki drugi isto) i pozvat ParseForHTMLIncludes(document, 'data-inline-html')
 //----------------------------------------------------------------------------------------------------
+class inlineHTMLfileCounter{ constructor(){ this.counter = 0; } }
 
-export function inlineHTMLfile(src, obj){
+export function inlineHTMLfile(src, obj, counter, callback){
 	fetch.fetchTextFileSrc(src, function(txt){
 		var write_file = null;
 		write_file = (typeof obj === 'string')? document.getElementById(obj) : obj;
 		write_file.innerHTML = txt;
+		counter.counter--;
+		if(counter.counter == 0){
+			callback();
+		}
 	});
 }
 
-export function ParseForHTMLIncludes(doc, strAttribute){
+export function ParseForHTMLIncludes(doc, strAttribute, callback){
 	var allElements = doc.getElementsByTagName("*");
 	
 	if(strAttribute == undefined || strAttribute == null) strAttribute = "data-inline-html";
+	var counter = new inlineHTMLfileCounter();
 	
 	for(let i = 0; i < allElements.length; ++i){
 		
@@ -25,7 +31,8 @@ export function ParseForHTMLIncludes(doc, strAttribute){
 		
 		if(file_src != null){
 			el.removeAttribute(strAttribute);
-			inlineHTMLfile(file_src, el);
+			counter.counter++;
+			inlineHTMLfile(file_src, el, counter, callback);
 		}
 	}
 }
