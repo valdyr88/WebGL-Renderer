@@ -118,19 +118,28 @@ function movable_findMovableRectFromAttrib(obj, strAttribute){
 	var objRect = obj.getBoundingClientRect();
 	var Rects = [];
 	
+	obj.movable_element_handle_attrib = strAttribute;
+	obj.onresize = function(){ 
+		obj.selectRect = movable_findMovableRectFromAttrib(obj, obj.movable_element_handle_attrib);
+	}
+	
 	for(let i = 0; i < allElements.length; ++i)
 	{
 		let el = allElements[i];
 		let bHasAttrib = el.getAttribute(strAttribute) != null;		
 		if(bHasAttrib == false){ continue; }
 		
-		el.removeAttribute(strAttribute);
+		// el.removeAttribute(strAttribute);
 		let elRect = el.getBoundingClientRect();
 		
 		let x0 = elRect.left - objRect.left;
 		let x1 = x0 + elRect.width;
 		let y0 = elRect.top - objRect.top;
 		let y1 = y0 + elRect.height;
+		
+		el.onresize = function(){ 
+			obj.selectRect = movable_findMovableRectFromAttrib(obj, obj.movable_element_handle_attrib);
+		}
 				
 		Rects[Rects.length] = new Rect(x0,y0,x1,y1);
 	}
