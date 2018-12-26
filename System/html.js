@@ -11,7 +11,7 @@ export function inlineHTMLfile(src, obj, counter, callback){
 		var write_file = null;
 		write_file = (typeof obj === 'string')? document.getElementById(obj) : obj;
 		write_file.innerHTML = txt;
-		counter.counter--;
+		--counter.counter;
 		if(counter.counter == 0){
 			callback();
 		}
@@ -30,8 +30,8 @@ export function ParseForHTMLIncludes(doc, strAttribute, callback){
 		let file_src = el.getAttribute(strAttribute);
 		
 		if(file_src != null){
+			++counter.counter;
 			el.removeAttribute(strAttribute);
-			counter.counter++;
 			inlineHTMLfile(file_src, el, counter, callback);
 		}
 	}
