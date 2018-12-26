@@ -64,9 +64,10 @@ function movable_OnMouseDown(e){
 	this.oldMouseX = e.clientX;
 	this.oldMouseY = e.clientY;
 	
-	var localX = e.clientX - this.offsetLeft;
-	var localY = e.clientY - this.offsetTop;
-	var bInSelectRect = true;
+	let thisRect = this.getBoundingClientRect();
+	let localX = e.clientX - thisRect.left;//this.offsetLeft;
+	let localY = e.clientY - thisRect.top; //this.offsetTop;
+	let bInSelectRect = true;
 	
 	//provjera jeli unutar selection recta
 	if(this.selectRect != null && this.selectRect.length != 0)
@@ -94,8 +95,8 @@ function movable_DragElement(e){
 	e.preventDefault();
 	if(document.movable_element == null) return;
 	
-	var dX = document.movable_element.oldMouseX - e.clientX;
-	var dY = document.movable_element.oldMouseY - e.clientY;
+	let dX = document.movable_element.oldMouseX - e.clientX;
+	let dY = document.movable_element.oldMouseY - e.clientY;
 	
 	document.movable_element.style.top = (document.movable_element.offsetTop - dY) + "px";
 	document.movable_element.style.left = (document.movable_element.offsetLeft - dX) + "px";
