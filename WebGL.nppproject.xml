@@ -46,6 +46,9 @@
 				<Folder name="toolbar">
 					<File name="appPhotoEditor\toolbar\toolbar.html"/>
 				</Folder>
+				<Folder name="menubar">
+					<File name="appPhotoEditor\menubar\menubar.html"/>
+				</Folder>
 			</Folder>
 		</Folder>
         <Folder name="Shaders">
