@@ -17,7 +17,7 @@
   color: white;
   padding: 1.1rem 1.6rem;
   text-decoration: none;
-   font-size: 1.0rem;
+  font-size: 1.0rem;
   display: block;
 }
 
@@ -50,7 +50,6 @@
 /* Panel main area */
 /*----------------------------------------------------------------------------------------------------------------*/ 
 .panelmain {
-  max-width: 480px;
   margin: auto;
   background-color: #555;
   color: white;

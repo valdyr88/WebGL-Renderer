@@ -149,7 +149,7 @@
 	</div>
 	
   <script type="module">
-	import { ParseForHTMLIncludes, MakeElementsMovable } from "./../System/html.js"
+	import { ParseForHTMLIncludes, MakeElementMovable, MakeElementsMovable } from "./../System/html.js"
 	import { main, recompileShader, reloadTexture, onShaderDefineChanged } from "./main_PhotoEditor.js";
 	import { fetchImage } from "./../GLExt/glTexture.js";
 	function wait(ms){ const start = performance.now(); while(performance.now() - start < ms); }
@@ -292,7 +292,7 @@
 //-------------------------------------------------------------------------------------------
 	window.onload = function(){
 		ParseForHTMLIncludes(document, "data-inline-html");
-		MakeElementsMovable(["toolbar"]);
+		MakeElementMovable("toolbar");
 		LoadAllExternFiles();
 	}
 //-------------------------------------------------------------------------------------------

@@ -37,18 +37,49 @@ export function ParseForHTMLIncludes(doc, strAttribute){
 // movable elements
 //----------------------------------------------------------------------------------------------------
 
+class Rect{
+	constructor(X0,Y0,X1,Y1){
+		this.x0 = X0;
+		this.x1 = X1;
+		this.y0 = Y0;
+		this.y1 = Y1;
+		this.width = X1-X0;
+		this.height = Y1-Y0;
+	}
+	isWithin(x,y){
+		return (x >= this.x0 && x <= this.x1 && y >= this.y0 && y <= this.y1);
+	}
+}
+
 function movable_OnMouseDown(e){
 	e = e || window.event;
-	e.preventDefault();
 	
 	this.oldMouseX = e.clientX;
 	this.oldMouseY = e.clientY;
 	
-	/* this.onmouseup = movable_StopMovement;
-	this.onmousemove = movable_DragElement; */
-	document.onmouseup = movable_StopMovement;
-	document.onmousemove = movable_DragElement;
-	document.movable_element = this;
+	var localX = e.clientX - this.offsetLeft;
+	var localY = e.clientY - this.offsetTop;
+	var bInSelectRect = true;
+	
+	//provjera jeli unutar selection recta
+	if(this.selectRect != null && this.selectRect.length != 0)
+	{
+		bInSelectRect = false;
+		
+		for(let i = 0; i < this.selectRect.length; ++i){
+			let rect = this.selectRect[i];
+			if(rect.isWithin(localX,localY) == true){ 
+				bInSelectRect = true; break;
+			}
+		}
+	}
+	
+	if(bInSelectRect == true){
+		e.preventDefault();
+		document.onmouseup = movable_StopMovement;
+		document.onmousemove = movable_DragElement;
+		document.movable_element = this;
+	}
 }
 
 function movable_DragElement(e){
@@ -72,7 +103,7 @@ function movable_StopMovement(e){
 	document.movable_element = null;
 }
 
-export function MakeElementMovable(elem){
+export function MakeElementMovable(elem, rect){
 	var obj = elem;
 	if(typeof elem === 'string'){ obj = document.getElementById(elem); }
 	if(obj == null) return;
@@ -81,14 +112,27 @@ export function MakeElementMovable(elem){
 	
 	obj.oldMouseX = 0;
 	obj.oldMouseY = 0;
+	
+	if(rect == null){
+		obj.selectRect = [];}
+	else if(rect[0].length == undefined){
+		obj.selectRect = [new Rect(rect[0],rect[1],rect[2],rect[3])];}
+	else{
+		obj.selectRect = [];
+		for(let i = 0; i < rect.length; ++i){
+			let r = rect[i];
+			obj.selectRect[i] = new Rect(r[0],r[1],r[2],r[3]);
+		}
+	}
+	
 }
 
 export function MakeElementsMovable(elems){
 	if(elems == null) return;
-	if(typeof elems == 'string') MakeElementMovable(elems);
+	if(typeof elems == 'string') MakeElementMovable(elems,null);
 	else{
-		if(elems.length == undefined) MakeElementMovable(elems);
-		for(let i = 0; i < elems.length; ++i) MakeElementMovable(elems[i]);
+		if(elems.length == undefined) MakeElementMovable(elems,null);
+		for(let i = 0; i < elems.length; ++i) MakeElementMovable(elems[i],null);
 	}
 }
 
