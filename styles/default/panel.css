@@ -40,7 +40,7 @@
 .paneltop text, .paneltop button {
 	background-color: #4CAF50;
 	color: white;
-	padding: 1.1rem 1.6rem;
+	padding: 0.7rem 1.6rem;
 	text-decoration: none;
 	font-size: 1.0rem;
 	display: block;
@@ -53,6 +53,8 @@
 	margin: auto;
 	background-color: #555;
 	color: white;
+	background-image: linear-gradient(to left, #555, #444);
+	box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
 }
 /*----------------------------------------------------------------------------------------------------------------*/ 
 

@@ -1,6 +1,17 @@
 /*global page style*/
 
+.main{
+	padding: 0px;
+	margin: 0;
+	height: 100%;
+	width: 100%;
+	overflow: hidden;
+}
+
 .main body{
-  font-family: Arial, Helvetica, sans-serif;
-  font-size: 10px;
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: 10px;
+	padding: 0px;
+	border: none;
+	margin: 0;
 }
