@@ -2,57 +2,57 @@
 /*----------------------------------------------------------------------------------------------------------------*/ 
  /* Style the navigation menu */
 .paneltop {
-  overflow: hidden;
-  background-color: #333;
-  position: relative;
+	overflow: hidden;
+	background-color: #333;
+	position: relative;
 }
 
 /* Hide the links inside the navigation menu (except for logo/home) */
 .paneltop #myLinks {
-  display: none;
+	display: none;
 }
 
 /* Style navigation menu links */
 .paneltop a {
-  color: white;
-  padding: 1.1rem 1.6rem;
-  text-decoration: none;
-  font-size: 1.0rem;
-  display: block;
+	color: white;
+	padding: 1.1rem 1.6rem;
+	text-decoration: none;
+	font-size: 1.0rem;
+	display: block;
 }
 
 /* Style the hamburger menu */
 .paneltop a.icon {
-  background: black;
-  display: block;
-  position: absolute;
-  right: 0;
-  top: 0;
+	background: black;
+	display: block;
+	position: absolute;
+	right: 0;
+	top: 0;
 }
 
 /* Add a grey background color on mouse-over */
 .paneltop a:hover {
-  background-color: #ddd;
-  color: black;
+	background-color: #ddd;
+	color: black;
 }
 
 /* Style the text */
 .paneltop text {
-  background-color: #4CAF50;
-  color: white;
-  padding: 1.1rem 1.6rem;
-  text-decoration: none;
-  font-size: 1.0rem;
-  display: block;
+	background-color: #4CAF50;
+	color: white;
+	padding: 1.1rem 1.6rem;
+	text-decoration: none;
+	font-size: 1.0rem;
+	display: block;
 } 
 /*----------------------------------------------------------------------------------------------------------------*/ 
 
 /* Panel main area */
 /*----------------------------------------------------------------------------------------------------------------*/ 
 .panelmain {
-  margin: auto;
-  background-color: #555;
-  color: white;
+	margin: auto;
+	background-color: #555;
+	color: white;
 }
 /*----------------------------------------------------------------------------------------------------------------*/ 
 
@@ -64,51 +64,58 @@
 }
 
 .menubar ul{
-  list-style-type: none;
-  margin: 0;
-  padding: 0;
-  overflow: hidden;
-  background-color: #555;
+	list-style-type: none;
+	margin: 0;
+	padding: 0;
+	overflow: hidden;
+	/* background-color: #555; */
+	background-image: linear-gradient(to bottom, #555, #444);
 }
 .menubar li{
 	float: left;
 }
-.menubar li a, .menubar li text, .dropbtn{
-  display: inline-block;
-  color: white;
-  text-align: center;
-  padding: 14px 16px;
-  text-decoration: none;
+.menubar li a, .menubar li text, .menubar li button, .menubar-dropbtn{
+	display: inline-block;
+	color: white;
+	text-align: center;
+	padding: 1.0rem 1.2rem;
+	text-decoration: none;
+	background-image: linear-gradient(to bottom, #555, #444);
+	border: none;
 }
-.menubar li a:hover, .menubar li text:hover, .dropdown:hover .dropbtn{
-  background-color: white;
-  color: #555;
+.menubar li a:hover, .menubar li text:hover, .menubar li button:hover, .menubar-dropdown:hover .menubar-dropbtn{
+	/* background-color: white; */
+	background-image: linear-gradient(to bottom, #ddd, #bbb);
+	color: #555;
 }
-.menubar li.dropbtn{
+.menubar li .menubar-dropbtn{
 	display: inline-block;
 }
 
-.dropdown-content {
-  display: none;
-  position: absolute;
-  background-color: #f9f9f9;
-  min-width: 160px;
-  box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
-  z-index: 1;
+.menubar-dropdown-content {
+	display: none;
+	position: absolute;
+	/* background-color: #f9f9f9; */
+	background-image: linear-gradient(to bottom, #ddd, #bbb);
+	min-width: 12.0rem;
+	box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+	z-index: 1;
 }
 
-.dropdown-content a {
-  color: black;
-  padding: 12px 16px;
-  text-decoration: none;
-  display: block;
-  text-align: left;
+.menubar-dropdown-content a {
+	color: black;
+	padding: 1.0rem 1.2rem;
+	text-decoration: none;
+	display: block;
+	text-align: left;
 }
 
-.dropdown-content a:hover, .dropdown-content text:hover {background-color: #f1f1f1}
+.menubar-dropdown-content a:hover, .menubar-dropdown-content text:hover, .menubar-dropdown-content button:hover {
+	background-color: #f1f1f1
+}
 
-.dropdown:hover .dropdown-content {
-  display: block;
+.menubar-dropdown:hover .menubar-dropdown-content {
+	display: block;
 }
 
 /*----------------------------------------------------------------------------------------------------------------*/ 
