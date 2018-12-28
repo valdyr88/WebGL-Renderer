@@ -101,13 +101,19 @@
 	box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
 	z-index: 1;
 }
-
-.menubar-dropdown-content a {
-	color: black;
-	padding: 1.0rem 1.2rem;
+.menubar-dropdown-content ul{
+	display: flex;
+	flex-direction: column;
+	flex-wrap: wrap;
+}
+.menubar-dropdown-content ul li{
+}
+.menubar-dropdown-content ul li * {
+	padding: 1.0rem 1.0rem;
 	text-decoration: none;
 	display: block;
-	text-align: left;
+	width:100%;
+	background-image: linear-gradient(to left, #555, #444);
 }
 
 .menubar-dropdown-content a:hover, .menubar-dropdown-content text:hover, .menubar-dropdown-content button:hover {
