@@ -18,23 +18,50 @@ export function inlineHTMLfile(src, obj, counter, callback){
 	});
 }
 
-export function ParseForHTMLIncludes(doc, strAttribute, callback){
-	var allElements = doc.getElementsByTagName("*");
+function ParseForHTMLIncludes_impl(doc, strAttribute, counter, callback){
+	//rekurzivna funkcija koja u prvoj for petlji traži <strAttribute> atribut u DOM elementima i povecava counter za svaki takav element
+	//a zatim prolazi sve te elemente i poziva inlineHTMLfile() za svaki, sa tim da predaje callback funkciju koja rekurzivno poziva ponovno ParseForHTMLIncludes_impl()
+	//rekurzija se zaustavi jednom kad pri prolazu kroz elemente nije postavljen bHadAttrib na true (tj nije bilo elementa sa <strAttribute> atributom.
 	
+	var bHadAttrib = false;
+	{
+		let elems = [];
+		let elems_inline_html_file = [];
+		let allElements = doc.getElementsByTagName("*");
+		
+		for(let i = 0; i < allElements.length; ++i)
+		{
+			let el = allElements[i];
+			let file_src = el.getAttribute(strAttribute);
+			if(file_src == null) continue;
+			
+			el.removeAttribute(strAttribute);
+			elems[elems.length] = el;
+			elems_inline_html_file[elems_inline_html_file.length] = file_src;
+			++counter.counter;
+			bHadAttrib = true;
+		}
+		for(let i = 0; i < elems.length; ++i)
+		{
+			let el = elems[i];
+			let inline_html_file = elems_inline_html_file[i];
+			
+			inlineHTMLfile(inline_html_file, el, counter, 
+				function(){
+					ParseForHTMLIncludes_impl(doc, strAttribute, counter, callback); //zove rekurzivno, te ako ne bude novih elemenata zove callback()
+				}
+			);
+		}
+		if(bHadAttrib == false){ callback(); } //ako nije bilo elemenata, onda zovemo callback()
+	}	
+}
+
+export function ParseForHTMLIncludes(doc, strAttribute, callback){
 	if(strAttribute == undefined || strAttribute == null) strAttribute = "data-inline-html";
 	var counter = new inlineHTMLfileCounter();
 	
-	for(let i = 0; i < allElements.length; ++i){
-		
-		let el = allElements[i];
-		let file_src = el.getAttribute(strAttribute);
-		
-		if(file_src != null){
-			++counter.counter;
-			el.removeAttribute(strAttribute);
-			inlineHTMLfile(file_src, el, counter, callback);
-		}
-	}
+	//poziva rekurzivnu funkciju
+	ParseForHTMLIncludes_impl(doc, strAttribute, counter, callback);
 }
 
 //----------------------------------------------------------------------------------------------------
