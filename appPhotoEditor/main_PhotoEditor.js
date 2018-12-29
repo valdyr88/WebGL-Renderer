@@ -12,7 +12,7 @@ export function main()
 	sys.mouse.InitMouse(document);
 	sys.keyboard.InitKeyboard(document);
 		
-	gl = glext.glInit("glcanvas");
+	gl = glext.glInit("document_paint_canvas");
 	if(gl == null) return;
 	
 		 if(gl.isWGL2 == false && glext.glEnableExtension('OES_texture_float') == false) alert("no extension: OES_texture_float");
