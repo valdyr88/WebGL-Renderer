@@ -1,0 +1,53 @@
+
+<div class="panelmain" style="width:150%"><!-- style="position: absolute; top: 32px; right: 32px;" -->
+	<div class="paneltop" data-movable-element-handle="">
+		<text>New Document</text>
+	</div>
+	<p style="font-family:verdana; color:white;" id="label_FPS">0</p>
+	<!-- <p style="font-family:verdana; color:white;">FPS</p> -->
+	
+	<div style="display: flex;">
+		<p style="font-family:verdana; color:white;" >Quality: </p>
+		<select id="select_Quality" onchange="on_shader_define_changed('volume_clouds_shader','select_Quality','Quality_Auto', null)" style=" height: 22px;  transform: translate(10%, 65%);">
+			<option value="Quality_Auto">Auto</option>
+			<option value="Quality_High">High</option>
+			<option value="Quality_Med">Medium</option>
+			<option value="Quality_Low">Low</option>
+		</select>
+	</div>
+	
+	<div style="display: flex;">
+		<p style="font-family:verdana; color:white;">Debug: </p>
+		<select id="select_Debug" onchange="on_shader_define_changed('volume_clouds_shader','select_Debug','Off', '_DEBUG')" style=" height: 22px;  transform: translate(10%, 65%);">
+			<option value="Off">Off</option>
+			<option value="_DEBUG_SDF_Density">SDF_Density</option>
+			<option value="_DEBUG_SDF_Display_Normals">SDF_SurfaceNormal</option>
+			<option value="_DEBUG_SDF_StepCount">SDF_StepCount</option>
+			<option value="_DEBUG_SDF_NormalCalcCount">SDF_NormalCount</option>
+			<option value="_DEBUG_SDF_StepCountAndNormalCalcCount">SDF_StepNormalCount</option>
+			<!-- <option value="_DEBUG_SDF_TDistance 1">SDF_TDist</option> - ne radi zbog razmaka, kod provjere ima li taj define ne pronalazi ga zbog splitanja razmaka -->
+			<option value="_DEBUG_Clouds_StepCount">Clouds_StepCount</option>
+		</select>
+	</div>
+	
+	<div style="display: flex;">
+		<p style="font-family:verdana; color:white;" >FluidSim: </p>
+		<select id="select_FluidSimDisplay" onchange="on_fluidsim_shader_define_changed('select_FluidSimDisplay','Display_Velocity', null)" style=" height: 22px;  transform: translate(10%, 65%);">
+			<option value="_DEBUG_Display_Velocity">Display_Velocity</option>
+			<option value="_DEBUG_Display_VelocitySize">Display_VelocitySize</option>
+			<option value="_DEBUG_Display_Pressure">Display_Pressure</option>
+			<option value="_DEBUG_Display_Divergence">Display_Divergence</option>
+		</select>
+	</div>
+		<div class="slidecontainer" title="brightness">
+		  <input type="range" min="1" max="100" value="50" class="slider" id="fluidsim_brightness_slider">
+		  <!-- <p>Value: <span id="demo"></span></p> -->
+		</div>
+		<div class="slidecontainer" title="pressure iteration count">
+		  <input type="range" min="1" max="125" value="1" class="slider" id="fluidsim_pressure_iteration_count_slider">
+		</div>
+		<div class="slidecontainer" title="viscosity">
+		  <input type="range" min="0" max="90" value="0" class="slider" id="fluidsim_viscosity_slider">
+		</div>
+		<button id="reset_fluidsim", onclick="on_fluidsim_reset()"  style="transform: translate(50%, 0%);">Reset FluidSim</button>
+</div>

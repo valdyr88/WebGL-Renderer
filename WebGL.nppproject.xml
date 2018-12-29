@@ -48,6 +48,20 @@
 				</Folder>
 				<Folder name="menubar">
 					<File name="appPhotoEditor\menubar\menubar.html"/>
+					<File name="appPhotoEditor\menubar\file.html"/>
+					<File name="appPhotoEditor\menubar\edit.html"/>
+					<File name="appPhotoEditor\menubar\view.html"/>
+					<File name="appPhotoEditor\menubar\image.html"/>
+					<File name="appPhotoEditor\menubar\layers.html"/>
+					<File name="appPhotoEditor\menubar\select.html"/>
+					<File name="appPhotoEditor\menubar\filter.html"/>
+					<File name="appPhotoEditor\menubar\tools.html"/>
+					<File name="appPhotoEditor\menubar\settings.html"/>
+					<File name="appPhotoEditor\menubar\window.html"/>
+					<File name="appPhotoEditor\menubar\help.html"/>
+				</Folder>
+				<Folder name="windows">
+					<File name="appPhotoEditor\windows\newdocument.html"/>
 				</Folder>
 			</Folder>
 		</Folder>
