@@ -3,7 +3,7 @@
  /* Style the navigation menu */
 .paneltop {
 	overflow: hidden;
-	background-color: #333;
+	background-color: #333333;
 	position: relative;
 }
 
@@ -32,7 +32,7 @@
 
 /* Add a grey background color on mouse-over */
 .paneltop a:hover {
-	background-color: #d0d0d0;
+	background-color: #dddddd;
 	color: black;
 }
 
@@ -51,9 +51,9 @@
 /*----------------------------------------------------------------------------------------------------------------*/ 
 .panelmain {
 	margin: auto;
-	background-color: #505050;
+	background-color: #555555;
 	color: white;
-	background-image: linear-gradient(to left, #505050, #404040);
+	background-image: linear-gradient(to left, #555555, #444444);
 	box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
 }
 /*----------------------------------------------------------------------------------------------------------------*/ 
@@ -70,8 +70,8 @@
 	margin: 0;
 	padding: 0;
 	overflow: hidden;
-	/* background-color: #505050; */
-	background-image: linear-gradient(to bottom, #505050, #404040);
+	/* background-color: #555555; */
+	background-image: linear-gradient(to bottom, #555555, #444444);
 }
 .menubar li{
 	float: left;
@@ -82,13 +82,13 @@
 	text-align: center;
 	padding: 1.0rem 1.2rem;
 	text-decoration: none;
-	background-image: linear-gradient(to bottom, #505050, #404040);
+	background-image: linear-gradient(to bottom, #555555, #444444);
 	border: none;
 }
 .menubar li a:hover, .menubar li text:hover, .menubar li button:hover, .menubar-dropdown:hover .menubar-dropbtn{
 	/* background-color: white; */
-	background-image: linear-gradient(to bottom, #d0d0d0, #b0b0b0);
-	color: #505050;
+	background-image: linear-gradient(to bottom, #dddddd, #bbbbbb);
+	color: #555555;
 }
 .menubar li .menubar-dropbtn{
 	display: inline-block;
@@ -98,7 +98,7 @@
 	display: none;
 	position: absolute;
 	/* background-color: #f9f9f9; */
-	background-image: linear-gradient(to bottom, #d0d0d0, #b0b0b0);
+	background-image: linear-gradient(to bottom, #dddddd, #bbbbbb);
 	min-width: 12.0rem;
 	box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
 	z-index: 1;
@@ -115,7 +115,7 @@
 	text-decoration: none;
 	display: block;
 	width:100%;
-	background-image: linear-gradient(to left, #505050, #404040);
+	background-image: linear-gradient(to left, #555555, #444444);
 }
 
 .menubar-dropdown-content a:hover, .menubar-dropdown-content text:hover, .menubar-dropdown-content button:hover {
