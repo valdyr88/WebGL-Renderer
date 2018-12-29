@@ -131,5 +131,24 @@
 /*----------------------------------------------------------------------------------------------------------------*/ 
 /* toolbox icon  */
 /*----------------------------------------------------------------------------------------------------------------*/ 
+.noselect {
+  -webkit-touch-callout: none; /* iOS Safari */
+    -webkit-user-select: none; /* Safari */
+     -khtml-user-select: none; /* Konqueror HTML */
+       -moz-user-select: none; /* Firefox */
+        -ms-user-select: none; /* Internet Explorer/Edge */
+            user-select: none; /* Non-prefixed version, currently
+                                  supported by Chrome and Opera */
+}
 
+.icon-select{
+	user-select: none;
+}
+.icon-select:hover{
+	user-select: none;
+	box-shadow: -2px -2px 4px 0px rgba(0,0,0,0.2);
+	position: relative;
+	left: 1px;
+	top: 1px;
+}
 /*----------------------------------------------------------------------------------------------------------------*/ 
