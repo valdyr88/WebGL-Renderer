@@ -4,7 +4,9 @@ import * as vMath from "./../glMatrix/gl-matrix.js";
 
 var gl = null;
 
-export function main(){
+export function main()
+{
+	document.addEventListener('contextmenu', event => event.preventDefault());
 	
 	var gs = sys.storage.GlobalStorage.getSingleton();
 	sys.mouse.InitMouse(document);
