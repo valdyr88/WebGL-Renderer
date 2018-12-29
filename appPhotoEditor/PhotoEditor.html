@@ -92,8 +92,8 @@
 	<div id="inlineMovableHTMLFile2" style="position: absolute;" data-inline-html="./inlineMovableHTMLFile.html"></div> -->
 	<div id="menubar" data-inline-html="./menubar/menubar.html"></div>
 	<div id="toolbar" style="position: absolute;" data-inline-html="./toolbar/toolbar.html"></div>
-	<div id="newdocument" style="position: absolute;" data-inline-html="./windows/newdocument.html"></div>
 	<div id="document" style="position: absolute;" data-inline-html="./windows/document.html"></div>
+	<div id="newdocument" style="position: absolute;" data-inline-html="./windows/newdocument.html"></div>
 	
 	<!-- <div id="workarea" class="main" width="100%" height="100%">
 	  <canvas id="glcanvas" width="1%" height="1%">
@@ -246,9 +246,9 @@
 	window.onload = function(){
 		ParseForHTMLIncludes(document, "data-inline-html", function(){
 			MakeElementsMovable(["toolbar","newdocument","document"], "data-movable-element-handle");
-		});
-		LoadAllExternFiles(function(){
-			main();
+			LoadAllExternFiles(function(){
+				main();
+			});
 		});
 	}
 //-------------------------------------------------------------------------------------------

@@ -1,12 +1,12 @@
 .slidecontainer {
-  width: 100%;
+  width: 95%;
 }
 
 .slider {
   -webkit-appearance: none;
   width: 100%;
-  height: 15px;
-  border-radius: 5px;
+  height: 0.45rem;
+  border-radius: 1.0rem;
   background: #d3d3d3;
   outline: none;
   opacity: 0.7;
@@ -21,16 +21,16 @@
 .slider::-webkit-slider-thumb {
   -webkit-appearance: none;
   appearance: none;
-  width: 25px;
-  height: 25px;
+  width: 0.5rem;
+  height: 1rem;
   border-radius: 50%;
   background: #4CAF50;
   cursor: pointer;
 }
 
 .slider::-moz-range-thumb {
-  width: 25px;
-  height: 25px;
+  width: 0.5rem;
+  height: 1rem;
   border-radius: 50%;
   background: #4CAF50;
   cursor: pointer;
