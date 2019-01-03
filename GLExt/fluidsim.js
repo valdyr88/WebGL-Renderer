@@ -1044,6 +1044,7 @@ export class FluidSim3D
 		this.mass_init_shader.ULdT = this.mass_init_shader.getUniformLocation("dT");
 		this.mass_init_shader.ULk = this.mass_init_shader.getUniformLocation("k");
 		this.mass_init_shader.ULTextureMass = this.mass_init_shader.getUniformLocation("txMass");
+		this.mass_init_shader.ULTextureNoiseRGB = this.mass_init_shader.getUniformLocation("txNoiseRGB");
 		this.mass_init_shader.ULTextureVelocity = this.mass_init_shader.getUniformLocation("txVelocity");
 		
 		this.mass_advect_shader = new Shader(-1);
@@ -1076,6 +1077,10 @@ export class FluidSim3D
 		this.ResetMass();
 	}
 	
+	setNoiseTexture(noiseRGB){
+		this.txNoiseRGB = noiseRGB;
+	}
+	
 	ResetMass()
 	{
 		if(this.mass_init_shader == undefined || this.mass_init_shader == null) return;
@@ -1086,6 +1091,7 @@ export class FluidSim3D
 		
 		this.mass_init_shader.Bind();
 			this.txVelocity.Bind(0, this.mass_init_shader.ULTextureVelocity);
+			this.txNoiseRGB.Bind(1, this.mass_init_shader.ULTextureNoiseRGB);
 			this.mass_init_shader.setFloatUniform( this.mass_init_shader.ULdT, 0.0);
 			this.mass_init_shader.setFloatUniform( this.mass_init_shader.ULTime, this.time);
 			this.mass_init_shader.setFloat2Uniform( this.mass_init_shader.ULaspect, this.aspect);

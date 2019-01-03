@@ -358,10 +358,10 @@ export class Texture{
 		this.levels = 1;
 	}
 	
-	CreateEmptyRGBAubyte(width, height){ this.CreateEmpty(width, height, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE); }
-	CreateEmptyRGBubyte(width, height){  this.CreateEmpty(width, height, gl.RGB,  gl.RGB,  gl.UNSIGNED_BYTE); }
-	CreateEmptyRGubyte(width, height){   this.CreateEmpty(width, height, gl.RG,   gl.RG,   gl.UNSIGNED_BYTE); }
-	CreateEmptyRubyte(width, height){    this.CreateEmpty(width, height, gl.R,    gl.RED,  gl.UNSIGNED_BYTE); }
+	CreateEmptyRGBAubyte(width, height){ this.CreateEmpty(width, height, gl.RGBA8, gl.RGBA, gl.UNSIGNED_BYTE); }
+	CreateEmptyRGBubyte(width, height){  this.CreateEmpty(width, height, gl.RGB8,  gl.RGB,  gl.UNSIGNED_BYTE); }
+	CreateEmptyRGubyte(width, height){   this.CreateEmpty(width, height, gl.RG8,   gl.RG,   gl.UNSIGNED_BYTE); }
+	CreateEmptyRubyte(width, height){    this.CreateEmpty(width, height, gl.R8,    gl.RED,  gl.UNSIGNED_BYTE); }
 	
 	CreateEmptyRGBAfloat32(width, height){ this.CreateEmpty(width, height, gl.RGBA32F, gl.RGBA, gl.FLOAT); }
 	CreateEmptyRGBfloat32(width, height){  this.CreateEmpty(width, height, gl.RGB32F,  gl.RGB,  gl.FLOAT); }
@@ -734,10 +734,10 @@ export class Texture3D{
 		this.levels = 1;
 	}
 	
-	CreateEmptyRGBAubyte(width, height, depth){ this.CreateEmpty(width, height, depth, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE); }
-	CreateEmptyRGBubyte(width, height, depth){  this.CreateEmpty(width, height, depth, gl.RGB,  gl.RGB,  gl.UNSIGNED_BYTE); }
-	CreateEmptyRGubyte(width, height, depth){   this.CreateEmpty(width, height, depth, gl.RG,   gl.RG,   gl.UNSIGNED_BYTE); }
-	CreateEmptyRubyte(width, height, depth){    this.CreateEmpty(width, height, depth, gl.R,    gl.RED,  gl.UNSIGNED_BYTE); }
+	CreateEmptyRGBAubyte(width, height, depth){ this.CreateEmpty(width, height, depth, gl.RGBA8, gl.RGBA, gl.UNSIGNED_BYTE); }
+	CreateEmptyRGBubyte(width, height, depth){  this.CreateEmpty(width, height, depth, gl.RGB8,  gl.RGB,  gl.UNSIGNED_BYTE); }
+	CreateEmptyRGubyte(width, height, depth){   this.CreateEmpty(width, height, depth, gl.RG8,   gl.RG,   gl.UNSIGNED_BYTE); }
+	CreateEmptyRubyte(width, height, depth){    this.CreateEmpty(width, height, depth, gl.R8,    gl.RED,  gl.UNSIGNED_BYTE); }
 	
 	CreateEmptyRGBAfloat32(width, height, depth){ this.CreateEmpty(width, height, depth, gl.RGBA32F, gl.RGBA, gl.FLOAT); }
 	CreateEmptyRGBfloat32(width, height, depth){  this.CreateEmpty(width, height, depth, gl.RGB32F,  gl.RGB,  gl.FLOAT); }

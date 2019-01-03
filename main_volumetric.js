@@ -278,6 +278,7 @@ export function main(){
 	
 	if(b3DFluidSim == true){
 		fluidSim.CreateTest3DRenderShader("test_3d_texture_render");
+		fluidSim.setNoiseTexture(txNoiseRGB);
 		fluidSim.CreateMass(400,400,400, false, false, "fluidsim_mass_init_shader", "fluidsim_mass_advect_shader");
 	}
 	

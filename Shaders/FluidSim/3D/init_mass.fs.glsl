@@ -39,6 +39,7 @@ precision mediump sampler3D;
 #endif
 
 uniform int z;
+uniform float Time;
 uniform vec3 aspect; //odnos dimenzija teksture i svijeta
 uniform sampler3D txVelocity;
 uniform sampler2D txNoiseRGB;
@@ -63,7 +64,7 @@ float noise(in vec3 x) //3d noise from iq https://www.shadertoy.com/view/XslGRr
 	return lerp( rg.x, rg.y, f.z );
 }
 
-float sample_clouds(in vec3 p) //cloud from TekF https://www.shadertoy.com/view/lssGRX
+float clouds(in vec3 p) //cloud from TekF https://www.shadertoy.com/view/lssGRX
 {	
 	float den = -2.0;//-1.0 - (abs(p.y-0.5)+0.5)/2.0;
 	
@@ -117,6 +118,8 @@ float sdf_map(in vec3 x)
 
 //===================================================================================================
 
+
+//===================================================================================================
 float sample_clouds_density(in vec3 x)
 {
 	x = toTexSpace(x);
@@ -125,8 +128,33 @@ float sample_clouds_density(in vec3 x)
 	if(dist > 0.0f) return 0.0; //ako je dist pozitivan onda smo izvan sdf containera
 	
 	float dens_sdf = saturate(abs(dist)*1.0f);			
-	float dens = dens_sdf * sample_clouds(ray);
+	float dens = dens_sdf * clouds(x);
+	
+	return dens;
 }
+
+vec3 sample_clouds_color(in vec3 x)
+{
+	return vec3(1.0,1.0,1.0);
+}
+
+vec4 sample_clouds_density_and_color(in vec3 x)
+{
+	float dens = sample_clouds_density(x);
+	vec3 color = sample_clouds_color(x);
+	
+	return vec4(color.x, color.y, color.z, dens);
+}
+
+out_dim sample_clouds(in vec3 x)
+{
+	#if bHasColorComponent == 1
+		return sample_clouds_density_and_color(x);
+	#else
+		return sample_clouds_density(x);
+	#endif
+}
+//===================================================================================================
 
 void main(void)
 {
@@ -135,7 +163,7 @@ void main(void)
 	for(int i = 0; i < NUM_OUT_BUFFERS; ++i)
 	{	
 		vec3 x = toWorldSpace(TexCoords, z+i);
-		uadv[i] = sample_clouds_density(x);
+		uadv[i] = sample_clouds(x);
 	}
 	
 	// gl_FragColor = uadv;
