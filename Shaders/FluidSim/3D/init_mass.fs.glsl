@@ -8,6 +8,7 @@ precision mediump sampler3D;
 #global_defines
 #include "defines"
 #include "functions"
+#include "sdfunctions"
 //------------------------------------------------------------------------------
 
 #if defined(bHasColorComponent)
@@ -40,7 +41,7 @@ precision mediump sampler3D;
 uniform int z;
 uniform vec3 aspect; //odnos dimenzija teksture i svijeta
 uniform sampler3D txVelocity;
-uniform sampler3D txMass; //(r) density ili (rgb) boja i (a) density
+uniform sampler2D txNoiseRGB;
 uniform float dT;
 
 //------------------------------------------------------------------------------
@@ -52,12 +53,80 @@ varyin vec2 TexCoords;
 #include "fluidsim3d_include"
 // #define MassResolution
 
-out_dim advect(sampler3D u, sampler3D m, vec3 x, float dt){
-	vec4 v = samplePoint(u, x); //sample point
-	return sampleLinear(m, x - dt*v.xyz).out_comp; //sample linear
+float noise(in vec3 x) //3d noise from iq https://www.shadertoy.com/view/XslGRr
+{
+    vec3 p = floor(x);
+    vec3 f = fract(x);
+	f = f*f*(3.0-2.0*f);
+	vec2 uv = (p.xy+vec2(37.0,17.0)*p.z) + f.xy;
+	vec2 rg = textureLod( txNoiseRGB, (uv+0.5)/256.0, 0.0 ).yx;
+	return lerp( rg.x, rg.y, f.z );
+}
+
+float sample_clouds(in vec3 p) //cloud from TekF https://www.shadertoy.com/view/lssGRX
+{	
+	float den = -2.0;//-1.0 - (abs(p.y-0.5)+0.5)/2.0;
+	
+	float time = 0.05f*Time;
+	time = 0.0f;
+	
+	float f = 0.0;
+	vec3 q = p*.5 - vec3(0.0,0.0,1.5)*0.0*time + vec3(sin(0.7*0.0*time),0,0);
+    f  = 0.50000*noise( q ); q = q*2.02 - vec3(0.0,2.0,0.0)*time;
+    f += 0.25000*noise( q ); q = q*2.03 - vec3(-4.0,0.0,0.1)*time;
+    f += 0.12500*noise( q ); q = q*2.01 - vec3(4.0,1.0,0.0)*time;
+    f += 0.06250*noise( q ); q = q*2.02 - vec3(0.0,0.0,0.2)*time;
+    f += 0.03125*noise( q );
+	
+	den += 4.0*f;
+	den = saturate(den);
+	return den;
 }
 
 //===================================================================================================
+// SDF gizmo container
+//===================================================================================================
+
+float sdf_map(in vec3 x)
+{
+	float dist = 1e10;
+	float distA = 1e10;
+	float distB = 1e10;
+	
+	const float scale = 2.0f;
+
+	/* vec3 pos = sdf_position(x, vec3(0.0, 0.0, 0.0));
+	dist = sdf_combine( dist, sdf_box(vec3(1.0,0.2,2.0), pos));
+	dist = sdf_smooth_union( dist, sdf_cylinder_capped(vec2(0.5,2.0), pos), 0.5 );
+		 pos = sdf_position(x, vec3(0.0, 0.0, 1.0));
+	dist = sdf_combine( dist, sdf_sphere(0.5, pos)); */
+	
+	vec3 pos = sdf_position(x/scale, vec3(0.0, 0.0, 0.0));
+	
+	distA = sdf_combine( distA, sdf_box(vec3(2.0,2.0,2.0), pos));
+	distA = sdf_intersect( distA, sdf_sphere(2.75, pos));
+	
+	distB = sdf_combine( distB, sdf_cylinder_capped(vec2(1.5,3.0), pos));
+	distB = sdf_union( distB, sdf_cylinder_capped(vec2(1.5,3.0), pos.yxz));
+	distB = sdf_union( distB, sdf_cylinder_capped(vec2(1.5,3.0), pos.xzy));
+	
+	dist = sdf_subtract( distB, distA );
+	
+	return distA;
+}
+
+//===================================================================================================
+
+float sample_clouds_density(in vec3 x)
+{
+	x = toTexSpace(x);
+	
+	float dist = sdf_map(x);
+	if(dist > 0.0f) return 0.0; //ako je dist pozitivan onda smo izvan sdf containera
+	
+	float dens_sdf = saturate(abs(dist)*1.0f);			
+	float dens = dens_sdf * sample_clouds(ray);
+}
 
 void main(void)
 {
@@ -66,7 +135,7 @@ void main(void)
 	for(int i = 0; i < NUM_OUT_BUFFERS; ++i)
 	{	
 		vec3 x = toWorldSpace(TexCoords, z+i);
-		uadv[i] = advect(txVelocity, txMass, x, dT);
+		uadv[i] = sample_clouds_density(x);
 	}
 	
 	// gl_FragColor = uadv;
