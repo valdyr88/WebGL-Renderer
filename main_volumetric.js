@@ -488,18 +488,17 @@ export function main(){
 				fluidSim.setDisplayBrightness(brightness);
 			//-------------------------------------------------------
 			
-			if(true){
-				
+			//simulacija
+			//-------------------------------------------------------
+			{
 				fluidSim.SimStep(0.1);
 				
 				glext.Framebuffer.BindMainFB();	
 				gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);		
 				
-				fluidSim.Display();
+				// fluidSim.Display(); //display preko fluidsim/debug_display
 			}
-			else {//test 3d, shader3DRender
-				fluidSim.Test3DRender();
-			}
+			//-------------------------------------------------------
 		}
 		
 		if(false) //Render deferred_opaque_shade i transparent_shader
@@ -603,7 +602,7 @@ export function main(){
 			light.Update();
 		}
 		
-		if(true && bFluidSimPass == false) //Render volume_clouds_shader
+		if(true) //Render volume_clouds_shader
 		{
 			glext.Framebuffer.BindMainFB();	
 			gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);		
@@ -619,6 +618,7 @@ export function main(){
 			volume_clouds_shader.Bind();
 				txNoiseRGB.Bind(0, volume_clouds_shader.ULTextureNoiseRGB);
 				txfbColor.Bind(1, volume_clouds_shader.ULTextureBackground);
+				fluidSim.txVelocity.Bind(2, volume_clouds_shader.ULTextureVelocity);
 				
 				volume_clouds_shader.setViewMatrixUniform( Camera.ViewMatrix );
 				volume_clouds_shader.setProjectionMatrixUniform( Camera.ProjectionMatrix );

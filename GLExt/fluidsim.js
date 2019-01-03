@@ -986,6 +986,154 @@ export class FluidSim3D
 		Framebuffer.Bind(oldFB);
 	}
 	
+	//-----------------------------------------------------------------------------------------------------------
+	// Mass advection
+	//-----------------------------------------------------------------------------------------------------------
+	
+	CreateMass(w,h,d,bColorAndDensity,bFloat, init_masss_shader, advect_mass_shader)
+	{
+		d = Math.floor(d/this.NumOutBuffers)*this.NumOutBuffers;
+		this.mass_width = w;
+		this.mass_height = h;
+		this.mass_depth = d;
+		
+		this.txMass0 = new Texture3D(-1);
+		this.txMass1 = new Texture3D(-1);
+		
+		if(bColorAndDensity == true){
+			if(bFloat == true){
+				this.txMass0.CreateEmptyRGBAfloat32(this.mass_width, this.mass_height, this.mass_depth);
+				this.txMass1.CreateEmptyRGBAfloat32(this.mass_width, this.mass_height, this.mass_depth); }
+			else{ 
+				this.txMass0.CreateEmptyRGBAubyte(this.mass_width, this.mass_height, this.mass_depth); 
+				this.txMass1.CreateEmptyRGBAubyte(this.mass_width, this.mass_height, this.mass_depth); }
+		}else{
+			if(bFloat == true){
+				this.txMass0.CreateEmptyRfloat32(this.mass_width, this.mass_height, this.mass_depth); 
+				this.txMass1.CreateEmptyRfloat32(this.mass_width, this.mass_height, this.mass_depth); }
+			else{
+				this.txMass0.CreateEmptyRubyte(this.mass_width, this.mass_height, this.mass_depth); 
+				this.txMass1.CreateEmptyRubyte(this.mass_width, this.mass_height, this.mass_depth); }
+		}
+		
+		this.txMass = this.txMass0;
+		
+		this.str_mass_vec3Res = "vec3(" + this.mass_width.toString()+ ".0," + this.mass_height.toString() + ".0," + this.mass_depth.toString() + ".0)";
+		
+		this.mass_init_shader = new Shader(-1);
+		this.mass_init_shader.addDefine("Resolution",this.str_vec3Res);
+		this.mass_init_shader.addDefine("MassResolution",this.str_mass_vec3Res);
+		this.mass_init_shader.addDefine("NUM_OUT_BUFFERS", this.NumOutBuffers.toString());
+		this.mass_init_shader.addDefine("WriteOutput(out_buffer, out_variable)", this.str_WriteOutBuffers);
+		if(this.mass_init_shader.CompileFromFile(vertex, init_masss_shader) == false) alert("nije kompajliran shader!");
+		this.mass_init_shader.InitDefaultAttribLocations();
+		this.mass_init_shader.InitDefaultUniformLocations();
+		this.mass_init_shader.ULaspect = -1;
+		this.mass_init_shader.ULdT = -1;
+		this.mass_init_shader.ULk = -1;
+		this.mass_init_shader.ULdisplayBrightness = -1;
+		this.mass_init_shader.ULTexturePressure = -1;
+		this.mass_init_shader.ULTextureVelocity = -1;
+		this.mass_init_shader.ULTextureDivergence = -1;
+		this.mass_init_shader.ULaspect = this.mass_init_shader.getUniformLocation("aspect");
+		this.mass_init_shader.ULdT = this.mass_init_shader.getUniformLocation("dT");
+		this.mass_init_shader.ULk = this.mass_init_shader.getUniformLocation("k");
+		this.mass_init_shader.ULTextureMass = this.mass_init_shader.getUniformLocation("txMass");
+		this.mass_init_shader.ULTextureVelocity = this.mass_init_shader.getUniformLocation("txVelocity");
+		
+		this.mass_advect_shader = new Shader(-1);
+		this.mass_advect_shader.addDefine("Resolution",this.str_vec3Res);
+		this.mass_advect_shader.addDefine("MassResolution",this.str_mass_vec3Res);
+		this.mass_advect_shader.addDefine("NUM_OUT_BUFFERS", this.NumOutBuffers.toString());
+		this.mass_advect_shader.addDefine("WriteOutput(out_buffer, out_variable)", this.str_WriteOutBuffers);
+		if(this.mass_advect_shader.CompileFromFile(vertex, init_masss_shader) == false) alert("nije kompajliran shader!");
+		this.mass_advect_shader.InitDefaultAttribLocations();
+		this.mass_advect_shader.InitDefaultUniformLocations();
+		this.mass_advect_shader.ULaspect = -1;
+		this.mass_advect_shader.ULdT = -1;
+		this.mass_advect_shader.ULk = -1;
+		this.mass_advect_shader.ULdisplayBrightness = -1;
+		this.mass_advect_shader.ULTexturePressure = -1;
+		this.mass_advect_shader.ULTextureVelocity = -1;
+		this.mass_advect_shader.ULTextureDivergence = -1;
+		this.mass_advect_shader.ULaspect = this.mass_advect_shader.getUniformLocation("aspect");
+		this.mass_advect_shader.ULdT = this.mass_advect_shader.getUniformLocation("dT");
+		this.mass_advect_shader.ULk = this.mass_advect_shader.getUniformLocation("k");
+		this.mass_advect_shader.ULTextureMass = this.mass_advect_shader.getUniformLocation("txMass");
+		this.mass_advect_shader.ULTextureVelocity = this.mass_advect_shader.getUniformLocation("txVelocity");
+		
+		ShaderList.addShader(this.mass_init_shader);
+		ShaderList.addShader(this.mass_advect_shader);
+		TextureList.addTexture(this.txMass0);
+		TextureList.addTexture(this.txMass1);
+	}
+	
+	ResetMass()
+	{
+		if(this.mass_init_shader == undefined || this.mass_init_shader == null) return;
+		
+		var oldFB = gl.currentFramebuffer;
+		this.framebuffer.Bind();
+		gl.viewport(0, 0, this.mass_width, this.mass_height);
+		
+		this.mass_init_shader.Bind();
+			this.txVelocity.Bind(0, this.mass_init_shader.ULTextureVelocity);
+			this.mass_init_shader.setFloatUniform( this.mass_init_shader.ULdT, dT);
+			this.mass_init_shader.setFloatUniform( this.mass_init_shader.ULTime, this.time);
+			this.mass_init_shader.setFloat2Uniform( this.mass_init_shader.ULaspect, this.aspect);
+			
+			for(let z = 0; z < this.mass_depth; z += this.NumOutBuffers)
+			{
+				for(let l = 0; l < this.NumOutBuffers; ++l)
+					this.framebuffer.AttachTextureLayer(this.txMass, l, z+l);
+				this.framebuffer.SetupUsage();
+				
+				this.mass_init_shader.setIntUniform(this.mass_init_shader.ULz, z);
+				this.quad_model.RenderIndexedTriangles(this.mass_init_shader);	
+			}
+		
+		Framebuffer.Bind(oldFB);
+	}
+	
+	AdvectMass()
+	{
+		if(this.mass_advect_shader == undefined || this.mass_advect_shader == null) return;
+		
+		var oldFB = gl.currentFramebuffer;
+		this.framebuffer.Bind();
+		gl.viewport(0, 0, this.mass_width, this.mass_height);
+		
+		{
+			var tmp = this.txMass1;
+			this.txMass1 = this.txMass0;
+			this.txMass0 = tmp;
+		}
+		
+		this.txMass = this.txMass1;
+		this.txOldMass = this.txMass0;
+		
+		this.mass_advect_shader.Bind();
+			this.txOldMass.Bind(0, this.mass_advect_shader.ULTextureMass);
+			this.txVelocity.Bind(1, this.mass_advect_shader.ULTextureVelocity);
+			this.mass_advect_shader.setFloatUniform( this.mass_advect_shader.ULdT, dT);
+			this.mass_advect_shader.setFloatUniform( this.mass_advect_shader.ULTime, this.time);
+			this.mass_advect_shader.setFloat2Uniform( this.mass_advect_shader.ULaspect, this.aspect);
+			
+			for(let z = 0; z < this.mass_depth; z += this.NumOutBuffers)
+			{
+				for(let l = 0; l < this.NumOutBuffers; ++l)
+					this.framebuffer.AttachTextureLayer(this.txMass, l, z+l);
+				this.framebuffer.SetupUsage();
+				
+				this.mass_advect_shader.setIntUniform(this.mass_advect_shader.ULz, z);
+				this.quad_model.RenderIndexedTriangles(this.mass_advect_shader);	
+			}
+		
+		Framebuffer.Bind(oldFB);
+	}
+	
+	//-----------------------------------------------------------------------------------------------------------
+	
 	setKinematicViscosity(v){
 		this.kinematicViscosity = v;
 	}

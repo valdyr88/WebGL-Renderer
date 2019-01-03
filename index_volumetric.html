@@ -221,8 +221,7 @@
 		}
 	}
 	
-	function LoadAllExternFiles()
-	{
+	function LoadAllExternFiles(){
 		//dodajemo fileove sa odvojene liste
 		extern_files_list = extern_files_list.concat(fluidsim_shader_files_list);
 		
@@ -231,7 +230,6 @@
 			fetchAndStore(extern_files_list[i]);
 		}
 	}
-	
 	
 	function delayedMain(){
 		if(extern_files_loaded_number >= extern_files_list.length){
