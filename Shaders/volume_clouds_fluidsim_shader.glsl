@@ -95,17 +95,17 @@ vec3 calcNormal(in vec3 p){
 }
 
 #if defined(Quality_High)
-	#define Raymarch_NofSteps 64 //broj samplanja npr za cloudse
+	#define Raymarch_NofSteps 512 //broj samplanja npr za cloudse
 	#define Raymarch_CloudShadow_NofSteps 5
 	#define Raymarch_DeltaStep(t) (1.0f / float(Raymarch_NofSteps))
 	#define Raymarch_CloudShadow_DeltaStep 0.68f
 #elif defined(Quality_Med)
-	#define Raymarch_NofSteps 48 //broj samplanja npr za cloudse
+	#define Raymarch_NofSteps 384 //broj samplanja npr za cloudse
 	#define Raymarch_CloudShadow_NofSteps 3
 	#define Raymarch_DeltaStep(t) (1.0f / float(Raymarch_NofSteps))
 	#define Raymarch_CloudShadow_DeltaStep 0.68f
 #elif defined(Quality_Low)
-	#define Raymarch_NofSteps 32 //broj samplanja npr za cloudse
+	#define Raymarch_NofSteps 256 //broj samplanja npr za cloudse
 	#define Raymarch_CloudShadow_NofSteps 2
 	#define Raymarch_DeltaStep(t) (1.0f / float(Raymarch_NofSteps))
 	#define Raymarch_CloudShadow_DeltaStep 0.68f
@@ -328,9 +328,10 @@ void main(void)
 	vec3 ViewDir = normalize(ViewVector);
 	
 	vec4 rtn = vec4(0.0);
-	const float maxT = 1.0f;
+	const float maxT = 2.0f;
+	float startT = length(Position); //u centru je od 0.0 do 1.0 cloud
 	
-	rtn = RaymarchMulti(Position, ViewDir, 0.0, maxT, dither);
+	rtn = RaymarchMulti(Position, ViewDir, startT, startT+maxT, dither);
 	
 	#if defined(Quality_High)
 		if(bMaliRect == true) rtn.xyz = vec3(1.0,0.5,0.0);
