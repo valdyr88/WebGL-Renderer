@@ -1,6 +1,6 @@
 #version 300 es
 // #extension GL_EXT_shader_texture_lod : require
-//Advekcija mase
+//Inicijalizacija mase (pocetno stanje cloudsa npr)
 
 precision mediump float;
 precision mediump sampler3D;

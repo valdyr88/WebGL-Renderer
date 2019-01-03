@@ -990,7 +990,7 @@ export class FluidSim3D
 	// Mass advection
 	//-----------------------------------------------------------------------------------------------------------
 	
-	CreateMass(w,h,d,bColorAndDensity,bFloat, init_masss_shader, advect_mass_shader)
+	CreateMass(w,h,d, bColorAndDensity, bFloat, init_mass_shader,advect_mass_shader)
 	{
 		d = Math.floor(d/this.NumOutBuffers)*this.NumOutBuffers;
 		this.mass_width = w;
@@ -1019,13 +1019,18 @@ export class FluidSim3D
 		this.txMass = this.txMass0;
 		
 		this.str_mass_vec3Res = "vec3(" + this.mass_width.toString()+ ".0," + this.mass_height.toString() + ".0," + this.mass_depth.toString() + ".0)";
+		this.str_mass_bHasColorComponent = (bColorAndDensity == true)? "1" : "0";
+		this.bMassHasColorComponent = bColorAndDensity;
+		
+		var vertex_shader = this.viscosity_shader.VertexShaderName;
 		
 		this.mass_init_shader = new Shader(-1);
 		this.mass_init_shader.addDefine("Resolution",this.str_vec3Res);
 		this.mass_init_shader.addDefine("MassResolution",this.str_mass_vec3Res);
+		this.mass_init_shader.addDefine("bHasColorComponent",this.str_mass_bHasColorComponent);
 		this.mass_init_shader.addDefine("NUM_OUT_BUFFERS", this.NumOutBuffers.toString());
 		this.mass_init_shader.addDefine("WriteOutput(out_buffer, out_variable)", this.str_WriteOutBuffers);
-		if(this.mass_init_shader.CompileFromFile(vertex, init_masss_shader) == false) alert("nije kompajliran shader!");
+		if(this.mass_init_shader.CompileFromFile(vertex_shader, init_mass_shader) == false) alert("nije kompajliran shader!");
 		this.mass_init_shader.InitDefaultAttribLocations();
 		this.mass_init_shader.InitDefaultUniformLocations();
 		this.mass_init_shader.ULaspect = -1;
@@ -1044,9 +1049,10 @@ export class FluidSim3D
 		this.mass_advect_shader = new Shader(-1);
 		this.mass_advect_shader.addDefine("Resolution",this.str_vec3Res);
 		this.mass_advect_shader.addDefine("MassResolution",this.str_mass_vec3Res);
+		this.mass_advect_shader.addDefine("bHasColorComponent",this.str_mass_bHasColorComponent);
 		this.mass_advect_shader.addDefine("NUM_OUT_BUFFERS", this.NumOutBuffers.toString());
 		this.mass_advect_shader.addDefine("WriteOutput(out_buffer, out_variable)", this.str_WriteOutBuffers);
-		if(this.mass_advect_shader.CompileFromFile(vertex, init_masss_shader) == false) alert("nije kompajliran shader!");
+		if(this.mass_advect_shader.CompileFromFile(vertex_shader, advect_mass_shader) == false) alert("nije kompajliran shader!");
 		this.mass_advect_shader.InitDefaultAttribLocations();
 		this.mass_advect_shader.InitDefaultUniformLocations();
 		this.mass_advect_shader.ULaspect = -1;
@@ -1066,6 +1072,8 @@ export class FluidSim3D
 		ShaderList.addShader(this.mass_advect_shader);
 		TextureList.addTexture(this.txMass0);
 		TextureList.addTexture(this.txMass1);
+		
+		this.ResetMass();
 	}
 	
 	ResetMass()
@@ -1078,7 +1086,7 @@ export class FluidSim3D
 		
 		this.mass_init_shader.Bind();
 			this.txVelocity.Bind(0, this.mass_init_shader.ULTextureVelocity);
-			this.mass_init_shader.setFloatUniform( this.mass_init_shader.ULdT, dT);
+			this.mass_init_shader.setFloatUniform( this.mass_init_shader.ULdT, 0.0);
 			this.mass_init_shader.setFloatUniform( this.mass_init_shader.ULTime, this.time);
 			this.mass_init_shader.setFloat2Uniform( this.mass_init_shader.ULaspect, this.aspect);
 			
@@ -1095,7 +1103,7 @@ export class FluidSim3D
 		Framebuffer.Bind(oldFB);
 	}
 	
-	AdvectMass()
+	AdvectMass(dT)
 	{
 		if(this.mass_advect_shader == undefined || this.mass_advect_shader == null) return;
 		

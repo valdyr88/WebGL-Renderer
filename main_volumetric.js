@@ -276,8 +276,10 @@ export function main(){
 		return v;
 	}
 	
-	if(b3DFluidSim == true)
+	if(b3DFluidSim == true){
 		fluidSim.CreateTest3DRenderShader("test_3d_texture_render");
+		fluidSim.CreateMass(400,400,400, false, false, "fluidsim_mass_init_shader", "fluidsim_mass_advect_shader");
+	}
 	
 	vMath.mat4.perspective(projectionMatrix, vMath.deg2rad(40.0), gl.viewportWidth/gl.viewportHeight, 0.1, 1000.0);
 	
@@ -492,6 +494,7 @@ export function main(){
 			//-------------------------------------------------------
 			{
 				fluidSim.SimStep(0.1);
+				fluidSim.AdvectMass(0.1);
 				
 				glext.Framebuffer.BindMainFB();	
 				gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);		
@@ -620,8 +623,8 @@ export function main(){
 				txfbColor.Bind(1, volume_clouds_shader.ULTextureBackground);
 				fluidSim.txVelocity.Bind(2, volume_clouds_shader.ULTextureVelocity);
 				
-				volume_clouds_shader.setViewMatrixUniform( Camera.ViewMatrix );
-				volume_clouds_shader.setProjectionMatrixUniform( Camera.ProjectionMatrix );
+				// volume_clouds_shader.setViewMatrixUniform( Camera.ViewMatrix );
+				// volume_clouds_shader.setProjectionMatrixUniform( Camera.ProjectionMatrix );
 				// volume_clouds_shader.setMatrix4Uniform( volume_clouds_shader.ULInverseViewMatrix, Camera.InverseViewMatrix);
 				volume_clouds_shader.setFloat3Uniform( volume_clouds_shader.ULCameraForward, Camera.ForwardDir );
 				volume_clouds_shader.setFloat3Uniform( volume_clouds_shader.ULCameraRight, Camera.RightDir );

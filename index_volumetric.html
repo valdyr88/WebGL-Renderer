@@ -60,6 +60,8 @@
   <script id="fluidsim_pressure_shader" src="./Shaders/FluidSim/3D/pressure_calc_pass.fs.glsl" type="shader/fragment"></script>
   <script id="fluidsim_divfree_velocity_shader" src="./Shaders/FluidSim/3D/divfree_velocity_pass.fs.glsl" type="shader/fragment"></script>
   <script id="fluidsim_display_shader" src="./Shaders/FluidSim/3D/debug_display.fs.glsl" type="shader/fragment"></script>
+  <script id="fluidsim_mass_init_shader" src="./Shaders/FluidSim/3D/init_mass.fs.glsl" type="shader/fragment"></script>
+  <script id="fluidsim_mass_advect_shader" src="./Shaders/FluidSim/3D/advect_mass.fs.glsl" type="shader/fragment"></script>
     
   <script id="fluidsim2d_include" src="./Shaders/FluidSim/2D/fluidsim2D_include.glsl" type="shader/fragment"></script>
   <script id="fluidsim3d_include" src="./Shaders/FluidSim/3D/fluidsim3D_include.glsl" type="shader/fragment"></script>
@@ -178,7 +180,7 @@
 							"atmosphere_shader", "volume_clouds_shader", "volume_clouds_vs", "navigatorModel", "mipmapVS", "3x3MipGenFS",
 							];//, "tx128"
 	var fluidsim_shader_files_list = ["fluidsim3d_include", "fluidsim3d_include", "fluidsim_quad_surface_shader", "fluidsim_viscosity_shader", "fluidsim_advection_shader", "fluidsim_advection_correction_shader",
-							 "fluidsim_divergence_shader", "fluidsim_pressure_shader", "fluidsim_divfree_velocity_shader", "fluidsim_display_shader", "test_3d_texture_render"];
+							 "fluidsim_divergence_shader", "fluidsim_pressure_shader", "fluidsim_divfree_velocity_shader", "fluidsim_display_shader", "fluidsim_mass_init_shader", "fluidsim_mass_advect_shader", "test_3d_texture_render"];
 	var extern_files_loaded_number = 0;
 		
 	function onExternFileLoadFinish(){
