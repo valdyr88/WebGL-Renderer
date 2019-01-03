@@ -105,6 +105,8 @@ export function main(){
 	volume_clouds_shader.ULMouse = volume_clouds_shader.getUniformLocation("Mouse");
 	volume_clouds_shader.ULResolution = volume_clouds_shader.getUniformLocation("Resolution");
 	volume_clouds_shader.ULPixelAspect = volume_clouds_shader.getUniformLocation("PixelAspect");
+	volume_clouds_shader.ULTextureMass = volume_clouds_shader.getUniformLocation("txFluidSimCloud");
+	volume_clouds_shader.ULTextureVelocity = volume_clouds_shader.getUniformLocation("txFluidSimVelocity");
 	
 	var SkySphereModel = new glext.Model(0);
 	SkySphereModel.ImportFrom("SphereModel");
@@ -623,6 +625,7 @@ export function main(){
 				txNoiseRGB.Bind(0, volume_clouds_shader.ULTextureNoiseRGB);
 				txfbColor.Bind(1, volume_clouds_shader.ULTextureBackground);
 				fluidSim.txVelocity.Bind(2, volume_clouds_shader.ULTextureVelocity);
+				fluidSim.txMass.Bind(3, volume_clouds_shader.ULTextureMass);
 				
 				// volume_clouds_shader.setViewMatrixUniform( Camera.ViewMatrix );
 				// volume_clouds_shader.setProjectionMatrixUniform( Camera.ProjectionMatrix );
@@ -634,7 +637,7 @@ export function main(){
 				volume_clouds_shader.setFloat2Uniform( volume_clouds_shader.ULResolution, [gl.viewportWidth,gl.viewportHeight] );
 				volume_clouds_shader.setFloatUniform( volume_clouds_shader.ULPixelAspect, gl.viewportWidth/gl.viewportHeight );
 				
-				volume_clouds_shader.setTimeUniform(time);
+				// volume_clouds_shader.setTimeUniform(time);
 				
 				volume_clouds_shader.setCameraPositionUniform(Camera.Position);			
 				
