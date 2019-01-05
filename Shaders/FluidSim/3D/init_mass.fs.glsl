@@ -113,7 +113,7 @@ float sdf_map(in vec3 x)
 	
 	dist = sdf_subtract( distB, distA );
 	
-	return distA;
+	return dist;
 }
 
 //===================================================================================================
@@ -122,7 +122,7 @@ float sdf_map(in vec3 x)
 //===================================================================================================
 float sample_clouds_density(in vec3 x)
 {
-	x = toTexSpace(x);
+	// x = toTexSpace(x);
 	
 	float dist = sdf_map(x);
 	if(dist > 0.0f) return 0.0; //ako je dist pozitivan onda smo izvan sdf containera
@@ -148,6 +148,8 @@ vec4 sample_clouds_density_and_color(in vec3 x)
 
 out_dim sample_clouds(in vec3 x)
 {
+	x = x * 0.01;
+
 	#if bHasColorComponent == 1
 		return sample_clouds_density_and_color(x);
 	#else
@@ -162,8 +164,10 @@ void main(void)
 
 	for(int i = 0; i < NUM_OUT_BUFFERS; ++i)
 	{	
-		vec3 x = toWorldSpace(TexCoords, z+i);
-		uadv[i] = sample_clouds(x);
+		vec3 x = toWorldSpace( (TexCoords - vec2(0.5))*0.1, z+i); x.z /= 0.0625*MassResolution.z; x.z -= 7.5; 
+		uadv[i] = (sdf_map(x) < 0.0)? 1.0 : 0.0;
+		// uadv[i] = float(z+i) / float(NUM_OUT_BUFFERS);
+		// uadv[i] = float(z+i) / MassResolution.z;
 	}
 	
 	// gl_FragColor = uadv;

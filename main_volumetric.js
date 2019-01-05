@@ -499,8 +499,8 @@ export function main(){
 				fluidSim.SimStep(0.1);
 				fluidSim.AdvectMass(0.1);
 				
-				glext.Framebuffer.BindMainFB();	
-				gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);		
+				// glext.Framebuffer.BindMainFB();	
+				// gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);		
 				
 				// fluidSim.Display(); //display preko fluidsim/debug_display
 			}
@@ -637,7 +637,7 @@ export function main(){
 				volume_clouds_shader.setFloat2Uniform( volume_clouds_shader.ULResolution, [gl.viewportWidth,gl.viewportHeight] );
 				volume_clouds_shader.setFloatUniform( volume_clouds_shader.ULPixelAspect, gl.viewportWidth/gl.viewportHeight );
 				
-				// volume_clouds_shader.setTimeUniform(time);
+				volume_clouds_shader.setTimeUniform(time);
 				
 				volume_clouds_shader.setCameraPositionUniform(Camera.Position);			
 				
@@ -658,6 +658,7 @@ export function main(){
 export function ReloadFluidSimShaders(){
 	if(gFluidSim == null) return;
 	gFluidSim.RecompileShaders();
+	gFluidSim.RecompileMassShaders();
 }
 export function FluidSimDisplayChanged(select_element_id, default_value, additional_define){
 	if(gFluidSim == null) return;
@@ -678,6 +679,7 @@ export function FluidSimSetKinematicViscosity(element_id){
 export function FluidSimReset(){
 	if(gFluidSim == null) return;
 	gFluidSim.ClearBuffers();
+	gFluidSim.ResetMass();
 }
 
 function RenderModels(fbo, bClearFBO, time, camera, models){
@@ -754,6 +756,8 @@ export function recompileShader(fragment_name){
 					glext.LightList.get(0).AttachUniformBlockTo(shader);
 				break;
 				case "volume_clouds_shader":
+					shader.ULTextureMass = shader.getUniformLocation("txFluidSimCloud");
+					shader.ULTextureVelocity = shader.getUniformLocation("txFluidSimVelocity");
 					shader.ULTextureNoiseRGB = shader.getUniformLocation("txNoiseRGB");
 					shader.ULTextureBackground = shader.getUniformLocation("txBackground");
 					glext.LightList.get(0).AttachUniformBlockTo(shader);

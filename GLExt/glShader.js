@@ -504,6 +504,7 @@ export class Shader
 	}
 	
 	setViewMatrixUniform(viewMatrix){
+		if(this.ULMatrixView == undefined || this.ULMatrixView == -1) return false;
 		if(this.program == null) return false;
 		if(this.isBinded() == false) this.Bind();
 		
@@ -511,6 +512,7 @@ export class Shader
 	}
 	
 	setProjectionMatrixUniform(projectionMatrix){
+		if(this.ULMatrixProjection == undefined || this.ULMatrixProjection == -1) return false;
 		if(this.program == null) return false;
 		if(this.isBinded() == false) this.Bind();
 		
@@ -702,6 +704,7 @@ export class Shader
 	}
 	
 	setFlagsUniform(Flags){
+		if(this.ULFlags == undefined || this.ULFlags == -1) return false;
 		if(this.program == null) return false;
 		if(this.isBinded() == false) this.Bind();
 		
@@ -711,6 +714,7 @@ export class Shader
 	}
 	
 	setTimeUniform(Time){
+		if(this.ULTime == undefined || this.ULTime == -1) return false;
 		if(this.program == null) return false;
 		if(this.isBinded() == false) this.Bind();
 		
@@ -720,6 +724,7 @@ export class Shader
 	}
 	
 	setCameraPositionUniform(Position){
+		if(this.ULCameraPosition == undefined || this.ULCameraPosition == -1) return false;
 		if(this.program == null) return false;
 		if(this.isBinded() == false) this.Bind();
 		

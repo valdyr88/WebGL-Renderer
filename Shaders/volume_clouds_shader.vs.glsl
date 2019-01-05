@@ -11,7 +11,7 @@ uniform mat4 ModelMatrix;
 uniform mat4 ViewMatrix;
 uniform mat4 ProjectionMatrix;
 
-uniform vec3 CameraPosition;
+uniform highp vec3 CameraPosition;
 uniform vec3 CameraForward;
 uniform vec3 CameraRight;
 uniform vec3 CameraUp;

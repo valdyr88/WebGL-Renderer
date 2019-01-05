@@ -37,6 +37,7 @@ uniform int uFlags;
 uniform float Time;
 uniform vec2 Mouse;
 uniform vec2 Resolution;
+uniform highp vec3 CameraPosition;
 //------------------------------------------------------------------------------
 #define varyin in
 
@@ -95,124 +96,20 @@ vec3 calcNormal(in vec3 p){
 }
 
 #if defined(Quality_High)
-	#define Raymarch_NofSteps 512 //broj samplanja npr za cloudse
-	#define Raymarch_CloudShadow_NofSteps 5
-	#define Raymarch_DeltaStep(t) (1.0f / float(Raymarch_NofSteps))
-	#define Raymarch_CloudShadow_DeltaStep 0.68f
-#elif defined(Quality_Med)
-	#define Raymarch_NofSteps 384 //broj samplanja npr za cloudse
-	#define Raymarch_CloudShadow_NofSteps 3
-	#define Raymarch_DeltaStep(t) (1.0f / float(Raymarch_NofSteps))
-	#define Raymarch_CloudShadow_DeltaStep 0.68f
-#elif defined(Quality_Low)
 	#define Raymarch_NofSteps 256 //broj samplanja npr za cloudse
-	#define Raymarch_CloudShadow_NofSteps 2
+	#define Raymarch_CloudShadow_NofSteps 16
 	#define Raymarch_DeltaStep(t) (1.0f / float(Raymarch_NofSteps))
 	#define Raymarch_CloudShadow_DeltaStep 0.68f
-#endif
-
-//===================================================================================================
-// cloud funkcije
-//===================================================================================================
-// #define _DEBUG
-
-#ifdef _DEBUG
-	// #define _DEBUG_Clouds_StepCount
-#endif
-
-#define cloudColor (vec3(0.1,0.5,0.4))
-#define cloudShadowColor (vec3(0.4,0.47,0.6))
-// #define lightDir (normalize(vec3(1.0,0.2,1.0)))
-
-float RaymarchCloudShadowSample(in vec3 start, in vec3 dir)
-{
-	float s = 0.0f;
-	float shadow = 1.0f;
-	#define shadowMult (1.0f+(1.5f / float(Raymarch_CloudShadow_NofSteps)))
-	#define shadowSampleDelta (Raymarch_CloudShadow_DeltaStep*(1.0f/float(Raymarch_CloudShadow_NofSteps)))
-
-	for(int i = 0; i < Raymarch_CloudShadow_NofSteps; ++i)
-	{
-		vec3 ray = start + s*dir;
-		shadow = shadow - sample_clouds(ray) * shadowMult*shadow;
-		s += shadowSampleDelta;
-	}
-	
-	return shadow;
-}
-
-vec4 RaymarchCloudsSample(in vec3 start, in vec3 dir, in float t, in float dt, in float tmax)
-{
-	vec4 colorsum = vec4(0.0);
-	/*
-	colorsum.xyz - boja
-	colorsum.a - density
-	*/
-	
-	#ifdef _DEBUG_Clouds_StepCount
-		int StepCount = 0;
-	#endif
-	
-	Light light0 = Lights[0].light;
-	#define sampleDelta (dt * (64.0f / float(Raymarch_NofSteps))) //dt == 0.1f
-		
-	for(int i = 0; i < Raymarch_NofSteps; ++i)
-	{
-		if(colorsum.a > 0.99f) break;
-		
-		vec3 ray = start + t*dir;
-		vec3 lightDir = light0.position.xyz - ray;
-		
-		float dens = sample_clouds(ray);
-		float shadow = RaymarchCloudShadowSample(ray, normalize(lightDir));
-		
-		#ifdef _DEBUG_Clouds_StepCount
-			StepCount++;
-		#endif
-		
-		float lited = 4.0 / length(lightDir); lited = clamp(lited,0.0,2.0);
-		
-		vec3 color = lerp( vec3(1.0), cloudColor, dens*0.5);
-		color *= lerp( cloudShadowColor, vec3(1.0), shadow);
-		color *= lited;
-		
-		color *= dens;
-		
-		colorsum.xyz += color*(1.0 - colorsum.a);
-		colorsum.a += dens;
-		
-		t += sampleDelta;
-		if(t >= tmax) break;
-	}
-	
-	#ifdef _DEBUG_Clouds_StepCount
-		float fStepCount = float(StepCount) / float( (Raymarch_NofSteps) );
-		colorsum.rgb = vec3(fStepCount);
-	#endif
-	
-	return colorsum;
-}
-
-vec4 RaymarchCloudsSample(in vec3 start, in vec3 dir, in float t){
-	return RaymarchCloudsSample(start, dir, t, 0.1f, 100000.0f);
-}
-
-/* #if defined(Quality_High)
 #elif defined(Quality_Med)
+	#define Raymarch_NofSteps 192 //broj samplanja npr za cloudse
+	#define Raymarch_CloudShadow_NofSteps 8
+	#define Raymarch_DeltaStep(t) (1.0f / float(Raymarch_NofSteps))
+	#define Raymarch_CloudShadow_DeltaStep 0.68f
 #elif defined(Quality_Low)
-#endif */
-//===================================================================================================
-// RaymarchMulti pronalazi vise tocaka izmedju kojih samplira volumetric clouds
-//===================================================================================================
-// #define _DEBUG
-
-#ifdef _DEBUG
-	// #define _DEBUG_SDF_Density
-	// #define _DEBUG_SDF_StepCount
-	// #define _DEBUG_SDF_NormalCalcCount
-	// #define _DEBUG_SDF_StepCountAndNormalCalcCount
-	// #define _DEBUG_SDF_TDistance 1
-	// #define _DEBUG_SDF_Display_Normals
+	#define Raymarch_NofSteps 128 //broj samplanja npr za cloudse
+	#define Raymarch_CloudShadow_NofSteps 4
+	#define Raymarch_DeltaStep(t) (1.0f / float(Raymarch_NofSteps))
+	#define Raymarch_CloudShadow_DeltaStep 0.68f
 #endif
 
 #if defined(Quality_High)
@@ -229,6 +126,27 @@ vec4 RaymarchCloudsSample(in vec3 start, in vec3 dir, in float t){
 	#define SDF_PrecisionTreshold 0.005f
 #endif
 
+#define cloudColor (vec3(0.1,0.5,0.4))
+#define cloudShadowColor (vec3(0.4,0.47,0.6))
+// #define lightDir (normalize(vec3(1.0,0.2,1.0)))
+
+float RaymarchCloudShadowSample(in vec3 start, in vec3 dir)
+{
+	float s = 0.0f;
+	float shadow = 1.0f;
+	#define shadowMult (1.0f+(1.5f / float(Raymarch_CloudShadow_NofSteps)))
+	#define shadowSampleDelta (Raymarch_CloudShadow_DeltaStep*(1.0f/float(Raymarch_CloudShadow_NofSteps)))
+
+	for(int i = 0; i < Raymarch_CloudShadow_NofSteps; ++i)
+	{
+		vec3 ray = start + s*dir;
+		shadow = saturate(shadow - sample_clouds(ray) * shadowMult*shadow);
+		s += shadowSampleDelta;
+	}
+	
+	return shadow;
+}
+
 vec4 RaymarchMulti(in vec3 start, in vec3 dir, in float tstart, in float maxt, in float dither)
 {
 	#ifdef _DEBUG_Clouds_StepCount
@@ -239,6 +157,8 @@ vec4 RaymarchMulti(in vec3 start, in vec3 dir, in float tstart, in float maxt, i
 	
 	float t = tstart;
 	vec4 colorsum = vec4(0.0);
+	
+	float dt = (maxt - tstart) / float(Raymarch_NofSteps);
 	
 	//raytracanje oblaka i provjera sdf predznaka
 	//---------------------------------------------------------------------------------				
@@ -254,7 +174,7 @@ vec4 RaymarchMulti(in vec3 start, in vec3 dir, in float tstart, in float maxt, i
 		float dens = sample_clouds(ray);
 		float shadow = RaymarchCloudShadowSample(ray, normalize(lightDir));
 			
-		float lited = 4.0 / (sqrt(dot(lightDir,lightDir))); lited = clamp(lited,0.0,4.0);
+		float lited = 4.0 / ((dot(lightDir,lightDir))); lited = clamp(lited,0.0,4.0);
 		// float lited = 1.0f;
 		
 		vec3 color = lerp( vec3(1.0), cloudColor, dens*0.5);
@@ -266,7 +186,7 @@ vec4 RaymarchMulti(in vec3 start, in vec3 dir, in float tstart, in float maxt, i
 		colorsum.xyz += color*(1.0 - colorsum.a);
 		colorsum.a += dens;
 		
-		float dt = Raymarch_DeltaStep(t);
+		// float dt = Raymarch_DeltaStep(t);
 		
 		t += dt;
 		if(t >= maxt) break;
@@ -276,14 +196,12 @@ vec4 RaymarchMulti(in vec3 start, in vec3 dir, in float tstart, in float maxt, i
 	#ifndef _DEBUG
 		return colorsum;
 	#else
-		
 		#ifdef _DEBUG_Clouds_StepCount
 			float fStepCount = float(StepCount) / float( (Raymarch_NofSteps) );
 			return lerp3pt(vec4(0.0,0.5,1.0,1.0), vec4(0.5,1.0,0.0,1.0), vec4(1.0,0.0,0.0,1.0), fStepCount);
 		#endif
 		
 		return vec4(1.0,0.0,1.0,1.0);
-		
 	#endif
 }
 //===================================================================================================
@@ -329,9 +247,12 @@ void main(void)
 	
 	vec4 rtn = vec4(0.0);
 	const float maxT = 2.0f;
-	float startT = length(Position); //u centru je od 0.0 do 1.0 cloud
+	float startT = 0.0; //u centru je od 0.0 do 1.0 cloud
 	
-	rtn = RaymarchMulti(Position, ViewDir, startT, startT+maxT, dither);
+	// vec3 pos = vec3(0.0,1.0,-7.0);
+	vec3 pos = CameraPosition;
+	rtn = RaymarchMulti(pos, ViewDir, startT, startT+maxT, dither);
+	// rtn.xyz = vec3( sample_clouds(vec3(TexCoords.x,TexCoords.y,fract(Time*0.1))) );
 	
 	#if defined(Quality_High)
 		if(bMaliRect == true) rtn.xyz = vec3(1.0,0.5,0.0);
@@ -343,7 +264,10 @@ void main(void)
 		if(bMaliRect == true) rtn.xyz = vec3(0.0,0.5,1.0);
 	#endif
 	
-	gl_FragColor = tovec4(vec3(rtn), 1.0);
+	if(bMaliRect == true) rtn.xyz = vec3(fract(Time*0.1));
+	
+	// rtn.xyz = vec3(0.1,0.7,1.0);
+	gl_FragColor = tovec4(vec3(rtn.xyz), 1.0);
 }
 
 

@@ -1035,15 +1035,15 @@ export class FluidSim3D
 		this.mass_init_shader.InitDefaultUniformLocations();
 		this.mass_init_shader.ULaspect = -1;
 		this.mass_init_shader.ULdT = -1;
-		this.mass_init_shader.ULk = -1;
+		this.mass_init_shader.ULz = -1;
 		this.mass_init_shader.ULdisplayBrightness = -1;
 		this.mass_init_shader.ULTexturePressure = -1;
 		this.mass_init_shader.ULTextureVelocity = -1;
 		this.mass_init_shader.ULTextureDivergence = -1;
 		this.mass_init_shader.ULaspect = this.mass_init_shader.getUniformLocation("aspect");
 		this.mass_init_shader.ULdT = this.mass_init_shader.getUniformLocation("dT");
-		this.mass_init_shader.ULk = this.mass_init_shader.getUniformLocation("k");
-		this.mass_init_shader.ULTextureMass = this.mass_init_shader.getUniformLocation("txMass");
+		this.mass_init_shader.ULz = this.mass_init_shader.getUniformLocation("z");
+		// this.mass_init_shader.ULTextureMass = this.mass_init_shader.getUniformLocation("txMass");
 		this.mass_init_shader.ULTextureNoiseRGB = this.mass_init_shader.getUniformLocation("txNoiseRGB");
 		this.mass_init_shader.ULTextureVelocity = this.mass_init_shader.getUniformLocation("txVelocity");
 		
@@ -1058,14 +1058,14 @@ export class FluidSim3D
 		this.mass_advect_shader.InitDefaultUniformLocations();
 		this.mass_advect_shader.ULaspect = -1;
 		this.mass_advect_shader.ULdT = -1;
-		this.mass_advect_shader.ULk = -1;
+		this.mass_advect_shader.ULz = -1;
 		this.mass_advect_shader.ULdisplayBrightness = -1;
 		this.mass_advect_shader.ULTexturePressure = -1;
 		this.mass_advect_shader.ULTextureVelocity = -1;
 		this.mass_advect_shader.ULTextureDivergence = -1;
 		this.mass_advect_shader.ULaspect = this.mass_advect_shader.getUniformLocation("aspect");
 		this.mass_advect_shader.ULdT = this.mass_advect_shader.getUniformLocation("dT");
-		this.mass_advect_shader.ULk = this.mass_advect_shader.getUniformLocation("k");
+		this.mass_advect_shader.ULz = this.mass_advect_shader.getUniformLocation("z");
 		this.mass_advect_shader.ULTextureMass = this.mass_advect_shader.getUniformLocation("txMass");
 		this.mass_advect_shader.ULTextureVelocity = this.mass_advect_shader.getUniformLocation("txVelocity");
 		
@@ -1294,7 +1294,42 @@ export class FluidSim3D
 		this.display_shader.ULTexturePressure = this.display_shader.getUniformLocation("txPressure");
 		this.display_shader.ULTextureVelocity = this.display_shader.getUniformLocation("txVelocity");
 		this.display_shader.ULTextureDivergence = this.display_shader.getUniformLocation("txVelocityDivergence");
-			
+	}
+	
+	RecompileMassShaders()
+	{
+		if(this.mass_init_shader.Recompile(false) == false) alert("nije kompajliran shader!");
+		this.mass_init_shader.InitDefaultAttribLocations();
+		this.mass_init_shader.InitDefaultUniformLocations();
+		this.mass_init_shader.ULaspect = -1;
+		this.mass_init_shader.ULdT = -1;
+		this.mass_init_shader.ULk = -1;
+		this.mass_init_shader.ULdisplayBrightness = -1;
+		this.mass_init_shader.ULTexturePressure = -1;
+		this.mass_init_shader.ULTextureVelocity = -1;
+		this.mass_init_shader.ULTextureDivergence = -1;
+		this.mass_init_shader.ULaspect = this.mass_init_shader.getUniformLocation("aspect");
+		this.mass_init_shader.ULdT = this.mass_init_shader.getUniformLocation("dT");
+		this.mass_init_shader.ULk = this.mass_init_shader.getUniformLocation("k");
+		this.mass_init_shader.ULTextureMass = this.mass_init_shader.getUniformLocation("txMass");
+		this.mass_init_shader.ULTextureNoiseRGB = this.mass_init_shader.getUniformLocation("txNoiseRGB");
+		this.mass_init_shader.ULTextureVelocity = this.mass_init_shader.getUniformLocation("txVelocity");
+		
+		if(this.mass_advect_shader.Recompile(false) == false) alert("nije kompajliran shader!");
+		this.mass_advect_shader.InitDefaultAttribLocations();
+		this.mass_advect_shader.InitDefaultUniformLocations();
+		this.mass_advect_shader.ULaspect = -1;
+		this.mass_advect_shader.ULdT = -1;
+		this.mass_advect_shader.ULk = -1;
+		this.mass_advect_shader.ULdisplayBrightness = -1;
+		this.mass_advect_shader.ULTexturePressure = -1;
+		this.mass_advect_shader.ULTextureVelocity = -1;
+		this.mass_advect_shader.ULTextureDivergence = -1;
+		this.mass_advect_shader.ULaspect = this.mass_advect_shader.getUniformLocation("aspect");
+		this.mass_advect_shader.ULdT = this.mass_advect_shader.getUniformLocation("dT");
+		this.mass_advect_shader.ULk = this.mass_advect_shader.getUniformLocation("k");
+		this.mass_advect_shader.ULTextureMass = this.mass_advect_shader.getUniformLocation("txMass");
+		this.mass_advect_shader.ULTextureVelocity = this.mass_advect_shader.getUniformLocation("txVelocity");
 	}
 }
 
