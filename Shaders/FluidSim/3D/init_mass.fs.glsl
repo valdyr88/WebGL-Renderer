@@ -113,7 +113,7 @@ float sdf_map(in vec3 x)
 	
 	dist = sdf_subtract( distB, distA );
 	
-	return dist;
+	return distA;
 }
 
 //===================================================================================================
@@ -168,6 +168,8 @@ void main(void)
 		uadv[i] = (sdf_map(x) < 0.0)? 1.0 : 0.0;
 		// uadv[i] = float(z+i) / float(NUM_OUT_BUFFERS);
 		// uadv[i] = float(z+i) / MassResolution.z;
+		
+		uadv[i] = sample_clouds_density(x);
 	}
 	
 	// gl_FragColor = uadv;

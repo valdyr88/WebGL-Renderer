@@ -55,8 +55,10 @@ varyin vec3 ViewVector;
 
 float sample_clouds(in vec3 p)
 {
+	p = p * 0.5;
 	p = fract(p);
-	return texture3DLod(txFluidSimCloud, p, 0.0).x;
+	float d = texture3DLod(txFluidSimCloud, p, 0.0).x;
+	return d*0.5;
 }
 
 //===================================================================================================
@@ -100,17 +102,17 @@ vec3 calcNormal(in vec3 p){
 	#define Raymarch_NofSteps 256 //broj samplanja npr za cloudse
 	#define Raymarch_CloudShadow_NofSteps 9
 	#define Raymarch_DeltaStep(t) (1.0f / float(Raymarch_NofSteps))
-	#define Raymarch_CloudShadow_DeltaStep 2.0f
+	#define Raymarch_CloudShadow_DeltaStep 16.0f
 #elif defined(Quality_Med)
 	#define Raymarch_NofSteps 192 //broj samplanja npr za cloudse
 	#define Raymarch_CloudShadow_NofSteps 6
 	#define Raymarch_DeltaStep(t) (1.0f / float(Raymarch_NofSteps))
-	#define Raymarch_CloudShadow_DeltaStep 2.0f
+	#define Raymarch_CloudShadow_DeltaStep 16.0f
 #elif defined(Quality_Low)
 	#define Raymarch_NofSteps 128 //broj samplanja npr za cloudse
 	#define Raymarch_CloudShadow_NofSteps 4
 	#define Raymarch_DeltaStep(t) (1.0f / float(Raymarch_NofSteps))
-	#define Raymarch_CloudShadow_DeltaStep 2.0f
+	#define Raymarch_CloudShadow_DeltaStep 16.0f
 #endif
 
 #define cloudColor (vec3(0.1,0.5,0.4))
@@ -122,7 +124,7 @@ float RaymarchCloudShadowSample(in vec3 start, in vec3 dir, in float ds, in floa
 	// ds += dither;
 	float s = 0.0f;
 	float shadow = 1.0f;
-	#define shadowMult (0.0f+(1.0f / float(Raymarch_CloudShadow_NofSteps)))
+	#define shadowMult (1.5f+(1.0f / float(Raymarch_CloudShadow_NofSteps)))
 	#define shadowSampleDelta (ds*Raymarch_CloudShadow_DeltaStep*(1.0f/float(Raymarch_CloudShadow_NofSteps)))
 
 	for(int i = 0; i < Raymarch_CloudShadow_NofSteps; ++i)
