@@ -333,7 +333,7 @@ export function main(){
 	// var distFromObject = 7.0;
 	
 	var orbital = [];
-	orbital.radius = 7.0;
+	orbital.radius = 2.0;
 	orbital.inclination = 0.0;
 	orbital.azimuth = 0.0;
 	orbital.dinclination = 0.0;

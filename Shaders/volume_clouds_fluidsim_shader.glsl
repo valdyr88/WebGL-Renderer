@@ -61,14 +61,16 @@ float sample_clouds_sphere(in vec3 p, vec3 c, float r){
 
 float sample_clouds(in vec3 p)
 {
-	// return sample_clouds_sphere(p, vec3(0.0,0.0,0.0), 0.15);
+	// return sample_clouds_sphere(p, vec3(0.0,0.0,0.0), 0.5);
 
-	p = p * 0.25;
-	p = p - 0.5;
+	p = p * 0.25; 
+	p = p + 0.5;// 
 	
-	p = fract(p);
-	/* if(p.x < 0.0 || p.y < 0.0 || p.z < 0.0) return 0.0;
-	if(p.x > 1.0 || p.y > 1.0 || p.z > 1.0) return 0.0;	 */
+	// p = fract(p); 	
+	if(p.x < 0.0 || p.y < 0.0 || p.z < 0.0) return 0.0;
+	if(p.x > 1.0 || p.y > 1.0 || p.z > 1.0) return 0.0;
+	
+	// return 1.0;/**/
 	
 	float d = texture3DLod(txFluidSimCloud, p, 0.0).x;
 	return d*0.5;
