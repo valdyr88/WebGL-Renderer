@@ -455,11 +455,11 @@ export function main(){
 				Camera.CalcInverseViewProjectionMatrix();
 			}
 			
-		var MovementDelta = 1.0;
+		var MovementDelta = .01;
 		if(sys.keyboard.isCtrlPressed()) bCtrlToggle = !bCtrlToggle;
 		if(sys.keyboard.isShiftPressed()) bShiftToggle = !bShiftToggle;
-		if(bCtrlToggle == true) MovementDelta = 0.1;
-		else if(bShiftToggle == true) MovementDelta = 10.0;
+		if(bCtrlToggle == true) MovementDelta *= 0.1;
+		else if(bShiftToggle == true) MovementDelta *= 10.0;
 		
 		if(sys.keyboard.isKeyPressed("w"))      Camera.MoveForward(MovementDelta);
 		else if(sys.keyboard.isKeyPressed("s")) Camera.MoveForward(-MovementDelta);
@@ -496,8 +496,8 @@ export function main(){
 			//simulacija
 			//-------------------------------------------------------
 			{
-				fluidSim.SimStep(0.1);
-				fluidSim.AdvectMass(0.1);
+				// fluidSim.SimStep(0.1);
+				// fluidSim.AdvectMass(0.1);
 				
 				// glext.Framebuffer.BindMainFB();	
 				// gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);		
@@ -599,7 +599,7 @@ export function main(){
 		}
 		else
 		{			
-			light.setPosition(-2.0, 2.0, 2.0); //*ctime
+			light.setPosition(-2.0*ctime, 2.0, 2.0); //*ctime
 			light.setDisplaySize(5.0);
 			light.setDisplayColor(0.5,0.79,1.0,1.0);
 			light.setMatrices( Camera.ViewMatrix, Camera.ProjectionMatrix );

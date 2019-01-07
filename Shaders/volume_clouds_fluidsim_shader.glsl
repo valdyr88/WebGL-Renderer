@@ -55,6 +55,7 @@ varyin vec3 ViewVector;
 
 float sample_clouds(in vec3 p)
 {
+	p = fract(p);
 	return texture3DLod(txFluidSimCloud, p, 0.0).x;
 }
 
@@ -97,45 +98,32 @@ vec3 calcNormal(in vec3 p){
 
 #if defined(Quality_High)
 	#define Raymarch_NofSteps 256 //broj samplanja npr za cloudse
-	#define Raymarch_CloudShadow_NofSteps 16
+	#define Raymarch_CloudShadow_NofSteps 9
 	#define Raymarch_DeltaStep(t) (1.0f / float(Raymarch_NofSteps))
-	#define Raymarch_CloudShadow_DeltaStep 0.68f
+	#define Raymarch_CloudShadow_DeltaStep 2.0f
 #elif defined(Quality_Med)
 	#define Raymarch_NofSteps 192 //broj samplanja npr za cloudse
-	#define Raymarch_CloudShadow_NofSteps 8
+	#define Raymarch_CloudShadow_NofSteps 6
 	#define Raymarch_DeltaStep(t) (1.0f / float(Raymarch_NofSteps))
-	#define Raymarch_CloudShadow_DeltaStep 0.68f
+	#define Raymarch_CloudShadow_DeltaStep 2.0f
 #elif defined(Quality_Low)
 	#define Raymarch_NofSteps 128 //broj samplanja npr za cloudse
 	#define Raymarch_CloudShadow_NofSteps 4
 	#define Raymarch_DeltaStep(t) (1.0f / float(Raymarch_NofSteps))
-	#define Raymarch_CloudShadow_DeltaStep 0.68f
-#endif
-
-#if defined(Quality_High)
-	#define SDF_NofPasses 8 //koliko ima udaljenosti koje ce samplirati (treba biti parni broj, vece vrijednosti dozvoljavaju vise supljina gizmo containera)
-	#define SDF_NofStepsPerPass 128 //br sampliranja sdf mape
-	#define SDF_PrecisionTreshold 0.0005f
-#elif defined(Quality_Med)
-	#define SDF_NofPasses 8
-	#define SDF_NofStepsPerPass 64
-	#define SDF_PrecisionTreshold 0.005f
-#elif defined(Quality_Low)
-	#define SDF_NofPasses 8
-	#define SDF_NofStepsPerPass 48
-	#define SDF_PrecisionTreshold 0.005f
+	#define Raymarch_CloudShadow_DeltaStep 2.0f
 #endif
 
 #define cloudColor (vec3(0.1,0.5,0.4))
 #define cloudShadowColor (vec3(0.4,0.47,0.6))
 // #define lightDir (normalize(vec3(1.0,0.2,1.0)))
 
-float RaymarchCloudShadowSample(in vec3 start, in vec3 dir)
+float RaymarchCloudShadowSample(in vec3 start, in vec3 dir, in float ds, in float dither)
 {
+	// ds += dither;
 	float s = 0.0f;
 	float shadow = 1.0f;
-	#define shadowMult (1.0f+(1.5f / float(Raymarch_CloudShadow_NofSteps)))
-	#define shadowSampleDelta (Raymarch_CloudShadow_DeltaStep*(1.0f/float(Raymarch_CloudShadow_NofSteps)))
+	#define shadowMult (0.0f+(1.0f / float(Raymarch_CloudShadow_NofSteps)))
+	#define shadowSampleDelta (ds*Raymarch_CloudShadow_DeltaStep*(1.0f/float(Raymarch_CloudShadow_NofSteps)))
 
 	for(int i = 0; i < Raymarch_CloudShadow_NofSteps; ++i)
 	{
@@ -155,7 +143,7 @@ vec4 RaymarchMulti(in vec3 start, in vec3 dir, in float tstart, in float maxt, i
 	
 	Light light0 = Lights[0].light;	
 	
-	float t = tstart;
+	float t = tstart+dither;
 	vec4 colorsum = vec4(0.0);
 	
 	float dt = (maxt - tstart) / float(Raymarch_NofSteps);
@@ -167,11 +155,24 @@ vec4 RaymarchMulti(in vec3 start, in vec3 dir, in float tstart, in float maxt, i
 		#ifdef _DEBUG_Clouds_StepCount
 			StepCount++;
 		#endif
-		
+				
 		vec3 ray = start + t*dir;
 		vec3 lightDir = light0.position.xyz - ray;
 		
+		float lited = 4.0 / ((dot(lightDir,lightDir))); lited = clamp(lited,0.0,4.0);
+		float shadow = RaymarchCloudShadowSample(ray, normalize(lightDir), dt, dither);
+				
+		float3 color = cloudColor;
+		// color *= lited;
+		
 		float dens = sample_clouds(ray);
+		colorsum.a += dens;
+		colorsum.rgb += dens*lited*(shadow)*color;
+		
+		t += dt;
+		if(colorsum.a > 0.99f) break;
+		
+		/*float dens = sample_clouds(ray);
 		float shadow = RaymarchCloudShadowSample(ray, normalize(lightDir));
 			
 		float lited = 4.0 / ((dot(lightDir,lightDir))); lited = clamp(lited,0.0,4.0);
@@ -190,7 +191,7 @@ vec4 RaymarchMulti(in vec3 start, in vec3 dir, in float tstart, in float maxt, i
 		
 		t += dt;
 		if(t >= maxt) break;
-		if(colorsum.a > 0.99f) break;
+		if(colorsum.a > 0.99f) break;*/
 	}
 	
 	#ifndef _DEBUG
@@ -233,7 +234,7 @@ float RaymarchSDFfindT(in vec3 start, in vec3 dir, float t, float disttreshold, 
 void main(void)
 {	
 	Light light0 = Lights[0].light;
-	float dither = 0.25f*(0.5f+0.5f*rand(TexCoords))*(64.0f/float(Raymarch_NofSteps));
+	float dither = 0.0125f*(0.5f+0.5f*rand(TexCoords))*(256.0f/float(Raymarch_NofSteps));
 	
 	vec2 mouse = Mouse.xy / Resolution.xy;
 	
