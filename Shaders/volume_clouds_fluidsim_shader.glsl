@@ -53,10 +53,23 @@ varyin vec3 ViewVector;
 // uniform Light light0;
 #include "ubLight"
 
+
+float sample_clouds_sphere(in vec3 p, vec3 c, float r){
+	if(length(p - c) < r) return 1.0;
+	return 0.0;	
+}
+
 float sample_clouds(in vec3 p)
 {
-	p = p * 0.5;
+	// return sample_clouds_sphere(p, vec3(0.0,0.0,0.0), 0.15);
+
+	p = p * 0.25;
+	p = p - 0.5;
+	
 	p = fract(p);
+	/* if(p.x < 0.0 || p.y < 0.0 || p.z < 0.0) return 0.0;
+	if(p.x > 1.0 || p.y > 1.0 || p.z > 1.0) return 0.0;	 */
+	
 	float d = texture3DLod(txFluidSimCloud, p, 0.0).x;
 	return d*0.5;
 }
@@ -161,7 +174,7 @@ vec4 RaymarchMulti(in vec3 start, in vec3 dir, in float tstart, in float maxt, i
 		vec3 ray = start + t*dir;
 		vec3 lightDir = light0.position.xyz - ray;
 		
-		float lited = 4.0 / ((dot(lightDir,lightDir))); lited = clamp(lited,0.0,4.0);
+		float lited = 4.0 / (sqrt(dot(lightDir,lightDir))); lited = clamp(lited,0.0,4.0);
 		float shadow = RaymarchCloudShadowSample(ray, normalize(lightDir), dt, dither);
 				
 		float3 color = cloudColor;
@@ -266,9 +279,7 @@ void main(void)
 	#if defined(Quality_Low)
 		if(bMaliRect == true) rtn.xyz = vec3(0.0,0.5,1.0);
 	#endif
-	
-	if(bMaliRect == true) rtn.xyz = vec3(fract(Time*0.1));
-	
+		
 	// rtn.xyz = vec3(0.1,0.7,1.0);
 	gl_FragColor = tovec4(vec3(rtn.xyz), 1.0);
 }

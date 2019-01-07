@@ -56,6 +56,8 @@ export class Mouse
 		this.AttachedMouse.x = event.pageX;
 		this.AttachedMouse.y = event.pageY;
 		
+		if(this.AttachedMouse.dz === undefined || this.AttachedMouse.dz == null) this.AttachedMouse.dz = 0;
+		
 		this.AttachedMouse.btnLeft = event.buttons & 0x01;
 		this.AttachedMouse.btnMiddle = event.buttons & 0x02;
 		this.AttachedMouse.btnRight = event.buttons & 0x04;
@@ -72,8 +74,12 @@ export class Mouse
 		if(this.AttachedMouse === undefined) return;
 		if(this.AttachedMouse == null) return;
 		
-		this.AttachedMouse.dz = event.wheelDelta;
-		// this.AttachedMouse.deltaZMode = event.deltaMode;		
+		if(event.wheelDelta != undefined)
+			this.AttachedMouse.dz = event.wheelDelta;
+		else if(event.deltaMode != undefined && event.deltaMode == 1)
+			this.AttachedMouse.dz = -event.deltaY;
+		else
+			this.AttachedMouse.dz = 1; //ne znamo u kojem smijeru!
 	}
 	
 	AttachTo(obj){		

@@ -150,7 +150,7 @@ export function main(){
 	var projectionMatrix = vMath.mat4.create();
 	var viewMatrix = vMath.mat4.create();
 	
-	var eyePt = vMath.vec3.fromValues(-7.0,0.0,0.0);
+	var eyePt = vMath.vec3.fromValues(-2.0,0.0,0.0);
 	var centerPt = vMath.vec3.fromValues(0.0,0.0,0.0);
 	var upDir = vMath.vec3.fromValues(0.0,0.0,1.0);
 	
@@ -406,74 +406,80 @@ export function main(){
 		var mousePos = sys.mouse.getPosition();
 		var mouseDelta = sys.mouse.getDeltaPosition();
 		
-		/*	
-		orbital.dinclination = 0.0;
-		orbital.dazimuth = 0.0;
-		
-		if(sys.mouse.get().btnLeft == true)
 		{
-			if(mouseDelta[0] != 0 || mouseDelta[1] != 0)
+			orbital.dinclination = 0.0;
+			orbital.dazimuth = 0.0;
+			
+			if(sys.mouse.get().btnLeft == true)
 			{
-				orbital.dazimuth = -mouseDelta[0];
-				orbital.dinclination = mouseDelta[1];
-				
+				if(mouseDelta[0] != 0 || mouseDelta[1] != 0)
+				{
+					orbital.dazimuth = -mouseDelta[0];
+					orbital.dinclination = mouseDelta[1];
+					
+					bUpdateCamera = true;
+				}
+			}
+			
+			if(sys.mouse.get().dz != 0)
+			{
+				orbital.radius = orbital.radius - orbital.radius*(sys.mouse.get().dz / 20.0);
+				if(orbital.radius < 0.1) orbital.radius = 0.1;
+				if(orbital.radius > 100.0) orbital.radius = 100.0;
 				bUpdateCamera = true;
+			}
+			
+			
+			if(bUpdateCamera == true)
+			{			
+				// eyePt = vMath.sph2cart3D(orbital.azimuth, orbital.inclination, orbital.radius);
+				var sinA = Math.sin(vMath.deg2rad(orbital.dazimuth)); var sinI = Math.sin(vMath.deg2rad(orbital.dinclination));
+				vMath.vec3.scale(RightAdd, Camera.RightDir, orbital.radius * sinA);
+				vMath.vec3.scale(UpAdd, Camera.UpDir, orbital.radius * sinI);
+				vMath.vec3.add(eyePt, eyePt, RightAdd);
+				vMath.vec3.add(eyePt, eyePt, UpAdd);
+				
+				vMath.vec3.normalize(eyePt, eyePt);
+				vMath.vec3.scale(eyePt, eyePt, orbital.radius);
+				
+				Camera.setPositionAndLookPt(eyePt, [0.0,0.0,0.0], upDir);
+				Camera.CalcInverseViewProjectionMatrix();
+				
+				vMath.vec3.copy(upDir, Camera.UpDir);
 			}
 		}
 		
-		if(sys.mouse.get().dz != 0)
+		/*	
 		{
-			orbital.radius = orbital.radius - orbital.radius*(sys.mouse.get().dz / 2000.0);
-			if(orbital.radius < 0.1) orbital.radius = 0.1;
-			if(orbital.radius > 100.0) orbital.radius = 100.0;
-			bUpdateCamera = true;
-		}
-		
-		
-		if(bUpdateCamera == true)
-		{			
-			// eyePt = vMath.sph2cart3D(orbital.azimuth, orbital.inclination, orbital.radius);
-			var sinA = Math.sin(vMath.deg2rad(orbital.dazimuth)); var sinI = Math.sin(vMath.deg2rad(orbital.dinclination));
-			vMath.vec3.scale(RightAdd, Camera.RightDir, orbital.radius * sinA);
-			vMath.vec3.scale(UpAdd, Camera.UpDir, orbital.radius * sinI);
-			vMath.vec3.add(eyePt, eyePt, RightAdd);
-			vMath.vec3.add(eyePt, eyePt, UpAdd);
+				
+			if(sys.mouse.get().btnLeft == true)
+				if(sys.mouse.get().dx != 0 || sys.mouse.get().dy != 0){
+					Camera.Rotate(sys.mouse.get().dx / 100.0, sys.mouse.get().dy / 100.0);
+					Camera.CalcInverseViewProjectionMatrix();
+				}
+				
+			var MovementDelta = .01;
+			if(sys.keyboard.isCtrlPressed()) bCtrlToggle = !bCtrlToggle;
+			if(sys.keyboard.isShiftPressed()) bShiftToggle = !bShiftToggle;
+			if(bCtrlToggle == true) MovementDelta *= 0.1;
+			else if(bShiftToggle == true) MovementDelta *= 10.0;
 			
-			vMath.vec3.normalize(eyePt, eyePt);
-			vMath.vec3.scale(eyePt, eyePt, orbital.radius);
+			if(sys.keyboard.isKeyPressed("w"))      Camera.MoveForward(MovementDelta);
+			else if(sys.keyboard.isKeyPressed("s")) Camera.MoveForward(-MovementDelta);
 			
-			Camera.setPositionAndLookPt(eyePt, [0.0,0.0,0.0], upDir);
-			Camera.CalcInverseViewProjectionMatrix();
+			if(sys.keyboard.isKeyPressed("a"))      Camera.MoveRight(MovementDelta);
+			else if(sys.keyboard.isKeyPressed("d")) Camera.MoveRight(-MovementDelta);
 			
-			vMath.vec3.copy(upDir, Camera.UpDir);
+			if(sys.keyboard.isKeyPressed("r"))      Camera.MoveUp(MovementDelta);
+			else if(sys.keyboard.isKeyPressed("f")) Camera.MoveUp(-MovementDelta);
+			
+			if(sys.keyboard.isKeyPressed("e"))      Camera.Tilt(0.1*MovementDelta);
+			else if(sys.keyboard.isKeyPressed("q")) Camera.Tilt(-0.1*MovementDelta);
+			
+			Camera.CalcInverseViewMatrix();
 		}
 		*/
 		
-		if(sys.mouse.get().btnLeft == true)
-			if(sys.mouse.get().dx != 0 || sys.mouse.get().dy != 0){
-				Camera.Rotate(sys.mouse.get().dx / 100.0, sys.mouse.get().dy / 100.0);
-				Camera.CalcInverseViewProjectionMatrix();
-			}
-			
-		var MovementDelta = .01;
-		if(sys.keyboard.isCtrlPressed()) bCtrlToggle = !bCtrlToggle;
-		if(sys.keyboard.isShiftPressed()) bShiftToggle = !bShiftToggle;
-		if(bCtrlToggle == true) MovementDelta *= 0.1;
-		else if(bShiftToggle == true) MovementDelta *= 10.0;
-		
-		if(sys.keyboard.isKeyPressed("w"))      Camera.MoveForward(MovementDelta);
-		else if(sys.keyboard.isKeyPressed("s")) Camera.MoveForward(-MovementDelta);
-		
-		if(sys.keyboard.isKeyPressed("a"))      Camera.MoveRight(MovementDelta);
-		else if(sys.keyboard.isKeyPressed("d")) Camera.MoveRight(-MovementDelta);
-		
-		if(sys.keyboard.isKeyPressed("r"))      Camera.MoveUp(MovementDelta);
-		else if(sys.keyboard.isKeyPressed("f")) Camera.MoveUp(-MovementDelta);
-		
-		if(sys.keyboard.isKeyPressed("e"))      Camera.Tilt(0.1*MovementDelta);
-		else if(sys.keyboard.isKeyPressed("q")) Camera.Tilt(-0.1*MovementDelta);
-		
-		Camera.CalcInverseViewMatrix();
 		//-------------------------------------------------------------------------------------
 		
 		if(bFluidSimPass == true)
@@ -599,7 +605,7 @@ export function main(){
 		}
 		else
 		{			
-			light.setPosition(-2.0*ctime, 2.0, 2.0); //*ctime
+			light.setPosition(-1.0*ctime, 0.0, 0.0); //*ctime
 			light.setDisplaySize(5.0);
 			light.setDisplayColor(0.5,0.79,1.0,1.0);
 			light.setMatrices( Camera.ViewMatrix, Camera.ProjectionMatrix );
