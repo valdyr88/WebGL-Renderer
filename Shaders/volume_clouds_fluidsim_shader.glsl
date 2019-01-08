@@ -114,17 +114,17 @@ vec3 calcNormal(in vec3 p){
 }
 
 #if defined(Quality_High)
-	#define Raymarch_NofSteps 256 //broj samplanja npr za cloudse
+	#define Raymarch_NofSteps 192 //broj samplanja npr za cloudse
 	#define Raymarch_CloudShadow_NofSteps 9
 	#define Raymarch_DeltaStep(t) (1.0f / float(Raymarch_NofSteps))
 	#define Raymarch_CloudShadow_DeltaStep 8.0f
 #elif defined(Quality_Med)
-	#define Raymarch_NofSteps 192 //broj samplanja npr za cloudse
+	#define Raymarch_NofSteps 128 //broj samplanja npr za cloudse
 	#define Raymarch_CloudShadow_NofSteps 6
 	#define Raymarch_DeltaStep(t) (1.0f / float(Raymarch_NofSteps))
 	#define Raymarch_CloudShadow_DeltaStep 8.0f
 #elif defined(Quality_Low)
-	#define Raymarch_NofSteps 128 //broj samplanja npr za cloudse
+	#define Raymarch_NofSteps 96 //broj samplanja npr za cloudse
 	#define Raymarch_CloudShadow_NofSteps 4
 	#define Raymarch_DeltaStep(t) (1.0f / float(Raymarch_NofSteps))
 	#define Raymarch_CloudShadow_DeltaStep 8.0f
@@ -252,7 +252,7 @@ float RaymarchSDFfindT(in vec3 start, in vec3 dir, float t, float disttreshold, 
 void main(void)
 {	
 	Light light0 = Lights[0].light;
-	float dither = 0.0125f*(0.5f+0.5f*rand(TexCoords))*(256.0f/float(Raymarch_NofSteps));
+	float dither = 0.015f*(0.5f+0.5f*rand(TexCoords))*(192.0f/float(Raymarch_NofSteps));
 	
 	vec2 mouse = Mouse.xy / Resolution.xy;
 	
