@@ -117,17 +117,17 @@ vec3 calcNormal(in vec3 p){
 	#define Raymarch_NofSteps 256 //broj samplanja npr za cloudse
 	#define Raymarch_CloudShadow_NofSteps 9
 	#define Raymarch_DeltaStep(t) (1.0f / float(Raymarch_NofSteps))
-	#define Raymarch_CloudShadow_DeltaStep 16.0f
+	#define Raymarch_CloudShadow_DeltaStep 8.0f
 #elif defined(Quality_Med)
 	#define Raymarch_NofSteps 192 //broj samplanja npr za cloudse
 	#define Raymarch_CloudShadow_NofSteps 6
 	#define Raymarch_DeltaStep(t) (1.0f / float(Raymarch_NofSteps))
-	#define Raymarch_CloudShadow_DeltaStep 16.0f
+	#define Raymarch_CloudShadow_DeltaStep 8.0f
 #elif defined(Quality_Low)
 	#define Raymarch_NofSteps 128 //broj samplanja npr za cloudse
 	#define Raymarch_CloudShadow_NofSteps 4
 	#define Raymarch_DeltaStep(t) (1.0f / float(Raymarch_NofSteps))
-	#define Raymarch_CloudShadow_DeltaStep 16.0f
+	#define Raymarch_CloudShadow_DeltaStep 8.0f
 #endif
 
 #define cloudColor (vec3(0.1,0.5,0.4))
@@ -176,15 +176,16 @@ vec4 RaymarchMulti(in vec3 start, in vec3 dir, in float tstart, in float maxt, i
 		vec3 ray = start + t*dir;
 		vec3 lightDir = light0.position.xyz - ray;
 		
-		float lited = 4.0 / (sqrt(dot(lightDir,lightDir))); lited = clamp(lited,0.0,4.0);
+		float lited = 1.0 / ((dot(lightDir,lightDir))); lited = clamp(lited,0.0,4.0);
 		float shadow = RaymarchCloudShadowSample(ray, normalize(lightDir), dt, dither);
 				
 		float3 color = cloudColor;
-		// color *= lited;
+		color *= lited;
+		color *= lerp( cloudShadowColor, vec3(1.0), shadow);
 		
 		float dens = sample_clouds(ray);
 		colorsum.a += dens;
-		colorsum.rgb += dens*lited*(shadow)*color;
+		colorsum.rgb += dens*color;
 		
 		t += dt;
 		if(colorsum.a > 0.99f) break;
@@ -264,8 +265,8 @@ void main(void)
 	vec3 ViewDir = normalize(ViewVector);
 	
 	vec4 rtn = vec4(0.0);
-	const float maxT = 2.0f;
-	float startT = 0.0; //u centru je od 0.0 do 1.0 cloud
+	float startT = length(CameraPosition) - 2.0; //u centru je od 0.0 do 1.0 cloud
+	float maxT = 4.0f;
 	
 	// vec3 pos = vec3(0.0,1.0,-7.0);
 	vec3 pos = CameraPosition;

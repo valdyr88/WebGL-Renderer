@@ -512,98 +512,7 @@ export function main(){
 			}
 			//-------------------------------------------------------
 		}
-		
-		if(false) //Render deferred_opaque_shade i transparent_shader
-		{
-			glext.Texture.Unbind(0);
-			glext.Texture.Unbind(1);
-			glext.Texture.Unbind(2);
-			glext.Texture.Unbind(3);
-			
-			gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);		
-			
-			gl.clearColor(0.25, 0.5, 0.75, 1.0);
-			gl.clearDepth(1.0);
-			gl.enable(gl.DEPTH_TEST);
-			gl.depthFunc(gl.LEQUAL);
-			gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-			
-			RenderModels(fbo, true, time, Camera, [SkySphereModel, model]);
-			
-			light.setPosition(-2.0*ctime, 2.0, 2.0);
-			light.setDisplaySize(5.0);
-			light.setDisplayColor(0.5,0.79,1.0,1.0);
-			light.setMatrices( Camera.ViewMatrix, Camera.ProjectionMatrix );
-			light.RenderPosition();
-			light.setIntensity(4.0);
-			light.setColor(0.5,0.79,1.0,1.0);
-			light.Update();
-				
-			/* 	 */
-			glext.Texture.Unbind(0);
-			glext.Texture.Unbind(1);
-			glext.Texture.Unbind(2);
-			glext.Texture.Unbind(3);
-			
-			
-			fboHdrMipBlur.Bind();
-			fboHdrMipBlur.DetachDepth();
-			gl.viewport(0, 0, fboHdrMipBlur.width, fboHdrMipBlur.height);
-				
-				gl.clearColor(0.5, 0.5, 0.5, 1.0);
-				gl.clearDepth(1.0);
-				gl.enable(gl.DEPTH_TEST);
-				gl.depthFunc(gl.LEQUAL);
-				gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-				
-				deferred_opaque_shade.Bind();
-				
-					// txfbColor.Bind(0, deferred_opaque_shade.ULTextureD);
-					quad_model.BindTexturesToShader(deferred_opaque_shade);
-					
-					deferred_opaque_shade.setViewMatrixUniform( IdentityMatrix );
-					deferred_opaque_shade.setProjectionMatrixUniform( IdentityMatrix );
-					
-					deferred_opaque_shade.setTimeUniform(time);
-					
-					deferred_opaque_shade.setCameraPositionUniform(Camera.Position);
-					deferred_opaque_shade.setMatrix4Uniform(deferred_opaque_shade.ULInvViewProjMatrix, Camera.InverseViewProjectionMatrix);
-					
-					// light.UploadToShader(deferred_opaque_shade, lightUniforms_backbuffer_shader);
-					
-					quad_model.RenderIndexedTriangles(deferred_opaque_shade);		
-			
-			//atmosphere render
-			fboHdrMipBlur.AttachDepth(txfbDepth);
-			// light.UploadToShader(atmosphere_shader, atmosphere_shader.lightUniforms);
-			RenderModels(null, false, time, Camera, [AtmoSphereModel]);
-			
-			//gen mipmapa za renderirani color buffer
-			glext.Framebuffer.CopyTextureFromFBColorAttachment(txfbHdrMipBlur, 0, txfbColor, 0, MipGen.framebuffer, true);
-			MipGen.Generate(txfbHdrMipBlur);
-			
-			gl.viewport(0, 0, txfbColor.width, txfbColor.height);
-			
-				fbo.AttachTexture(txfbColor, 0);
-				RenderModels(fbo, false, time, Camera, [navigatorModel]);
-			
-			//render to main FB, sa shaderom koji prikazuje mipove.
-			glext.Framebuffer.BindMainFB();	
-			gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
-			
-			backbuffer_shader.Bind();
-			
-				// guad_model.BindTexturesToShader(backbuffer_shader);
-				txfbColor.Bind(0, backbuffer_shader.ULTextureD);
-				
-				backbuffer_shader.setViewMatrixUniform( IdentityMatrix );
-				backbuffer_shader.setProjectionMatrixUniform( IdentityMatrix );
-				backbuffer_shader.setTimeUniform(time);
-				backbuffer_shader.setCameraPositionUniform(Camera.Position);
-				
-				quad_model.RenderIndexedTriangles(backbuffer_shader);
-		}
-		else
+
 		{			
 			light.setPosition(-1.0*ctime, 0.0, 0.0); //*ctime
 			light.setDisplaySize(5.0);
@@ -614,7 +523,7 @@ export function main(){
 			light.Update();
 		}
 		
-		if(true) //Render volume_clouds_shader
+		//Render volume_clouds_shader
 		{
 			glext.Framebuffer.BindMainFB();	
 			gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);		
