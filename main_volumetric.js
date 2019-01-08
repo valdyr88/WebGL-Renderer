@@ -311,6 +311,13 @@ export function main(){
 	var oldframe_time = -1.0;
 	var avg_frame_time = 1.0/60.0;
 	var FPSlabel = document.getElementById("label_FPS");
+	/* var FPSSlider = document.getElementById("fps_slider");
+	FPSSlider.fvalue = function(){
+		var v = this.value; //0, 10
+		v = v - 4.0; //-4, 6
+		v = Math.pow(2.0, v); //0.0625, 64.0
+		return v;
+	} */
 	
 	var lastRecompileTime = sys.time.getSecondsSinceStart();
 	
@@ -348,8 +355,10 @@ export function main(){
 	var bCtrlToggle = false;
 	var bShiftToggle = false;
 	var bFluidSimPass = true;
-		
-	setInterval( function(){ window.requestAnimationFrame(renderFrame); }, 17);
+	
+	var delay_ms = 17;
+	
+	setInterval( function(){ window.requestAnimationFrame(renderFrame); }, delay_ms);
 	
 	function renderFrame()
 	{
@@ -502,8 +511,8 @@ export function main(){
 			//simulacija
 			//-------------------------------------------------------
 			{
-				// fluidSim.SimStep(0.1);
-				// fluidSim.AdvectMass(0.1);
+				fluidSim.SimStep(0.1);
+				fluidSim.AdvectMass(0.1);
 				
 				// glext.Framebuffer.BindMainFB();	
 				// gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);		

@@ -719,6 +719,7 @@ export class FluidSim3D
 		gl.disable(gl.DEPTH_TEST);
 		gl.clearColor(0.0, 0.0, 0.0, 1.0);
 		// gl.clearDepth(1.0);
+		this.framebuffer.DetachAllTextures();
 		
 		var buffers = [this.txVelocity0, this.txVelocity1, this.txVelocity2,
 						this.txDivergence, this.txPressure0, this.txPressure1];
