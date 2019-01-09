@@ -52,8 +52,11 @@ varyin vec2 TexCoords;
 #include "fluidsim3d_include"
 // #define MassResolution
 
+float zToWorldSpace(int z){ return float(z) * (float(Resolution.z) / float(MassResolution.z)); }
+
 out_dim advect(sampler3D u, sampler3D m, vec3 x, float dt){
 	vec4 v = samplePoint(u, x); //sample point
+	x.z = x.z + 0.5f;
 	return sampleLinear(m, x - dt*v.xyz).out_comp; //sample linear
 }
 
@@ -65,8 +68,10 @@ void main(void)
 
 	for(int i = 0; i < NUM_OUT_BUFFERS; ++i)
 	{	
-		vec3 x = toWorldSpace(TexCoords, z+i);
+		vec3 x = toWorldSpace(TexCoords, zToWorldSpace(z+i));
 		uadv[i] = advect(txVelocity, txMass, x, dT);
+		
+		// uadv[i] = textureLod(txMass, toTexSpace(x), 0.0).out_comp;
 	}
 	
 	// gl_FragColor = uadv;

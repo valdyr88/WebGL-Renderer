@@ -158,13 +158,17 @@ out_dim sample_clouds(in vec3 x)
 }
 //===================================================================================================
 
+float zToWorldSpace(int z){ return float(z) * (float(Resolution.z) / float(MassResolution.z)); }
+
 void main(void)
 {
 	out_dim uadv[NUM_OUT_BUFFERS];
 
 	for(int i = 0; i < NUM_OUT_BUFFERS; ++i)
 	{	
-		vec3 x = toWorldSpace( (TexCoords - vec2(0.5))*0.1, z+i); x.z /= 0.0625*MassResolution.z; x.z -= 7.5; 
+		vec3 x = toWorldSpace( (TexCoords - vec2(0.5))*0.1, zToWorldSpace(z+i));
+		// x.z /= 0.0625*MassResolution.z; x.z -= 7.5; 
+		x.z /= 0.075*MassResolution.z; x.z -= 6.5;
 		uadv[i] = (sdf_map(x) < 0.0)? 1.0 : 0.0;
 		// uadv[i] = float(z+i) / float(NUM_OUT_BUFFERS);
 		// uadv[i] = float(z+i) / MassResolution.z;

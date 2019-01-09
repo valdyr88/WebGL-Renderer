@@ -510,6 +510,7 @@ export function main(){
 			
 			//simulacija
 			//-------------------------------------------------------
+			// if(false)
 			{
 				fluidSim.SimStep(0.1);
 				fluidSim.AdvectMass(0.1);
