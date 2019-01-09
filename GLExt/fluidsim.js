@@ -1017,6 +1017,11 @@ export class FluidSim3D
 				this.txMass1.CreateEmptyRubyte(this.mass_width, this.mass_height, this.mass_depth); }
 		}
 		
+		this.txMass0.setMinMagFilterLinearLinear();
+		this.txMass1.setMinMagFilterLinearLinear();
+		this.txMass0.setWrapTypeClampToEdge();
+		this.txMass1.setWrapTypeClampToEdge();
+		
 		this.txMass = this.txMass0;
 		
 		this.str_mass_vec3Res = "vec3(" + this.mass_width.toString()+ ".0," + this.mass_height.toString() + ".0," + this.mass_depth.toString() + ".0)";
@@ -1118,12 +1123,6 @@ export class FluidSim3D
 		this.framebuffer.Bind();
 		gl.viewport(0, 0, this.mass_width, this.mass_height);
 		
-		{
-			var tmp = this.txMass1;
-			this.txMass1 = this.txMass0;
-			this.txMass0 = tmp;
-		}
-		
 		this.txMass = this.txMass1;
 		this.txOldMass = this.txMass0;
 		
@@ -1145,6 +1144,12 @@ export class FluidSim3D
 			}
 		
 		Framebuffer.Bind(oldFB);
+		
+		{
+			var tmp = this.txMass1;
+			this.txMass1 = this.txMass0;
+			this.txMass0 = tmp;
+		}
 	}
 	
 	//-----------------------------------------------------------------------------------------------------------

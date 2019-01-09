@@ -281,7 +281,7 @@ export function main(){
 	if(b3DFluidSim == true){
 		fluidSim.CreateTest3DRenderShader("test_3d_texture_render");
 		fluidSim.setNoiseTexture(txNoiseRGB);
-		fluidSim.CreateMass(400,400,400, false, false, "fluidsim_mass_init_shader", "fluidsim_mass_advect_shader");
+		fluidSim.CreateMass(128,128,128, false, false, "fluidsim_mass_init_shader", "fluidsim_mass_advect_shader");
 	}
 	
 	vMath.mat4.perspective(projectionMatrix, vMath.deg2rad(40.0), gl.viewportWidth/gl.viewportHeight, 0.1, 1000.0);

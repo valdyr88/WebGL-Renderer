@@ -252,7 +252,8 @@ float RaymarchSDFfindT(in vec3 start, in vec3 dir, float t, float disttreshold, 
 void main(void)
 {	
 	Light light0 = Lights[0].light;
-	float dither = 0.015f*(0.5f+0.5f*rand(TexCoords))*(192.0f/float(Raymarch_NofSteps));
+	float dither = 0.0125f*(0.5f+0.5f*rand(TexCoords))*(192.0f/float(Raymarch_NofSteps));
+	// dither = 0.0;
 	
 	vec2 mouse = Mouse.xy / Resolution.xy;
 	

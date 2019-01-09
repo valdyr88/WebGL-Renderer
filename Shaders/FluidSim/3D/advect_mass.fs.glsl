@@ -39,8 +39,8 @@ precision mediump sampler3D;
 
 uniform int z;
 uniform vec3 aspect; //odnos dimenzija teksture i svijeta
-uniform sampler3D txVelocity;
 uniform sampler3D txMass; //(r) density ili (rgb) boja i (a) density
+uniform sampler3D txVelocity;
 uniform float dT;
 
 //------------------------------------------------------------------------------
