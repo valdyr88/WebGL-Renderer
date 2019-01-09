@@ -240,8 +240,7 @@ vec4 RaymarchMulti(in vec3 start, in vec3 dir, in float tstart, in float maxt, i
 		#endif
 		
 		#ifdef _DEBUG_Display_VelocitySize
-			float fVSizeNorm = colorsum.a;
-			return lerp3pt(vec4(0.0,0.5,1.0,1.0), vec4(0.5,1.0,0.0,1.0), vec4(1.0,0.0,0.0,1.0), fVSizeNorm);
+			return lerp3pt(vec4(0.0,0.5,1.0,1.0), vec4(0.5,1.0,0.0,1.0), vec4(1.0,0.0,0.0,1.0), colorsum.a);
 		#endif
 		
 		#ifdef _DEBUG_Display_Pressure
