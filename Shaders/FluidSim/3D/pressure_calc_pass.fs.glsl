@@ -69,7 +69,7 @@ void main(void)
 		// // if(isAtBorder(x) == true){ pnew[i] =  -divu / 6.0; }
 		// if(isAtBorder(x) == true){ pnew[i] = p; }
 		// if(isAtBorder(x) == true){ pnew[i] = 0.0; }
-		vec3 centar = toWorldSpace(vec3(0.2,0.5+cos(0.25*t)*0.25,0.5));
+		vec3 centar = toWorldSpace(vec3(0.5,0.5+cos(0.25*t)*0.25,0.5));
 		if(length(x - centar) < 0.05f*Resolution.x) pnew[i] = 0.0;
 	}
 		

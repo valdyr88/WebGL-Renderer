@@ -28,7 +28,11 @@ export function main(){
 		 if(glext.glEnableExtension('OES_texture_float_linear') == false) alert("no extension: OES_texture_float_linear");
 		
 	glext.InitDebugTextDOM("debug_text");
-			
+	
+	var bMouseOverCanvas = false;
+	gl.canvasObject.onmouseover = function(){ bMouseOverCanvas = true; }
+	gl.canvasObject.onmouseout = function(){ bMouseOverCanvas = false; }
+	
 	gl.clearColor(0.0, 1.0, 1.0, 1.0);
 	gl.blendColor(1.0, 1.0, 1.0, 1.0);
 	gl.enable(gl.DEPTH_TEST);
@@ -416,6 +420,7 @@ export function main(){
 		var mousePos = sys.mouse.getPosition();
 		var mouseDelta = sys.mouse.getDeltaPosition();
 		
+		if(bMouseOverCanvas == true)
 		{
 			orbital.dinclination = 0.0;
 			orbital.dazimuth = 0.0;

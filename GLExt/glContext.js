@@ -27,6 +27,8 @@ function glInitWebGLContext(canvas){
 			glContextName = contextNames[i];
 			gl.contextName = glContextName;
 			
+			gl.canvasObject = canvas;
+			
 			if(glContextName == "webgl2")
 				gl.isWGL2 = true;
 			else
