@@ -107,6 +107,7 @@ export function main(){
 	volume_clouds_shader.ULPixelAspect = volume_clouds_shader.getUniformLocation("PixelAspect");
 	volume_clouds_shader.ULTextureMass = volume_clouds_shader.getUniformLocation("txFluidSimCloud");
 	volume_clouds_shader.ULTextureVelocity = volume_clouds_shader.getUniformLocation("txFluidSimVelocity");
+	volume_clouds_shader.ULDisplayBrightness = volume_clouds_shader.getUniformLocation("displayBrightness");
 	
 	var SkySphereModel = new glext.Model(0);
 	SkySphereModel.ImportFrom("SphereModel");
@@ -495,15 +496,15 @@ export function main(){
 		{
 			//slideri
 			//-------------------------------------------------------
-				var c = fluidsimPressureIterationCountSlider.value;
+				let c = fluidsimPressureIterationCountSlider.value;
 				fluidsimPressureIterationCountSlider.title = "pressure iteration count: " + c.toString();
 				fluidSim.setPressureIterationNumber(c);
 				
-				var viscosity = fluidsimViscositySlider.fvalue(); //Number.parseFloat(avg_FPS).toFixed(2)
+				let viscosity = fluidsimViscositySlider.fvalue(); //Number.parseFloat(avg_FPS).toFixed(2)
 				fluidsimViscositySlider.title = "viscosity: " + Number.parseFloat(viscosity).toFixed(5);
 				fluidSim.setKinematicViscosity(viscosity);
 				
-				var brightness = fluidsimBrightnessSlider.fvalue();
+				let brightness = fluidsimBrightnessSlider.fvalue();
 				fluidsimBrightnessSlider.title = "brightness: " + Number.parseFloat(brightness).toFixed(4);
 				fluidSim.setDisplayBrightness(brightness);
 			//-------------------------------------------------------
@@ -552,6 +553,7 @@ export function main(){
 				fluidSim.txVelocity.Bind(2, volume_clouds_shader.ULTextureVelocity);
 				fluidSim.txMass.Bind(3, volume_clouds_shader.ULTextureMass);
 				
+				let brightness = fluidsimBrightnessSlider.fvalue();
 				// volume_clouds_shader.setViewMatrixUniform( Camera.ViewMatrix );
 				// volume_clouds_shader.setProjectionMatrixUniform( Camera.ProjectionMatrix );
 				// volume_clouds_shader.setMatrix4Uniform( volume_clouds_shader.ULInverseViewMatrix, Camera.InverseViewMatrix);
@@ -561,6 +563,7 @@ export function main(){
 				volume_clouds_shader.setFloat2Uniform( volume_clouds_shader.ULMouse, mousePos );
 				volume_clouds_shader.setFloat2Uniform( volume_clouds_shader.ULResolution, [gl.viewportWidth,gl.viewportHeight] );
 				volume_clouds_shader.setFloatUniform( volume_clouds_shader.ULPixelAspect, gl.viewportWidth/gl.viewportHeight );
+				volume_clouds_shader.setFloatUniform( volume_clouds_shader.ULDisplayBrightness, brightness );
 				
 				volume_clouds_shader.setTimeUniform(time);
 				
@@ -685,6 +688,7 @@ export function recompileShader(fragment_name){
 					shader.ULTextureVelocity = shader.getUniformLocation("txFluidSimVelocity");
 					shader.ULTextureNoiseRGB = shader.getUniformLocation("txNoiseRGB");
 					shader.ULTextureBackground = shader.getUniformLocation("txBackground");
+					shader.ULDisplayBrightness = shader.getUniformLocation("displayBrightness");
 					glext.LightList.get(0).AttachUniformBlockTo(shader);
 					// shader.ULInverseViewMatrix = shader.getUniformLocation("InverseViewMatrix");
 					shader.ULCameraForward = shader.getUniformLocation("CameraForward");

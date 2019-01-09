@@ -38,6 +38,7 @@ uniform float Time;
 uniform vec2 Mouse;
 uniform vec2 Resolution;
 uniform highp vec3 CameraPosition;
+uniform float displayBrightness;
 //------------------------------------------------------------------------------
 #define varyin in
 
@@ -53,6 +54,9 @@ varyin vec3 ViewVector;
 // uniform Light light0;
 #include "ubLight"
 
+#if defined(_DEBUG) && !defined(_DEBUG_Clouds_StepCount)
+	#define _DEBUG_Display
+#endif
 
 float sample_clouds_sphere(in vec3 p, vec3 c, float r){
 	if(length(p - c) < r) return 1.0;
@@ -74,6 +78,17 @@ float sample_clouds(in vec3 p)
 	
 	float d = texture3DLod(txFluidSimCloud, p, 0.0).x;
 	return d*0.5;
+}
+
+float3 sample_velocity(in vec3 p)
+{
+	p = p * 0.25; 
+	p = p + 0.5;// 
+	
+	if(p.x < 0.0 || p.y < 0.0 || p.z < 0.0) return vec3(0.0);
+	if(p.x > 1.0 || p.y > 1.0 || p.z > 1.0) return vec3(0.0);
+	
+	return texture3DLod(txFluidSimVelocity, p, 0.0).xyz;
 }
 
 //===================================================================================================
@@ -134,9 +149,8 @@ vec3 calcNormal(in vec3 p){
 #define cloudShadowColor (vec3(0.4,0.47,0.6))
 // #define lightDir (normalize(vec3(1.0,0.2,1.0)))
 
-float RaymarchCloudShadowSample(in vec3 start, in vec3 dir, in float ds, in float dither)
+float RaymarchCloudShadowSample(in vec3 start, in vec3 dir, in float ds)
 {
-	// ds += dither;
 	float s = 0.0f;
 	float shadow = 1.0f;
 	#define shadowMult (1.5f+(1.0f / float(Raymarch_CloudShadow_NofSteps)))
@@ -158,58 +172,58 @@ vec4 RaymarchMulti(in vec3 start, in vec3 dir, in float tstart, in float maxt, i
 		int StepCount = 0;
 	#endif
 	
-	Light light0 = Lights[0].light;	
+	Light light0 = Lights[0].light;
 	
 	float t = tstart+dither;
 	vec4 colorsum = vec4(0.0);
 	
 	float dt = (maxt - tstart) / float(Raymarch_NofSteps);
-	
-	//raytracanje oblaka i provjera sdf predznaka
-	//---------------------------------------------------------------------------------				
+			
 	for(int i = 0; i < Raymarch_NofSteps; ++i)
 	{
 		#ifdef _DEBUG_Clouds_StepCount
 			StepCount++;
 		#endif
-				
+		
 		vec3 ray = start + t*dir;
-		vec3 lightDir = light0.position.xyz - ray;
 		
-		float lited = 1.0 / ((dot(lightDir,lightDir))); lited = clamp(lited,0.0,4.0);
-		float shadow = RaymarchCloudShadowSample(ray, normalize(lightDir), dt, dither);
-				
-		float3 color = cloudColor;
-		color *= lited;
-		color *= lerp( cloudShadowColor, vec3(1.0), shadow);
+		#ifndef _DEBUG_Display //raymarch oblaka i sjencanje
+			
+			vec3 lightDir = light0.position.xyz - ray;
+			
+			float lited = 1.0 / ((dot(lightDir,lightDir))); lited = clamp(lited,0.0,4.0);
+			float shadow = RaymarchCloudShadowSample(ray, normalize(lightDir), dt);
+					
+			float3 color = cloudColor;
+			color *= lited;
+			color *= lerp( cloudShadowColor, vec3(1.0), shadow);
+			
+			float dens = sample_clouds(ray);
+			colorsum.a += dens;
+			colorsum.rgb += dens*color;
+			
+		#else //debug prikaz
 		
-		float dens = sample_clouds(ray);
-		colorsum.a += dens;
-		colorsum.rgb += dens*color;
+		#if defined(_DEBUG_Display_Velocity) || defined(_DEBUG_Display_VelocitySize)
+			vec3 velocity = sample_velocity(ray);
+			float velocitySize = length(velocity)*displayBrightness / 10.0;
+			
+			colorsum.a += velocitySize;
+			colorsum.rgb += velocitySize*velocity;
+		#endif
+		
+		#ifdef _DEBUG_Display_Pressure
+			
+		#endif
+		
+		#ifdef _DEBUG_Display_Divergence
+			
+		#endif
+		
+		#endif //_DEBUG_Display		
 		
 		t += dt;
 		if(colorsum.a > 0.99f) break;
-		
-		/*float dens = sample_clouds(ray);
-		float shadow = RaymarchCloudShadowSample(ray, normalize(lightDir));
-			
-		float lited = 4.0 / ((dot(lightDir,lightDir))); lited = clamp(lited,0.0,4.0);
-		// float lited = 1.0f;
-		
-		vec3 color = lerp( vec3(1.0), cloudColor, dens*0.5);
-		color *= lerp( cloudShadowColor, vec3(1.0), shadow);
-		color *= lited;
-		
-		color *= dens;
-		
-		colorsum.xyz += color*(1.0 - colorsum.a);
-		colorsum.a += dens;
-		
-		// float dt = Raymarch_DeltaStep(t);
-		
-		t += dt;
-		if(t >= maxt) break;
-		if(colorsum.a > 0.99f) break;*/
 	}
 	
 	#ifndef _DEBUG
@@ -218,6 +232,24 @@ vec4 RaymarchMulti(in vec3 start, in vec3 dir, in float tstart, in float maxt, i
 		#ifdef _DEBUG_Clouds_StepCount
 			float fStepCount = float(StepCount) / float( (Raymarch_NofSteps) );
 			return lerp3pt(vec4(0.0,0.5,1.0,1.0), vec4(0.5,1.0,0.0,1.0), vec4(1.0,0.0,0.0,1.0), fStepCount);
+		#endif
+		
+		#ifdef _DEBUG_Display_Velocity
+			vec3 vdisplay = colorsum.xyz * 0.5 + 0.5;
+			return tovec4(vdisplay, 1.0);
+		#endif
+		
+		#ifdef _DEBUG_Display_VelocitySize
+			float fVSizeNorm = colorsum.a;
+			return lerp3pt(vec4(0.0,0.5,1.0,1.0), vec4(0.5,1.0,0.0,1.0), vec4(1.0,0.0,0.0,1.0), fVSizeNorm);
+		#endif
+		
+		#ifdef _DEBUG_Display_Pressure
+			
+		#endif
+		
+		#ifdef _DEBUG_Display_Divergence
+			
 		#endif
 		
 		return vec4(1.0,0.0,1.0,1.0);
