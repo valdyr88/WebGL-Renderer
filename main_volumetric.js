@@ -12,6 +12,7 @@ var QualitySelect = 0;
 var strQualitySelect = ["Quality_Low", "Quality_Med", "Quality_High"];
 var gFluidSim = null;
 var b3DFluidSim = true;
+var bFluidSimPass = true;
 
 export function main(){
 	
@@ -359,7 +360,6 @@ export function main(){
 	
 	var bCtrlToggle = false;
 	var bShiftToggle = false;
-	var bFluidSimPass = true;
 	
 	var delay_ms = 17;
 	
@@ -613,6 +613,10 @@ export function FluidSimReset(){
 	if(gFluidSim == null) return;
 	gFluidSim.ClearBuffers();
 	gFluidSim.ResetMass();
+}
+export function FluidSimTogglePause(){
+	bFluidSimPass = !bFluidSimPass;
+	return !bFluidSimPass;
 }
 
 function RenderModels(fbo, bClearFBO, time, camera, models){

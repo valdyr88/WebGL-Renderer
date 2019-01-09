@@ -168,7 +168,9 @@
 			<div class="slidecontainer" title="viscosity">
 			  <input type="range" min="0" max="90" value="0" class="slider" id="fluidsim_viscosity_slider">
 			</div>
-			<button id="reset_fluidsim", onclick="on_fluidsim_reset()"  style="transform: translate(50%, 0%);">Reset FluidSim</button>
+			<button id="pause_fluidsim", onclick="on_fluidsim_pause()" style="transform: translate(50%, 0%);">Pause FluidSim</button>
+			<br/>
+			<button id="reset_fluidsim", onclick="on_fluidsim_reset()" style="transform: translate(50%, 0%);">Reset FluidSim</button>
 	</div>
 	
 	<div style="background-color:#0055ff">
@@ -178,7 +180,7 @@
 	</div>
 	
   <script type="module">
-	import { main, recompileShader, reloadTexture, onShaderDefineChanged, SetAutoQualitySelection, ReloadFluidSimShaders, FluidSimDisplayChanged, FluidSimSetKinematicViscosity, FluidSimReset } from "./main_volumetric.js";
+	import { main, recompileShader, reloadTexture, onShaderDefineChanged, SetAutoQualitySelection, ReloadFluidSimShaders, FluidSimDisplayChanged, FluidSimSetKinematicViscosity, FluidSimReset, FluidSimTogglePause } from "./main_volumetric.js";
 	import { fetchImage } from "./GLExt/glTexture.js";
 	function wait(ms){ const start = performance.now(); while(performance.now() - start < ms); }
 	
@@ -365,6 +367,16 @@
 	
 	window.on_fluidsim_reset = function on_fluidsim_reset(){
 		FluidSimReset();
+	}
+	window.on_fluidsim_pause = function on_fluidsim_pause(){
+		var bPaused = FluidSimTogglePause();
+		var button = document.getElementById("pause_fluidsim");
+		if(button == null) return;
+		
+		if(bPaused == true)
+			button.innerHTML = "Resume FluidSim";
+		else
+			button.innerHTML = "Pause FluidSim";
 	}
 
 //-------------------------------------------------------------------------------------------
