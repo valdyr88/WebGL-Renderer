@@ -527,7 +527,9 @@ export class FluidSim3D
 		this.viscosity_shader.ULdT = this.viscosity_shader.getUniformLocation("dT");
 		this.viscosity_shader.ULk = this.viscosity_shader.getUniformLocation("k");
 		this.viscosity_shader.ULTextureVelocity = this.viscosity_shader.getUniformLocation("txVelocity");
-				
+		
+		this.pre_viscosity_pass_function = function(){};
+			
 		this.advection_shader = new Shader(-1);
 		this.advection_shader.addDefine("Resolution",this.str_vec3Res);
 		this.advection_shader.addDefine("NUM_OUT_BUFFERS", this.NumOutBuffers.toString());
@@ -544,6 +546,8 @@ export class FluidSim3D
 		this.advection_shader.ULdT = this.advection_shader.getUniformLocation("dT");
 		this.advection_shader.ULTextureVelocity = this.advection_shader.getUniformLocation("txVelocity");
 				
+		this.pre_advection_pass_function = function(){};
+		
 		this.advection_correction_shader = new Shader(-1);
 		this.advection_correction_shader.addDefine("Resolution",this.str_vec3Res);
 		this.advection_correction_shader.addDefine("NUM_OUT_BUFFERS", this.NumOutBuffers.toString());
@@ -562,6 +566,8 @@ export class FluidSim3D
 		this.advection_correction_shader.ULTextureVelocity = this.advection_correction_shader.getUniformLocation("txVelocity");
 		this.advection_correction_shader.ULTextureAdvectedVelocity = this.advection_correction_shader.getUniformLocation("txAdvectedVelocity");
 				
+		this.pre_advection_correction_pass_function = function(){};
+		
 		this.divergence_shader = new Shader(-1);
 		this.divergence_shader.addDefine("Resolution",this.str_vec3Res);
 		this.divergence_shader.addDefine("NUM_OUT_BUFFERS", this.NumOutBuffers.toString());
@@ -578,6 +584,8 @@ export class FluidSim3D
 		this.divergence_shader.ULdT = this.divergence_shader.getUniformLocation("dT");
 		this.divergence_shader.ULTexture = this.divergence_shader.getUniformLocation("txTexture");
 				
+		this.pre_divergence_pass_function = function(){};
+		
 		this.pressure_shader = new Shader(-1);
 		this.pressure_shader.addDefine("Resolution",this.str_vec3Res);
 		this.pressure_shader.addDefine("NUM_OUT_BUFFERS", this.NumOutBuffers.toString());
@@ -596,6 +604,8 @@ export class FluidSim3D
 		this.pressure_shader.ULTexturePressure = this.pressure_shader.getUniformLocation("txPressure");
 		this.pressure_shader.ULTextureDivergence = this.pressure_shader.getUniformLocation("txDivergence");
 				
+		this.pre_pressure_pass_function = function(){};
+		
 		this.divfree_velocity_shader = new Shader(-1);
 		this.divfree_velocity_shader.addDefine("Resolution",this.str_vec3Res);
 		this.divfree_velocity_shader.addDefine("NUM_OUT_BUFFERS", this.NumOutBuffers.toString());
@@ -614,6 +624,8 @@ export class FluidSim3D
 		this.divfree_velocity_shader.ULTexturePressure = this.divfree_velocity_shader.getUniformLocation("txPressure");
 		this.divfree_velocity_shader.ULTextureVelocity = this.divfree_velocity_shader.getUniformLocation("txVelocity");
 				
+		this.pre_divfree_velocity_pass_function = function(){};
+		
 		this.display_shader = new Shader(-1);
 		this.display_shader.addDefine("_DEBUG_Display_Velocity","");
 		this.display_shader.addDefine("Resolution",this.str_vec3Res);
@@ -782,6 +794,8 @@ export class FluidSim3D
 				this.viscosity_shader.setFloat3Uniform( this.viscosity_shader.ULaspect, this.aspect );
 				this.viscosity_shader.setFloatUniform( this.viscosity_shader.ULTime, this.time);
 			
+			this.pre_viscosity_pass_function();
+			
 			for(let z = 0; z < this.depth; z += this.NumOutBuffers)
 			{
 				for(let l = 0; l < this.NumOutBuffers; ++l)
@@ -802,6 +816,8 @@ export class FluidSim3D
 				this.txDiffusedVelocity.Bind(0, this.advection_shader.ULTextureVelocity);
 				this.advection_shader.setFloatUniform( this.advection_shader.ULdT, dT);
 				this.advection_shader.setFloat3Uniform( this.advection_shader.ULaspect, this.aspect);
+			
+			this.pre_advection_pass_function();
 			
 			for(let z = 0; z < this.depth; z += this.NumOutBuffers)
 			{
@@ -824,6 +840,8 @@ export class FluidSim3D
 					this.txDiffusedVelocity.Bind(1, this.advection_correction_shader.ULTextureVelocity);
 					this.advection_correction_shader.setFloatUniform( this.advection_correction_shader.ULdT, dT);
 					this.advection_correction_shader.setFloat3Uniform( this.advection_correction_shader.ULaspect, this.aspect);
+			
+			this.pre_advection_correction_pass_function();
 					
 			for(let z = 0; z < this.depth; z += this.NumOutBuffers)
 			{	
@@ -845,6 +863,8 @@ export class FluidSim3D
 				this.txAdvectedCorrectedVelocity.Bind(0, this.divergence_shader.ULTexture);
 				this.divergence_shader.setFloatUniform( this.divergence_shader.ULdT, dT);
 				this.divergence_shader.setFloat3Uniform( this.divergence_shader.ULaspect, this.aspect);
+			
+			this.pre_divergence_pass_function();
 								
 			for(let z = 0; z < this.depth; z += this.NumOutBuffers)
 			{	
@@ -867,6 +887,8 @@ export class FluidSim3D
 				this.pressure_shader.setFloat3Uniform( this.pressure_shader.ULaspect, this.aspect);
 				this.pressure_shader.setFloatUniform( this.pressure_shader.ULdT, dT);
 				this.pressure_shader.setFloatUniform( this.pressure_shader.ULTime, this.time);
+			
+			this.pre_pressure_pass_function();
 			
 			for(let i = this.NofPressureIterations; i > 0; --i)
 			{
@@ -907,6 +929,8 @@ export class FluidSim3D
 				this.txAdvectedCorrectedVelocity.Bind(1, this.divfree_velocity_shader.ULTextureVelocity);
 				this.divfree_velocity_shader.setFloatUniform( this.divfree_velocity_shader.ULdT, dT);
 				this.divfree_velocity_shader.setFloat3Uniform( this.divfree_velocity_shader.ULaspect, this.aspect);
+			
+			this.pre_divfree_velocity_pass_function();
 			
 			for(let z = 0; z < this.depth; z += this.NumOutBuffers)
 			{	

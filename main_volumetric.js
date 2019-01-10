@@ -284,10 +284,31 @@ export function main(){
 		return v;
 	}
 	
-	if(b3DFluidSim == true){
+	if(b3DFluidSim == true)
+	{
 		fluidSim.CreateTest3DRenderShader("test_3d_texture_render");
 		fluidSim.setNoiseTexture(txNoiseRGB);
 		fluidSim.CreateMass(256,256,256, false, false, "fluidsim_mass_init_shader", "fluidsim_mass_advect_shader");
+		
+		//custom barrier
+		fluidSim.viscosity_shader.ULSphereBarrier = fluidSim.viscosity_shader.getUniformLocation("sphereBarrier");
+		fluidSim.viscosity_shader.ULSphereBarrierVelocity = fluidSim.viscosity_shader.getUniformLocation("sphereBarrierVelocity");
+		fluidSim.pressure_shader.ULSphereBarrier = fluidSim.pressure_shader.getUniformLocation("sphereBarrier");
+		fluidSim.SphereBarrier = ["Sphere Barrier"];
+		fluidSim.SphereBarrier.position = [0.0,0.0,0.0];
+		fluidSim.SphereBarrier.radius = 0.05;
+		fluidSim.SphereBarrier.velocity = [0.0,0.0,0.0];
+		fluidSim.SphereBarrier.getPositionAndRadius = function(){ return [this.position[0], this.position[1], this.position[2], this.radius]; }
+		fluidSim.SphereBarrier.getVelocity = function(){ return this.velocity; }
+	
+		fluidSim.pre_viscosity_pass_function = function(){
+			this.viscosity_shader.setFloat4Uniform( this.viscosity_shader.ULSphereBarrier, this.SphereBarrier.getPositionAndRadius() );
+			this.viscosity_shader.setFloat3Uniform( this.viscosity_shader.ULSphereBarrierVelocity, this.SphereBarrier.getVelocity() );
+		}
+		fluidSim.pre_pressure_pass_function = function(){
+			this.pressure_shader.setFloat4Uniform( this.pressure_shader.ULSphereBarrier, this.SphereBarrier.getPositionAndRadius() );
+		}
+		
 	}
 	
 	vMath.mat4.perspective(projectionMatrix, vMath.deg2rad(40.0), gl.viewportWidth/gl.viewportHeight, 0.1, 1000.0);
@@ -512,10 +533,16 @@ export function main(){
 				fluidSim.setDisplayBrightness(brightness);
 			//-------------------------------------------------------
 			
+			
 			//simulacija
 			//-------------------------------------------------------
 			if(bFluidSimPass == true)
 			{
+				//barrier
+				//-------------------------------------------------------
+				fluidSim.SphereBarrier.position = [0.5, 0.5+Math.cos(0.25*time)*0.25, 0.5 ];
+				fluidSim.SphereBarrier.velocity = [0.0, -128.0*Math.sin(0.25*time), 0.0 ];
+				//-------------------------------------------------------
 				fluidSim.SimStep(0.1);
 				fluidSim.AdvectMass(0.1);
 				

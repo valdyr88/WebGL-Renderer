@@ -29,10 +29,10 @@ uniform float dT;
 uniform float Time;
 uniform float k; //kinematic viscosity, = viscosity / density
 uniform sampler3D txVelocity;
-// uniform vec4 sphereBarrier; //xyz pozicija, w radius
-// uniform vec3 sphereBarrierVelocity;
-#define sphereBarrier (vec4(  0.5,0.5+cos(0.25*t)*0.25,0.5,  0.05f))
-#define sphereBarrierVelocity ( 128.0*vec3(0.0,-sin(0.25*t),0.0) )
+uniform vec4 sphereBarrier; //xyz pozicija, w radius
+uniform vec3 sphereBarrierVelocity;
+// #define sphereBarrier (vec4(  0.5,0.5+cos(0.25*t)*0.25,0.5,  0.05f))
+// #define sphereBarrierVelocity ( 128.0*vec3(0.0,-sin(0.25*t),0.0) )
 //------------------------------------------------------------------------------
 #define varyin in
 

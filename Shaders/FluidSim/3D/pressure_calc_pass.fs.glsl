@@ -30,8 +30,8 @@ uniform sampler3D txPressure;
 uniform sampler3D txDivergence;
 uniform float dT;
 uniform float Time;
-// uniform vec4 sphereBarrier; //xyz pozicija, w radius
-#define sphereBarrier (vec4(  0.5,0.5+cos(0.25*t)*0.25,0.5,  0.05f))
+uniform vec4 sphereBarrier; //xyz pozicija, w radius
+// #define sphereBarrier (vec4(  0.5,0.5+cos(0.25*t)*0.25,0.5,  0.05f))
 
 #define PressureComp x
 #define DivergenceComp x
