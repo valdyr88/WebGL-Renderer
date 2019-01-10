@@ -147,7 +147,7 @@ vec3 calcNormal(in vec3 p){
 
 #define cloudColor (vec3(0.1,0.5,0.4))
 #define cloudShadowColor (vec3(0.4,0.47,0.6))
-// #define lightDir (normalize(vec3(1.0,0.2,1.0)))
+#define lightIntensity (4.0)
 
 float RaymarchCloudShadowSample(in vec3 start, in vec3 dir, in float ds)
 {
@@ -191,7 +191,7 @@ vec4 RaymarchMulti(in vec3 start, in vec3 dir, in float tstart, in float maxt, i
 			
 			vec3 lightDir = light0.position.xyz - ray;
 			
-			float lited = 1.0 / ((dot(lightDir,lightDir))); lited = clamp(lited,0.0,4.0);
+			float lited = lightIntensity / ((dot(lightDir,lightDir))); lited = clamp(lited,0.0,4.0*lightIntensity);
 			float shadow = RaymarchCloudShadowSample(ray, normalize(lightDir), dt);
 					
 			float3 color = cloudColor;
@@ -297,7 +297,7 @@ void main(void)
 	vec3 ViewDir = normalize(ViewVector);
 	
 	vec4 rtn = vec4(0.0);
-	float startT = length(CameraPosition) - 2.0; //u centru je od 0.0 do 1.0 cloud
+	float startT = max(length(CameraPosition) - 2.0, 0.0); //u centru je od 0.0 do 1.0 cloud
 	float maxT = 4.0f;
 	
 	// vec3 pos = vec3(0.0,1.0,-7.0);

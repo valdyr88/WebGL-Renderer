@@ -29,6 +29,10 @@ uniform float dT;
 uniform float Time;
 uniform float k; //kinematic viscosity, = viscosity / density
 uniform sampler3D txVelocity;
+// uniform vec4 sphereBarrier; //xyz pozicija, w radius
+// uniform vec3 sphereBarrierVelocity;
+#define sphereBarrier (vec4(  0.5,0.5+cos(0.25*t)*0.25,0.5,  0.05f))
+#define sphereBarrierVelocity ( 128.0*vec3(0.0,-sin(0.25*t),0.0) )
 //------------------------------------------------------------------------------
 #define varyin in
 
@@ -49,9 +53,9 @@ vec4 velocityFromAdditionalForces(vec3 x, float t, float dt){
 void modifyVelocity(vec3 x, float t, float dt, inout vec4 u){
 	// u += velocityFromAdditionalForces(x, t, dt);
 	
-	vec3 centar = toWorldSpace(vec3(0.5,0.5+cos(0.25*t)*0.25,0.5));
-	if(length(x - centar) < 0.07f*Resolution.x) u = 128.0*dt*vec4(0.0,-sin(0.25*t),0.0,0.0);
-	// if(length(x - centar) < 0.05f*Resolution.x) u = vec4(0.0,0.0,0.0,0.0);
+	vec3 centar = toWorldSpace(sphereBarrier.xyz);
+	if(length(x - centar) < 1.4f*sphereBarrier.w*Resolution.x) u = dt*tovec4(sphereBarrierVelocity,0.0);
+	if(length(x - centar) < 0.8f*sphereBarrier.w*Resolution.x) u = vec4(0.0,0.0,0.0,0.0);
 }
 
 //racuna diffuziju zbog viscosity

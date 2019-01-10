@@ -158,7 +158,8 @@ out_dim sample_clouds(in vec3 x)
 }
 //===================================================================================================
 
-float zToWorldSpace(int z){ return float(z) * (float(Resolution.z) / float(MassResolution.z)); }
+// float zToWorldSpace(int z){ return float(z) * (float(Resolution.z) / float(MassResolution.z)); }
+float zToWorldSpace(int z){ return float(z); }
 
 void main(void)
 {

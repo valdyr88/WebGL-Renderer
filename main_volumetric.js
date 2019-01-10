@@ -287,7 +287,7 @@ export function main(){
 	if(b3DFluidSim == true){
 		fluidSim.CreateTest3DRenderShader("test_3d_texture_render");
 		fluidSim.setNoiseTexture(txNoiseRGB);
-		fluidSim.CreateMass(128,128,128, false, false, "fluidsim_mass_init_shader", "fluidsim_mass_advect_shader");
+		fluidSim.CreateMass(256,256,256, false, false, "fluidsim_mass_init_shader", "fluidsim_mass_advect_shader");
 	}
 	
 	vMath.mat4.perspective(projectionMatrix, vMath.deg2rad(40.0), gl.viewportWidth/gl.viewportHeight, 0.1, 1000.0);
@@ -443,8 +443,7 @@ export function main(){
 				if(orbital.radius > 100.0) orbital.radius = 100.0;
 				bUpdateCamera = true;
 			}
-			
-			
+						
 			if(bUpdateCamera == true)
 			{			
 				// eyePt = vMath.sph2cart3D(orbital.azimuth, orbital.inclination, orbital.radius);
@@ -497,7 +496,6 @@ export function main(){
 		
 		//-------------------------------------------------------------------------------------
 		
-		if(bFluidSimPass == true)
 		{
 			//slideri
 			//-------------------------------------------------------
@@ -516,7 +514,7 @@ export function main(){
 			
 			//simulacija
 			//-------------------------------------------------------
-			// if(false)
+			if(bFluidSimPass == true)
 			{
 				fluidSim.SimStep(0.1);
 				fluidSim.AdvectMass(0.1);
@@ -530,7 +528,7 @@ export function main(){
 		}
 
 		{			
-			light.setPosition(-1.0*ctime, 0.0, 0.0); //*ctime
+			light.setPosition(1.0, 0.0, 2.0); //*ctime
 			light.setDisplaySize(5.0);
 			light.setDisplayColor(0.5,0.79,1.0,1.0);
 			light.setMatrices( Camera.ViewMatrix, Camera.ProjectionMatrix );
