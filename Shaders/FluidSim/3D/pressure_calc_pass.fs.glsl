@@ -43,6 +43,13 @@ varyin vec2 TexCoords;
 
 #include "fluidsim3d_include"
 
+float pressureFromSphereBarrier(in float p, in vec3 x, in float t, in float dt){
+
+	vec3 centar = toWorldSpace(sphereBarrier.xyz);
+	if(length(x - centar) < sphereBarrier.w*Resolution.x) return 1.0;
+	return p;
+}
+
 //racuna pressure
 void main(void)
 {	
@@ -72,8 +79,9 @@ void main(void)
 		// if(isAtBorder(x) == true){ pnew[i] = p; }
 		// if(isAtBorder(x) == true){ pnew[i] = 0.0; }
 		
-		vec3 centar = toWorldSpace(sphereBarrier.xyz);
-		if(length(x - centar) < sphereBarrier.w*Resolution.x) pnew[i] = 0.0;
+		// vec3 centar = toWorldSpace(sphereBarrier.xyz);
+		// if(length(x - centar) < sphereBarrier.w*Resolution.x) pnew[i] = 0.0;
+		pnew[i] = pressureFromSphereBarrier(pnew[i], x, t, dt);
 	}
 		
 	// out_FragColor = pnew;

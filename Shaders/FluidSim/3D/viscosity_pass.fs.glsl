@@ -41,21 +41,46 @@ varyin vec2 TexCoords;
 
 #include "fluidsim3d_include"
 
-vec4 velocityFromAdditionalForces(vec3 x, float t, float dt){
+vec4 velocityFromAdditionalForces(in vec4 u, in vec3 x, in float t, in float dt){
 	vec3 tc = toTexSpace(x);
 		
 	if( (tc.x > 0.05 && tc.x < 0.1) && (tc.y > 0.2 && tc.y < 0.8) )
-		return tovec4(dt*25.0*vec3(1.0,0.0,0.0), 0.0);
+		return u + tovec4(dt*25.0*vec3(1.0,0.0,0.0), 0.0);
 	
-	return vec4(0.0,0.0,0.0,0.0);
+	return u;
+}
+
+vec4 velocityFromSphereBarrier(in vec4 u, in vec3 x, in float t, in float dt){
+	
+	vec3 centar = toWorldSpace(sphereBarrier.xyz);
+	vec3 toX = x - centar;
+	
+	if(length(toX) < 0.8f*sphereBarrier.w*Resolution.x){
+		return vec4(0.0);
+	}
+	if(length(toX) < 1.4f*sphereBarrier.w*Resolution.x){
+		//saturate(dot(normal(x-centar),normal(velocity))) * normal(x-centar) * length(velocity)
+		
+		vec3 n = normalize(toX);
+		vec3 vdir = normalize(sphereBarrierVelocity);
+		float vsize = length(sphereBarrierVelocity);
+		float dotNV = dot(n,vdir);
+		
+		if(dotNV > 0.0)
+			return u+dt*dotNV*vsize*tovec4(n, 0.0);
+	}
+	
+	return u;
 }
 
 void modifyVelocity(vec3 x, float t, float dt, inout vec4 u){
-	// u += velocityFromAdditionalForces(x, t, dt);
+	// u = velocityFromAdditionalForces(u, x, t, dt);
 	
-	vec3 centar = toWorldSpace(sphereBarrier.xyz);
+	/* vec3 centar = toWorldSpace(sphereBarrier.xyz);
 	if(length(x - centar) < 1.4f*sphereBarrier.w*Resolution.x) u = dt*tovec4(sphereBarrierVelocity,0.0);
-	if(length(x - centar) < 0.8f*sphereBarrier.w*Resolution.x) u = vec4(0.0,0.0,0.0,0.0);
+	if(length(x - centar) < 0.8f*sphereBarrier.w*Resolution.x) u = vec4(0.0,0.0,0.0,0.0); */
+	
+	u = velocityFromSphereBarrier(u, x, t, dt);
 }
 
 //racuna diffuziju zbog viscosity
