@@ -544,8 +544,8 @@ export function main(){
 			{
 				//barrier
 				//-------------------------------------------------------
-				fluidSim.SphereBarrier.position = [0.5, 0.5+Math.cos(time)*0.25, 0.5 ];
-				fluidSim.SphereBarrier.velocity = [0.0, -192.0*Math.sin(time), 0.0 ];
+				fluidSim.SphereBarrier.position = [0.5, 0.5+Math.cos(0.25*fluidSim.time)*0.25, 0.5 ];
+				fluidSim.SphereBarrier.velocity = [0.0, -128.0*Math.sin(0.25*fluidSim.time), 0.0 ];
 				//-------------------------------------------------------
 				
 				fluidSim.SimStep(0.1);
