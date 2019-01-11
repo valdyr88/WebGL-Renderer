@@ -143,11 +143,39 @@ vec3 calcNormal(in vec3 p){
 	#define Raymarch_CloudShadow_NofSteps 4
 	#define Raymarch_DeltaStep(t) (1.0f / float(Raymarch_NofSteps))
 	#define Raymarch_CloudShadow_DeltaStep 8.0f
+#elif defined(Quality_UltraLow)
+	#define Raymarch_NofSteps 48 //broj samplanja npr za cloudse
+	#define Raymarch_CloudShadow_NofSteps 2
+	#define Raymarch_DeltaStep(t) (1.0f / float(Raymarch_NofSteps))
+	#define Raymarch_CloudShadow_DeltaStep 8.0f
 #endif
 
 #define cloudColor (vec3(0.1,0.5,0.4))
 #define cloudShadowColor (vec3(0.4,0.47,0.6))
 #define lightIntensity (4.0)
+
+bool isEdge(in vec3 p){
+	const float eps = 0.005f;
+	p = p * 0.25; 
+	p = p + 0.5;// 
+	
+	if(float_equals(p.x, 0.0f, eps) && float_equals(p.y, 0.0f, eps)) return true;
+	if(float_equals(p.x, 0.0f, eps) && float_equals(p.y, 1.0f, eps)) return true;
+	if(float_equals(p.x, 1.0f, eps) && float_equals(p.y, 0.0f, eps)) return true;
+	if(float_equals(p.x, 1.0f, eps) && float_equals(p.y, 1.0f, eps)) return true;
+	
+	if(float_equals(p.x, 0.0f, eps) && float_equals(p.z, 0.0f, eps)) return true;
+	if(float_equals(p.x, 0.0f, eps) && float_equals(p.z, 1.0f, eps)) return true;
+	if(float_equals(p.x, 1.0f, eps) && float_equals(p.z, 0.0f, eps)) return true;
+	if(float_equals(p.x, 1.0f, eps) && float_equals(p.z, 1.0f, eps)) return true;
+	
+	if(float_equals(p.y, 0.0f, eps) && float_equals(p.z, 0.0f, eps)) return true;
+	if(float_equals(p.y, 0.0f, eps) && float_equals(p.z, 1.0f, eps)) return true;
+	if(float_equals(p.y, 1.0f, eps) && float_equals(p.z, 0.0f, eps)) return true;
+	if(float_equals(p.y, 1.0f, eps) && float_equals(p.z, 1.0f, eps)) return true;
+	
+	return false;
+}
 
 float RaymarchCloudShadowSample(in vec3 start, in vec3 dir, in float ds)
 {
@@ -168,8 +196,9 @@ float RaymarchCloudShadowSample(in vec3 start, in vec3 dir, in float ds)
 
 vec4 RaymarchMulti(in vec3 start, in vec3 dir, in float tstart, in float maxt, in float dither)
 {
-	#ifdef _DEBUG_Clouds_StepCount
+	#ifdef _DEBUG
 		int StepCount = 0;
+		bool bCubeEdge = false;
 	#endif
 	
 	Light light0 = Lights[0].light;
@@ -204,6 +233,8 @@ vec4 RaymarchMulti(in vec3 start, in vec3 dir, in float tstart, in float maxt, i
 			
 		#else //debug prikaz
 		
+		if(isEdge(ray) == true){ bCubeEdge = true; break; }
+		
 		#if defined(_DEBUG_Display_Velocity) || defined(_DEBUG_Display_VelocitySize)
 			vec3 velocity = sample_velocity(ray);
 			float velocitySize = length(velocity)*displayBrightness / 10.0;
@@ -229,6 +260,9 @@ vec4 RaymarchMulti(in vec3 start, in vec3 dir, in float tstart, in float maxt, i
 	#ifndef _DEBUG
 		return colorsum;
 	#else
+		if(bCubeEdge == true){
+			return vec4(1.0,1.0,1.0,1.0); }
+	
 		#ifdef _DEBUG_Clouds_StepCount
 			float fStepCount = float(StepCount) / float( (Raymarch_NofSteps) );
 			return lerp3pt(vec4(0.0,0.5,1.0,1.0), vec4(0.5,1.0,0.0,1.0), vec4(1.0,0.0,0.0,1.0), fStepCount);
@@ -313,6 +347,9 @@ void main(void)
 	#endif
 	#if defined(Quality_Low)
 		if(bMaliRect == true) rtn.xyz = vec3(0.0,0.5,1.0);
+	#endif
+	#if defined(Quality_UltraLow)
+		if(bMaliRect == true) rtn.xyz = vec3(0.0,0.2,1.0);
 	#endif
 		
 	// rtn.xyz = vec3(0.1,0.7,1.0);

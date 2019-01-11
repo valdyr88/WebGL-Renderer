@@ -30,6 +30,12 @@
 #define e  (2.71828182846)
 #define FLT_MIN (1.175494351e-38)
 #define FLT_MAX (3.402823466e+38)
+
+//================================================================================================================
+
+inline bool float_equals(float a, float b, float eps){ return abs( a-b ) < eps; }
+inline bool float_equals(float a, float b){ return float_equals( a, b, 2.0f*FLT_MIN ); }
+
 //================================================================================================================
 
 inline vec4 tovec4(vec3 a, float b){
