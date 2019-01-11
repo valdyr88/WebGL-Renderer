@@ -308,7 +308,11 @@ export function main(){
 		fluidSim.pre_pressure_pass_function = function(){
 			this.pressure_shader.setFloat4Uniform( this.pressure_shader.ULSphereBarrier, this.SphereBarrier.getPositionAndRadius() );
 		}
-		
+		fluidSim.on_recompile_fluidsim_shaders = function(){
+			this.viscosity_shader.ULSphereBarrier = this.viscosity_shader.getUniformLocation("sphereBarrier");
+			this.viscosity_shader.ULSphereBarrierVelocity = this.viscosity_shader.getUniformLocation("sphereBarrierVelocity");
+			this.pressure_shader.ULSphereBarrier = this.pressure_shader.getUniformLocation("sphereBarrier");
+		}
 	}
 	
 	vMath.mat4.perspective(projectionMatrix, vMath.deg2rad(40.0), gl.viewportWidth/gl.viewportHeight, 0.1, 1000.0);

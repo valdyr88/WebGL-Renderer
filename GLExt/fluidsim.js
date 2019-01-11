@@ -647,7 +647,9 @@ export class FluidSim3D
 		this.display_shader.ULTexturePressure = this.display_shader.getUniformLocation("txPressure");
 		this.display_shader.ULTextureVelocity = this.display_shader.getUniformLocation("txVelocity");
 		this.display_shader.ULTextureDivergence = this.display_shader.getUniformLocation("txVelocityDivergence");
-				
+		
+		this.on_recompile_fluidsim_shaders = function(){};
+		
 		ShaderList.addShader(this.viscosity_shader);
 		ShaderList.addShader(this.advection_shader);
 		ShaderList.addShader(this.advection_correction_shader);
@@ -1324,6 +1326,8 @@ export class FluidSim3D
 		this.display_shader.ULTexturePressure = this.display_shader.getUniformLocation("txPressure");
 		this.display_shader.ULTextureVelocity = this.display_shader.getUniformLocation("txVelocity");
 		this.display_shader.ULTextureDivergence = this.display_shader.getUniformLocation("txVelocityDivergence");
+		
+		this.on_recompile_fluidsim_shaders();
 	}
 	
 	RecompileMassShaders()
