@@ -57,7 +57,6 @@ int zToWorldSpace(int z){ return int(float(z) * (float(Resolution.z) / float(Mas
 
 out_dim advect(sampler3D u, sampler3D m, vec3 x, float dt){
 	vec4 v = samplePoint(u, x); //sample point
-	x.z = x.z + 0.5f;
 	return sampleLinear(m, x - dt*v.xyz).out_comp; //sample linear
 }
 
