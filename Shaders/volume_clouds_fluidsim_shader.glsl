@@ -237,7 +237,12 @@ vec4 RaymarchMulti(in vec3 start, in vec3 dir, in float tstart, in float maxt, i
 		
 		#if defined(_DEBUG_Display_Velocity) || defined(_DEBUG_Display_VelocitySize)
 			vec3 velocity = sample_velocity(ray);
-			float velocitySize = length(velocity)*displayBrightness / 10.0;
+			
+			#if defined(_DEBUG_Display_Velocity)
+				float velocitySize = length(velocity) / float((Raymarch_NofSteps));
+			#elif defined(_DEBUG_Display_VelocitySize)
+				float velocitySize = length(velocity)*displayBrightness/250.0;
+			#endif
 			
 			colorsum.a += velocitySize;
 			colorsum.rgb += velocitySize*velocity;
@@ -269,7 +274,7 @@ vec4 RaymarchMulti(in vec3 start, in vec3 dir, in float tstart, in float maxt, i
 		#endif
 		
 		#ifdef _DEBUG_Display_Velocity
-			vec3 vdisplay = colorsum.xyz * 0.5 + 0.5;
+			vec3 vdisplay = (colorsum.xyz*displayBrightness) * 0.5 + 0.5;
 			return tovec4(vdisplay, 1.0);
 		#endif
 		
