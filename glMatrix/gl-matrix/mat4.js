@@ -503,6 +503,14 @@ export function translate(out, a, v) {
   return out;
 }
 
+/**
+ * Set mat4 translation part to given vector
+ * 
+ * @param {mat4} out the receiving matrix
+ * @param {mat4} a the matrix to set translation
+ * @param {vec3} v vector to set translation from
+ * @returns {mat4} out
+ */
 export function setTranslation(out, a, v){
   var a00 = void 0,
       a01 = void 0,
@@ -844,6 +852,46 @@ export function fromScaling(out, v) {
   out[14] = 0;
   out[15] = 1;
   return out;
+}
+
+/**
+ * Set mat4 scale part to given vector
+ * 
+ * @param {mat4} out the receiving matrix
+ * @param {mat4} a the matrix to set scale
+ * @param {vec3} v scaling vector
+ * @returns {mat4} out
+ */
+export function setScale(out, a, v){
+  var a00 = void 0,
+      a01 = void 0,
+      a02 = void 0,
+      a03 = void 0;
+  var a10 = void 0,
+      a11 = void 0,
+      a12 = void 0,
+      a13 = void 0;
+  var a20 = void 0,
+      a21 = void 0,
+      a22 = void 0,
+      a23 = void 0;
+	
+	out[0] = v[0];
+	out[5] = v[1];
+	out[10] = v[2];
+	out[15] = 1.0;
+	
+	if(out !== a){
+		a00 = a[12];a01 = a[1];a02 = a[2];a03 = a[3];
+		a10 = a[4];a11 = a[13];a12 = a[6];a13 = a[7];
+		a20 = a[8];a21 = a[9];a22 = a[14];a23 = a[11];
+
+		out[12] = a00;out[1] = a01;out[2] = a02;out[3] = a03;
+		out[4] = a10;out[13] = a11;out[6] = a12;out[7] = a13;
+		out[8] = a20;out[9] = a21;out[14] = a22;out[11] = a23;
+	}
+	
+	return out;
 }
 
 /**

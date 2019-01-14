@@ -34,8 +34,8 @@ void main(void)
 	PixelPosition = PixelPosition*0.5f + 0.5f;
 	
 	Position = 2.0 * CameraForward +
-			-PixelAspect * aVertexPosition.x * CameraRight +
-			aVertexPosition.y * CameraUp + CameraPosition;
+			-PixelAspect * aVertexPosition.x * (-CameraRight) +
+			aVertexPosition.y * (-CameraUp) + CameraPosition;
 	
 	ViewVector = Position - CameraPosition;
 	

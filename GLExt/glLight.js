@@ -139,12 +139,12 @@ export class Light{
 	setColor(R,G,B,A){ this.Color[0] = R; this.Color[1] = G; this.Color[2] = B; this.Color[3] = A; this.bNeedsToUpdateUniformBlock = true; }
 		
 	/*
-	static getUniformLocationsFromShader(light, baseName){
+	static getUniformLocationsFromShader(shader, baseName){
 		
-		var ULPosition = light.getUniformLocation(baseName + ".position");
-		var ULIntensity = light.getUniformLocation(baseName + ".intensity");
-		var ULColor = light.getUniformLocation(baseName + ".color");
-		var ULFlags = light.getUniformLocation(baseName + ".flags");
+		var ULPosition = shader.getUniformLocation(baseName + ".position");
+		var ULIntensity = shader.getUniformLocation(baseName + ".intensity");
+		var ULColor = shader.getUniformLocation(baseName + ".color");
+		var ULFlags = shader.getUniformLocation(baseName + ".flags");
 		
 		var output = {"ULPosition" : ULPosition,
 					  "ULIntensity" : ULIntensity,
@@ -154,9 +154,9 @@ export class Light{
 		return output;
 	}
 	
-	UploadToShader(light, uniformLocations){
+	UploadToShader(shader, uniformLocations){
 
-		if(light.isBinded() == false) light.Bind();
+		if(shader.isBinded() == false) shader.Bind();
 		gl.uniform4f(uniformLocations.ULPosition, this.Position[0], this.Position[1], this.Position[2], 0.0f);
 		gl.uniform1f(uniformLocations.ULIntensity, this.Intensity);
 		gl.uniform4f(uniformLocations.ULColor, this.Color[0], this.Color[1], this.Color[2], 1.0f);
@@ -164,15 +164,15 @@ export class Light{
 	}
 	*/
 	
-	AttachUniformBlockTo(light){
+	AttachUniformBlockTo(shader){
 		if(this.SlotID >= MAX_LIGHTS){
 			alert("Light.SlotID >= MAX_LIGHTS"); return;
 		}
 		
 		var strUBName = "ubLight["+this.SlotID+"]";
-		// light.UBLights[i] = gl.getUniformBlockIndex(light.program, "Lights[" + i + "]");
-		// var bindingPoint = light.getUniformBlockBindingPoint(strUBName);
-		light.addUniformBlock(strUBName, this.UniformBlock); 
+		// shader.UBLights[i] = gl.getUniformBlockIndex(shader.program, "Lights[" + i + "]");
+		// var bindingPoint = shader.getUniformBlockBindingPoint(strUBName);
+		shader.addUniformBlock(strUBName, this.UniformBlock); 
 	}
 	
 	RenderPosition(){

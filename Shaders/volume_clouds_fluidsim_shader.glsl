@@ -329,7 +329,8 @@ void main(void)
 	
 	bool bMaliRect = (TexCoords.x < 0.025f && TexCoords.y < 0.025f);
 	
-	vec4 diffuse = texture2D(txBackground, TexCoords);
+	vec4 bckgColor = texture2D(txBackground, TexCoords);
+	float bckgDepth = texture2DLod(txDepth, TexCoords,0.0).x;
 	vec3 normal = Normal;
 	vec3 toCamera = normalize(-ViewVector);
 	vec3 toLight = normalize(light0.position.xyz - Position);
@@ -356,7 +357,10 @@ void main(void)
 	#if defined(Quality_UltraLow)
 		if(bMaliRect == true) rtn.xyz = vec3(0.0,0.2,1.0);
 	#endif
-		
+	
+	// rtn.xyz = lerp(bckgColor.xyz, rtn.xyz, rtn.a);
+	// rtn.xyz = bckgColor.xyz + rtn.xyz;
+	// rtn.xyz = vec3(saturate(1.0-bckgDepth)) + rtn.xyz;
 	// rtn.xyz = vec3(0.1,0.7,1.0);
 	gl_FragColor = tovec4(vec3(rtn.xyz), 1.0);
 }
