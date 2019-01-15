@@ -55,17 +55,16 @@ export function main(){
 	
 	glext.ShaderDefines.addGlobalDefine("MAX_LIGHTS", " "+glext.MAX_LIGHTS);
 	
-	var shader = new glext.Shader(0);
-	if(shader.CompileFromFile("simpleVS", "deferred_BcNAoRSMt") == false) alert("nije kompajliran shader!");
-	shader.setVertexAttribLocations("aVertexPosition","aVertexNormal","aVertexTangent",null,"aTexCoords");
-	shader.setTransformMatricesUniformLocation("ModelMatrix","ViewMatrix","ProjectionMatrix");
-	shader.setDefaultTextureUniformLocations("txDiffuse","txNormal","txAoRS");
-	shader.setBRDFLUTTextureUniformLocation("txBRDF");
-	shader.setFlagsUniformLocation("uFlags");
-	shader.setTimeUniformLocation("Time");
-	shader.setCameraPositionUniformLocation("CameraPosition");
-	
-	shader.ULTextureAmb = shader.getUniformLocation("txAmbient");
+	var simple_shader = new glext.Shader(0);
+	if(simple_shader.CompileFromFile("simpleVS", "deferred_BcNAoRSMt") == false) alert("nije kompajliran shader!");
+	simple_shader.setVertexAttribLocations("aVertexPosition","aVertexNormal","aVertexTangent",null,"aTexCoords");
+	simple_shader.setTransformMatricesUniformLocation("ModelMatrix","ViewMatrix","ProjectionMatrix");
+	simple_shader.setDefaultTextureUniformLocations("txDiffuse","txNormal","txAoRS");
+	// simple_shader.setBRDFLUTTextureUniformLocation("txBRDF");
+	simple_shader.setFlagsUniformLocation("uFlags");
+	simple_shader.setTimeUniformLocation("Time");
+	simple_shader.setCameraPositionUniformLocation("CameraPosition");
+	simple_shader.ULTextureAmb = simple_shader.getUniformLocation("txAmbient");
 	
 	var skybox_shader = new glext.Shader(1);
 	if(skybox_shader.CompileFromFile("simpleVS", "deferred_skybox") == false) alert("nije kompajliran shader!");
@@ -103,6 +102,7 @@ export function main(){
 	volume_clouds_shader.InitDefaultUniformLocations();
 	volume_clouds_shader.ULTextureNoiseRGB = volume_clouds_shader.getUniformLocation("txNoiseRGB");
 	volume_clouds_shader.ULTextureBackground = volume_clouds_shader.getUniformLocation("txBackground");
+	volume_clouds_shader.ULTextureBackgroundDepth = volume_clouds_shader.getUniformLocation("txDepth");
 	// volume_clouds_shader.ULInverseViewMatrix = volume_clouds_shader.getUniformLocation("InverseViewMatrix");
 	volume_clouds_shader.ULCameraForward = volume_clouds_shader.getUniformLocation("CameraForward");
 	volume_clouds_shader.ULCameraRight = volume_clouds_shader.getUniformLocation("CameraRight");
@@ -118,8 +118,8 @@ export function main(){
 	SkySphereModel.ImportFrom("SphereModel");
 	// glext.GenCubeModel(model);
 	
-	var model = new glext.Model(1);
-	model.ImportFrom("SphereModel");
+	var sphere_model = new glext.Model(1);
+	sphere_model.ImportFrom("SphereModel");
 	
 	var navigatorModel = new glext.Model(2);
 	navigatorModel.ImportFrom("navigatorModel");
@@ -199,7 +199,7 @@ export function main(){
 		glext.TextureList.addTexture(txAtmosphere);
 		glext.TextureList.addTexture(txNoiseRGB);
 		
-		glext.ShaderList.addShader(shader);
+		glext.ShaderList.addShader(simple_shader);
 		glext.ShaderList.addShader(skybox_shader);
 		glext.ShaderList.addShader(deferred_opaque_shade);
 		glext.ShaderList.addShader(transparent_shader);
@@ -207,11 +207,11 @@ export function main(){
 		glext.ShaderList.addShader(atmosphere_shader);
 		glext.ShaderList.addShader(volume_clouds_shader);
 		
-		model.setTexture(txD,"txDiffuse");
-		model.setTexture(txN,"txNormal");
-		model.setTexture(txAoRS,"txAoRS");
-		// model.setTexture(txAmb,"txAmbient");
-		model.setShader(shader);
+		sphere_model.setTexture(txD,"txDiffuse");
+		sphere_model.setTexture(txN,"txNormal");
+		sphere_model.setTexture(txAoRS,"txAoRS");
+		// sphere_model.setTexture(txAmb,"txAmbient");
+		sphere_model.setShader(simple_shader);
 		
 		SkySphereModel.setTexture(txAmb,"txAmbient");
 		SkySphereModel.setShader(skybox_shader);
@@ -231,7 +231,7 @@ export function main(){
 		quad_model.setTexture(txfbColor,"txDiffuse");
 		quad_model.setTexture(txfbNormal,"txNormal");
 		quad_model.setTexture(txfbAoRSMt,"txAoRS");
-		quad_model.setTexture(txfbDepth,"txDepth");
+		// quad_model.setTexture(txfbDepth,"txDepth");
 		quad_model.setTexture(txBRDF_LUT,"txBRDF");
 		quad_model.setTexture(txAmb,"txAmbient");
 		quad_model.setShader(deferred_opaque_shade);
@@ -288,12 +288,13 @@ export function main(){
 	{
 		fluidSim.CreateTest3DRenderShader("test_3d_texture_render");
 		fluidSim.setNoiseTexture(txNoiseRGB);
-		fluidSim.CreateMass(256,256,256, false, false, "fluidsim_mass_init_shader", "fluidsim_mass_advect_shader");
+		fluidSim.CreateMass(128,128,128, false, false, "fluidsim_mass_init_shader", "fluidsim_mass_advect_shader");
 		
 		//custom barrier
 		fluidSim.viscosity_shader.ULSphereBarrier = fluidSim.viscosity_shader.getUniformLocation("sphereBarrier");
 		fluidSim.viscosity_shader.ULSphereBarrierVelocity = fluidSim.viscosity_shader.getUniformLocation("sphereBarrierVelocity");
 		fluidSim.pressure_shader.ULSphereBarrier = fluidSim.pressure_shader.getUniformLocation("sphereBarrier");
+		fluidSim.pressure_shader.ULSphereBarrierVelocity = fluidSim.pressure_shader.getUniformLocation("sphereBarrierVelocity");
 		fluidSim.SphereBarrier = ["Sphere Barrier"];
 		fluidSim.SphereBarrier.position = [0.0,0.0,0.0];
 		fluidSim.SphereBarrier.radius = 0.05;
@@ -307,11 +308,13 @@ export function main(){
 		}
 		fluidSim.pre_pressure_pass_function = function(){
 			this.pressure_shader.setFloat4Uniform( this.pressure_shader.ULSphereBarrier, this.SphereBarrier.getPositionAndRadius() );
+			this.pressure_shader.setFloat3Uniform( this.pressure_shader.ULSphereBarrierVelocity, this.SphereBarrier.getVelocity() );
 		}
 		fluidSim.on_recompile_fluidsim_shaders = function(){
 			this.viscosity_shader.ULSphereBarrier = this.viscosity_shader.getUniformLocation("sphereBarrier");
 			this.viscosity_shader.ULSphereBarrierVelocity = this.viscosity_shader.getUniformLocation("sphereBarrierVelocity");
 			this.pressure_shader.ULSphereBarrier = this.pressure_shader.getUniformLocation("sphereBarrier");
+			this.pressure_shader.ULSphereBarrierVelocity = this.pressure_shader.getUniformLocation("sphereBarrierVelocity");
 		}
 	}
 	
@@ -325,9 +328,9 @@ export function main(){
 	Camera.setPositionAndDir(eyePt, [1.0,0.0,0.0], upDir);
 	Camera.UpdateProjectionMatrix();
 	
-	vMath.mat4.identity(model.Transform);
-	// vMath.mat4.scale(model.Transform, model.Transform, [4.0,4.0,4.0]);
-	vMath.mat4.rotate(model.Transform, model.Transform, vMath.deg2rad(-90.0), [1,0,0]);
+	vMath.mat4.identity(sphere_model.Transform);
+	// vMath.mat4.scale(sphere_model.Transform, sphere_model.Transform, [4.0,4.0,4.0]);
+	vMath.mat4.rotate(sphere_model.Transform, sphere_model.Transform, vMath.deg2rad(-90.0), [1,0,0]);
 	
 	vMath.mat4.identity(AtmoSphereModel.Transform); var atmoScale = 1.012;
 	vMath.mat4.scale(AtmoSphereModel.Transform, AtmoSphereModel.Transform, [atmoScale,atmoScale,atmoScale]);
@@ -352,7 +355,7 @@ export function main(){
 	
 	var lastRecompileTime = sys.time.getSecondsSinceStart();
 	
-	shader.setFlagsUniform(1);
+	simple_shader.setFlagsUniform(1);
 	
 	var IdentityMatrix = vMath.mat4.create();
 	vMath.mat4.identity(IdentityMatrix);
@@ -430,12 +433,6 @@ export function main(){
 		// if(checkWindowsSizeAndResizeCanvas() == true){
 			// Camera.setViewportWidthHeight(gl.viewportWidth,gl.viewportHeight);}
 		
-		vMath.mat4.identity(model.Transform);
-		vMath.mat4.rotate(model.Transform, model.Transform, vMath.deg2rad(time*10), [0,0,1]);/*  */
-		
-		vMath.mat4.identity(navigatorModel.Transform);
-		vMath.mat4.setTranslation(navigatorModel.Transform, navigatorModel.Transform, [ -1.0, -ctime*0.5, 0.0]);
-		vMath.mat4.rotate(navigatorModel.Transform, navigatorModel.Transform, vMath.deg2rad(90), [0,1,0]);
 		// glext.Framebuffer.BindMainFB();
 		
 		//Calc camera view i proj
@@ -444,6 +441,8 @@ export function main(){
 		
 		var mousePos = sys.mouse.getPosition();
 		var mouseDelta = sys.mouse.getDeltaPosition();
+		
+		var fluidSimToRealWorldScale = 6.0;
 		
 		if(bMouseOverCanvas == true)
 		{
@@ -536,20 +535,20 @@ export function main(){
 				fluidsimBrightnessSlider.title = "brightness: " + Number.parseFloat(brightness).toFixed(4);
 				fluidSim.setDisplayBrightness(brightness);
 			//-------------------------------------------------------
-			
-			
+						
 			//simulacija
 			//-------------------------------------------------------
 			if(bFluidSimPass == true)
 			{
 				//barrier
 				//-------------------------------------------------------
-				fluidSim.SphereBarrier.position = [0.5, 0.5+Math.cos(0.25*fluidSim.time)*0.25, 0.5 ];
-				fluidSim.SphereBarrier.velocity = [0.0, -128.0*Math.sin(0.25*fluidSim.time), 0.0 ];
+				let A = 0.25, B = 0.25;
+				fluidSim.SphereBarrier.position = [0.5, 0.5 + A*Math.cos(B*fluidSim.time), 0.5 ];
+				fluidSim.SphereBarrier.velocity = [0.0, 128.0 * -A*B*Math.sin(B*fluidSim.time), 0.0 ];
 				//-------------------------------------------------------
 				
-				fluidSim.SimStep(0.1);
-				fluidSim.AdvectMass(0.1);
+				fluidSim.SimStep(avg_frame_time);
+				fluidSim.AdvectMass(avg_frame_time);
 				
 				// glext.Framebuffer.BindMainFB();	
 				// gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);		
@@ -558,35 +557,70 @@ export function main(){
 			}
 			//-------------------------------------------------------
 		}
+		
+			gl.enable(gl.DEPTH_TEST);
+			gl.depthFunc(gl.LEQUAL);
 
-		{			
-			light.setPosition(1.0, 0.0, 2.0); //*ctime
+		{
+			light.setPosition(1.0, 0.0, 1.5); //*ctime
 			light.setDisplaySize(5.0);
 			light.setDisplayColor(0.5,0.79,1.0,1.0);
 			light.setMatrices( Camera.ViewMatrix, Camera.ProjectionMatrix );
 			light.setIntensity(4.0);
 			light.setColor(0.5,0.79,1.0,1.0);
 			light.Update();
+			
+			let r = fluidSim.SphereBarrier.radius * fluidSimToRealWorldScale; let p = [0,0,0];
+			vMath.vec3.copy(p, fluidSim.SphereBarrier.position);
+			vMath.vec3.add(p, p, [-0.5,-0.5,-0.5]);
+			vMath.vec3.scale(p, p, fluidSimToRealWorldScale);
+			vMath.mat4.identity(sphere_model.Transform);
+			vMath.mat4.setTranslation(sphere_model.Transform, sphere_model.Transform, p);
+			vMath.mat4.setScale(sphere_model.Transform, sphere_model.Transform, [r,r,r]);
+			
+			//Render scene
+			fbo.Bind();
+			
+			gl.viewport(0, 0, fbo.width, fbo.height);
+			
+			gl.clearColor(0.0, 0.0, 0.0, 1.0);
+			gl.clearDepth(1.0);
+			gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+			
+			light.RenderPosition();
+			
+			simple_shader.Bind();
+			
+				txD.Bind(0, simple_shader.ULTextureD);
+				txN.Bind(1, simple_shader.ULTextureN);
+				txAoRS.Bind(2, simple_shader.ULTextureAoRS);
+				txAmb.Bind(3, simple_shader.ULTextureAmb);
+				
+				simple_shader.setViewMatrixUniform( Camera.ViewMatrix );
+				simple_shader.setProjectionMatrixUniform( Camera.ProjectionMatrix );
+				
+				simple_shader.setTimeUniform(time);
+				
+				simple_shader.setCameraPositionUniform(Camera.Position);
+				
+				sphere_model.RenderIndexedTriangles(simple_shader);
 		}
 		
-		//Render volume_clouds_shader
+		//Render fluidsim cloud
 		{
 			glext.Framebuffer.BindMainFB();	
 			gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);		
 			
 			gl.clearColor(0.0, 0.0, 0.0, 1.0);
 			gl.clearDepth(1.0);
-			gl.enable(gl.DEPTH_TEST);
-			gl.depthFunc(gl.LEQUAL);
 			gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 			
-			light.RenderPosition();
-						
 			volume_clouds_shader.Bind();
 				txNoiseRGB.Bind(0, volume_clouds_shader.ULTextureNoiseRGB);
 				txfbColor.Bind(1, volume_clouds_shader.ULTextureBackground);
-				fluidSim.txVelocity.Bind(2, volume_clouds_shader.ULTextureVelocity);
-				fluidSim.txMass.Bind(3, volume_clouds_shader.ULTextureMass);
+				txfbDepth.Bind(2, volume_clouds_shader.ULTextureBackgroundDepth);
+				fluidSim.txVelocity.Bind(3, volume_clouds_shader.ULTextureVelocity);
+				fluidSim.txMass.Bind(4, volume_clouds_shader.ULTextureMass);
 				
 				let brightness = fluidsimBrightnessSlider.fvalue();
 				// volume_clouds_shader.setViewMatrixUniform( Camera.ViewMatrix );
@@ -727,6 +761,7 @@ export function recompileShader(fragment_name){
 					shader.ULTextureVelocity = shader.getUniformLocation("txFluidSimVelocity");
 					shader.ULTextureNoiseRGB = shader.getUniformLocation("txNoiseRGB");
 					shader.ULTextureBackground = shader.getUniformLocation("txBackground");
+					shader.ULTextureBackgroundDepth = shader.getUniformLocation("txDepth");
 					shader.ULDisplayBrightness = shader.getUniformLocation("displayBrightness");
 					glext.LightList.get(0).AttachUniformBlockTo(shader);
 					// shader.ULInverseViewMatrix = shader.getUniformLocation("InverseViewMatrix");
