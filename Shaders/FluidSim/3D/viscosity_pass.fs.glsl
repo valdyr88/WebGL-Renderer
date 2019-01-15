@@ -1,7 +1,7 @@
 #version 300 es
 // #extension GL_EXT_shader_texture_lod : require
-precision mediump float;
-precision mediump sampler3D;
+precision highp float;
+precision highp sampler3D;
 //diffuzija zbog viscosity. input je stara brzina, output je nova brzina
 
 #global_defines
@@ -67,7 +67,7 @@ vec4 velocityFromSphereBarrier(in vec4 u, in vec3 x, in float t, in float dt){
 		float dotNV = dot(n,vdir);
 		
 		if(dotNV > 0.0)
-			return u+dt*dotNV*vsize*tovec4(n, 0.0);
+			return u + dt*dotNV*vsize*tovec4(n, 0.0);
 	}
 	
 	return u;
@@ -86,7 +86,7 @@ void modifyVelocity(vec3 x, float t, float dt, inout vec4 u){
 //racuna diffuziju zbog viscosity
 void main(void)
 {	
-	float dt = dT;	
+	float dt = dT;
 	const vec3 dx = vec3(1.0,1.0,1.0);
 	vec4 unew[NUM_OUT_BUFFERS];
 	
@@ -94,17 +94,8 @@ void main(void)
 	{
 		vec3 x = toWorldSpace(TexCoords, z+i);
 		vec4 u = samplePoint(txVelocity, x);
-			
-		vec4 us[6];
-		//za 3D treba 6 susjednih samplirat
-		us[0] = samplePoint(txVelocity, x + vec3( dx.x,0.0,0.0));
-		us[1] = samplePoint(txVelocity, x + vec3(-dx.x,0.0,0.0));
-		us[2] = samplePoint(txVelocity, x + vec3(0.0, dx.y,0.0));
-		us[3] = samplePoint(txVelocity, x + vec3(0.0,-dx.y,0.0));
-		us[4] = samplePoint(txVelocity, x + vec3(0.0,0.0, dx.z));
-		us[5] = samplePoint(txVelocity, x + vec3(0.0,0.0,-dx.z));
-		
-		unew[i] = u + dt*k*(us[0] + us[1] + us[2] + us[3] + us[4] + us[5] - 6.0*u);
+				
+		unew[i] = u + dt*k*(laplace(u, txVelocity, x, dx));
 		
 		//dodatne sile
 		modifyVelocity(x, Time, dT, unew[i]);

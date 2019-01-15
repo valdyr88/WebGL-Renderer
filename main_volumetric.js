@@ -535,7 +535,7 @@ export function main(){
 				fluidsimBrightnessSlider.title = "brightness: " + Number.parseFloat(brightness).toFixed(4);
 				fluidSim.setDisplayBrightness(brightness);
 			//-------------------------------------------------------
-						
+			
 			//simulacija
 			//-------------------------------------------------------
 			if(bFluidSimPass == true)

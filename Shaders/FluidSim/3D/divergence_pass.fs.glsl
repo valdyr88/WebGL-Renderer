@@ -1,7 +1,7 @@
 #version 300 es
 // #extension GL_EXT_shader_texture_lod : require
-precision mediump float;
-precision mediump sampler3D;
+precision highp float;
+precision highp sampler3D;
 //racunanje divergencije, output je scalar
 
 #global_defines
@@ -36,7 +36,7 @@ varyin vec2 TexCoords;
 //------------------------------------------------------------------------------
 
 #include "fluidsim3d_include"
-
+/* 
 float divergence(sampler3D tx, vec3 x){
 	//za 3D treba 6 susjednih samplirat
 	
@@ -51,19 +51,20 @@ float divergence(sampler3D tx, vec3 x){
 	u[5] = samplePoint(tx, x + vec3(  0.0,  0.0,-dx.z));
 	
 	return 0.5*((u[0].x - u[1].x) + (u[2].y - u[3].y) + (u[4].z - u[5].z));
-}
+} */
 
 //===================================================================================================
 
 void main(void)
 {	
 	float udiv[NUM_OUT_BUFFERS];
+	const vec3 dx = vec3(1.0,1.0,1.0);
 	
 	for(int i = 0; i < NUM_OUT_BUFFERS; ++i)
 	{
 		vec3 x = toWorldSpace(TexCoords, z+i);
 		
-		udiv[i] = divergence(txTexture, x);
+		udiv[i] = divergence(txTexture, x, dx);
 	}
 	
 	// gl_FragColor = udiv;

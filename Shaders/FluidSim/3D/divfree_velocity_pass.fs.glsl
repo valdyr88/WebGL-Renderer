@@ -1,7 +1,7 @@
 #version 300 es
 // #extension GL_EXT_shader_texture_lod : require
-precision mediump float;
-precision mediump sampler3D;
+precision highp float;
+precision highp sampler3D;
 //racuna divergence free velocity, output je velocity
 
 #global_defines
@@ -39,7 +39,8 @@ varyin vec2 TexCoords;
 #include "fluidsim3d_include"
 
 #define GradComp x
-vec4 gradient(sampler3D tx, vec3 x){
+
+/*vec4 gradient(sampler3D tx, vec3 x){
 	
 	const vec3 dx = vec3(1.0,1.0,1.0);
 	
@@ -54,18 +55,19 @@ vec4 gradient(sampler3D tx, vec3 x){
 	
 	vec4 grad = 0.5*vec4( u[0]-u[1], u[2]-u[3], u[4]-u[5], 0.0 );
 	return grad;
-}
+}*/
 
 //racuna divergence free brzinu
 void main(void)
 {
-	vec4 u[NUM_OUT_BUFFERS];
+	vec4 u[NUM_OUT_BUFFERS];	
+	const vec3 dx = vec3(1.0,1.0,1.0);
 	
 	for(int i = 0; i < NUM_OUT_BUFFERS; ++i)
 	{	
 		vec3 x = toWorldSpace(TexCoords, z+i);
 		
-		vec4 gradP = gradient(txPressure, x);
+		vec4 gradP = tovec4(gradient(txPressure, x, dx),0.0);
 		vec4 oldU = samplePoint(txVelocity, x);
 		
 		u[i] = oldU - gradP;

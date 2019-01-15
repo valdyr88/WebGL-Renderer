@@ -2,8 +2,8 @@
 // #extension GL_EXT_shader_texture_lod : require
 //Inicijalizacija mase (pocetno stanje cloudsa npr)
 
-precision mediump float;
-precision mediump sampler3D;
+precision highp float;
+precision highp sampler3D;
 
 #global_defines
 #include "defines"
