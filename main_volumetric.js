@@ -288,7 +288,7 @@ export function main(){
 	{
 		fluidSim.CreateTest3DRenderShader("test_3d_texture_render");
 		fluidSim.setNoiseTexture(txNoiseRGB);
-		fluidSim.CreateMass(128,128,128, false, false, "fluidsim_mass_init_shader", "fluidsim_mass_advect_shader");
+		fluidSim.CreateMass(128,128,128, false, false, "fluidsim_mass_init_shader", "fluidsim_mass_advect_shader", "fluidsim_mass_advect_correction_shader");
 		
 		//custom barrier
 		fluidSim.viscosity_shader.ULSphereBarrier = fluidSim.viscosity_shader.getUniformLocation("sphereBarrier");

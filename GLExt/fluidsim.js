@@ -1017,7 +1017,7 @@ export class FluidSim3D
 	// Mass advection
 	//-----------------------------------------------------------------------------------------------------------
 	
-	CreateMass(w,h,d, bColorAndDensity, bFloat, init_mass_shader,advect_mass_shader)
+	CreateMass(w,h,d, bColorAndDensity, bFloat, init_mass_shader,advect_mass_shader,advect_correction_mass_shader)
 	{
 		d = Math.floor(d/this.NumOutBuffers)*this.NumOutBuffers;
 		this.mass_width = w;
@@ -1026,29 +1026,37 @@ export class FluidSim3D
 		
 		this.txMass0 = new Texture3D(-1);
 		this.txMass1 = new Texture3D(-1);
+		this.txMass2 = new Texture3D(-1);
 		
 		if(bColorAndDensity == true){
 			if(bFloat == true){
 				this.txMass0.CreateEmptyRGBAfloat32(this.mass_width, this.mass_height, this.mass_depth);
-				this.txMass1.CreateEmptyRGBAfloat32(this.mass_width, this.mass_height, this.mass_depth); }
+				this.txMass1.CreateEmptyRGBAfloat32(this.mass_width, this.mass_height, this.mass_depth);
+				this.txMass2.CreateEmptyRGBAfloat32(this.mass_width, this.mass_height, this.mass_depth); }
 			else{ 
 				this.txMass0.CreateEmptyRGBAubyte(this.mass_width, this.mass_height, this.mass_depth); 
-				this.txMass1.CreateEmptyRGBAubyte(this.mass_width, this.mass_height, this.mass_depth); }
+				this.txMass1.CreateEmptyRGBAubyte(this.mass_width, this.mass_height, this.mass_depth); 
+				this.txMass2.CreateEmptyRGBAubyte(this.mass_width, this.mass_height, this.mass_depth); }
 		}else{
 			if(bFloat == true){
 				this.txMass0.CreateEmptyRfloat32(this.mass_width, this.mass_height, this.mass_depth); 
-				this.txMass1.CreateEmptyRfloat32(this.mass_width, this.mass_height, this.mass_depth); }
+				this.txMass1.CreateEmptyRfloat32(this.mass_width, this.mass_height, this.mass_depth); 
+				this.txMass2.CreateEmptyRfloat32(this.mass_width, this.mass_height, this.mass_depth); }
 			else{
 				this.txMass0.CreateEmptyRubyte(this.mass_width, this.mass_height, this.mass_depth); 
-				this.txMass1.CreateEmptyRubyte(this.mass_width, this.mass_height, this.mass_depth); }
+				this.txMass1.CreateEmptyRubyte(this.mass_width, this.mass_height, this.mass_depth); 
+				this.txMass2.CreateEmptyRubyte(this.mass_width, this.mass_height, this.mass_depth); }
 		}
 		
 		this.txMass0.setMinMagFilterLinearLinear();
 		this.txMass1.setMinMagFilterLinearLinear();
+		this.txMass2.setMinMagFilterLinearLinear();
 		this.txMass0.setWrapTypeClampToEdge();
 		this.txMass1.setWrapTypeClampToEdge();
+		this.txMass2.setWrapTypeClampToEdge();
 		
 		this.txMass = this.txMass0;
+		this.txAdvectedMass = this.txMass1;
 		
 		this.str_mass_vec3Res = "vec3(" + this.mass_width.toString()+ ".0," + this.mass_height.toString() + ".0," + this.mass_depth.toString() + ".0)";
 		this.str_mass_bHasColorComponent = (bColorAndDensity == true)? "1" : "0";
@@ -1101,10 +1109,35 @@ export class FluidSim3D
 		this.mass_advect_shader.ULTextureMass = this.mass_advect_shader.getUniformLocation("txMass");
 		this.mass_advect_shader.ULTextureVelocity = this.mass_advect_shader.getUniformLocation("txVelocity");
 		
+		this.mass_advect_correction_shader = new Shader(-1);
+		this.mass_advect_correction_shader.addDefine("Resolution",this.str_vec3Res);
+		this.mass_advect_correction_shader.addDefine("MassResolution",this.str_mass_vec3Res);
+		this.mass_advect_correction_shader.addDefine("bHasColorComponent",this.str_mass_bHasColorComponent);
+		this.mass_advect_correction_shader.addDefine("NUM_OUT_BUFFERS", this.NumOutBuffers.toString());
+		this.mass_advect_correction_shader.addDefine("WriteOutput(out_buffer, out_variable)", this.str_WriteOutBuffers);
+		if(this.mass_advect_correction_shader.CompileFromFile(vertex_shader, advect_correction_mass_shader) == false) alert("nije kompajliran shader!");
+		this.mass_advect_correction_shader.InitDefaultAttribLocations();
+		this.mass_advect_correction_shader.InitDefaultUniformLocations();
+		this.mass_advect_correction_shader.ULaspect = -1;
+		this.mass_advect_correction_shader.ULdT = -1;
+		this.mass_advect_correction_shader.ULz = -1;
+		this.mass_advect_correction_shader.ULdisplayBrightness = -1;
+		this.mass_advect_correction_shader.ULTexturePressure = -1;
+		this.mass_advect_correction_shader.ULTextureVelocity = -1;
+		this.mass_advect_correction_shader.ULTextureDivergence = -1;
+		this.mass_advect_correction_shader.ULaspect = this.mass_advect_correction_shader.getUniformLocation("aspect");
+		this.mass_advect_correction_shader.ULdT = this.mass_advect_correction_shader.getUniformLocation("dT");
+		this.mass_advect_correction_shader.ULz = this.mass_advect_correction_shader.getUniformLocation("z");
+		this.mass_advect_correction_shader.ULTextureMass = this.mass_advect_correction_shader.getUniformLocation("txMass");
+		this.mass_advect_correction_shader.ULTextureAdvectedMass = this.mass_advect_correction_shader.getUniformLocation("txAdvectedMass");
+		this.mass_advect_correction_shader.ULTextureVelocity = this.mass_advect_correction_shader.getUniformLocation("txVelocity");
+		
 		ShaderList.addShader(this.mass_init_shader);
 		ShaderList.addShader(this.mass_advect_shader);
+		ShaderList.addShader(this.mass_advect_correction_shader);
 		TextureList.addTexture(this.txMass0);
 		TextureList.addTexture(this.txMass1);
+		TextureList.addTexture(this.txMass2);
 		
 		this.ResetMass();
 	}
@@ -1169,11 +1202,33 @@ export class FluidSim3D
 				this.quad_model.RenderIndexedTriangles(this.mass_advect_shader);	
 			}
 		
+		this.txAdvectedMass = this.txMass;
+		this.txMass = this.txMass2;
+		
+		this.mass_advect_correction_shader.Bind();
+			this.txOldMass.Bind(0, this.mass_advect_correction_shader.ULTextureMass);
+			this.txAdvectedMass.Bind(1, this.mass_advect_correction_shader.ULTextureAdvectedMass);
+			this.txVelocity.Bind(2, this.mass_advect_correction_shader.ULTextureVelocity);
+			this.mass_advect_correction_shader.setFloatUniform( this.mass_advect_correction_shader.ULdT, dT);
+			this.mass_advect_correction_shader.setFloatUniform( this.mass_advect_correction_shader.ULTime, this.time);
+			this.mass_advect_correction_shader.setFloat2Uniform( this.mass_advect_correction_shader.ULaspect, this.aspect);
+			
+			for(let z = 0; z < this.mass_depth; z += this.NumOutBuffers)
+			{
+				for(let l = 0; l < this.NumOutBuffers; ++l)
+					this.framebuffer.AttachTextureLayer(this.txMass, l, z+l);
+				this.framebuffer.SetupUsage();
+				
+				this.mass_advect_correction_shader.setIntUniform(this.mass_advect_correction_shader.ULz, z);
+				this.quad_model.RenderIndexedTriangles(this.mass_advect_correction_shader);	
+			}		
+		
+		
 		Framebuffer.Bind(oldFB);
 		
 		{
-			var tmp = this.txMass1;
-			this.txMass1 = this.txMass0;
+			var tmp = this.txMass2;
+			this.txMass2 = this.txMass0;
 			this.txMass0 = tmp;
 		}
 	}

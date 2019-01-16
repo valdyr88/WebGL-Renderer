@@ -90,6 +90,7 @@
 					<File name="Shaders\FluidSim\3D\debug_display.fs.glsl" />
 					<File name="Shaders\FluidSim\3D\init_mass.fs.glsl" />
 					<File name="Shaders\FluidSim\3D\advect_mass.fs.glsl" />
+					<File name="Shaders\FluidSim\3D\advect_correction_mass.fs.glsl" />
 				</Folder>
 			</Folder>
             <File name="Shaders\atmosphere_shader.fs.glsl" />
