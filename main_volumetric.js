@@ -297,11 +297,17 @@ export function main(){
 		fluidSim.pressure_shader.ULSphereBarrierVelocity = fluidSim.pressure_shader.getUniformLocation("sphereBarrierVelocity");
 		fluidSim.SphereBarrier = ["Sphere Barrier"];
 		fluidSim.SphereBarrier.position = [0.0,0.0,0.0];
+		fluidSim.SphereBarrier.old_position = [0.0,0.0,0.0];
 		fluidSim.SphereBarrier.radius = 0.05;
 		fluidSim.SphereBarrier.velocity = [0.0,0.0,0.0];
 		fluidSim.SphereBarrier.getPositionAndRadius = function(){ return [this.position[0], this.position[1], this.position[2], this.radius]; }
 		fluidSim.SphereBarrier.getVelocity = function(){ return this.velocity; }
-	
+		fluidSim.SphereBarrier.setPosition = function(new_position, dt){
+			this.old_position = this.position; this.position = new_position;
+			vMath.vec3.subtract(this.velocity, this.position, this.old_position);
+			vMath.vec3.scale(this.velocity, this.velocity, 1.0/dt);
+		}
+		
 		fluidSim.pre_viscosity_pass_function = function(){
 			this.viscosity_shader.setFloat4Uniform( this.viscosity_shader.ULSphereBarrier, this.SphereBarrier.getPositionAndRadius() );
 			this.viscosity_shader.setFloat3Uniform( this.viscosity_shader.ULSphereBarrierVelocity, this.SphereBarrier.getVelocity() );
@@ -543,8 +549,9 @@ export function main(){
 				//barrier
 				//-------------------------------------------------------
 				let oscAmp = 0.25, oscSpeed = 0.75;
-				fluidSim.SphereBarrier.position = [0.5, 0.5 + oscAmp*Math.cos(oscSpeed*fluidSim.time), 0.5 ];
-				fluidSim.SphereBarrier.velocity = [0.0, -oscAmp*oscSpeed*Math.sin(oscSpeed*fluidSim.time), 0.0 ];
+				/* fluidSim.SphereBarrier.position = [0.5, 0.5 + oscAmp*Math.cos(oscSpeed*fluidSim.time), 0.5 ];
+				fluidSim.SphereBarrier.velocity = [0.0, -oscAmp*oscSpeed*Math.sin(oscSpeed*fluidSim.time), 0.0 ]; */
+				fluidSim.SphereBarrier.setPosition([0.5, 0.5 + oscAmp*Math.cos(oscSpeed*fluidSim.time), 0.5 ], avg_frame_time);
 				//-------------------------------------------------------
 				
 				fluidSim.SimStep(avg_frame_time);
