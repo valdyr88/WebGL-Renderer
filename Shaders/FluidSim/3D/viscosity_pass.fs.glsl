@@ -64,10 +64,10 @@ vec4 velocityFromSphereBarrier(in vec4 u, in vec3 x, in float t, in float dt){
 		vec3 n = normalize(toX);
 		vec3 vdir = normalize(sphereBarrierVelocity);
 		float vsize = length(sphereBarrierVelocity);
-		float dotNV = dot(n,vdir);
+		float dotNV = dot(n,vdir)*0.9+0.1;
 		
-		if(dotNV > 0.0)
-			return u + dt*dotNV*vsize*tovec4(n, 0.0);
+		// if(dotNV > 0.0) //ocekivo sam da ce pressure pass forsat da brzina iza kugle bude istog smijera kao i ispred no nije tako.
+			return u + dt*8.0*(dotNV)*vsize*tovec4(Resolution.xyz*n, 0.0);
 	}
 	
 	return u;
