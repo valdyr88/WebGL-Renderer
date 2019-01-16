@@ -560,9 +560,9 @@ export function main(){
 		
 			gl.enable(gl.DEPTH_TEST);
 			gl.depthFunc(gl.LEQUAL);
-
+		
 		{
-			light.setPosition(1.0, 0.0, 1.5); //*ctime
+			light.setPosition(1.0, 0.0, 2.5); //*ctime
 			light.setDisplaySize(5.0);
 			light.setDisplayColor(0.5,0.79,1.0,1.0);
 			light.setMatrices( Camera.ViewMatrix, Camera.ProjectionMatrix );
