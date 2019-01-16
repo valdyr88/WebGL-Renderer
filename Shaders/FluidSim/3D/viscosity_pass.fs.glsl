@@ -67,7 +67,7 @@ vec4 velocityFromSphereBarrier(in vec4 u, in vec3 x, in float t, in float dt){
 		float dotNV = dot(n,vdir)*0.9+0.1; //<- fejk
 		
 		// if(dotNV > 0.0) //ocekivo sam da ce pressure pass forsat da brzina iza kugle bude istog smijera kao i ispred no nije tako.
-			return u + dt*8.0*(dotNV)*vsize*tovec4(Resolution.xyz*n, 0.0);
+			return u + dt*(dotNV)*vsize*tovec4(Resolution.xyz*n, 0.0);
 	}
 	
 	return u;

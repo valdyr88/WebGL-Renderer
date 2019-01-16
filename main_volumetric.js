@@ -296,16 +296,25 @@ export function main(){
 		fluidSim.pressure_shader.ULSphereBarrier = fluidSim.pressure_shader.getUniformLocation("sphereBarrier");
 		fluidSim.pressure_shader.ULSphereBarrierVelocity = fluidSim.pressure_shader.getUniformLocation("sphereBarrierVelocity");
 		fluidSim.SphereBarrier = ["Sphere Barrier"];
-		fluidSim.SphereBarrier.position = [0.0,0.0,0.0];
-		fluidSim.SphereBarrier.old_position = [0.0,0.0,0.0];
+		fluidSim.SphereBarrier.position = [0.5,0.5,0.5];
 		fluidSim.SphereBarrier.radius = 0.05;
 		fluidSim.SphereBarrier.velocity = [0.0,0.0,0.0];
+		
 		fluidSim.SphereBarrier.getPositionAndRadius = function(){ return [this.position[0], this.position[1], this.position[2], this.radius]; }
+		
 		fluidSim.SphereBarrier.getVelocity = function(){ return this.velocity; }
+		
 		fluidSim.SphereBarrier.setPosition = function(new_position, dt){
-			this.old_position = this.position; this.position = new_position;
-			vMath.vec3.subtract(this.velocity, this.position, this.old_position);
+			if(dt < 1.0/1000.0) dt = 1.0/1000.0;
+			vMath.vec3.subtract(this.velocity, new_position, this.position);
 			vMath.vec3.scale(this.velocity, this.velocity, 1.0/dt);
+			this.position = new_position;
+		}
+		fluidSim.SphereBarrier.addOffset = function(offset, dt){
+			let new_position = [0.0,0.0,0.0];
+			vMath.vec3.scale(offset, offset, 1.0/100.0);
+			vMath.vec3.add(new_position, offset, this.position);
+			this.setPosition(new_position, dt);
 		}
 		
 		fluidSim.pre_viscosity_pass_function = function(){
@@ -449,6 +458,7 @@ export function main(){
 		var mouseDelta = sys.mouse.getDeltaPosition();
 		
 		var fluidSimToRealWorldScale = 6.0;
+		var SphereBarrierPositionOffset = [0.0,0.0,0.0];
 		
 		if(bMouseOverCanvas == true)
 		{
@@ -473,7 +483,7 @@ export function main(){
 				if(orbital.radius > 100.0) orbital.radius = 100.0;
 				bUpdateCamera = true;
 			}
-						
+			
 			if(bUpdateCamera == true)
 			{			
 				// eyePt = vMath.sph2cart3D(orbital.azimuth, orbital.inclination, orbital.radius);
@@ -490,6 +500,22 @@ export function main(){
 				Camera.CalcInverseViewProjectionMatrix();
 				
 				vMath.vec3.copy(upDir, Camera.UpDir);
+			}
+			else
+			{
+				let deltaX = [0.0,0.0,0.0];
+				let deltaY = [0.0,0.0,0.0];
+				
+				vMath.vec3.copy(deltaX, Camera.RightDir);
+				vMath.vec3.copy(deltaY, Camera.UpDir);
+				
+				if(orbital.radius < 0.1) orbital.radius = 0.1;
+				
+				vMath.vec3.scale(deltaX, deltaX, (mouseDelta[0]/orbital.radius) );
+				vMath.vec3.scale(deltaY, deltaY,  mouseDelta[1]/orbital.radius);
+				
+				vMath.vec3.add(SphereBarrierPositionOffset, SphereBarrierPositionOffset, deltaX);
+				vMath.vec3.add(SphereBarrierPositionOffset, SphereBarrierPositionOffset, deltaY);
 			}
 		}
 		
@@ -551,7 +577,8 @@ export function main(){
 				let oscAmp = 0.25, oscSpeed = 0.75;
 				/* fluidSim.SphereBarrier.position = [0.5, 0.5 + oscAmp*Math.cos(oscSpeed*fluidSim.time), 0.5 ];
 				fluidSim.SphereBarrier.velocity = [0.0, -oscAmp*oscSpeed*Math.sin(oscSpeed*fluidSim.time), 0.0 ]; */
-				fluidSim.SphereBarrier.setPosition([0.5, 0.5 + oscAmp*Math.cos(oscSpeed*fluidSim.time), 0.5 ], avg_frame_time);
+				// fluidSim.SphereBarrier.setPosition([0.5, 0.5 + oscAmp*Math.cos(oscSpeed*fluidSim.time), 0.5 ], avg_frame_time);
+				fluidSim.SphereBarrier.addOffset(SphereBarrierPositionOffset, avg_frame_time);
 				//-------------------------------------------------------
 				
 				fluidSim.SimStep(avg_frame_time);
