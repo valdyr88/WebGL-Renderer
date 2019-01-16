@@ -48,7 +48,7 @@ vec4 laplace(vec4 c, sampler3D tx, vec3 x, vec3 dx){
 	s[4] = samplePoint(tx, x + vec3(0.0,0.0, dx.z));
 	s[5] = samplePoint(tx, x + vec3(0.0,0.0,-dx.z));
 	
-#ifdef FINITE_DIFFERENCE_COARSE
+#ifndef FINITE_DIFFERENCE_FINE
 	return s[0]+s[1]+s[2]+s[3]+s[4]+s[5] - 6.0*c;
 #else
 	vec4 u[20];
@@ -105,7 +105,7 @@ float divergence(sampler3D tx, vec3 x, vec3 dx){
 	s[4] = samplePoint(tx, x + vec3(  0.0,  0.0, dx.z)).z;
 	s[5] = samplePoint(tx, x + vec3(  0.0,  0.0,-dx.z)).z;
 	
-#ifdef FINITE_DIFFERENCE_COARSE
+#ifndef FINITE_DIFFERENCE_FINE
 	return 0.5*((s[0] - s[1]) + (s[2] - s[3]) + (s[4] - s[5]));
 #else
 	float u[20];
@@ -151,7 +151,7 @@ vec3 gradient(sampler3D tx, vec3 x, vec3 dx){
 	s[4] = samplePoint(tx, x + vec3(  0.0,  0.0, dx.z)).x;
 	s[5] = samplePoint(tx, x + vec3(  0.0,  0.0,-dx.z)).x;
 	
-#ifdef FINITE_DIFFERENCE_COARSE
+#ifndef FINITE_DIFFERENCE_FINE
 	return 0.5*vec3( s[0]-s[1], s[2]-s[3], s[4]-s[5] );
 #else
 	vec3 u2[12];
