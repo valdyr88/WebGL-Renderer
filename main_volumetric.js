@@ -113,11 +113,7 @@ export function main(){
 	volume_clouds_shader.ULTextureMass = volume_clouds_shader.getUniformLocation("txFluidSimCloud");
 	volume_clouds_shader.ULTextureVelocity = volume_clouds_shader.getUniformLocation("txFluidSimVelocity");
 	volume_clouds_shader.ULDisplayBrightness = volume_clouds_shader.getUniformLocation("displayBrightness");
-	
-	var SkySphereModel = new glext.Model(0);
-	SkySphereModel.ImportFrom("SphereModel");
-	// glext.GenCubeModel(model);
-	
+		
 	var sphere_model = new glext.Model(1);
 	sphere_model.ImportFrom("SphereModel");
 	
@@ -126,9 +122,6 @@ export function main(){
 	
 	var quad_model = new glext.Model(2);
 	glext.GenQuadModel(quad_model);
-	
-	var AtmoSphereModel = new glext.Model(4);
-	AtmoSphereModel.ImportFrom("SphereModel");
 	
 	var txBRDF_LUT = new glext.Texture(3); txBRDF_LUT.CreateFromFile("txBRDF_LUT");
 	txBRDF_LUT.setWrapTypeClampToEdge();
@@ -212,13 +205,6 @@ export function main(){
 		sphere_model.setTexture(txAoRS,"txAoRS");
 		// sphere_model.setTexture(txAmb,"txAmbient");
 		sphere_model.setShader(simple_shader);
-		
-		SkySphereModel.setTexture(txAmb,"txAmbient");
-		SkySphereModel.setShader(skybox_shader);
-		
-		AtmoSphereModel.setTexture(txAtmosphere, "txDiffuse");
-		AtmoSphereModel.setShader(atmosphere_shader);
-		AtmoSphereModel.setBlendMode(glext.BlendMode_AlphaBlend);
 		
 		navigatorModel.setTexture(txGlassN,"txNormal");
 		navigatorModel.setTexture(txGlassAoRS,"txAoRS");
@@ -310,11 +296,11 @@ export function main(){
 			if(dt < 1.0/1000.0) dt = 1.0/1000.0;
 			vMath.vec3.subtract(this.velocity, new_position, this.position);
 			vMath.vec3.scale(this.velocity, this.velocity, 1.0/dt);
-			this.position = new_position;
+			vMath.vec3.copy(this.position, new_position);
 		}
 		fluidSim.SphereBarrier.addOffset = function(offset, dt){
 			let new_position = [0.0,0.0,0.0];
-			vMath.vec3.scale(offset, offset, 1.0/100.0);
+			// vMath.vec3.scale(offset, offset, 1.0/100.0);
 			vMath.vec3.add(new_position, offset, this.position);
 			this.setPosition(new_position, dt);
 		}
@@ -328,6 +314,14 @@ export function main(){
 			x += 0.5; y += 0.5;//[x,y] su sad u [0.0,1.0]
 			x *= Camera.Width; y *= Camera.Height;
 			return [x,y];
+		}
+		fluidSim.SphereBarrier.addOffsetFromScreenCoords = function(offset, dt, Camera){
+			vMath.vec2.multiply(offset, offset, [1.0/Camera.Width, 1.0/Camera.Height]);
+			let dist = 0.33333333*vMath.vec3.length(Camera.Position);
+			let v = [0.0,0.0,0.0]; vMath.vec3.scale(v, Camera.RightDir, offset[0]*dist);
+			let v2 = [0.0,0.0,0.0]; vMath.vec3.scale(v2, Camera.UpDir, offset[1]*dist);
+			vMath.vec3.add(v,v,v2);
+			this.addOffset(v, dt);
 		}
 		
 		fluidSim.pre_viscosity_pass_function = function(){
@@ -344,14 +338,41 @@ export function main(){
 			this.pressure_shader.ULSphereBarrier = this.pressure_shader.getUniformLocation("sphereBarrier");
 			this.pressure_shader.ULSphereBarrierVelocity = this.pressure_shader.getUniformLocation("sphereBarrierVelocity");
 		}
-		
-		
+				
 		//div test kvadrat
 		kvadrat = document.getElementById("kvadrat");
+		kvadrat.delta_position = [0.0,0.0];
+		kvadrat.position = [0.0,0.0];
+		kvadrat.bIsMouseOver = false;
+		kvadrat.bIsMouseDown = false;
+		
 		kvadrat.setPosition = function(pos){
 			this.style.position = "absolute";
 			this.style.left = pos[0] + "px";
 			this.style.top = (pos[1] + this.offsetHeight) + "px";
+			// vMath.vec2.subtract(this.delta_position, pos, this.position);
+			vMath.vec2.copy(this.position, pos);
+		}
+		kvadrat.getDeltaPosition = function(){ return this.delta_position; }
+		
+		kvadrat.onmouseover = function(){ this.bIsMouseOver = true; }
+		kvadrat.onmouseout = function(){ this.bIsMouseOver = false; }
+		kvadrat.onmousedown = function(){ this.bIsMouseDown = true; }
+		kvadrat.onmouseup = function(){ this.bIsMouseDown = false; }
+		kvadrat.onmouseenter = kvadrat.onmouseover;
+		kvadrat.onmouseleave = kvadrat.onmouseout;
+		
+		kvadrat.setDeltaFromMouseMovement = function(mouse){
+			if(this.bIsMouseDown == false) return;
+			
+			let mouseDelta = mouse.getDeltaPosition();
+			vMath.vec2.copy(this.delta_position, mouseDelta);
+		}
+		kvadrat.UpdateInputFromMouse = function(mouse){
+			this.delta_position[0] = 0.0; this.delta_position[1] = 0.0;
+			
+			if(this.bIsMouseDown == true && mouse.get().btnLeft == false){ this.bIsMouseDown = false; }
+			this.setDeltaFromMouseMovement(mouse);
 		}
 	}
 	
@@ -368,13 +389,6 @@ export function main(){
 	vMath.mat4.identity(sphere_model.Transform);
 	// vMath.mat4.scale(sphere_model.Transform, sphere_model.Transform, [4.0,4.0,4.0]);
 	vMath.mat4.rotate(sphere_model.Transform, sphere_model.Transform, vMath.deg2rad(-90.0), [1,0,0]);
-	
-	vMath.mat4.identity(AtmoSphereModel.Transform); var atmoScale = 1.012;
-	vMath.mat4.scale(AtmoSphereModel.Transform, AtmoSphereModel.Transform, [atmoScale,atmoScale,atmoScale]);
-	
-	vMath.mat4.identity(SkySphereModel.Transform);
-	vMath.mat4.scale(SkySphereModel.Transform, SkySphereModel.Transform, [10.0,10.0,10.0]);
-	vMath.mat4.rotate(SkySphereModel.Transform, SkySphereModel.Transform, vMath.deg2rad(-90.0), [1,0,0]);
 	
 	var time = 0.0;
 	sys.time.init();
@@ -487,7 +501,7 @@ export function main(){
 			orbital.dinclination = 0.0;
 			orbital.dazimuth = 0.0;
 			
-			if(sys.mouse.get().btnLeft == true)
+			if(sys.mouse.get().btnLeft == true && kvadrat.bIsMouseDown == false)
 			{
 				if(mouseDelta[0] != 0 || mouseDelta[1] != 0)
 				{
@@ -590,6 +604,11 @@ export function main(){
 				fluidSim.setDisplayBrightness(brightness);
 			//-------------------------------------------------------
 			
+			//micanje barriera
+			//-------------------------------------------------------
+			kvadrat.UpdateInputFromMouse(sys.mouse);
+			//-------------------------------------------------------
+			
 			//simulacija
 			//-------------------------------------------------------
 			if(bFluidSimPass == true)
@@ -599,9 +618,9 @@ export function main(){
 				let oscAmp = 0.25, oscSpeed = 0.75;
 				/* fluidSim.SphereBarrier.position = [0.5, 0.5 + oscAmp*Math.cos(oscSpeed*fluidSim.time), 0.5 ];
 				fluidSim.SphereBarrier.velocity = [0.0, -oscAmp*oscSpeed*Math.sin(oscSpeed*fluidSim.time), 0.0 ]; */
-				fluidSim.SphereBarrier.setPosition([0.5, 0.5 + oscAmp*Math.cos(oscSpeed*fluidSim.time), 0.5 ], avg_frame_time);
+				// fluidSim.SphereBarrier.setPosition([0.5, 0.5 + oscAmp*Math.cos(oscSpeed*fluidSim.time), 0.5 ], avg_frame_time);
 				// fluidSim.SphereBarrier.addOffset(SphereBarrierPositionOffset, avg_frame_time);
-				if(kvadrat != null) kvadrat.setPosition(fluidSim.SphereBarrier.getPositionOnScreen(Camera));
+				fluidSim.SphereBarrier.addOffsetFromScreenCoords(kvadrat.getDeltaPosition(), avg_frame_time, Camera);
 				//-------------------------------------------------------
 				
 				fluidSim.SimStep(avg_frame_time);
@@ -612,6 +631,8 @@ export function main(){
 				
 				// fluidSim.Display(); //display preko fluidsim/debug_display
 			}
+			//-------------------------------------------------------
+			kvadrat.setPosition(fluidSim.SphereBarrier.getPositionOnScreen(Camera));
 			//-------------------------------------------------------
 		}
 		
