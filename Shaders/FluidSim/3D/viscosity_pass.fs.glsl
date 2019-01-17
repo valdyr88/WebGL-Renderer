@@ -27,7 +27,7 @@ uniform int z;
 uniform vec3 aspect; //odnos dimenzija teksture i svijeta
 uniform float dT;
 uniform float Time;
-uniform float k; //kinematic viscosity, = viscosity / density
+uniform float k; //kinematic viscosity, = viscosity / density, [Pa*s / kg/m^3] -> [kg/(m*s) / kg/m^3] -> [m^2/s]
 uniform sampler3D txVelocity;
 uniform vec4 sphereBarrier; //xyz pozicija, w radius
 uniform vec3 sphereBarrierVelocity;

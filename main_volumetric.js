@@ -284,6 +284,8 @@ export function main(){
 		return v;
 	}
 	
+	var kvadrat = null;
+	
 	if(b3DFluidSim == true)
 	{
 		fluidSim.CreateTest3DRenderShader("test_3d_texture_render");
@@ -316,6 +318,17 @@ export function main(){
 			vMath.vec3.add(new_position, offset, this.position);
 			this.setPosition(new_position, dt);
 		}
+		fluidSim.SphereBarrier.getPositionOnScreen = function(Camera){
+			let pos = [0.0,0.0,0.0];
+			vMath.vec3.subtract(pos, this.position, [0.5,0.5,0.5]);
+			let x = vMath.vec3.dot(pos, Camera.RightDir);
+			let y = vMath.vec3.dot(pos, Camera.UpDir);
+			let dist = 0.33333333*vMath.vec3.length(Camera.Position);
+			x /= dist; y /= dist;
+			x += 0.5; y += 0.5;//[x,y] su sad u [0.0,1.0]
+			x *= Camera.Width; y *= Camera.Height;
+			return [x,y];
+		}
 		
 		fluidSim.pre_viscosity_pass_function = function(){
 			this.viscosity_shader.setFloat4Uniform( this.viscosity_shader.ULSphereBarrier, this.SphereBarrier.getPositionAndRadius() );
@@ -330,6 +343,15 @@ export function main(){
 			this.viscosity_shader.ULSphereBarrierVelocity = this.viscosity_shader.getUniformLocation("sphereBarrierVelocity");
 			this.pressure_shader.ULSphereBarrier = this.pressure_shader.getUniformLocation("sphereBarrier");
 			this.pressure_shader.ULSphereBarrierVelocity = this.pressure_shader.getUniformLocation("sphereBarrierVelocity");
+		}
+		
+		
+		//div test kvadrat
+		kvadrat = document.getElementById("kvadrat");
+		kvadrat.setPosition = function(pos){
+			this.style.position = "absolute";
+			this.style.left = pos[0] + "px";
+			this.style.top = (pos[1] + this.offsetHeight) + "px";
 		}
 	}
 	
@@ -577,8 +599,9 @@ export function main(){
 				let oscAmp = 0.25, oscSpeed = 0.75;
 				/* fluidSim.SphereBarrier.position = [0.5, 0.5 + oscAmp*Math.cos(oscSpeed*fluidSim.time), 0.5 ];
 				fluidSim.SphereBarrier.velocity = [0.0, -oscAmp*oscSpeed*Math.sin(oscSpeed*fluidSim.time), 0.0 ]; */
-				// fluidSim.SphereBarrier.setPosition([0.5, 0.5 + oscAmp*Math.cos(oscSpeed*fluidSim.time), 0.5 ], avg_frame_time);
-				fluidSim.SphereBarrier.addOffset(SphereBarrierPositionOffset, avg_frame_time);
+				fluidSim.SphereBarrier.setPosition([0.5, 0.5 + oscAmp*Math.cos(oscSpeed*fluidSim.time), 0.5 ], avg_frame_time);
+				// fluidSim.SphereBarrier.addOffset(SphereBarrierPositionOffset, avg_frame_time);
+				if(kvadrat != null) kvadrat.setPosition(fluidSim.SphereBarrier.getPositionOnScreen(Camera));
 				//-------------------------------------------------------
 				
 				fluidSim.SimStep(avg_frame_time);
