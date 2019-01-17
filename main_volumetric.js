@@ -349,6 +349,7 @@ export function main(){
 		kvadrat.mass = 1.0;
 		kvadrat.k_opruge = 1.0;
 		kvadrat.max_velocity = 20.0;
+		kvadrat.goal_position = [0.0,0.0];
 		
 		kvadrat.setPosition = function(pos){
 			this.style.position = "absolute";
@@ -370,12 +371,15 @@ export function main(){
 			this.delta_position[0] = 0.0; this.delta_position[1] = 0.0;
 			
 			if(this.bIsMouseDown == true && mouse.get().btnLeft == false){ this.bIsMouseDown = false; }
-			if(this.bIsMouseDown == false) return;
+			if(this.bIsMouseDown == true){ vMath.vec2.copy(this.goal_position, mouse.getPosition()); }
 			
-			let mousePosition = mouse.getPosition();
+			// let mousePosition = mouse.getPosition();
 			
-			let n = [0.0,0.0]; vMath.vec2.subtract(n, mousePosition, this.position);
-			let d = vMath.vec2.length(n); vMath.vec2.scale(n, n, 1.0/d);
+			let n = [0.0,0.0]; vMath.vec2.subtract(n, this.goal_position, this.position);
+			let d = vMath.vec2.length(n);
+			if(d < 0.01) return;
+			
+			vMath.vec2.scale(n, n, 1.0/d);
 			
 			let F = [0.0,0.0]; vMath.vec2.scale(F, n, d*this.k_opruge);
 			let a = [0.0,0.0]; vMath.vec2.scale(a, F, 1.0/this.mass);
