@@ -377,7 +377,7 @@ export function main(){
 			
 			let n = [0.0,0.0]; vMath.vec2.subtract(n, this.goal_position, this.position);
 			let d = vMath.vec2.length(n);
-			if(d < 0.01) return;
+			if(d < 0.01){ return; }
 			
 			vMath.vec2.scale(n, n, 1.0/d);
 			
@@ -610,6 +610,8 @@ export function main(){
 		//-------------------------------------------------------------------------------------
 		
 		{
+			let dt = avg_frame_time; if(dt > 1.0) dt = 1.0;
+			
 			//slideri
 			//-------------------------------------------------------
 				let c = fluidsimPressureIterationCountSlider.value;
@@ -627,7 +629,7 @@ export function main(){
 			
 			//micanje barriera
 			//-------------------------------------------------------
-			kvadrat.UpdateMovement(sys.mouse, avg_frame_time);
+			kvadrat.UpdateMovement(sys.mouse, dt);
 			//-------------------------------------------------------
 			
 			//simulacija
@@ -639,13 +641,13 @@ export function main(){
 				let oscAmp = 0.25, oscSpeed = 0.75;
 				/* fluidSim.SphereBarrier.position = [0.5, 0.5 + oscAmp*Math.cos(oscSpeed*fluidSim.time), 0.5 ];
 				fluidSim.SphereBarrier.velocity = [0.0, -oscAmp*oscSpeed*Math.sin(oscSpeed*fluidSim.time), 0.0 ]; */
-				// fluidSim.SphereBarrier.setPosition([0.5, 0.5 + oscAmp*Math.cos(oscSpeed*fluidSim.time), 0.5 ], avg_frame_time);
-				// fluidSim.SphereBarrier.addOffset(SphereBarrierPositionOffset, avg_frame_time);
-				fluidSim.SphereBarrier.addOffsetFromScreenCoords(kvadrat.getDeltaPosition(), avg_frame_time, Camera);
+				// fluidSim.SphereBarrier.setPosition([0.5, 0.5 + oscAmp*Math.cos(oscSpeed*fluidSim.time), 0.5 ], dt);
+				// fluidSim.SphereBarrier.addOffset(SphereBarrierPositionOffset, dt);
+				fluidSim.SphereBarrier.addOffsetFromScreenCoords(kvadrat.getDeltaPosition(), dt, Camera);
 				//-------------------------------------------------------
 				
-				fluidSim.SimStep(avg_frame_time);
-				fluidSim.AdvectMass(avg_frame_time);
+				fluidSim.SimStep(dt);
+				fluidSim.AdvectMass(dt);
 				
 				// glext.Framebuffer.BindMainFB();	
 				// gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);		
