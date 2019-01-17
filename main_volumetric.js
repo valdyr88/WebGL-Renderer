@@ -339,12 +339,16 @@ export function main(){
 			this.pressure_shader.ULSphereBarrierVelocity = this.pressure_shader.getUniformLocation("sphereBarrierVelocity");
 		}
 				
-		//div test kvadrat
+		//div kvadrat koji prati mis na principu opruge
 		kvadrat = document.getElementById("kvadrat");
 		kvadrat.delta_position = [0.0,0.0];
 		kvadrat.position = [0.0,0.0];
+		kvadrat.velocity = [0.0,0.0];
 		kvadrat.bIsMouseOver = false;
 		kvadrat.bIsMouseDown = false;
+		kvadrat.mass = 1.0;
+		kvadrat.k_opruge = 1.0;
+		kvadrat.max_velocity = 20.0;
 		
 		kvadrat.setPosition = function(pos){
 			this.style.position = "absolute";
@@ -362,17 +366,30 @@ export function main(){
 		kvadrat.onmouseenter = kvadrat.onmouseover;
 		kvadrat.onmouseleave = kvadrat.onmouseout;
 		
-		kvadrat.setDeltaFromMouseMovement = function(mouse){
-			if(this.bIsMouseDown == false) return;
-			
-			let mouseDelta = mouse.getDeltaPosition();
-			vMath.vec2.copy(this.delta_position, mouseDelta);
-		}
-		kvadrat.UpdateInputFromMouse = function(mouse){
+		kvadrat.UpdateMovement = function(mouse, dt){
 			this.delta_position[0] = 0.0; this.delta_position[1] = 0.0;
 			
 			if(this.bIsMouseDown == true && mouse.get().btnLeft == false){ this.bIsMouseDown = false; }
-			this.setDeltaFromMouseMovement(mouse);
+			if(this.bIsMouseDown == false) return;
+			
+			let mousePosition = mouse.getPosition();
+			
+			let n = [0.0,0.0]; vMath.vec2.subtract(n, mousePosition, this.position);
+			let d = vMath.vec2.length(n); vMath.vec2.scale(n, n, 1.0/d);
+			
+			let F = [0.0,0.0]; vMath.vec2.scale(F, n, d*this.k_opruge);
+			let a = [0.0,0.0]; vMath.vec2.scale(a, F, 1.0/this.mass);
+			
+			let dv = [0.0,0.0]; vMath.vec2.scale(dv, a, dt);
+			vMath.vec2.add(this.velocity, this.velocity, dv);
+			
+			//clamp
+			d = vMath.vec2.length(this.velocity);
+			if(d > this.max_velocity){
+				vMath.vec2.scale(n, this.velocity, 1.0/d);
+				vMath.vec2.scale(this.velocity, n, this.max_velocity);
+			}
+			this.delta_position = this.velocity;
 		}
 	}
 	
@@ -606,7 +623,7 @@ export function main(){
 			
 			//micanje barriera
 			//-------------------------------------------------------
-			kvadrat.UpdateInputFromMouse(sys.mouse);
+			kvadrat.UpdateMovement(sys.mouse, avg_frame_time);
 			//-------------------------------------------------------
 			
 			//simulacija
