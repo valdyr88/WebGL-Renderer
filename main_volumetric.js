@@ -277,7 +277,7 @@ export function main(){
 		fluidSim.CreateTest3DRenderShader("test_3d_texture_render");
 		fluidSim.setNoiseTexture(txNoiseRGB);
 		fluidSim.CreateMass(128,128,128, false, false, "fluidsim_mass_init_shader", "fluidsim_mass_advect_shader", "fluidsim_mass_advect_correction_shader");
-		
+				
 		//custom barrier
 		fluidSim.viscosity_shader.ULSphereBarrier = fluidSim.viscosity_shader.getUniformLocation("sphereBarrier");
 		fluidSim.viscosity_shader.ULSphereBarrierVelocity = fluidSim.viscosity_shader.getUniformLocation("sphereBarrierVelocity");
@@ -287,8 +287,9 @@ export function main(){
 		fluidSim.SphereBarrier.position = [0.5,0.5,0.5];
 		fluidSim.SphereBarrier.radius = 0.05;
 		fluidSim.SphereBarrier.velocity = [0.0,0.0,0.0];
+		fluidSim.SphereBarrier.ToRealWorldScale = 6.0;
 		
-		fluidSim.SphereBarrier.getPositionAndRadius = function(){ return [this.position[0], this.position[1], this.position[2], this.radius]; }
+		fluidSim.SphereBarrier.getPositionAndRadius = function(){ return [this.position[0]*0.5+0.5, this.position[1]*0.5+0.5, this.position[2]*0.5+0.5, this.radius]; }
 		
 		fluidSim.SphereBarrier.getVelocity = function(){ return this.velocity; }
 		
@@ -300,27 +301,65 @@ export function main(){
 		}
 		fluidSim.SphereBarrier.addOffset = function(offset, dt){
 			let new_position = [0.0,0.0,0.0];
-			// vMath.vec3.scale(offset, offset, 1.0/100.0);
 			vMath.vec3.add(new_position, offset, this.position);
 			this.setPosition(new_position, dt);
 		}
-		fluidSim.SphereBarrier.getPositionOnScreen = function(Camera){
-			let pos = [0.0,0.0,0.0];
-			vMath.vec3.subtract(pos, this.position, [0.5,0.5,0.5]);
-			let x = vMath.vec3.dot(pos, Camera.RightDir);
-			let y = vMath.vec3.dot(pos, Camera.UpDir);
-			let dist = 0.33333333*vMath.vec3.length(Camera.Position);
-			x /= dist; y /= dist;
-			x += 0.5; y += 0.5;//[x,y] su sad u [0.0,1.0]
-			x *= Camera.Width; y *= Camera.Height;
-			return [x,y];
-		}
-		fluidSim.SphereBarrier.addOffsetFromScreenCoords = function(offset, dt, Camera){
-			vMath.vec2.multiply(offset, offset, [1.0/Camera.Width, 1.0/Camera.Height]);
-			let dist = 0.33333333*vMath.vec3.length(Camera.Position);
-			let v = [0.0,0.0,0.0]; vMath.vec3.scale(v, Camera.RightDir, offset[0]*dist);
-			let v2 = [0.0,0.0,0.0]; vMath.vec3.scale(v2, Camera.UpDir, offset[1]*dist);
+		fluidSim.SphereBarrier.TransformFromScreenCoordinates = function(pos, Camera, bNaRavniniKojaSadrziPosition){
+			let pos2D = [0.0,0.0]; vMath.vec2.copy(pos2D, pos); //pos2D = [[0.0, 0.0], [Camera.Width, Camera.Height]]
+			// pos2D[1] /= Camera.PixelAspect;
+			vMath.vec2.multiply(pos2D, pos2D, [1.0/Camera.Width, 1.0/Camera.Height]); // pos2D = [[0.0,0.0], [1.0,1.0]];
+			vMath.vec2.subtract(pos2D, pos2D, [0.5,0.5]); //pos2D = [[-0.5,-0.5], [0.5,0.5]]
+			vMath.vec3.scale(pos2D, pos2D, 2.0); //pos2D = [[-1.0,-1.0],[1.0,1.0]]
+			
+			let dist = (1.0/this.ToRealWorldScale)*vMath.vec3.length(Camera.Position);
+			
+			var v = [0.0,0.0,0.0]; let v2 = [0.0,0.0,0.0];
+			vMath.vec3.scale(v, Camera.RightDir, pos2D[0]);
+			vMath.vec3.scale(v2, Camera.UpDir, pos2D[1]);
 			vMath.vec3.add(v,v,v2);
+			
+			vMath.vec3.scale(v,v,dist);
+			
+			if(bNaRavniniKojaSadrziPosition == true){
+				let dotFrPs = vMath.vec3.dot(this.position, Camera.ForwardDir) - 0.5;
+				vMath.vec3.scale(v2, Camera.ForwardDir, dotFrPs);
+				vMath.vec3.add(v,v,v2);
+			}
+			
+			// vMath.vec3.scale(v,v,0.5);
+			// vMath.vec3.add(v,v,[0.5,0.5,0.5]); //centar je u 0.5,0.5,0.5
+									
+			return v;
+		}
+		fluidSim.SphereBarrier.TransformToScreenCoordinates = function(pos, Camera){
+			let pos3D = [0.0,0.0,0.0]; vMath.vec3.copy(pos3D, pos); var pos2D = [0.0,0.0];
+			
+			// vMath.vec3.subtract(pos3D, pos3D, [0.5,0.5,0.5]); //centar je u 0.5,0.5,0.5
+			// vMath.vec3.scale(pos3D, pos3D, 2.0); //pos3D = [[-1.0,-1.0,-1.0],[1.0,1.0,1.0]]
+			
+			pos2D[0] = vMath.vec3.dot(pos3D, Camera.RightDir); //[-1,1]
+			pos2D[1] = vMath.vec3.dot(pos3D, Camera.UpDir); //[-1,1]
+			
+			let dist = (1.0/this.ToRealWorldScale)*vMath.vec3.length(Camera.Position);
+			vMath.vec2.scale(pos2D, pos2D, 1.0/dist);
+			
+			vMath.vec2.scale(pos2D, pos2D, 0.5); //[-0.5,0.5]
+			vMath.vec2.add(pos2D, pos2D, [0.5,0.5]); //[0.0,1.0]
+			
+			vMath.vec2.multiply(pos2D, pos2D, [Camera.Width, Camera.Height]); //pos2D = [[0.0, 0.0], [Camera.Width, Camera.Height]]
+			
+			return pos2D;
+		}
+		fluidSim.SphereBarrier.getPositionOnScreen = function(Camera){
+			return this.TransformToScreenCoordinates(this.position, Camera);
+		}
+		fluidSim.SphereBarrier.addOffsetFromScreenCoords = function(in_offset, dt, Camera){
+			let offset = [0.0,0.0]; vMath.vec2.copy(offset, in_offset);
+			
+			vMath.vec2.add(offset, offset, [0.5*Camera.Width, 0.5*Camera.Height]);
+			let v = this.TransformFromScreenCoordinates(offset, Camera, false);
+			// vMath.vec3.subtract(v, v, [0.5,0.5,0.5]);
+			
 			this.addOffset(v, dt);
 		}
 		
@@ -338,7 +377,7 @@ export function main(){
 			this.pressure_shader.ULSphereBarrier = this.pressure_shader.getUniformLocation("sphereBarrier");
 			this.pressure_shader.ULSphereBarrierVelocity = this.pressure_shader.getUniformLocation("sphereBarrierVelocity");
 		}
-				
+		
 		//div kvadrat koji prati mis na principu opruge
 		kvadrat = document.getElementById("kvadrat");
 		kvadrat.delta_position = [0.0,0.0];
@@ -350,6 +389,7 @@ export function main(){
 		kvadrat.k_opruge = 1.0;
 		kvadrat.max_velocity = 20.0;
 		kvadrat.goal_position = [0.0,0.0];
+		kvadrat.goal_position3D = [0.0,0.0,0.0];
 		
 		kvadrat.setPosition = function(pos){
 			this.style.position = "absolute";
@@ -367,11 +407,18 @@ export function main(){
 		kvadrat.onmouseenter = kvadrat.onmouseover;
 		kvadrat.onmouseleave = kvadrat.onmouseout;
 		
-		kvadrat.UpdateMovement = function(mouse, dt){
+		kvadrat.UpdateGoalPosition = function(mouse, Camera, fluidSim){
+			if(this.bIsMouseDown == true){ 
+				vMath.vec2.copy(this.goal_position, mouse.getPosition());
+				this.goal_position3D = fluidSim.SphereBarrier.TransformFromScreenCoordinates(this.goal_position, Camera, true);
+			}
+			/*  */else{
+				//rotirat ako treba
+				this.goal_position = fluidSim.SphereBarrier.TransformToScreenCoordinates(this.goal_position3D, Camera);
+			}
+		}
+		kvadrat.UpdateMovement = function(dt, mouse){
 			this.delta_position[0] = 0.0; this.delta_position[1] = 0.0;
-			
-			if(this.bIsMouseDown == true && mouse.get().btnLeft == false){ this.bIsMouseDown = false; }
-			if(this.bIsMouseDown == true){ vMath.vec2.copy(this.goal_position, mouse.getPosition()); }
 			
 			// let mousePosition = mouse.getPosition();
 			
@@ -394,6 +441,13 @@ export function main(){
 				vMath.vec2.scale(this.velocity, n, this.max_velocity);
 			}
 			this.delta_position = this.velocity;
+		}
+		kvadrat.Update = function(dt, mouse, Camera, fluidSim){
+			
+			if(this.bIsMouseDown == true && mouse.get().btnLeft == false){ this.bIsMouseDown = false; }
+			
+			this.UpdateGoalPosition(mouse, Camera, fluidSim);
+			this.UpdateMovement(dt, mouse);
 		}
 	}
 	
@@ -462,6 +516,15 @@ export function main(){
 	var bShiftToggle = false;
 	
 	var delay_ms = 17;
+/*  
+	let testv3D_1 = [0.0,0.0,0.0];
+	let testv2D_1 = [0.0,0.0];
+	
+	while(true){
+		
+		testv3D_1 = fluidSim.SphereBarrier.TransformFromScreenCoordinates(testv2D_1, Camera);
+		testv2D_1 = fluidSim.SphereBarrier.TransformToScreenCoordinates(testv3D_1, Camera);
+	}*/
 	
 	setInterval( function(){ window.requestAnimationFrame(renderFrame); }, delay_ms);
 	
@@ -514,7 +577,6 @@ export function main(){
 		var mousePos = sys.mouse.getPosition();
 		var mouseDelta = sys.mouse.getDeltaPosition();
 		
-		var fluidSimToRealWorldScale = 6.0;
 		var SphereBarrierPositionOffset = [0.0,0.0,0.0];
 		
 		if(bMouseOverCanvas == true)
@@ -629,7 +691,7 @@ export function main(){
 			
 			//micanje barriera
 			//-------------------------------------------------------
-			kvadrat.UpdateMovement(sys.mouse, dt);
+			kvadrat.Update(dt, sys.mouse, Camera, fluidSim);
 			//-------------------------------------------------------
 			
 			//simulacija
@@ -671,10 +733,10 @@ export function main(){
 			light.setColor(0.5,0.79,1.0,1.0);
 			light.Update();
 			
-			let r = fluidSim.SphereBarrier.radius * fluidSimToRealWorldScale; let p = [0,0,0];
+			let r = fluidSim.SphereBarrier.radius * fluidSim.SphereBarrier.ToRealWorldScale; let p = [0,0,0];
 			vMath.vec3.copy(p, fluidSim.SphereBarrier.position);
 			vMath.vec3.add(p, p, [-0.5,-0.5,-0.5]);
-			vMath.vec3.scale(p, p, fluidSimToRealWorldScale);
+			vMath.vec3.scale(p, p, fluidSim.SphereBarrier.ToRealWorldScale);
 			vMath.mat4.identity(sphere_model.Transform);
 			vMath.mat4.setTranslation(sphere_model.Transform, sphere_model.Transform, p);
 			vMath.mat4.setScale(sphere_model.Transform, sphere_model.Transform, [r,r,r]);

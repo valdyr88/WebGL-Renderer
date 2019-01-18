@@ -22,7 +22,7 @@ export class Camera{
 		this.Far = 1000.0;
 		this.Height = viewHeight;
 		this.Width = viewWidth;
-		this.PixelAspect = (1.0*this.Width) / (1.0*this.Height);
+		this.PixelAspect = this.Width/this.Height;
 		
 		this.UpdateProjectionMatrix();
 	}
@@ -126,7 +126,7 @@ export class Camera{
 	
 	setViewportWidthHeight(width,height){
 		this.Height = height; this.Width = width;
-		this.PixelAspect = (1.0*this.Width) / (1.0*this.Height);
+		this.PixelAspect = this.Width/this.Height;
 		this.UpdateProjectionMatrix();
 	}
 	
