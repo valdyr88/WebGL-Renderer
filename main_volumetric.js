@@ -287,7 +287,7 @@ export function main(){
 		fluidSim.SphereBarrier.position = [0.5,0.5,0.5];
 		fluidSim.SphereBarrier.radius = 0.05;
 		fluidSim.SphereBarrier.velocity = [0.0,0.0,0.0];
-		fluidSim.SphereBarrier.ToRealWorldScale = 6.0;
+		fluidSim.SphereBarrier.ToRealWorldScale = 5.0;
 		
 		fluidSim.SphereBarrier.getPositionAndRadius = function(){ return [this.position[0]*0.5+0.5, this.position[1]*0.5+0.5, this.position[2]*0.5+0.5, this.radius]; }
 		
@@ -311,11 +311,11 @@ export function main(){
 			vMath.vec2.subtract(pos2D, pos2D, [0.5,0.5]); //pos2D = [[-0.5,-0.5], [0.5,0.5]]
 			vMath.vec3.scale(pos2D, pos2D, 2.0); //pos2D = [[-1.0,-1.0],[1.0,1.0]]
 			
-			let dist = (1.0/this.ToRealWorldScale)*vMath.vec3.length(Camera.Position);
+			let dist = (2.0/this.ToRealWorldScale)*vMath.vec3.length(Camera.Position);
 			
 			var v = [0.0,0.0,0.0]; let v2 = [0.0,0.0,0.0];
 			vMath.vec3.scale(v, Camera.RightDir, pos2D[0]);
-			vMath.vec3.scale(v2, Camera.UpDir, pos2D[1]);
+			vMath.vec3.scale(v2, Camera.UpDir, pos2D[1]/Camera.PixelAspect);
 			vMath.vec3.add(v,v,v2);
 			
 			vMath.vec3.scale(v,v,dist);
@@ -338,9 +338,9 @@ export function main(){
 			// vMath.vec3.scale(pos3D, pos3D, 2.0); //pos3D = [[-1.0,-1.0,-1.0],[1.0,1.0,1.0]]
 			
 			pos2D[0] = vMath.vec3.dot(pos3D, Camera.RightDir); //[-1,1]
-			pos2D[1] = vMath.vec3.dot(pos3D, Camera.UpDir); //[-1,1]
+			pos2D[1] = vMath.vec3.dot(pos3D, Camera.UpDir)*Camera.PixelAspect; //[-1,1]
 			
-			let dist = (1.0/this.ToRealWorldScale)*vMath.vec3.length(Camera.Position);
+			let dist = (2.0/this.ToRealWorldScale)*vMath.vec3.length(Camera.Position);
 			vMath.vec2.scale(pos2D, pos2D, 1.0/dist);
 			
 			vMath.vec2.scale(pos2D, pos2D, 0.5); //[-0.5,0.5]
@@ -362,7 +362,7 @@ export function main(){
 			
 			this.addOffset(v, dt);
 		}
-		
+				
 		fluidSim.pre_viscosity_pass_function = function(){
 			this.viscosity_shader.setFloat4Uniform( this.viscosity_shader.ULSphereBarrier, this.SphereBarrier.getPositionAndRadius() );
 			this.viscosity_shader.setFloat3Uniform( this.viscosity_shader.ULSphereBarrierVelocity, this.SphereBarrier.getVelocity() );
@@ -407,14 +407,18 @@ export function main(){
 		kvadrat.onmouseenter = kvadrat.onmouseover;
 		kvadrat.onmouseleave = kvadrat.onmouseout;
 		
-		kvadrat.UpdateGoalPosition = function(mouse, Camera, fluidSim){
-			if(this.bIsMouseDown == true){ 
+		kvadrat.UpdateGoalPosition = function(mouse, Camera, bCameraUpdated, fluidSim){
+			if(bCameraUpdated == false && this.bIsMouseDown == true){ 
 				vMath.vec2.copy(this.goal_position, mouse.getPosition());
 				this.goal_position3D = fluidSim.SphereBarrier.TransformFromScreenCoordinates(this.goal_position, Camera, true);
 			}
-			/*  */else{
+			else{
 				//rotirat ako treba
 				this.goal_position = fluidSim.SphereBarrier.TransformToScreenCoordinates(this.goal_position3D, Camera);
+				if(bCameraUpdated == true){
+					this.velocity[0] = 0.0; this.velocity[1] = 0.0;
+					this.delta_position[0] = 0.0; this.delta_position[1] = 0.0;
+				}
 			}
 		}
 		kvadrat.UpdateMovement = function(dt, mouse){
@@ -442,11 +446,11 @@ export function main(){
 			}
 			this.delta_position = this.velocity;
 		}
-		kvadrat.Update = function(dt, mouse, Camera, fluidSim){
+		kvadrat.Update = function(dt, mouse, Camera, bCameraUpdated, fluidSim){
 			
 			if(this.bIsMouseDown == true && mouse.get().btnLeft == false){ this.bIsMouseDown = false; }
 			
-			this.UpdateGoalPosition(mouse, Camera, fluidSim);
+			this.UpdateGoalPosition(mouse, Camera, bCameraUpdated, fluidSim);
 			this.UpdateMovement(dt, mouse);
 		}
 	}
@@ -620,7 +624,7 @@ export function main(){
 				
 				vMath.vec3.copy(upDir, Camera.UpDir);
 			}
-			else
+			/* else
 			{
 				let deltaX = [0.0,0.0,0.0];
 				let deltaY = [0.0,0.0,0.0];
@@ -635,7 +639,7 @@ export function main(){
 				
 				vMath.vec3.add(SphereBarrierPositionOffset, SphereBarrierPositionOffset, deltaX);
 				vMath.vec3.add(SphereBarrierPositionOffset, SphereBarrierPositionOffset, deltaY);
-			}
+			} */
 		}
 		
 		/*	
@@ -691,7 +695,7 @@ export function main(){
 			
 			//micanje barriera
 			//-------------------------------------------------------
-			kvadrat.Update(dt, sys.mouse, Camera, fluidSim);
+			kvadrat.Update(dt, sys.mouse, Camera, bUpdateCamera, fluidSim);
 			//-------------------------------------------------------
 			
 			//simulacija
