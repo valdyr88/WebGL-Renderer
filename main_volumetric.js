@@ -113,6 +113,7 @@ export function main(){
 	volume_clouds_shader.ULTextureMass = volume_clouds_shader.getUniformLocation("txFluidSimCloud");
 	volume_clouds_shader.ULTextureVelocity = volume_clouds_shader.getUniformLocation("txFluidSimVelocity");
 	volume_clouds_shader.ULDisplayBrightness = volume_clouds_shader.getUniformLocation("displayBrightness");
+	volume_clouds_shader.ULTanHalfFOV = volume_clouds_shader.getUniformLocation("TanHalfFOV");
 		
 	var sphere_model = new glext.Model(1);
 	sphere_model.ImportFrom("SphereModel");
@@ -287,7 +288,7 @@ export function main(){
 		fluidSim.SphereBarrier.position = [0.5,0.5,0.5];
 		fluidSim.SphereBarrier.radius = 0.05;
 		fluidSim.SphereBarrier.velocity = [0.0,0.0,0.0];
-		fluidSim.SphereBarrier.ToRealWorldScale = 5.0;
+		fluidSim.SphereBarrier.ToRealWorldScale = 2.0;
 		
 		fluidSim.SphereBarrier.getPositionAndRadius = function(){ return [this.position[0]*0.5+0.5, this.position[1]*0.5+0.5, this.position[2]*0.5+0.5, this.radius]; }
 		
@@ -309,9 +310,10 @@ export function main(){
 			// pos2D[1] /= Camera.PixelAspect;
 			vMath.vec2.multiply(pos2D, pos2D, [1.0/Camera.Width, 1.0/Camera.Height]); // pos2D = [[0.0,0.0], [1.0,1.0]];
 			vMath.vec2.subtract(pos2D, pos2D, [0.5,0.5]); //pos2D = [[-0.5,-0.5], [0.5,0.5]]
-			vMath.vec3.scale(pos2D, pos2D, 2.0); //pos2D = [[-1.0,-1.0],[1.0,1.0]]
+			vMath.vec2.scale(pos2D, pos2D, 2.0); //pos2D = [[-1.0,-1.0],[1.0,1.0]]
+			// vMath.vec2.scale(pos2D, pos2D, 1.0/Math.tan(vMath.deg2rad(Camera.FOV)/2.0));
 			
-			let dist = (2.0/this.ToRealWorldScale)*vMath.vec3.length(Camera.Position);
+			let dist = (1.5/this.ToRealWorldScale)*vMath.vec3.length(Camera.Position);
 			
 			var v = [0.0,0.0,0.0]; let v2 = [0.0,0.0,0.0];
 			vMath.vec3.scale(v, Camera.RightDir, pos2D[0]);
@@ -328,7 +330,7 @@ export function main(){
 			
 			// vMath.vec3.scale(v,v,0.5);
 			// vMath.vec3.add(v,v,[0.5,0.5,0.5]); //centar je u 0.5,0.5,0.5
-									
+			
 			return v;
 		}
 		fluidSim.SphereBarrier.TransformToScreenCoordinates = function(pos, Camera){
@@ -340,9 +342,10 @@ export function main(){
 			pos2D[0] = vMath.vec3.dot(pos3D, Camera.RightDir); //[-1,1]
 			pos2D[1] = vMath.vec3.dot(pos3D, Camera.UpDir)*Camera.PixelAspect; //[-1,1]
 			
-			let dist = (2.0/this.ToRealWorldScale)*vMath.vec3.length(Camera.Position);
+			let dist = (1.5/this.ToRealWorldScale)*vMath.vec3.length(Camera.Position);
 			vMath.vec2.scale(pos2D, pos2D, 1.0/dist);
 			
+			// vMath.vec2.scale(pos2D, pos2D, Math.tan(vMath.deg2rad(Camera.FOV)/2.0));
 			vMath.vec2.scale(pos2D, pos2D, 0.5); //[-0.5,0.5]
 			vMath.vec2.add(pos2D, pos2D, [0.5,0.5]); //[0.0,1.0]
 			
@@ -362,7 +365,7 @@ export function main(){
 			
 			this.addOffset(v, dt);
 		}
-				
+		
 		fluidSim.pre_viscosity_pass_function = function(){
 			this.viscosity_shader.setFloat4Uniform( this.viscosity_shader.ULSphereBarrier, this.SphereBarrier.getPositionAndRadius() );
 			this.viscosity_shader.setFloat3Uniform( this.viscosity_shader.ULSphereBarrierVelocity, this.SphereBarrier.getVelocity() );
@@ -393,7 +396,7 @@ export function main(){
 		
 		kvadrat.setPosition = function(pos){
 			this.style.position = "absolute";
-			this.style.left = pos[0] + "px";
+			this.style.left =(pos[0]) + "px";
 			this.style.top = (pos[1] + this.offsetHeight) + "px";
 			// vMath.vec2.subtract(this.delta_position, pos, this.position);
 			vMath.vec2.copy(this.position, pos);
@@ -513,8 +516,10 @@ export function main(){
 	var RightAdd = vMath.vec3.create();
 	var UpAdd = vMath.vec3.create();
 	
+	var FOV = 75.0;
+	
 	Camera.setPositionAndLookPt(eyePt, [0.0,0.0,0.0], upDir);
-	Camera.setFOV(75.0);
+	Camera.setFOV(FOV);
 	
 	var bCtrlToggle = false;
 	var bShiftToggle = false;
@@ -577,6 +582,7 @@ export function main(){
 		//Calc camera view i proj
 		//-------------------------------------------------------------------------------------
 		var bUpdateCamera = false;
+		Camera.setFOV(FOV);
 		
 		var mousePos = sys.mouse.getPosition();
 		var mouseDelta = sys.mouse.getDeltaPosition();
@@ -704,7 +710,7 @@ export function main(){
 			{
 				//barrier
 				//-------------------------------------------------------
-				let oscAmp = 0.25, oscSpeed = 0.75;
+				// let oscAmp = 0.25, oscSpeed = 0.75;
 				/* fluidSim.SphereBarrier.position = [0.5, 0.5 + oscAmp*Math.cos(oscSpeed*fluidSim.time), 0.5 ];
 				fluidSim.SphereBarrier.velocity = [0.0, -oscAmp*oscSpeed*Math.sin(oscSpeed*fluidSim.time), 0.0 ]; */
 				// fluidSim.SphereBarrier.setPosition([0.5, 0.5 + oscAmp*Math.cos(oscSpeed*fluidSim.time), 0.5 ], dt);
@@ -737,9 +743,8 @@ export function main(){
 			light.setColor(0.5,0.79,1.0,1.0);
 			light.Update();
 			
-			let r = fluidSim.SphereBarrier.radius * fluidSim.SphereBarrier.ToRealWorldScale; let p = [0,0,0];
+			let r = 2.0*fluidSim.SphereBarrier.radius * fluidSim.SphereBarrier.ToRealWorldScale; let p = [0,0,0];
 			vMath.vec3.copy(p, fluidSim.SphereBarrier.position);
-			vMath.vec3.add(p, p, [-0.5,-0.5,-0.5]);
 			vMath.vec3.scale(p, p, fluidSim.SphereBarrier.ToRealWorldScale);
 			vMath.mat4.identity(sphere_model.Transform);
 			vMath.mat4.setTranslation(sphere_model.Transform, sphere_model.Transform, p);
@@ -749,6 +754,7 @@ export function main(){
 			fbo.Bind();
 			
 			gl.viewport(0, 0, fbo.width, fbo.height);
+			Camera.setViewportWidthHeight(fbo.width, fbo.height);
 			
 			gl.clearColor(0.0, 0.0, 0.0, 1.0);
 			gl.clearDepth(1.0);
@@ -777,6 +783,7 @@ export function main(){
 		{
 			glext.Framebuffer.BindMainFB();	
 			gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);		
+			Camera.setViewportWidthHeight(gl.viewportWidth, gl.viewportHeight);
 			
 			gl.clearColor(0.0, 0.0, 0.0, 1.0);
 			gl.clearDepth(1.0);
@@ -800,6 +807,7 @@ export function main(){
 				volume_clouds_shader.setFloat2Uniform( volume_clouds_shader.ULResolution, [gl.viewportWidth,gl.viewportHeight] );
 				volume_clouds_shader.setFloatUniform( volume_clouds_shader.ULPixelAspect, gl.viewportWidth/gl.viewportHeight );
 				volume_clouds_shader.setFloatUniform( volume_clouds_shader.ULDisplayBrightness, brightness );
+				volume_clouds_shader.setFloatUniform( volume_clouds_shader.ULTanHalfFOV, Math.tan(vMath.deg2rad(FOV)/2.0) );
 				
 				volume_clouds_shader.setTimeUniform(time);
 				
@@ -930,6 +938,7 @@ export function recompileShader(fragment_name){
 					shader.ULTextureBackground = shader.getUniformLocation("txBackground");
 					shader.ULTextureBackgroundDepth = shader.getUniformLocation("txDepth");
 					shader.ULDisplayBrightness = shader.getUniformLocation("displayBrightness");
+					shader.ULTanHalfFOV = shader.getUniformLocation("TanHalfFOV");
 					glext.LightList.get(0).AttachUniformBlockTo(shader);
 					// shader.ULInverseViewMatrix = shader.getUniformLocation("InverseViewMatrix");
 					shader.ULCameraForward = shader.getUniformLocation("CameraForward");

@@ -16,6 +16,7 @@ uniform vec3 CameraForward;
 uniform vec3 CameraRight;
 uniform vec3 CameraUp;
 uniform float PixelAspect;
+uniform float TanHalfFOV;
 
 #define varyin out
 
@@ -33,9 +34,9 @@ void main(void)
 	PixelPosition = gl_Position.xyz / gl_Position.w; 
 	PixelPosition = PixelPosition*0.5f + 0.5f;
 	
-	Position = 2.0 * CameraForward +
-			-PixelAspect * aVertexPosition.x * (-CameraRight) +
-			aVertexPosition.y * (-CameraUp) + CameraPosition;
+	Position = 1.0 * CameraForward +
+			-TanHalfFOV * PixelAspect * aVertexPosition.x * (-CameraRight) +
+			TanHalfFOV * aVertexPosition.y * (-CameraUp) + CameraPosition;
 	
 	ViewVector = Position - CameraPosition;
 	
