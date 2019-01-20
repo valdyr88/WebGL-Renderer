@@ -104,7 +104,7 @@
   <script src="./main.js" type="script"></script>
   
   </head>
-<body>
+<body style="margin: 0; height: 100%; overflow: hidden;">
 	<img id="reload_shader_btn" onclick="reload_fluidsim_shader()" title="fluidsim shaders" src="./misc/reload_ico.png"></img>
 	<img id="reload_shader_btn" onclick="reload_shader('deferred_opaque_shade')" title="deferred_opaque_shade" src="./misc/reload_ico.png"></img>
 	<img id="reload_shader_btn" onclick="reload_shader('transparent_shader')" title="transparent_shader" src="./misc/reload_ico.png"></img>
@@ -178,10 +178,10 @@
 	<div style="background-color:#0055ff">
 	  <canvas id="glcanvas" width="640" height="480">
 		Your browser doesn't appear to support the HTML5 <code>&lt;canvas&gt;</code> element.
+		<div id="barriermove_kvadrat" style="background-color:#55aaff00; width:128px; height:128px; position:absolute"></div>
 	  </canvas>
-	  <div id="kvadrat" style="background-color:#55aaff; width:58px; height:58px; position:absolute" />
 	</div>
-	
+	<div id="debug_kvadrat" style="background-color:#55aaff; width:128px; height:128px; position:absolute"></div>
   <script type="module">
 	import { main, recompileShader, reloadTexture, onShaderDefineChanged, SetAutoQualitySelection, ReloadFluidSimShaders, FluidSimDisplayChanged, FluidSimSetKinematicViscosity, FluidSimReset, FluidSimTogglePause } from "./main_volumetric.js";
 	import { fetchImage } from "./GLExt/glTexture.js";

@@ -295,6 +295,9 @@ vec4 RaymarchMulti(in vec3 start, in vec3 dir, in float tstart, in float maxt, i
 }
 //===================================================================================================
 
+#define Near 0.1
+#define Far 1000.0
+
 //===================================================================================================
 //pronalazi jeli potrebno izvrsavat RaymarchMulti funkciju, i na kojoj udaljenosti gledat za t
 //===================================================================================================
@@ -336,13 +339,16 @@ void main(void)
 	vec3 toLight = normalize(light0.position.xyz - Position);
 	vec3 ViewDir = normalize(ViewVector);
 	
+	float linDepth = LinearizeDepth2(bckgDepth, Near, Far);
+	linDepth = linDepth * (Far - Near) + Near;
+	
 	vec4 rtn = vec4(0.0);
 	float startT = max(length(CameraPosition) - 2.0, 0.0); //u centru je od 0.0 do 1.0 cloud
 	float maxT = 4.0f;
 	
 	// vec3 pos = vec3(0.0,1.0,-7.0);
 	vec3 pos = CameraPosition;
-	rtn = RaymarchMulti(pos, ViewDir, startT, startT+maxT, dither);
+	rtn = RaymarchMulti(pos, ViewDir, startT, min(startT+maxT, linDepth+startT), dither);
 	// rtn.xyz = vec3( sample_clouds(vec3(TexCoords.x,TexCoords.y,fract(Time*0.1))) );
 	
 	#if defined(Quality_High)
@@ -362,7 +368,9 @@ void main(void)
 	// rtn.xyz = bckgColor.xyz + rtn.xyz;
 	// rtn.xyz = vec3(saturate(1.0-bckgDepth)) + rtn.xyz;
 	// rtn.xyz = vec3(0.1,0.7,1.0);
-	if(bckgDepth < 0.99999) rtn.xyz = vec3(0.0,0.5,0.75);
+	// if(bckgDepth < 0.99999) rtn.xyz = vec3(0.0,0.5,0.75);
+	
+	// if(linDepth < 100.0) rtn.xyz = vec3(linDepth);
 	
 	
 	gl_FragColor = tovec4(vec3(rtn.xyz), 1.0);

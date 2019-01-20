@@ -31,6 +31,12 @@
 #define FLT_MIN (1.175494351e-38)
 #define FLT_MAX (3.402823466e+38)
 
+#define LinearizeDepth(x,n,f) ((2.0 * n) / (f + n - x * (f - n)))
+#define LinearizeDepthAndSubtract(b,a,n,f) (LinearizeDepth(b,n,f) - LinearizeDepth(a,n,f))
+#define LinearizeDepth2(x,n,f) ((2.0 * n) / (f + lerp(n,f,-x)))
+#define LinearizeDepthAndSubtract2(b,a,n,f) (LinearizeDepth2(b,n,f) - LinearizeDepth2(a,n,f))
+#define LinearizeZ(z,Near,Far) ( 2.0*Far*Near / ( Far + Near - ( Far - Near ) * ( 2.0*z - 1.0 ) ) )
+
 //================================================================================================================
 
 inline bool float_equals(float a, float b, float eps){ return abs( a-b ) < eps; }

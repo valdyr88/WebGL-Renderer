@@ -29,10 +29,13 @@ export function main(){
 		 if(glext.glEnableExtension('OES_texture_float_linear') == false) alert("no extension: OES_texture_float_linear");
 		
 	glext.InitDebugTextDOM("debug_text");
+	var debug_kvadrat = document.getElementById("debug_kvadrat");
 	
 	var bMouseOverCanvas = false;
-	gl.canvasObject.onmouseover = function(){ bMouseOverCanvas = true; }
-	gl.canvasObject.onmouseout = function(){ bMouseOverCanvas = false; }
+	// gl.canvasObject.onmouseover = function(){ bMouseOverCanvas = true; }
+	// gl.canvasObject.onmouseout = function(){ bMouseOverCanvas = false; }
+	gl.canvasObject.onmouseenter = function(){ bMouseOverCanvas = true; }
+	gl.canvasObject.onmouseleave = function(){ bMouseOverCanvas = false; }
 	
 	gl.clearColor(0.0, 1.0, 1.0, 1.0);
 	gl.blendColor(1.0, 1.0, 1.0, 1.0);
@@ -393,7 +396,7 @@ export function main(){
 		}
 		
 		//div kvadrat koji prati mis na principu opruge
-		kvadrat = document.getElementById("kvadrat");
+		kvadrat = document.getElementById("barriermove_kvadrat");
 		kvadrat.delta_position = [0.0,0.0];
 		kvadrat.position = [0.0,0.0];
 		kvadrat.velocity = [0.0,0.0];
@@ -407,6 +410,7 @@ export function main(){
 		kvadrat.goal_position3D = [0.0,0.0,0.0];
 		kvadrat.baseWindowOffset = [gl.canvasObject.offsetLeft, gl.canvasObject.offsetTop];
 		kvadrat.baseSize = 2560.0 * fluidSim.SphereBarrier.radius;
+		kvadrat.mouse = null;
 		
 		kvadrat.setPosition = function(pos){
 			this.style.position = "absolute";
@@ -422,10 +426,23 @@ export function main(){
 		}
 		kvadrat.getDeltaPosition = function(){ return this.delta_position; }
 		
-		kvadrat.onmouseover = function(){ this.bIsMouseOver = true; }
-		kvadrat.onmouseout = function(){ this.bIsMouseOver = false; }
-		kvadrat.onmousedown = function(){ this.bIsMouseDown = true; }
-		kvadrat.onmouseup = function(){ this.bIsMouseDown = false; }
+		
+		kvadrat.onmouseover = function(){
+			if(this.mouse.get().btnLeft == false)
+				this.bIsMouseOver = true;
+			debug_kvadrat.style.backgroundColor = "rgb(255,255,0)";
+		}
+		kvadrat.onmouseout = function(){
+			this.bIsMouseOver = false;
+			debug_kvadrat.style.backgroundColor = "rgb(0,125,255)";
+		}
+		kvadrat.onmousedown = function(){
+			if(this.bIsMouseOver == true)
+				this.bIsMouseDown = true;
+		}
+		kvadrat.onmouseup = function(){
+			this.bIsMouseDown = false;
+		}
 		kvadrat.onmouseenter = kvadrat.onmouseover;
 		kvadrat.onmouseleave = kvadrat.onmouseout;
 		
@@ -473,6 +490,7 @@ export function main(){
 		}
 		kvadrat.Update = function(dt, mouse, Camera, bCameraUpdated, fluidSim){
 			
+			kvadrat.mouse = mouse;
 			if(this.bIsMouseDown == true && mouse.get().btnLeft == false){ this.bIsMouseDown = false; }
 			
 			this.UpdateGoalPosition(mouse, Camera, bCameraUpdated, fluidSim);
