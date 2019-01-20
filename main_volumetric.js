@@ -285,7 +285,7 @@ export function main(){
 		fluidSim.pressure_shader.ULSphereBarrier = fluidSim.pressure_shader.getUniformLocation("sphereBarrier");
 		fluidSim.pressure_shader.ULSphereBarrierVelocity = fluidSim.pressure_shader.getUniformLocation("sphereBarrierVelocity");
 		fluidSim.SphereBarrier = ["Sphere Barrier"];
-		fluidSim.SphereBarrier.position = [0.5,0.5,0.5];
+		fluidSim.SphereBarrier.position = [0.0,0.0,0.0];
 		fluidSim.SphereBarrier.radius = 0.05;
 		fluidSim.SphereBarrier.velocity = [0.0,0.0,0.0];
 		fluidSim.SphereBarrier.ToRealWorldScale = 2.0;
@@ -313,16 +313,23 @@ export function main(){
 			vMath.vec2.scale(pos2D, pos2D, 2.0); //pos2D = [[-1.0,-1.0],[1.0,1.0]]
 			// vMath.vec2.scale(pos2D, pos2D, 1.0/Math.tan(vMath.deg2rad(Camera.FOV)/2.0));
 			
-			let dist = (1.5/this.ToRealWorldScale)*vMath.vec3.length(Camera.Position);
+			pos2D[0] = Math.tan(pos2D[0]*vMath.deg2rad(Camera.FOV)/2.0);
+			pos2D[1] = Math.tan(pos2D[1]*vMath.deg2rad(Camera.FOV)/2.0);
 			
 			var v = [0.0,0.0,0.0]; let v2 = [0.0,0.0,0.0];
 			vMath.vec3.scale(v, Camera.RightDir, pos2D[0]);
 			vMath.vec3.scale(v2, Camera.UpDir, pos2D[1]/Camera.PixelAspect);
 			vMath.vec3.add(v,v,v2);
+		
+			vMath.vec3.copy(v2, this.position);
+			vMath.vec3.subtract(v2, v2, Camera.Position);
+			let dist = vMath.vec3.length(v2);
 			
 			vMath.vec3.scale(v,v,dist);
+			vMath.vec3.scale(v,v,1.0/this.ToRealWorldScale);
 			
-			if(bNaRavniniKojaSadrziPosition == true){
+			if(bNaRavniniKojaSadrziPosition == true)
+			{	
 				let dotFrPs = vMath.vec3.dot(this.position, Camera.ForwardDir) - 0.5;
 				vMath.vec3.scale(v2, Camera.ForwardDir, dotFrPs);
 				vMath.vec3.add(v,v,v2);
@@ -331,6 +338,39 @@ export function main(){
 			// vMath.vec3.scale(v,v,0.5);
 			// vMath.vec3.add(v,v,[0.5,0.5,0.5]); //centar je u 0.5,0.5,0.5
 			
+			
+			/*let pos2D = [0.0,0.0]; vMath.vec2.copy(pos2D, pos); var v = [0.0,0.0,0.0];
+			
+			// Camera.CalcInverseViewProjectionMatrix();
+			Camera.CalcInverseViewMatrix();
+			Camera.CalcInverseProjectionMatrix();
+			
+			let pos4D = [0.0,0.0,0.0,1.0]; vMath.vec3.copy(pos4D, this.position);
+			vMath.vec3.scale(pos4D, pos4D, this.ToRealWorldScale);
+			vMath.vec4.transformMat4(pos4D, pos4D, Camera.ViewMatrix);
+			vMath.vec4.transformMat4(pos4D, pos4D, Camera.ProjectionMatrix);
+			
+			vMath.vec2.multiply(pos2D, pos2D, [1.0/Camera.Width, 1.0/Camera.Height]); //[0.0,1.0]
+			vMath.vec2.subtract(pos2D, pos2D, [0.5,0.5]); //[-0.5,0.5]
+			vMath.vec2.scale(pos2D, pos2D, 2.0);  //[-1.0,1.0]
+			
+			vMath.vec2.scale(pos2D, pos2D, pos4D[3]);
+			
+			vMath.vec2.copy(pos4D, pos2D);
+			if(bNaRavniniKojaSadrziPosition == false){ pos4D[2] = Camera.Near; }
+			
+			let InvMat = vMath.mat4.create();
+			vMath.mat4.transpose(InvMat, Camera.InverseViewMatrix);
+			vMath.vec4.transformMat4(pos4D, pos4D, Camera.InverseViewMatrix);
+			vMath.mat4.transpose(InvMat, Camera.InverseProjectionMatrix);
+			vMath.vec4.transformMat4(pos4D, pos4D, InvMat);
+			// vMath.vec4.transformMat4(pos4D, pos4D, Camera.InverseViewProjectionMatrix);
+			
+			vMath.vec4.scale(pos4D, pos4D, 1.0/pos4D[3]);
+			
+			vMath.vec3.copy(v, pos4D);
+			vMath.vec3.scale(v, v, 1.0/this.ToRealWorldScale);			
+			*/
 			return v;
 		}
 		fluidSim.SphereBarrier.TransformToScreenCoordinates = function(pos, Camera){
@@ -339,18 +379,37 @@ export function main(){
 			// vMath.vec3.subtract(pos3D, pos3D, [0.5,0.5,0.5]); //centar je u 0.5,0.5,0.5
 			// vMath.vec3.scale(pos3D, pos3D, 2.0); //pos3D = [[-1.0,-1.0,-1.0],[1.0,1.0,1.0]]
 			
+			vMath.vec3.scale(pos3D, pos3D, this.ToRealWorldScale);
+			vMath.vec3.subtract(pos3D, pos3D, Camera.Position);
+			
 			pos2D[0] = vMath.vec3.dot(pos3D, Camera.RightDir); //[-1,1]
 			pos2D[1] = vMath.vec3.dot(pos3D, Camera.UpDir)*Camera.PixelAspect; //[-1,1]
 			
-			let dist = (1.5/this.ToRealWorldScale)*vMath.vec3.length(Camera.Position);
+			let dist = vMath.vec3.length(pos3D);
 			vMath.vec2.scale(pos2D, pos2D, 1.0/dist);
 			
-			// vMath.vec2.scale(pos2D, pos2D, Math.tan(vMath.deg2rad(Camera.FOV)/2.0));
+			pos2D[0] = Math.atan(pos2D[0])/(vMath.deg2rad(Camera.FOV)/2.0);
+			pos2D[1] = Math.atan(pos2D[1])/(vMath.deg2rad(Camera.FOV)/2.0);			
+			
 			vMath.vec2.scale(pos2D, pos2D, 0.5); //[-0.5,0.5]
 			vMath.vec2.add(pos2D, pos2D, [0.5,0.5]); //[0.0,1.0]
 			
 			vMath.vec2.multiply(pos2D, pos2D, [Camera.Width, Camera.Height]); //pos2D = [[0.0, 0.0], [Camera.Width, Camera.Height]]
+			/*
+			let pos4D = [0.0,0.0,0.0,1.0]; vMath.vec3.copy(pos4D, pos); var pos2D = [0.0,0.0];
 			
+			vMath.vec3.scale(pos4D, pos4D, this.ToRealWorldScale);
+			vMath.vec4.transformMat4(pos4D, pos4D, Camera.ViewMatrix);
+			vMath.vec4.transformMat4(pos4D, pos4D, Camera.ProjectionMatrix);
+			
+			vMath.vec4.scale(pos4D, pos4D, 1.0/pos4D[3]);
+			
+			vMath.vec2.copy(pos2D, pos4D); //[-1.0,1.0]
+			
+			vMath.vec2.scale(pos2D, pos2D, 0.5); //[-0.5,0.5]
+			vMath.vec2.add(pos2D, pos2D, [0.5,0.5]); //[0.0,1.0]
+			vMath.vec2.multiply(pos2D, pos2D, [Camera.Width, Camera.Height]);
+			*/
 			return pos2D;
 		}
 		fluidSim.SphereBarrier.getPositionOnScreen = function(Camera){
@@ -527,7 +586,7 @@ export function main(){
 	var delay_ms = 17;
 /*  
 	let testv3D_1 = [0.0,0.0,0.0];
-	let testv2D_1 = [0.0,0.0];
+	let testv2D_1 = [250.0,250.0];
 	
 	while(true){
 		
@@ -582,7 +641,6 @@ export function main(){
 		//Calc camera view i proj
 		//-------------------------------------------------------------------------------------
 		var bUpdateCamera = false;
-		Camera.setFOV(FOV);
 		
 		var mousePos = sys.mouse.getPosition();
 		var mouseDelta = sys.mouse.getDeltaPosition();
@@ -754,7 +812,7 @@ export function main(){
 			fbo.Bind();
 			
 			gl.viewport(0, 0, fbo.width, fbo.height);
-			Camera.setViewportWidthHeight(fbo.width, fbo.height);
+			// Camera.setViewportWidthHeight(fbo.width, fbo.height);
 			
 			gl.clearColor(0.0, 0.0, 0.0, 1.0);
 			gl.clearDepth(1.0);
@@ -783,7 +841,7 @@ export function main(){
 		{
 			glext.Framebuffer.BindMainFB();	
 			gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);		
-			Camera.setViewportWidthHeight(gl.viewportWidth, gl.viewportHeight);
+			// Camera.setViewportWidthHeight(gl.viewportWidth, gl.viewportHeight);
 			
 			gl.clearColor(0.0, 0.0, 0.0, 1.0);
 			gl.clearDepth(1.0);

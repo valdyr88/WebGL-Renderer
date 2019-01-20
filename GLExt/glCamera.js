@@ -11,6 +11,10 @@ export class Camera{
 		this.ProjectionMatrix = vMath.mat4.create();
 		this.InverseViewProjectionMatrix = vMath.mat4.create();
 		this.InverseViewMatrix = vMath.mat4.create();
+		this.InverseProjectionMatrix = vMath.mat4.create();
+		this.bDoCalcInvView = false;
+		this.bDoCalcInvProj = false;
+		this.bDoCalcInvViewProj = false;
 		this.Position = vMath.vec3.create();
 		
 		this.ForwardDir = vMath.vec3.create();
@@ -35,10 +39,12 @@ export class Camera{
 		vMath.vec3.scaleAndAdd(centerPt, this.Position, centerPt, 1000.0);
 		
 		vMath.mat4.lookAt(this.ViewMatrix, this.Position, centerPt, this.UpDir);
+		this.bDoCalcInvView = true; this.bDoCalcInvViewProj = true;
 	}
 	
 	UpdateProjectionMatrix(){
 		vMath.mat4.perspective(this.ProjectionMatrix, vMath.deg2rad(this.FOV), this.PixelAspect, this.Near, this.Far);
+		this.bDoCalcInvProj = true; this.bDoCalcInvViewProj = true;
 	}
 	
 	Rotate(dx, dy){
@@ -126,8 +132,12 @@ export class Camera{
 	
 	setViewportWidthHeight(width,height){
 		this.Height = height; this.Width = width;
-		this.PixelAspect = this.Width/this.Height;
-		this.UpdateProjectionMatrix();
+		let newPixelAspect = this.Width/this.Height;
+		
+		if(newPixelAspect != this.PixelAspect){
+			this.PixelAspect = newPixelAspect;
+			this.UpdateProjectionMatrix();
+		}
 	}
 	
 	setShaderMatrices(shader){
@@ -160,11 +170,20 @@ export class Camera{
 	}
 	
 	CalcInverseViewProjectionMatrix(){
+		if(this.bDoCalcInvViewProj == false) return;
 		vMath.mat4.multiply(this.InverseViewProjectionMatrix, this.ProjectionMatrix, this.ViewMatrix);
 		this.InverseViewProjectionMatrix = vMath.mat4.glInverse(this.InverseViewProjectionMatrix);
+		this.bDoCalcInvViewProj = false;
 	}
 	
 	CalcInverseViewMatrix(){
+		if(this.bDoCalcInvView == false) return;
 		this.InverseViewMatrix = vMath.mat4.glInverse(this.ViewMatrix);
+		this.bDoCalcInvView = false;
+	}
+	CalcInverseProjectionMatrix(){
+		if(this.bDoCalcInvProj == false) return;
+		this.InverseProjectionMatrix = vMath.mat4.glInverse(this.ProjectionMatrix);
+		this.bDoCalcInvProj = false;
 	}
 }
