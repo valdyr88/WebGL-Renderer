@@ -306,8 +306,6 @@ export function main(){
 			this.setPosition(new_position, dt);
 		}
 		
-		
-		
 		//TransformToScreenCoordinates(): pos je 3D pozicija u fluidSim lokalnom prostoru
 		fluidSim.SphereBarrier.TransformToScreenCoordinates = function(pos, Camera){
 			let pos3D = [0.0,0.0,0.0]; vMath.vec3.copy(pos3D, pos); var pos2D = [0.0,0.0];
@@ -318,8 +316,7 @@ export function main(){
 			pos2D[0] = vMath.vec3.dot(pos3D, Camera.RightDir);
 			pos2D[1] = vMath.vec3.dot(pos3D, Camera.UpDir)*Camera.PixelAspect;
 			
-			// let dist = vMath.vec3.length(pos3D);
-			let dist = vMath.vec3.dot(pos3D, Camera.ForwardDir); //testirat
+			let dist = vMath.vec3.dot(pos3D, Camera.ForwardDir); 
 			
 			vMath.vec2.scale(pos2D, pos2D, 1.0/dist);
 			
@@ -358,9 +355,6 @@ export function main(){
 			return pos3D;
 		}
 		
-		
-		
-		
 		fluidSim.SphereBarrier.getPositionOnScreen = function(Camera){
 			return this.TransformToScreenCoordinates(this.position, Camera);
 		}
@@ -369,9 +363,18 @@ export function main(){
 			
 			vMath.vec2.add(offset, offset, [0.5*Camera.Width, 0.5*Camera.Height]);
 			let v = this.TransformFromScreenCoordinates(offset, Camera, false);
-			// vMath.vec3.subtract(v, v, [0.5,0.5,0.5]);
 			
 			this.addOffset(v, dt);
+		}
+		fluidSim.SphereBarrier.getDistanceToCamera = function(Camera){
+			let pos3D = [0.0,0.0,0.0];
+			
+			vMath.vec3.scale(pos3D, this.position, this.ToRealWorldScale);
+			vMath.vec3.subtract(pos3D, pos3D, Camera.Position);
+			
+			let dist = vMath.vec3.dot(pos3D, Camera.ForwardDir);
+			
+			return dist;
 		}
 		
 		fluidSim.pre_viscosity_pass_function = function(){
@@ -394,6 +397,7 @@ export function main(){
 		kvadrat.delta_position = [0.0,0.0];
 		kvadrat.position = [0.0,0.0];
 		kvadrat.velocity = [0.0,0.0];
+		kvadrat.velocity3D = [0.0,0.0,0.0];
 		kvadrat.bIsMouseOver = false;
 		kvadrat.bIsMouseDown = false;
 		kvadrat.mass = 1.0;
@@ -401,13 +405,20 @@ export function main(){
 		kvadrat.max_velocity = 20.0;
 		kvadrat.goal_position = [0.0,0.0];
 		kvadrat.goal_position3D = [0.0,0.0,0.0];
+		kvadrat.baseWindowOffset = [gl.canvasObject.offsetLeft, gl.canvasObject.offsetTop];
+		kvadrat.baseSize = 2560.0 * fluidSim.SphereBarrier.radius;
 		
 		kvadrat.setPosition = function(pos){
 			this.style.position = "absolute";
-			this.style.left =(pos[0]) + "px";
-			this.style.top = (pos[1] + this.offsetHeight) + "px";
+			this.style.left =(pos[0] + this.baseWindowOffset[0] - 0.5*this.offsetWidth) + "px";
+			this.style.top = (pos[1] + this.baseWindowOffset[1] - 0.5*this.offsetHeight) + "px";
 			// vMath.vec2.subtract(this.delta_position, pos, this.position);
 			vMath.vec2.copy(this.position, pos);
+		}
+		kvadrat.setPositionAndSize = function(pos, size){
+			this.style.width = size + "px";
+			this.style.height = size + "px";
+			this.setPosition(pos);
 		}
 		kvadrat.getDeltaPosition = function(){ return this.delta_position; }
 		
@@ -423,13 +434,14 @@ export function main(){
 				vMath.vec2.copy(this.goal_position, mouse.getPosition());
 				this.goal_position3D = fluidSim.SphereBarrier.TransformFromScreenCoordinates(this.goal_position, Camera, true);
 			}
-			else{
+			else if(bCameraUpdated == true){
 				//rotirat ako treba
 				this.goal_position = fluidSim.SphereBarrier.TransformToScreenCoordinates(this.goal_position3D, Camera);
-				/* if(bCameraUpdated == true){
+				/*this.velocity = fluidSim.SphereBarrier.TransformToScreenCoordinates(this.velocity3D, Camera); */
+				if(bCameraUpdated == true){
 					this.velocity[0] = 0.0; this.velocity[1] = 0.0;
 					this.delta_position[0] = 0.0; this.delta_position[1] = 0.0;
-				} */
+				}
 			}
 		}
 		kvadrat.UpdateMovement = function(dt, mouse){
@@ -456,6 +468,8 @@ export function main(){
 				vMath.vec2.scale(this.velocity, n, this.max_velocity);
 			}
 			this.delta_position = this.velocity;
+			/* let v2D = [0.0,0.0]; vMath.vec2.add(v2D, this.velocity, [0.5*Camera.Width, 0.5*Camera.Height]);
+			this.velocity3D = fluidSim.SphereBarrier.TransformFromScreenCoordinates(v2D, Camera, false); */
 		}
 		kvadrat.Update = function(dt, mouse, Camera, bCameraUpdated, fluidSim){
 			
@@ -734,7 +748,7 @@ export function main(){
 				// fluidSim.Display(); //display preko fluidsim/debug_display
 			}
 			//-------------------------------------------------------
-			kvadrat.setPosition(fluidSim.SphereBarrier.getPositionOnScreen(Camera));
+			kvadrat.setPositionAndSize(fluidSim.SphereBarrier.getPositionOnScreen(Camera), 125.0/fluidSim.SphereBarrier.getDistanceToCamera(Camera));
 			//-------------------------------------------------------
 		}
 		
