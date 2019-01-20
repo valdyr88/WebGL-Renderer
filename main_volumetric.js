@@ -305,113 +305,62 @@ export function main(){
 			vMath.vec3.add(new_position, offset, this.position);
 			this.setPosition(new_position, dt);
 		}
-		fluidSim.SphereBarrier.TransformFromScreenCoordinates = function(pos, Camera, bNaRavniniKojaSadrziPosition){
-			let pos2D = [0.0,0.0]; vMath.vec2.copy(pos2D, pos); //pos2D = [[0.0, 0.0], [Camera.Width, Camera.Height]]
-			// pos2D[1] /= Camera.PixelAspect;
-			vMath.vec2.multiply(pos2D, pos2D, [1.0/Camera.Width, 1.0/Camera.Height]); // pos2D = [[0.0,0.0], [1.0,1.0]];
-			vMath.vec2.subtract(pos2D, pos2D, [0.5,0.5]); //pos2D = [[-0.5,-0.5], [0.5,0.5]]
-			vMath.vec2.scale(pos2D, pos2D, 2.0); //pos2D = [[-1.0,-1.0],[1.0,1.0]]
-			// vMath.vec2.scale(pos2D, pos2D, 1.0/Math.tan(vMath.deg2rad(Camera.FOV)/2.0));
-			
-			pos2D[0] = Math.tan(pos2D[0]*vMath.deg2rad(Camera.FOV)/2.0);
-			pos2D[1] = Math.tan(pos2D[1]*vMath.deg2rad(Camera.FOV)/2.0);
-			
-			var v = [0.0,0.0,0.0]; let v2 = [0.0,0.0,0.0];
-			vMath.vec3.scale(v, Camera.RightDir, pos2D[0]);
-			vMath.vec3.scale(v2, Camera.UpDir, pos2D[1]/Camera.PixelAspect);
-			vMath.vec3.add(v,v,v2);
 		
-			vMath.vec3.copy(v2, this.position);
-			vMath.vec3.subtract(v2, v2, Camera.Position);
-			let dist = vMath.vec3.length(v2);
-			
-			vMath.vec3.scale(v,v,dist);
-			vMath.vec3.scale(v,v,1.0/this.ToRealWorldScale);
-			
-			if(bNaRavniniKojaSadrziPosition == true)
-			{	
-				let dotFrPs = vMath.vec3.dot(this.position, Camera.ForwardDir) - 0.5;
-				vMath.vec3.scale(v2, Camera.ForwardDir, dotFrPs);
-				vMath.vec3.add(v,v,v2);
-			}
-			
-			// vMath.vec3.scale(v,v,0.5);
-			// vMath.vec3.add(v,v,[0.5,0.5,0.5]); //centar je u 0.5,0.5,0.5
-			
-			
-			/*let pos2D = [0.0,0.0]; vMath.vec2.copy(pos2D, pos); var v = [0.0,0.0,0.0];
-			
-			// Camera.CalcInverseViewProjectionMatrix();
-			Camera.CalcInverseViewMatrix();
-			Camera.CalcInverseProjectionMatrix();
-			
-			let pos4D = [0.0,0.0,0.0,1.0]; vMath.vec3.copy(pos4D, this.position);
-			vMath.vec3.scale(pos4D, pos4D, this.ToRealWorldScale);
-			vMath.vec4.transformMat4(pos4D, pos4D, Camera.ViewMatrix);
-			vMath.vec4.transformMat4(pos4D, pos4D, Camera.ProjectionMatrix);
-			
-			vMath.vec2.multiply(pos2D, pos2D, [1.0/Camera.Width, 1.0/Camera.Height]); //[0.0,1.0]
-			vMath.vec2.subtract(pos2D, pos2D, [0.5,0.5]); //[-0.5,0.5]
-			vMath.vec2.scale(pos2D, pos2D, 2.0);  //[-1.0,1.0]
-			
-			vMath.vec2.scale(pos2D, pos2D, pos4D[3]);
-			
-			vMath.vec2.copy(pos4D, pos2D);
-			if(bNaRavniniKojaSadrziPosition == false){ pos4D[2] = Camera.Near; }
-			
-			let InvMat = vMath.mat4.create();
-			vMath.mat4.transpose(InvMat, Camera.InverseViewMatrix);
-			vMath.vec4.transformMat4(pos4D, pos4D, Camera.InverseViewMatrix);
-			vMath.mat4.transpose(InvMat, Camera.InverseProjectionMatrix);
-			vMath.vec4.transformMat4(pos4D, pos4D, InvMat);
-			// vMath.vec4.transformMat4(pos4D, pos4D, Camera.InverseViewProjectionMatrix);
-			
-			vMath.vec4.scale(pos4D, pos4D, 1.0/pos4D[3]);
-			
-			vMath.vec3.copy(v, pos4D);
-			vMath.vec3.scale(v, v, 1.0/this.ToRealWorldScale);			
-			*/
-			return v;
-		}
+		
+		
+		//TransformToScreenCoordinates(): pos je 3D pozicija u fluidSim lokalnom prostoru
 		fluidSim.SphereBarrier.TransformToScreenCoordinates = function(pos, Camera){
 			let pos3D = [0.0,0.0,0.0]; vMath.vec3.copy(pos3D, pos); var pos2D = [0.0,0.0];
 			
-			// vMath.vec3.subtract(pos3D, pos3D, [0.5,0.5,0.5]); //centar je u 0.5,0.5,0.5
-			// vMath.vec3.scale(pos3D, pos3D, 2.0); //pos3D = [[-1.0,-1.0,-1.0],[1.0,1.0,1.0]]
-			
-			vMath.vec3.scale(pos3D, pos3D, this.ToRealWorldScale);
+			vMath.vec3.scale(pos3D, pos, this.ToRealWorldScale);
 			vMath.vec3.subtract(pos3D, pos3D, Camera.Position);
 			
-			pos2D[0] = vMath.vec3.dot(pos3D, Camera.RightDir); //[-1,1]
-			pos2D[1] = vMath.vec3.dot(pos3D, Camera.UpDir)*Camera.PixelAspect; //[-1,1]
+			pos2D[0] = vMath.vec3.dot(pos3D, Camera.RightDir);
+			pos2D[1] = vMath.vec3.dot(pos3D, Camera.UpDir)*Camera.PixelAspect;
 			
-			let dist = vMath.vec3.length(pos3D);
+			// let dist = vMath.vec3.length(pos3D);
+			let dist = vMath.vec3.dot(pos3D, Camera.ForwardDir); //testirat
+			
 			vMath.vec2.scale(pos2D, pos2D, 1.0/dist);
 			
-			pos2D[0] = Math.atan(pos2D[0])/(vMath.deg2rad(Camera.FOV)/2.0);
-			pos2D[1] = Math.atan(pos2D[1])/(vMath.deg2rad(Camera.FOV)/2.0);			
+			vMath.vec2.add(pos2D, pos2D, [1.0,1.0]);
+			vMath.vec2.scale(pos2D, pos2D, 0.5);
 			
-			vMath.vec2.scale(pos2D, pos2D, 0.5); //[-0.5,0.5]
-			vMath.vec2.add(pos2D, pos2D, [0.5,0.5]); //[0.0,1.0]
-			
-			vMath.vec2.multiply(pos2D, pos2D, [Camera.Width, Camera.Height]); //pos2D = [[0.0, 0.0], [Camera.Width, Camera.Height]]
-			/*
-			let pos4D = [0.0,0.0,0.0,1.0]; vMath.vec3.copy(pos4D, pos); var pos2D = [0.0,0.0];
-			
-			vMath.vec3.scale(pos4D, pos4D, this.ToRealWorldScale);
-			vMath.vec4.transformMat4(pos4D, pos4D, Camera.ViewMatrix);
-			vMath.vec4.transformMat4(pos4D, pos4D, Camera.ProjectionMatrix);
-			
-			vMath.vec4.scale(pos4D, pos4D, 1.0/pos4D[3]);
-			
-			vMath.vec2.copy(pos2D, pos4D); //[-1.0,1.0]
-			
-			vMath.vec2.scale(pos2D, pos2D, 0.5); //[-0.5,0.5]
-			vMath.vec2.add(pos2D, pos2D, [0.5,0.5]); //[0.0,1.0]
 			vMath.vec2.multiply(pos2D, pos2D, [Camera.Width, Camera.Height]);
-			*/
+			
 			return pos2D;
 		}
+		//TransformFromScreenCoordinates(): pos je 2D pozicija na screenu u screen-space prostoru
+		fluidSim.SphereBarrier.TransformFromScreenCoordinates = function(pos, Camera, bNaRavniniKojaSadrziPosition){
+			let pos2D = [0.0,0.0]; vMath.vec2.copy(pos2D, pos); var pos3D = [0.0,0.0,0.0]; let v2 = [0.0,0.0,0.0];
+			
+			vMath.vec2.multiply(pos2D, pos2D, [1.0/Camera.Width, 1.0/Camera.Height]);
+			vMath.vec2.scale(pos2D, pos2D, 2.0);
+			vMath.vec2.subtract(pos2D, pos2D, [1.0,1.0]);
+						
+			vMath.vec3.scale(pos3D, Camera.RightDir, pos2D[0]);
+			vMath.vec3.scale(v2, Camera.UpDir, pos2D[1]);
+			vMath.vec3.add(pos3D, pos3D, v2);
+			
+			vMath.vec3.scale(v2, this.position, this.ToRealWorldScale);
+			vMath.vec3.subtract(v2, v2, Camera.Position);
+			let dist = vMath.vec3.dot(v2, Camera.ForwardDir); //testirat
+			
+			vMath.vec3.scale(pos3D, pos3D, dist);
+			
+			if(bNaRavniniKojaSadrziPosition == true){
+				vMath.vec3.scale(v2, Camera.ForwardDir, dist);
+				vMath.vec3.add(pos3D, pos3D, v2);
+			}
+			
+			vMath.vec3.scale(pos3D, pos3D, 1.0/this.ToRealWorldScale);
+			
+			return pos3D;
+		}
+		
+		
+		
+		
 		fluidSim.SphereBarrier.getPositionOnScreen = function(Camera){
 			return this.TransformToScreenCoordinates(this.position, Camera);
 		}
@@ -477,10 +426,10 @@ export function main(){
 			else{
 				//rotirat ako treba
 				this.goal_position = fluidSim.SphereBarrier.TransformToScreenCoordinates(this.goal_position3D, Camera);
-				if(bCameraUpdated == true){
+				/* if(bCameraUpdated == true){
 					this.velocity[0] = 0.0; this.velocity[1] = 0.0;
 					this.delta_position[0] = 0.0; this.delta_position[1] = 0.0;
-				}
+				} */
 			}
 		}
 		kvadrat.UpdateMovement = function(dt, mouse){
