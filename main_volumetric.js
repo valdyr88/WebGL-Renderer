@@ -748,7 +748,7 @@ export function main(){
 				// fluidSim.Display(); //display preko fluidsim/debug_display
 			}
 			//-------------------------------------------------------
-			kvadrat.setPositionAndSize(fluidSim.SphereBarrier.getPositionOnScreen(Camera), 125.0/fluidSim.SphereBarrier.getDistanceToCamera(Camera));
+			kvadrat.setPositionAndSize(fluidSim.SphereBarrier.getPositionOnScreen(Camera), kvadrat.baseSize/fluidSim.SphereBarrier.getDistanceToCamera(Camera));
 			//-------------------------------------------------------
 		}
 		
