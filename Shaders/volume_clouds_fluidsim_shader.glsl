@@ -265,7 +265,7 @@ vec4 RaymarchMulti(in vec3 start, in vec3 dir, in float tstart, in float maxt, i
 	}
 	
 	#ifndef _DEBUG
-		// colorsum.a = colorsum.a / 0.995f;
+		colorsum.a = colorsum.a / 0.995f;
 		return colorsum;
 	#else
 		if(bCubeEdge == true){
@@ -377,8 +377,8 @@ void main(void)
 	// if(depth < 900.0) rtn.xyz = vec3(bckgDepth);
 	
 	#ifndef _DEBUG
-		rtn.xyz = lerp(bckgColor.xyz, rtn.xyz, saturate(rtn.a/0.99f));
-		// rtn.xyz = rtn.a*rtn.xyz + (1.0-rtn.a)*bckgColor.xyz;
+		float alpha = (bckgDepth < 0.9999f)? saturate(rtn.a) : 1.0f;
+		rtn.xyz = lerp(bckgColor.xyz, rtn.xyz, alpha);
 	#endif
 	
 	gl_FragColor = tovec4(vec3(rtn.xyz), 1.0);
