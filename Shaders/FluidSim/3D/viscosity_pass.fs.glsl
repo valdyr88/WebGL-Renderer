@@ -45,7 +45,7 @@ vec4 velocityFromAdditionalForces(in vec4 u, in vec3 x, in float t, in float dt)
 	vec3 tc = toTexSpace(x);
 		
 	if( (tc.x > 0.05 && tc.x < 0.1) && (tc.y > 0.2 && tc.y < 0.8) )
-		return u + tovec4(dt*25.0*vec3(1.0,0.0,0.0), 0.0);
+		return u + tovec4(25.0*vec3(1.0,0.0,0.0), 0.0);
 	
 	return u;
 }
@@ -68,7 +68,7 @@ vec4 velocityFromSphereBarrier(in vec4 u, in vec3 x, in float t, in float dt){
 		
 		// if(dotNV > 0.0) //ocekivo sam da ce pressure pass forsat da brzina iza kugle bude istog smijera kao i ispred no nije tako.
 		if(vsize > 1e-10)
-			return u + dt*(dotNV)*vsize*tovec4(Resolution.xyz*n, 0.0);
+			return u + (dotNV)*vsize*tovec4(Resolution.xyz*n, 0.0);
 	}
 	
 	return u;

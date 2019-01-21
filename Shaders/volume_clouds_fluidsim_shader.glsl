@@ -350,10 +350,8 @@ void main(void)
 	float startT = max(length(CameraPosition) - 2.0, 0.0); //u centru je od 0.0 do 1.0 cloud
 	float maxT = 4.0f;
 	
-	// vec3 pos = vec3(0.0,1.0,-7.0);
 	vec3 pos = CameraPosition;
 	rtn = RaymarchMulti(pos, ViewDir, startT, startT+maxT, depth, dither);
-	// rtn.xyz = vec3( sample_clouds(vec3(TexCoords.x,TexCoords.y,fract(Time*0.1))) );
 	
 	#if defined(Quality_High)
 		if(bMaliRect == true) rtn.xyz = vec3(1.0,0.5,0.0);
@@ -367,14 +365,6 @@ void main(void)
 	#if defined(Quality_UltraLow)
 		if(bMaliRect == true) rtn.xyz = vec3(0.0,0.2,1.0);
 	#endif
-	
-	// rtn.xyz = lerp(bckgColor.xyz, rtn.xyz, rtn.a);
-	// rtn.xyz = bckgColor.xyz + rtn.xyz;
-	// rtn.xyz = vec3(saturate(1.0-bckgDepth)) + rtn.xyz;
-	// rtn.xyz = vec3(0.1,0.7,1.0);
-	// if(bckgDepth < 0.99999) rtn.xyz = vec3(0.0,0.5,0.75);
-	
-	// if(depth < 900.0) rtn.xyz = vec3(bckgDepth);
 	
 	#ifndef _DEBUG
 		float alpha = (bckgDepth < 0.9999f)? saturate(rtn.a) : 1.0f;

@@ -310,7 +310,8 @@ export function main(){
 		fluidSim.SphereBarrier.setPosition = function(new_position, dt){
 			if(dt < 1.0/1000.0) dt = 1.0/1000.0;
 			vMath.vec3.subtract(this.velocity, new_position, this.position);
-			vMath.vec3.scale(this.velocity, this.velocity, 1.0/dt);
+			// vMath.vec3.scale(this.velocity, this.velocity, 1.0/dt);
+			vMath.vec3.scale(this.velocity, this.velocity, 2.0);
 			vMath.vec3.copy(this.position, new_position);
 		}
 		fluidSim.SphereBarrier.addOffset = function(offset, dt){
