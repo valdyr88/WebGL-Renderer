@@ -194,7 +194,7 @@ float RaymarchCloudShadowSample(in vec3 start, in vec3 dir, in float ds)
 	return shadow;
 }
 
-vec4 RaymarchMulti(in vec3 start, in vec3 dir, in float tstart, in float maxt, in float dither)
+vec4 RaymarchMulti(in vec3 start, in vec3 dir, in float tstart, in float maxt, in float depth, in float dither)
 {
 	#ifdef _DEBUG
 		int StepCount = 0;
@@ -204,6 +204,7 @@ vec4 RaymarchMulti(in vec3 start, in vec3 dir, in float tstart, in float maxt, i
 	Light light0 = Lights[0].light;
 	
 	float t = tstart+dither;
+	depth = depth+dither;
 	vec4 colorsum = vec4(0.0);
 	
 	float dt = (maxt - tstart) / float(Raymarch_NofSteps);
@@ -259,7 +260,8 @@ vec4 RaymarchMulti(in vec3 start, in vec3 dir, in float tstart, in float maxt, i
 		#endif //_DEBUG_Display		
 		
 		t += dt;
-		if(colorsum.a > 0.99f) break;
+		if(t > depth) break;
+		if(colorsum.a > 0.995f) break;
 	}
 	
 	#ifndef _DEBUG
@@ -339,8 +341,9 @@ void main(void)
 	vec3 toLight = normalize(light0.position.xyz - Position);
 	vec3 ViewDir = normalize(ViewVector);
 	
-	float linDepth = LinearizeDepth2(bckgDepth, Near, Far);
-	linDepth = linDepth * (Far - Near) + Near;
+	float depth = LinearizeDepth(bckgDepth, Near, Far);
+	depth = depth * (Far - Near) + Near;
+	depth *= 0.5;
 	
 	vec4 rtn = vec4(0.0);
 	float startT = max(length(CameraPosition) - 2.0, 0.0); //u centru je od 0.0 do 1.0 cloud
@@ -348,7 +351,7 @@ void main(void)
 	
 	// vec3 pos = vec3(0.0,1.0,-7.0);
 	vec3 pos = CameraPosition;
-	rtn = RaymarchMulti(pos, ViewDir, startT, min(startT+maxT, linDepth+startT), dither);
+	rtn = RaymarchMulti(pos, ViewDir, startT, startT+maxT, depth, dither);
 	// rtn.xyz = vec3( sample_clouds(vec3(TexCoords.x,TexCoords.y,fract(Time*0.1))) );
 	
 	#if defined(Quality_High)
@@ -370,7 +373,11 @@ void main(void)
 	// rtn.xyz = vec3(0.1,0.7,1.0);
 	// if(bckgDepth < 0.99999) rtn.xyz = vec3(0.0,0.5,0.75);
 	
-	if(linDepth < 900.0) rtn.xyz = vec3(bckgDepth);	
+	// if(depth < 900.0) rtn.xyz = vec3(bckgDepth);
+	
+	#ifndef _DEBUG
+		rtn.xyz = lerp(bckgColor.xyz, rtn.xyz, rtn.a/0.99f);
+	#endif
 	
 	gl_FragColor = tovec4(vec3(rtn.xyz), 1.0);
 }
