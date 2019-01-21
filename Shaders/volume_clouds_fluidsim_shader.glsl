@@ -370,8 +370,7 @@ void main(void)
 	// rtn.xyz = vec3(0.1,0.7,1.0);
 	// if(bckgDepth < 0.99999) rtn.xyz = vec3(0.0,0.5,0.75);
 	
-	// if(linDepth < 100.0) rtn.xyz = vec3(linDepth);
-	
+	if(linDepth < 900.0) rtn.xyz = vec3(bckgDepth);	
 	
 	gl_FragColor = tovec4(vec3(rtn.xyz), 1.0);
 }

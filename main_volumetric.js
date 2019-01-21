@@ -32,10 +32,20 @@ export function main(){
 	var debug_kvadrat = document.getElementById("debug_kvadrat");
 	
 	var bMouseOverCanvas = false;
-	// gl.canvasObject.onmouseover = function(){ bMouseOverCanvas = true; }
-	// gl.canvasObject.onmouseout = function(){ bMouseOverCanvas = false; }
-	gl.canvasObject.onmouseenter = function(){ bMouseOverCanvas = true; }
-	gl.canvasObject.onmouseleave = function(){ bMouseOverCanvas = false; }
+	gl.canvasObject.onmouseover = function(){ bMouseOverCanvas = true; }
+	gl.canvasObject.onmouseout = function(){
+		let mpos = sys.mouse.get().getPosition();
+		
+		if(mpos[0] > this.offsetLeft && mpos[0] < this.offsetLeft + this.offsetWidth &&
+		   mpos[1] > this.offsetTop && mpos[1] < this.offsetTop + this.offsetHeight){
+			return;
+		}
+		
+		bMouseOverCanvas = false;
+	}
+	
+	// gl.canvasObject.addEventListener("mouseenter", function(){ bMouseOverCanvas = true; });
+	// gl.canvasObject.addEventListener("mouseleave", function(){ bMouseOverCanvas = false; });
 	
 	gl.clearColor(0.0, 1.0, 1.0, 1.0);
 	gl.blendColor(1.0, 1.0, 1.0, 1.0);
@@ -426,15 +436,13 @@ export function main(){
 		}
 		kvadrat.getDeltaPosition = function(){ return this.delta_position; }
 		
-		
+		// .addEventListener("mouseenter", 
 		kvadrat.onmouseover = function(){
 			if(this.mouse.get().btnLeft == false)
 				this.bIsMouseOver = true;
-			debug_kvadrat.style.backgroundColor = "rgb(255,255,0)";
 		}
 		kvadrat.onmouseout = function(){
 			this.bIsMouseOver = false;
-			debug_kvadrat.style.backgroundColor = "rgb(0,125,255)";
 		}
 		kvadrat.onmousedown = function(){
 			if(this.bIsMouseOver == true)

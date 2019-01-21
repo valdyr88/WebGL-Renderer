@@ -176,12 +176,12 @@
 	</div>
 	
 	<div style="background-color:#0055ff">
-	  <canvas id="glcanvas" width="640" height="480">
-		Your browser doesn't appear to support the HTML5 <code>&lt;canvas&gt;</code> element.
+		<canvas id="glcanvas" width="640" height="480">
+			Your browser doesn't appear to support the HTML5 <code>&lt;canvas&gt;</code> element.
+		</canvas>
 		<div id="barriermove_kvadrat" style="background-color:#55aaff00; width:128px; height:128px; position:absolute"></div>
-	  </canvas>
 	</div>
-	<div id="debug_kvadrat" style="background-color:#55aaff; width:128px; height:128px; position:absolute"></div>
+	<!-- <div id="debug_kvadrat" style="background-color:#55aaff; width:128px; height:128px; position:absolute"></div> -->
   <script type="module">
 	import { main, recompileShader, reloadTexture, onShaderDefineChanged, SetAutoQualitySelection, ReloadFluidSimShaders, FluidSimDisplayChanged, FluidSimSetKinematicViscosity, FluidSimReset, FluidSimTogglePause } from "./main_volumetric.js";
 	import { fetchImage } from "./GLExt/glTexture.js";
