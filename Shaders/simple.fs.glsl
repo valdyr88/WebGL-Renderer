@@ -1,7 +1,8 @@
 #version 300 es
 // #extension GL_EXT_shader_texture_lod : require
 precision mediump float;
-
+/***/
+#include "defines"
 #include "functions"
 #include "structs"
 //------------------------------------------------------------------------------
@@ -20,7 +21,7 @@ precision mediump float;
 uniform sampler2D txDiffuse;
 uniform sampler2D txNormal;
 uniform sampler2D txAoRS;
-uniform samplerCube txAmbient;
+// uniform samplerCube txAmbient;
 
 uniform int uFlags;
 #define getBitFlag(bit) uint_getbit(uFlags, (bit))
@@ -58,18 +59,18 @@ void main(void)
 	// if(uint_getbit(uFlags, 2) == true) normaltx.y = 1.0-normaltx.y;
 	// if(getBitFlag(2) == true) normaltx.y = 1.0-normaltx.y;
 	vec3 normal = normaltx.xyz*2.0 - 1.0;
-	normal = NormalMatrix * normal;
+	normal = NormalMatrix * normal; normal = normalize(normal);
+	vec3 dirToLight = Light_DirToLight(light0, Position);	
 	
-	float l = dot(normal.xyz, Light_DirToLight(light0, Position))*0.5+0.5;
-	
-	vec3 dir = Light_DirToLight(light0, Position);	
+	float l = dot(normal.xyz, dirToLight);
+	l = l*0.5+0.5;
 	
 	float mipLevel = (cos(Time*0.4)+1.0)/2.0;
-	vec4 Amb = textureCubeLod(txAmbient, -normal.xyz, 7.0*AoRS.y);
+	// vec4 Amb = textureCubeLod(txAmbient, -normal.xyz, 7.0*AoRS.y);
 	float ambMult = 2.0*(cos(Time*0.4) + 1.0)+0.75;
 	
 	gl_FragColor.xyz = vec3(1.0)*saturate(l);
-	gl_FragColor = Amb * 1.0;
+	gl_FragColor.xyz = vec3(1.0) * I * l;
 	
 	// gl_FragColor = vec4( I*I, l, I, 1.0);
 	// gl_FragColor = vec4( l, l, l, 1.0);

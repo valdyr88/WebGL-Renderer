@@ -69,7 +69,7 @@ export function main(){
 	glext.ShaderDefines.addGlobalDefine("MAX_LIGHTS", " "+glext.MAX_LIGHTS);
 	
 	var simple_shader = new glext.Shader(0);
-	if(simple_shader.CompileFromFile("simpleVS", "deferred_BcNAoRSMt") == false) alert("nije kompajliran shader!");
+	if(simple_shader.CompileFromFile("simpleVS", "simpleFS") == false) alert("nije kompajliran shader!");
 	simple_shader.setVertexAttribLocations("aVertexPosition","aVertexNormal","aVertexTangent",null,"aTexCoords");
 	simple_shader.setTransformMatricesUniformLocation("ModelMatrix","ViewMatrix","ProjectionMatrix");
 	simple_shader.setDefaultTextureUniformLocations("txDiffuse","txNormal","txAoRS");
@@ -152,7 +152,7 @@ export function main(){
 	var txNoiseRGB = new glext.Texture(-1); txNoiseRGB.CreateFromFile("txNoiseRGB");
 	txNoiseRGB.setWrapTypeRepeat();
 	
-	var txAmb = new glext.TextureCube(0); txAmb.CreateFromDOMDataElements("tx128");	
+	// var txAmb = new glext.TextureCube(0); txAmb.CreateFromDOMDataElements("tx128");	
 			
 	var light = new glext.Light(0);
 	// var lightUniforms = glext.Light.getUniformLocationsFromShader(shader,"light0");
@@ -163,7 +163,7 @@ export function main(){
 	var projectionMatrix = vMath.mat4.create();
 	var viewMatrix = vMath.mat4.create();
 	
-	var eyePt = vMath.vec3.fromValues(-2.0,0.0,0.0);
+	var eyePt = vMath.vec3.fromValues(2.0,0.0,0.0);
 	var centerPt = vMath.vec3.fromValues(0.0,0.0,0.0);
 	var upDir = vMath.vec3.fromValues(0.0,0.0,1.0);
 	
@@ -197,7 +197,7 @@ export function main(){
 		glext.TextureList.addTexture(txGlassN);
 		glext.TextureList.addTexture(txGlassAoRS);
 		glext.TextureList.addTexture(txBRDF_LUT);
-		glext.TextureList.addTexture(txAmb);
+		// glext.TextureList.addTexture(txAmb);
 		glext.TextureList.addTexture(txfbColor);
 		glext.TextureList.addTexture(txfbNormal);
 		glext.TextureList.addTexture(txfbAoRSMt);
@@ -224,7 +224,7 @@ export function main(){
 		navigatorModel.setTexture(txGlassAoRS,"txAoRS");
 		navigatorModel.setTexture(txfbDepth,"txDepth");
 		navigatorModel.setTexture(txBRDF_LUT,"txBRDF");
-		navigatorModel.setTexture(txAmb,"txAmbient");
+		// navigatorModel.setTexture(txAmb,"txAmbient");
 		navigatorModel.setTexture(txfbHdrMipBlur,"txBackground");
 		navigatorModel.setShader(transparent_shader);
 		
@@ -233,13 +233,14 @@ export function main(){
 		quad_model.setTexture(txfbAoRSMt,"txAoRS");
 		// quad_model.setTexture(txfbDepth,"txDepth");
 		quad_model.setTexture(txBRDF_LUT,"txBRDF");
-		quad_model.setTexture(txAmb,"txAmbient");
+		// quad_model.setTexture(txAmb,"txAmbient");
 		quad_model.setShader(deferred_opaque_shade);
 		
 		light.AttachUniformBlockTo(deferred_opaque_shade);	
 		light.AttachUniformBlockTo(transparent_shader);	
 		light.AttachUniformBlockTo(atmosphere_shader);
 		light.AttachUniformBlockTo(volume_clouds_shader);
+		light.AttachUniformBlockTo(simple_shader);
 		
 	txfbHdrMipBlur.setMinMagFilterLinearMipMapLinear();
 	//------------------------------------------------------------------------
@@ -417,11 +418,13 @@ export function main(){
 		kvadrat.mass = 1.0;
 		kvadrat.k_opruge = 1.0;
 		kvadrat.max_velocity = 20.0;
+		kvadrat.trenje = 0.01;
 		kvadrat.goal_position = [0.0,0.0];
 		kvadrat.goal_position3D = [0.0,0.0,0.0];
 		kvadrat.baseWindowOffset = [gl.canvasObject.offsetLeft, gl.canvasObject.offsetTop];
 		kvadrat.baseSize = 2560.0 * fluidSim.SphereBarrier.radius;
 		kvadrat.mouse = null;
+		kvadrat.bUpdateTowadsGoal = false;
 		
 		kvadrat.setPosition = function(pos){
 			this.style.position = "absolute";
@@ -456,18 +459,25 @@ export function main(){
 		kvadrat.onmouseleave = kvadrat.onmouseout;
 		
 		kvadrat.UpdateGoalPosition = function(mouse, Camera, bCameraUpdated, fluidSim){
-			if(bCameraUpdated == false && this.bIsMouseDown == true){ 
+			if(bCameraUpdated == false && this.bIsMouseDown == true)
+			{
+				this.bUpdateTowadsGoal = true;
 				vMath.vec2.copy(this.goal_position, mouse.getPosition());
 				this.goal_position3D = fluidSim.SphereBarrier.TransformFromScreenCoordinates(this.goal_position, Camera, true);
 			}
-			else if(bCameraUpdated == true){
+			else if(bCameraUpdated == true)
+			{
+				this.bUpdateTowadsGoal = false;
+				
 				//rotirat ako treba
 				this.goal_position = fluidSim.SphereBarrier.TransformToScreenCoordinates(this.goal_position3D, Camera);
 				/*this.velocity = fluidSim.SphereBarrier.TransformToScreenCoordinates(this.velocity3D, Camera); */
+				
 				if(bCameraUpdated == true){
 					this.velocity[0] = 0.0; this.velocity[1] = 0.0;
 					this.delta_position[0] = 0.0; this.delta_position[1] = 0.0;
 				}
+				
 			}
 		}
 		kvadrat.UpdateMovement = function(dt, mouse){
@@ -494,6 +504,8 @@ export function main(){
 				vMath.vec2.scale(this.velocity, n, this.max_velocity);
 			}
 			this.delta_position = this.velocity;
+			
+			
 			/* let v2D = [0.0,0.0]; vMath.vec2.add(v2D, this.velocity, [0.5*Camera.Width, 0.5*Camera.Height]);
 			this.velocity3D = fluidSim.SphereBarrier.TransformFromScreenCoordinates(v2D, Camera, false); */
 		}
@@ -815,7 +827,7 @@ export function main(){
 				txD.Bind(0, simple_shader.ULTextureD);
 				txN.Bind(1, simple_shader.ULTextureN);
 				txAoRS.Bind(2, simple_shader.ULTextureAoRS);
-				txAmb.Bind(3, simple_shader.ULTextureAmb);
+				// txAmb.Bind(3, simple_shader.ULTextureAmb);
 				
 				simple_shader.setViewMatrixUniform( Camera.ViewMatrix );
 				simple_shader.setProjectionMatrixUniform( Camera.ProjectionMatrix );

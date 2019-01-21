@@ -12,10 +12,10 @@ struct Light{
 Light CreateLight(vec3 pos, float inten){ Light light; light.position.xyz = pos; light.position.a = 0.0; light.intensity = inten; return light; }
 float Light_Calculate(const Light light, vec3 pos){
 
-	vec3 toCenter = light.position.xyz - pos;
-	float dist = dot(toCenter, toCenter);
+	vec3 toLight = light.position.xyz - pos;
+	float dist2 = dot(toLight, toLight);
 	
-	return light.intensity / (dist);
+	return light.intensity / (dist2);
 }
 vec3 Light_DirToLight(const Light light, vec3 pos){
 	vec3 dir = light.position.xyz - pos;
