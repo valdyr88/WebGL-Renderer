@@ -363,7 +363,7 @@ void main(void)
 	
 	vec2 mouse = Mouse.xy / Resolution.xy;
 	
-	bool bMaliRect = (TexCoords.x < 0.025f && TexCoords.y < 0.025f);
+	bool bMaliRect = (TexCoords.x < 0.0125f && TexCoords.y < 0.0125f);
 	
 	vec4 bckgColor = texture2D(txBackground, TexCoords);
 	float bckgDepth = texture2DLod(txDepth, TexCoords,0.0).x;
