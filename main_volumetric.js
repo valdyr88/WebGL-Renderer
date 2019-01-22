@@ -321,14 +321,22 @@ export function main(){
 		fluidSim.SphereBarrier.velocity = [0.0,0.0,0.0];
 		fluidSim.SphereBarrier.ToRealWorldScale = 2.0;
 		fluidSim.SphereBarrier.gravity_dir = [upDir[0],upDir[1],upDir[2]];
+		fluidSim.SphereBarrier.up_dir = [-upDir[0],-upDir[1],-upDir[2]];
+		fluidSim.SphereBarrier.down_dir = [upDir[0],upDir[1],upDir[2]];
+		fluidSim.SphereBarrier.right_dir = [Camera.RightDir[0], Camera.RightDir[1], Camera.RightDir[2]];
+		fluidSim.SphereBarrier.left_dir = [-Camera.RightDir[0], -Camera.RightDir[1], -Camera.RightDir[2]];
+		fluidSim.SphereBarrier.forward_dir = [Camera.ForwardDir[0], Camera.ForwardDir[1], Camera.ForwardDir[2]];
+		fluidSim.SphereBarrier.back_dir = [-Camera.ForwardDir[0], -Camera.ForwardDir[1], -Camera.ForwardDir[2]];
+		fluidSim.SphereBarrier.floor_depth = 1.0;
+		fluidSim.SphereBarrier.ceiling_height = 1.0;
+		fluidSim.SphereBarrier.walls_dist = 1.0;
 		fluidSim.SphereBarrier.g = 0.981;
-		fluidSim.SphereBarrier.floor_height = -1.0;
 		fluidSim.SphereBarrier.restitution = 0.5;
 		fluidSim.SphereBarrier.velScale = 1.0;
 		fluidSim.SphereBarrier.mass = 0.25;
 		fluidSim.SphereBarrier.k_spring = 1.0;
 		fluidSim.SphereBarrier.max_velocity = 10.0;
-		fluidSim.SphereBarrier.drag = 0.0025;
+		fluidSim.SphereBarrier.drag = 0.25;
 		fluidSim.SphereBarrier.goal_position = [0.0,0.0,0.0];
 		fluidSim.SphereBarrier.goal_position2D = [0.0,0.0];
 		fluidSim.SphereBarrier.position2D = [0.0,0.0];
@@ -423,6 +431,16 @@ export function main(){
 			return dist;
 		}
 		
+		fluidSim.SphereBarrier.ReflectVector = function(out, vector, normal, restitution){
+			if(restitution == undefined) restitution = 1.0;
+			let d = vMath.vec3.dot(vector, normal);
+			let v2 = [0.0,0.0,0.0]; 
+			vMath.vec3.scale(v2, normal, -d);
+			vMath.vec3.add(out, vector, v2);
+			vMath.vec3.scale(v2, normal, -d*restitution);
+			vMath.vec3.add(out, out, v2);
+			return out;
+		}
 		//--------------------------------------------------------------
 		
 		fluidSim.SphereBarrier.UpdateMovementTowardsGoal = function(dt){
@@ -460,7 +478,7 @@ export function main(){
 			
 			vMath.vec3.add(this.velocity, this.velocity, dv3D);
 		}
-		
+				
 		fluidSim.SphereBarrier.UpdateDrag = function(dt){
 			if(this.bUpdateTowadsGoal == true) return;
 			//ovo je bezveze funcija koja usporava barrier kuglu.
@@ -469,20 +487,41 @@ export function main(){
 		fluidSim.SphereBarrier.UpdateGravity = function(dt){
 			if(this.bUpdateTowadsGoal == true) return;
 			
-			let h = -vMath.vec3.dot(this.position, this.gravity_dir);
-						
-			if(h <= this.floor_height+this.radius){//bounce
-				let d = vMath.vec3.dot(this.velocity, this.gravity_dir);
-				let v2 = [0.0,0.0,0.0]; 
-				vMath.vec3.scale(v2, this.gravity_dir, -d);
-				vMath.vec3.add(this.velocity, this.velocity, v2);
-				vMath.vec3.scale(v2, this.gravity_dir, -d*this.restitution);
-				vMath.vec3.add(this.velocity, this.velocity, v2);
+			let dv = [0.0,0.0,0.0];
+			vMath.vec3.scale(dv, this.gravity_dir, dt*this.g);
+			vMath.vec3.add(this.velocity, this.velocity, dv);
+		}
+		fluidSim.SphereBarrier.BounceOfWalls = function(dt){
+			
+			let projected_position = [0.0,0.0,0.0];
+			vMath.vec3.scale(projected_position, this.velocity, dt);
+			vMath.vec3.add(projected_position, this.position, projected_position);
+			
+			let h = vMath.vec3.dot(projected_position, this.down_dir);
+			if(h >= this.floor_depth-1.5*this.radius){
+				this.ReflectVector(this.velocity, this.velocity, this.down_dir, this.restitution);
 			}
-			else{
-				let dv = [0.0,0.0,0.0];
-				vMath.vec3.scale(dv, this.gravity_dir, dt*this.g);
-				vMath.vec3.add(this.velocity, this.velocity, dv);
+			h = vMath.vec3.dot(projected_position, this.up_dir);
+			if(h >= this.ceiling_height-1.5*this.radius){
+				this.ReflectVector(this.velocity, this.velocity, this.up_dir, this.restitution);
+			}			
+			
+			h = vMath.vec3.dot(projected_position, this.right_dir);
+			if(h >= this.walls_dist-1.5*this.radius){
+				this.ReflectVector(this.velocity, this.velocity, this.right_dir, this.restitution);
+			}
+			h = vMath.vec3.dot(projected_position, this.left_dir);
+			if(h >= this.walls_dist-1.5*this.radius){
+				this.ReflectVector(this.velocity, this.velocity, this.left_dir, this.restitution);
+			}			
+			
+			h = vMath.vec3.dot(projected_position, this.forward_dir);
+			if(h >= this.walls_dist-1.5*this.radius){
+				this.ReflectVector(this.velocity, this.velocity, this.forward_dir, this.restitution);
+			}
+			h = vMath.vec3.dot(projected_position, this.back_dir);
+			if(h >= this.walls_dist-1.5*this.radius){
+				this.ReflectVector(this.velocity, this.velocity, this.back_dir, this.restitution);
 			}
 		}
 		fluidSim.SphereBarrier.ClampVelocity = function(max_velocity){	
@@ -503,6 +542,7 @@ export function main(){
 			this.UpdateMovementTowardsGoal2D(dt);
 			this.UpdateGravity(dt);
 			this.UpdateDrag(dt);
+			this.BounceOfWalls(dt);
 			
 			this.ClampVelocity(this.max_velocity);
 			
@@ -775,7 +815,7 @@ export function main(){
 		//-------------------------------------------------------------------------------------
 		
 		{
-			let dt = avg_frame_time; if(dt > 1.0) dt = 1.0;
+			let dt = avg_frame_time; if(dt > 0.1) dt = 0.1;
 			
 			//slideri
 			//-------------------------------------------------------
