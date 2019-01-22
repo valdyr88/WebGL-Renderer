@@ -178,6 +178,10 @@ export function main(){
 	var centerPt = vMath.vec3.fromValues(0.0,0.0,0.0);
 	var upDir = vMath.vec3.fromValues(0.0,0.0,-1.0);
 	
+	var Camera = new glext.Camera(0, gl.viewportWidth, gl.viewportHeight);
+	Camera.setPositionAndDir(eyePt, [1.0,0.0,0.0], upDir);
+	Camera.UpdateProjectionMatrix();
+	
 	//framebuffer
 	//------------------------------------------------------------------------
 	var fbo_width = gl.viewportWidth; var fbo_height = gl.viewportHeight;
@@ -317,16 +321,19 @@ export function main(){
 		fluidSim.SphereBarrier.velocity = [0.0,0.0,0.0];
 		fluidSim.SphereBarrier.ToRealWorldScale = 2.0;
 		fluidSim.SphereBarrier.gravity_dir = [upDir[0],upDir[1],upDir[2]];
-		fluidSim.SphereBarrier.g = 0.0981/fluidSim.SphereBarrier.ToRealWorldScale;
+		fluidSim.SphereBarrier.g = 0.981;
 		fluidSim.SphereBarrier.floor_height = -1.0;
-		fluidSim.SphereBarrier.restitution = 0.2;
+		fluidSim.SphereBarrier.restitution = 0.5;
 		fluidSim.SphereBarrier.velScale = 1.0;
-		fluidSim.SphereBarrier.mass = 1.0;
+		fluidSim.SphereBarrier.mass = 0.25;
 		fluidSim.SphereBarrier.k_spring = 1.0;
-		fluidSim.SphereBarrier.max_velocity = 20.0;
+		fluidSim.SphereBarrier.max_velocity = 10.0;
 		fluidSim.SphereBarrier.drag = 0.0025;
 		fluidSim.SphereBarrier.goal_position = [0.0,0.0,0.0];
+		fluidSim.SphereBarrier.goal_position2D = [0.0,0.0];
+		fluidSim.SphereBarrier.position2D = [0.0,0.0];
 		fluidSim.SphereBarrier.bUpdateTowadsGoal = false;
+		fluidSim.SphereBarrier.Camera = Camera;
 		
 		fluidSim.SphereBarrier.getPositionAndRadius = function(){ return [this.position[0]*0.5+0.5, this.position[1]*0.5+0.5, this.position[2]*0.5+0.5, this.radius]; }
 		fluidSim.SphereBarrier.getVelocity = function(){ return [ this.velScale*this.velocity[0], this.velScale*this.velocity[1], this.velScale*this.velocity[2]]; }
@@ -397,10 +404,12 @@ export function main(){
 		}
 		
 		fluidSim.SphereBarrier.getPositionOnScreen = function(Camera){
-			return this.TransformToScreenCoordinates(this.position, Camera);
+			this.position2D = this.TransformToScreenCoordinates(this.position, Camera);
+			return this.position2D;
 		}
 		fluidSim.SphereBarrier.setGoalPosition2D = function(pos2D, Camera){
 			this.goal_position = this.TransformFromScreenCoordinates(pos2D, Camera, true);
+			vMath.vec2.copy(this.goal_position2D, pos2D);
 		}
 		
 		fluidSim.SphereBarrier.getDistanceToCamera = function(Camera){
@@ -431,6 +440,27 @@ export function main(){
 			let dv = [0.0,0.0,0.0]; vMath.vec3.scale(dv, a, dt);
 			vMath.vec3.add(this.velocity, this.velocity, dv);	
 		}
+		fluidSim.SphereBarrier.UpdateMovementTowardsGoal2D = function(dt){
+			if(this.bUpdateTowadsGoal == false) return;
+			
+			//koordinate su u Screen space ([0,0] - [Camera.Width, Camera.Height])
+			let n = [0.0,0.0]; vMath.vec2.subtract(n, this.goal_position2D, this.position2D);
+			let d = vMath.vec2.length(n);
+			if(d < 0.1){ return; }
+			
+			vMath.vec2.scale(n, n, 1.0/d);
+			
+			let F = [0.0,0.0]; vMath.vec2.scale(F, n, d*this.k_spring);
+			let a = [0.0,0.0]; vMath.vec2.scale(a, F, 1.0/this.mass);
+			
+			let dv = [0.0,0.0]; vMath.vec2.scale(dv, a, dt);
+			
+			vMath.vec2.add(dv, dv, [0.5*this.Camera.Width, 0.5*this.Camera.Height]);
+			let dv3D = this.TransformFromScreenCoordinates(dv, this.Camera, false);
+			
+			vMath.vec3.add(this.velocity, this.velocity, dv3D);
+		}
+		
 		fluidSim.SphereBarrier.UpdateDrag = function(dt){
 			if(this.bUpdateTowadsGoal == true) return;
 			//ovo je bezveze funcija koja usporava barrier kuglu.
@@ -470,7 +500,7 @@ export function main(){
 		}
 		fluidSim.SphereBarrier.Update = function(dt){
 			
-			this.UpdateMovementTowardsGoal(dt);
+			this.UpdateMovementTowardsGoal2D(dt);
 			this.UpdateGravity(dt);
 			this.UpdateDrag(dt);
 			
@@ -538,10 +568,6 @@ export function main(){
 	vMath.mat4.lookAt(viewMatrix, eyePt, centerPt, upDir);
 	// vMath.mat4.identity(viewMatrix);
 	// vMath.mat4.translate(viewMatrix, viewMatrix, [0.0, 0.0, -7.0]);
-	
-	var Camera = new glext.Camera(0, gl.viewportWidth, gl.viewportHeight);
-	Camera.setPositionAndDir(eyePt, [1.0,0.0,0.0], upDir);
-	Camera.UpdateProjectionMatrix();
 	
 	vMath.mat4.identity(sphere_model.Transform);
 	// vMath.mat4.scale(sphere_model.Transform, sphere_model.Transform, [4.0,4.0,4.0]);
