@@ -58,6 +58,10 @@ varyin vec3 ViewVector;
 	#define _DEBUG_Display
 #endif
 
+#define minimum 0.01
+#define p0 vec3(minimum)
+#define p1 vec3(1.0-minimum)
+
 float sample_clouds_sphere(in vec3 p, vec3 c, float r){
 	if(length(p - c) < r) return 1.0;
 	return 0.0;	
@@ -71,8 +75,8 @@ float sample_clouds(in vec3 p)
 	p = p + 0.5;// 
 	
 	// p = fract(p); 	
-	if(p.x < 0.0 || p.y < 0.0 || p.z < 0.0) return 0.0;
-	if(p.x > 1.0 || p.y > 1.0 || p.z > 1.0) return 0.0;
+	if(p.x < p0.x || p.y < p0.y || p.z < p0.z) return 0.0;
+	if(p.x > p1.x || p.y > p1.y || p.z > p1.z) return 0.0;
 	
 	// return 1.0;/**/
 	
@@ -85,8 +89,8 @@ float3 sample_velocity(in vec3 p)
 	p = p * 0.25; 
 	p = p + 0.5;// 
 	
-	if(p.x < 0.0 || p.y < 0.0 || p.z < 0.0) return vec3(0.0);
-	if(p.x > 1.0 || p.y > 1.0 || p.z > 1.0) return vec3(0.0);
+	if(p.x < p0.x || p.y < p0.y || p.z < p0.z) return vec3(0.0);
+	if(p.x > p1.x || p.y > p1.y || p.z > p1.z) return vec3(0.0);
 	
 	return texture3DLod(txFluidSimVelocity, p, 0.0).xyz;
 }

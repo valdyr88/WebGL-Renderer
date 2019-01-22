@@ -7,13 +7,17 @@ vec3 toWorldSpace(vec3 x){ return x*Resolution - vec3(0.0,0.0,0.0); }
 vec3 toWorldSpace(vec2 x, int z){ vec3 r = toWorldSpace(vec3(x.x,x.y,0.0f)); r.z = float(z)-0.5; return r; }
 vec3 toWorldSpace(vec2 x, float z){ vec3 r = toWorldSpace(vec3(x.x,x.y,0.0f)); r.z = z-0.5; return r; }
 
-bool isAtBorder(vec3 x){
-#define border_size (0)
+// #define border_size (0)
+
+bool isAtBorder(in vec3 x, in int border_size){
 	if(int(x.x) < border_size || int(x.x) >= int(Resolution.x)-border_size || 
 	   int(x.y) < border_size || int(x.y) >= int(Resolution.y)-border_size ||
 	   int(x.z) < border_size || int(x.z) >= int(Resolution.z)-border_size)
 		return true;
 	return false;
+}
+bool isAtBorder(vec3 x){
+	return isAtBorder(x, 0);
 }
 
 vec4 sampleLinear(sampler3D tx, vec3 x){

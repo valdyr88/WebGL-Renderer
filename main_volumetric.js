@@ -34,12 +34,12 @@ export function main(){
 	var bMouseOverCanvas = false;
 	gl.canvasObject.onmouseover = function(){ bMouseOverCanvas = true; }
 	gl.canvasObject.onmouseout = function(){
-		let mpos = sys.mouse.get().getPosition();
+		/* let mpos = sys.mouse.get().getPosition();
 		
 		if(mpos[0] > this.offsetLeft && mpos[0] < this.offsetLeft + this.offsetWidth &&
 		   mpos[1] > this.offsetTop && mpos[1] < this.offsetTop + this.offsetHeight){
 			return;
-		}
+		} */
 		
 		bMouseOverCanvas = false;
 	}
@@ -332,10 +332,11 @@ export function main(){
 		fluidSim.SphereBarrier.walls_dist = 1.0;
 		fluidSim.SphereBarrier.g = 0.981;
 		fluidSim.SphereBarrier.restitution = 0.5;
-		fluidSim.SphereBarrier.velScale = 1.0;
+		fluidSim.SphereBarrier.velScale = 0.25;
 		fluidSim.SphereBarrier.mass = 0.25;
 		fluidSim.SphereBarrier.k_spring = 1.0;
 		fluidSim.SphereBarrier.max_velocity = 10.0;
+		fluidSim.SphereBarrier.min_velocity = 0.1;
 		fluidSim.SphereBarrier.drag = 0.25;
 		fluidSim.SphereBarrier.goal_position = [0.0,0.0,0.0];
 		fluidSim.SphereBarrier.goal_position2D = [0.0,0.0];
@@ -499,7 +500,11 @@ export function main(){
 			
 			let h = vMath.vec3.dot(projected_position, this.down_dir);
 			if(h >= this.floor_depth-1.5*this.radius){
-				this.ReflectVector(this.velocity, this.velocity, this.down_dir, this.restitution);
+				let d = vMath.vec3.length(this.velocity);
+				if(d > this.min_velocity)
+					this.ReflectVector(this.velocity, this.velocity, this.down_dir, this.restitution);
+				else
+					vMath.vec3.copy(this.velocity, [0,0,0]);
 			}
 			h = vMath.vec3.dot(projected_position, this.up_dir);
 			if(h >= this.ceiling_height-1.5*this.radius){

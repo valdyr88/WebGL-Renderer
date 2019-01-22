@@ -38,24 +38,7 @@ varyin vec2 TexCoords;
 
 #include "fluidsim3d_include"
 
-#define GradComp x
 
-/*vec4 gradient(sampler3D tx, vec3 x){
-	
-	const vec3 dx = vec3(1.0,1.0,1.0);
-	
-	float u[6];
-	//za 3D treba 6 susjednih samplirat
-	u[0] = samplePoint(tx, x + vec3( dx.x,  0.0,  0.0)).GradComp;
-	u[1] = samplePoint(tx, x + vec3(-dx.x,  0.0,  0.0)).GradComp;
-	u[2] = samplePoint(tx, x + vec3(  0.0, dx.y,  0.0)).GradComp;
-	u[3] = samplePoint(tx, x + vec3(  0.0,-dx.y,  0.0)).GradComp;
-	u[4] = samplePoint(tx, x + vec3(  0.0,  0.0, dx.z)).GradComp;
-	u[5] = samplePoint(tx, x + vec3(  0.0,  0.0,-dx.z)).GradComp;
-	
-	vec4 grad = 0.5*vec4( u[0]-u[1], u[2]-u[3], u[4]-u[5], 0.0 );
-	return grad;
-}*/
 
 //racuna divergence free brzinu
 void main(void)
@@ -69,8 +52,10 @@ void main(void)
 		
 		vec4 gradP = tovec4(gradient(txPressure, x, dx),0.0);
 		vec4 oldU = samplePoint(txVelocity, x);
-		
+				
 		u[i] = oldU - gradP;
+		
+		if(isAtBorder(x, 1) == true) u[i] = vec4(0.0);
 	}
 	
 	// gl_FragColor = u;
