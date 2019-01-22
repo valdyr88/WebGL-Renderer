@@ -104,13 +104,13 @@
   <script src="./main.js" type="script"></script>
   
   </head>
-<body style="margin: 0; height: 100%; overflow: hidden;">
-	<img id="reload_shader_btn" onclick="reload_fluidsim_shader()" title="fluidsim shaders" src="./misc/reload_ico.png"></img>
+<body style="margin: 0; height: 100%; overflow: hidden; background-color:#555555;">
+	 <!-- <img id="reload_shader_btn" onclick="reload_fluidsim_shader()" title="fluidsim shaders" src="./misc/reload_ico.png"></img> -->
 	<!-- <img id="reload_shader_btn" onclick="reload_shader('deferred_opaque_shade')" title="deferred_opaque_shade" src="./misc/reload_ico.png"></img> -->
 	<!-- <img id="reload_shader_btn" onclick="reload_shader('transparent_shader')" title="transparent_shader" src="./misc/reload_ico.png"></img> -->
-	<img id="reload_shader_btn" onclick="reload_shader('volume_clouds_shader')" title="volume_clouds_shader" src="./misc/reload_ico.png"></img>
-	<img id="reload_shader_btn" onclick="reload_shader('volume_clouds_vs')" title="volume_clouds_vs" src="./misc/reload_ico.png"></img>
-	<img id="reload_shader_btn" onclick="reload_shader('simpleFS')" title="simpleFS" src="./misc/reload_ico.png"></img>
+	 <!-- <img id="reload_shader_btn" onclick="reload_shader('volume_clouds_shader')" title="volume_clouds_shader" src="./misc/reload_ico.png"></img> -->
+	 <!-- <img id="reload_shader_btn" onclick="reload_shader('volume_clouds_vs')" title="volume_clouds_vs" src="./misc/reload_ico.png"></img> -->
+	 <!-- <img id="reload_shader_btn" onclick="reload_shader('simpleFS')" title="simpleFS" src="./misc/reload_ico.png"></img> -->
 	<!-- <img id="reload_shader_btn" onclick="reload_shader('deferred_skybox')" title="deferred_skybox" src="./misc/reload_ico.png"></img> -->
   	<!-- <img id="reload_texture_btn" onclick="reload_texture('txGlass_AoRS')" title="txGlass_AoRS" src="./misc/reload_ico.png"></img> -->
   	<!-- <img id="reload_texture_btn" onclick="reload_texture('txGlass_N')" title="txGlass_N" src="./misc/reload_ico.png"></img> -->
@@ -180,7 +180,21 @@
 			<br>
 			Kugla se može pomicati držanjem lijeve tipke miša<br>
 			Lijeva tipka miša također služi i za rotiranje pogleda<br>
-			Kolut miša približava/udaljuje pogled
+			Kolut miša približava/udaljuje pogled<br>
+			<br>
+			Pritiskom na "Pause FluidSim" pauzira se simulacija.<br>
+			Kugla se tada ne može micati no pogled se može mijenjati.<br>
+			Pritiskom na "Reset FluidSim" simulacija se vraća u <br>
+			početno stanje, no kugla i dalje ostaje na istoj poziciji.<br>
+			<br>
+			Odabirom "Quality" mijenja se kvaliteta prikaza (no ne i simulacije).<br>
+			Odabirom "Debug" mijenja se prikaz različitih "varijabli" simulacije.<br>
+			<br>
+			Prvi slider kontrolira jačinu prikaza za "Debug" varijable.<br>
+			Drugi slider određuje broj koraka korekcije pritiska.<br>
+			Ako je simulacija zahtjevna za računalo, smanjenje koraka korekcije<br>
+			može pomoći.<br>
+			Treći slider određuje viskoznost fluida.<br>
 		</p>
 	
 	</div>
