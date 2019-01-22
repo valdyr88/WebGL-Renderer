@@ -305,48 +305,46 @@ export function main(){
 		fluidSim.CreateMass(128,128,128, false, false, "fluidsim_mass_init_shader", "fluidsim_mass_advect_shader", "fluidsim_mass_advect_correction_shader");
 				
 		//custom barrier
+		//-----------------------------------------------------------------------------------------------
 		fluidSim.viscosity_shader.ULSphereBarrier = fluidSim.viscosity_shader.getUniformLocation("sphereBarrier");
 		fluidSim.viscosity_shader.ULSphereBarrierVelocity = fluidSim.viscosity_shader.getUniformLocation("sphereBarrierVelocity");
 		fluidSim.pressure_shader.ULSphereBarrier = fluidSim.pressure_shader.getUniformLocation("sphereBarrier");
 		fluidSim.pressure_shader.ULSphereBarrierVelocity = fluidSim.pressure_shader.getUniformLocation("sphereBarrierVelocity");
+		
 		fluidSim.SphereBarrier = ["Sphere Barrier"];
 		fluidSim.SphereBarrier.position = [0.25,0.0,0.5];
-		fluidSim.SphereBarrier.old_position = [0.0,0.0,0.0];
 		fluidSim.SphereBarrier.radius = 0.05;
 		fluidSim.SphereBarrier.velocity = [0.0,0.0,0.0];
 		fluidSim.SphereBarrier.ToRealWorldScale = 2.0;
 		fluidSim.SphereBarrier.gravity_dir = [upDir[0],upDir[1],upDir[2]];
 		fluidSim.SphereBarrier.g = 0.0981/fluidSim.SphereBarrier.ToRealWorldScale;
-		fluidSim.SphereBarrier.velocity_due_gravity = [0.0,0.0,0.0];
 		fluidSim.SphereBarrier.floor_height = -1.0;
 		fluidSim.SphereBarrier.restitution = 0.2;
-		fluidSim.SphereBarrier.velScale = 2.0;
+		fluidSim.SphereBarrier.velScale = 1.0;
+		fluidSim.SphereBarrier.mass = 1.0;
+		fluidSim.SphereBarrier.k_spring = 1.0;
+		fluidSim.SphereBarrier.max_velocity = 20.0;
+		fluidSim.SphereBarrier.drag = 0.0025;
+		fluidSim.SphereBarrier.goal_position = [0.0,0.0,0.0];
+		fluidSim.SphereBarrier.bUpdateTowadsGoal = false;
 		
 		fluidSim.SphereBarrier.getPositionAndRadius = function(){ return [this.position[0]*0.5+0.5, this.position[1]*0.5+0.5, this.position[2]*0.5+0.5, this.radius]; }
-		
 		fluidSim.SphereBarrier.getVelocity = function(){ return [ this.velScale*this.velocity[0], this.velScale*this.velocity[1], this.velScale*this.velocity[2]]; }
-		
 		fluidSim.SphereBarrier.getWorldPosition = function(){ return [this.position[0]*this.ToRealWorldScale, this.position[1]*this.ToRealWorldScale, this.position[2]*this.ToRealWorldScale]; }
 		
-		/* fluidSim.SphereBarrier.setPosition = function(new_position, dt){
-			if(dt < 1.0/1000.0) dt = 1.0/1000.0;
-			vMath.vec3.subtract(this.velocity, new_position, this.position);
-			vMath.vec3.copy(this.position, new_position);
-		} */
-		fluidSim.SphereBarrier.addOffset = function(offset, dt){
-			// let new_position = [0.0,0.0,0.0];
-			vMath.vec3.add(this.position, offset, this.position);
-			// this.setPosition(new_position, dt);
+		fluidSim.pre_viscosity_pass_function = function(){
+			this.viscosity_shader.setFloat4Uniform( this.viscosity_shader.ULSphereBarrier, this.SphereBarrier.getPositionAndRadius() );
+			this.viscosity_shader.setFloat3Uniform( this.viscosity_shader.ULSphereBarrierVelocity, this.SphereBarrier.getVelocity() );
 		}
-		fluidSim.SphereBarrier.VelocityFromDeltaPos = function(){
-			
-			vMath.vec3.subtract(this.velocity, this.position, this.old_position);
-			//copy over old pos
-			vMath.vec3.copy(this.old_position, this.position);
+		fluidSim.pre_pressure_pass_function = function(){
+			this.pressure_shader.setFloat4Uniform( this.pressure_shader.ULSphereBarrier, this.SphereBarrier.getPositionAndRadius() );
+			this.pressure_shader.setFloat3Uniform( this.pressure_shader.ULSphereBarrierVelocity, this.SphereBarrier.getVelocity() );
 		}
-		
-		fluidSim.SphereBarrier.PostUpdate = function(){
-			this.VelocityFromDeltaPos();
+		fluidSim.on_recompile_fluidsim_shaders = function(){
+			this.viscosity_shader.ULSphereBarrier = this.viscosity_shader.getUniformLocation("sphereBarrier");
+			this.viscosity_shader.ULSphereBarrierVelocity = this.viscosity_shader.getUniformLocation("sphereBarrierVelocity");
+			this.pressure_shader.ULSphereBarrier = this.pressure_shader.getUniformLocation("sphereBarrier");
+			this.pressure_shader.ULSphereBarrierVelocity = this.pressure_shader.getUniformLocation("sphereBarrierVelocity");
 		}
 		
 		//TransformToScreenCoordinates(): pos je 3D pozicija u fluidSim lokalnom prostoru
@@ -401,14 +399,10 @@ export function main(){
 		fluidSim.SphereBarrier.getPositionOnScreen = function(Camera){
 			return this.TransformToScreenCoordinates(this.position, Camera);
 		}
-		fluidSim.SphereBarrier.addOffsetFromScreenCoords = function(in_offset, dt, Camera){
-			let offset = [0.0,0.0]; vMath.vec2.copy(offset, in_offset);
-			
-			vMath.vec2.add(offset, offset, [0.5*Camera.Width, 0.5*Camera.Height]);
-			let v = this.TransformFromScreenCoordinates(offset, Camera, false);
-			
-			this.addOffset(v, dt);
+		fluidSim.SphereBarrier.setGoalPosition2D = function(pos2D, Camera){
+			this.goal_position = this.TransformFromScreenCoordinates(pos2D, Camera, true);
 		}
+		
 		fluidSim.SphereBarrier.getDistanceToCamera = function(Camera){
 			let pos3D = [0.0,0.0,0.0];
 			
@@ -420,169 +414,123 @@ export function main(){
 			return dist;
 		}
 		
+		//--------------------------------------------------------------
+		
+		fluidSim.SphereBarrier.UpdateMovementTowardsGoal = function(dt){
+			if(this.bUpdateTowadsGoal == false) return;
+			
+			let n = [0.0,0.0,0.0]; vMath.vec3.subtract(n, this.goal_position, this.position);
+			let d = vMath.vec3.length(n);
+			if(d < 0.01){ return; }
+			
+			vMath.vec3.scale(n, n, 1.0/d);
+			
+			let F = [0.0,0.0,0.0]; vMath.vec3.scale(F, n, d*this.k_spring);
+			let a = [0.0,0.0,0.0]; vMath.vec3.scale(a, F, 1.0/this.mass);
+			
+			let dv = [0.0,0.0,0.0]; vMath.vec3.scale(dv, a, dt);
+			vMath.vec3.add(this.velocity, this.velocity, dv);	
+		}
+		fluidSim.SphereBarrier.UpdateDrag = function(dt){
+			if(this.bUpdateTowadsGoal == true) return;
+			//ovo je bezveze funcija koja usporava barrier kuglu.
+			vMath.vec3.scale(this.velocity, this.velocity, 1.0 - this.drag*dt);
+		}
 		fluidSim.SphereBarrier.UpdateGravity = function(dt){
+			if(this.bUpdateTowadsGoal == true) return;
 			
 			let h = -vMath.vec3.dot(this.position, this.gravity_dir);
 						
 			if(h <= this.floor_height+this.radius){//bounce
-				this.velocity_due_gravity;
-				let d = vMath.vec3.dot(this.velocity_due_gravity, this.gravity_dir);
+				let d = vMath.vec3.dot(this.velocity, this.gravity_dir);
 				let v2 = [0.0,0.0,0.0]; 
 				vMath.vec3.scale(v2, this.gravity_dir, -d);
-				vMath.vec3.add(this.velocity_due_gravity, this.velocity_due_gravity, v2);
+				vMath.vec3.add(this.velocity, this.velocity, v2);
 				vMath.vec3.scale(v2, this.gravity_dir, -d*this.restitution);
-				vMath.vec3.add(this.velocity_due_gravity, this.velocity_due_gravity, v2);
+				vMath.vec3.add(this.velocity, this.velocity, v2);
 			}
 			else{
 				let dv = [0.0,0.0,0.0];
 				vMath.vec3.scale(dv, this.gravity_dir, dt*this.g);
-				vMath.vec3.add(this.velocity_due_gravity, this.velocity_due_gravity, dv);
+				vMath.vec3.add(this.velocity, this.velocity, dv);
 			}
-			this.addOffset(this.velocity_due_gravity, dt);
 		}
-		fluidSim.SphereBarrier.ClearGravity = function(){
-			vMath.vec3.copy(this.velocity_due_gravity, [0,0,0]);
+		fluidSim.SphereBarrier.ClampVelocity = function(max_velocity){	
+			let d = vMath.vec3.length(this.velocity);
+			if(d > max_velocity){
+				let n = [0.0,0.0,0.0];
+				vMath.vec3.scale(n, this.velocity, 1.0/d);
+				vMath.vec3.scale(this.velocity, n, max_velocity);
+			}
 		}
+		fluidSim.SphereBarrier.UpdatePosition = function(dt){
+			
+			let dx = [0.0,0.0,0.0]; vMath.vec3.scale(dx, this.velocity, dt);
+			vMath.vec3.add(this.position, this.position, dx);
+		}
+		fluidSim.SphereBarrier.Update = function(dt){
+			
+			this.UpdateMovementTowardsGoal(dt);
+			this.UpdateGravity(dt);
+			this.UpdateDrag(dt);
+			
+			this.ClampVelocity(this.max_velocity);
+			
+			this.UpdatePosition(dt);
+		}
+		//--------------------------------------------------------------
 		
-		fluidSim.pre_viscosity_pass_function = function(){
-			this.viscosity_shader.setFloat4Uniform( this.viscosity_shader.ULSphereBarrier, this.SphereBarrier.getPositionAndRadius() );
-			this.viscosity_shader.setFloat3Uniform( this.viscosity_shader.ULSphereBarrierVelocity, this.SphereBarrier.getVelocity() );
-		}
-		fluidSim.pre_pressure_pass_function = function(){
-			this.pressure_shader.setFloat4Uniform( this.pressure_shader.ULSphereBarrier, this.SphereBarrier.getPositionAndRadius() );
-			this.pressure_shader.setFloat3Uniform( this.pressure_shader.ULSphereBarrierVelocity, this.SphereBarrier.getVelocity() );
-		}
-		fluidSim.on_recompile_fluidsim_shaders = function(){
-			this.viscosity_shader.ULSphereBarrier = this.viscosity_shader.getUniformLocation("sphereBarrier");
-			this.viscosity_shader.ULSphereBarrierVelocity = this.viscosity_shader.getUniformLocation("sphereBarrierVelocity");
-			this.pressure_shader.ULSphereBarrier = this.pressure_shader.getUniformLocation("sphereBarrier");
-			this.pressure_shader.ULSphereBarrierVelocity = this.pressure_shader.getUniformLocation("sphereBarrierVelocity");
-		}
+		//-----------------------------------------------------------------------------------------------
 		
 		//div kvadrat koji reprezentira sphere barrier i njeno micanje u 2D planeu
+		//-----------------------------------------------------------------------------------------------
 		barrier = document.getElementById("barriermove_kvadrat");
-		barrier.delta_position = [0.0,0.0];
-		barrier.position = [0.0,0.0];
-		barrier.position3D = [0.0,0.0,0.0];
-		barrier.velocity = [0.0,0.0];
-		barrier.velocity3D = [0.0,0.0,0.0];
 		barrier.bIsMouseOver = false;
 		barrier.bIsMouseDown = false;
 		barrier.radius = fluidSim.SphereBarrier.radius * fluidSim.SphereBarrier.ToRealWorldScale;
-		barrier.mass = 1.0;
-		barrier.k_spring = 1.0;
-		barrier.max_velocity = 20.0;
-		barrier.drag = 0.0025;
-		barrier.goal_position = [0.0,0.0];
-		barrier.goal_position3D = [0.0,0.0,0.0];
 		barrier.baseWindowOffset = [gl.canvasObject.offsetLeft, gl.canvasObject.offsetTop];
 		barrier.baseSize = 2560.0 * fluidSim.SphereBarrier.radius;
-		barrier.mouse = null;
+		barrier.mouse = sys.mouse;
 		barrier.bUpdateTowadsGoal = false;
+		barrier.goal_position2D = [0.0,0.0];
+		barrier.position2D = [0.0,0.0];
 		
 		barrier.setScreenPosition = function(pos){
 			this.style.position = "absolute";
 			this.style.left =(pos[0] + this.baseWindowOffset[0] - 0.5*this.offsetWidth) + "px";
 			this.style.top = (pos[1] + this.baseWindowOffset[1] - 0.5*this.offsetHeight) + "px";
-			// vMath.vec2.subtract(this.delta_position, pos, this.position);
-			vMath.vec2.copy(this.position, pos);
+			// vMath.vec2.subtract(this.delta_position, pos, this.position2D);
+			vMath.vec2.copy(this.position2D, pos);
 		}
-		barrier.setPositionAndSize = function(pos3D, pos, size){
+		barrier.setPositionAndSize = function(pos, size){
 			this.style.width = size + "px";
 			this.style.height = size + "px";
 			this.setScreenPosition(pos);
-			vMath.vec3.copy(this.position3D, pos3D);
 		}
-		barrier.getDeltaPosition = function(){ return this.delta_position; }
-		
 		// .addEventListener("mouseenter", 
-		barrier.onmouseover = function(){
-			if(this.mouse.get().btnLeft == false)
-				this.bIsMouseOver = true;
-		}
-		barrier.onmouseout = function(){
-			this.bIsMouseOver = false;
-		}
-		barrier.onmousedown = function(){
-			if(this.bIsMouseOver == true)
-				this.bIsMouseDown = true;
-		}
-		barrier.onmouseup = function(){
-			this.bIsMouseDown = false;
-		}
+		barrier.onmouseover = function(){ if(this.mouse.get().btnLeft == false) this.bIsMouseOver = true; }
+		barrier.onmouseout = function(){ this.bIsMouseOver = false; }
+		barrier.onmousedown = function(){ if(this.bIsMouseOver == true) this.bIsMouseDown = true; }
+		barrier.onmouseup = function(){ this.bIsMouseDown = false; }
 		barrier.onmouseenter = barrier.onmouseover;
 		barrier.onmouseleave = barrier.onmouseout;
 		
 		barrier.UpdateGoalPosition = function(mouse, Camera, bCameraUpdated, fluidSim){
-			if(bCameraUpdated == false && this.bIsMouseDown == true)
-			{
+			if(bCameraUpdated == false && this.bIsMouseDown == true){
+				vMath.vec2.copy(this.goal_position2D, mouse.getPosition());
 				this.bUpdateTowadsGoal = true;
-				vMath.vec2.copy(this.goal_position, mouse.getPosition());
-				this.goal_position3D = fluidSim.SphereBarrier.TransformFromScreenCoordinates(this.goal_position, Camera, true);
 			}
-			else if(bCameraUpdated == true)
-			{
+			else{
 				this.bUpdateTowadsGoal = false;
-				
-				//rotirat ako treba
-				this.goal_position = fluidSim.SphereBarrier.TransformToScreenCoordinates(this.goal_position3D, Camera);
-				/*this.velocity = fluidSim.SphereBarrier.TransformToScreenCoordinates(this.velocity3D, Camera); */
-				
-				if(bCameraUpdated == true){
-					this.velocity[0] = 0.0; this.velocity[1] = 0.0;
-					this.delta_position[0] = 0.0; this.delta_position[1] = 0.0;
-				}
-				
 			}
-		}
-		barrier.UpdateMovementTowardsGoal = function(dt){
-			if(this.bUpdateTowadsGoal == false) return;
-			
-			let n = [0.0,0.0]; vMath.vec2.subtract(n, this.goal_position, this.position);
-			let d = vMath.vec2.length(n);
-			if(d < 0.01){ return; }
-			
-			vMath.vec2.scale(n, n, 1.0/d);
-			
-			let F = [0.0,0.0]; vMath.vec2.scale(F, n, d*this.k_spring);
-			let a = [0.0,0.0]; vMath.vec2.scale(a, F, 1.0/this.mass);
-			
-			let dv = [0.0,0.0]; vMath.vec2.scale(dv, a, dt);
-			vMath.vec2.add(this.velocity, this.velocity, dv);	
-			
-			/* let v2D = [0.0,0.0]; vMath.vec2.add(v2D, this.velocity, [0.5*Camera.Width, 0.5*Camera.Height]);
-			this.velocity3D = fluidSim.SphereBarrier.TransformFromScreenCoordinates(v2D, Camera, false); */
-		}
-		barrier.UpdateDrag = function(dt){
-			//ovo je bezveze funcija koja usporava barrier kuglu.
-			vMath.vec2.scale(this.velocity, this.velocity, 1.0 - this.drag*dt);
-		}
-		barrier.ClampVelocity = function(max_velocity){	
-			let d = vMath.vec2.length(this.velocity);
-			if(d > max_velocity){
-				let n = [0.0,0.0];
-				vMath.vec2.scale(n, this.velocity, 1.0/d);
-				vMath.vec2.scale(this.velocity, n, max_velocity);
-			}
+			fluidSim.SphereBarrier.bUpdateTowadsGoal = this.bUpdateTowadsGoal;
+			fluidSim.SphereBarrier.setGoalPosition2D(this.goal_position2D, Camera);
 		}
 		barrier.Update = function(dt, mouse, Camera, bCameraUpdated, fluidSim){
-			this.delta_position[0] = 0.0; this.delta_position[1] = 0.0;
-			
-			barrier.mouse = mouse;
 			if(this.bIsMouseDown == true && mouse.get().btnLeft == false){ this.bIsMouseDown = false; }
-			
-			this.UpdateDrag(dt);
 			this.UpdateGoalPosition(mouse, Camera, bCameraUpdated, fluidSim);
-			this.UpdateMovementTowardsGoal(dt);
-			
-			this.ClampVelocity(this.max_velocity);
-			this.delta_position = this.velocity;
-			
-			if(this.bIsMouseDown == false) //ah, moram ovdje
-				fluidSim.SphereBarrier.UpdateGravity(dt);
-			else
-				fluidSim.SphereBarrier.ClearGravity();
 		}
+		//-----------------------------------------------------------------------------------------------
 	}
 	
 	vMath.mat4.perspective(projectionMatrix, vMath.deg2rad(40.0), gl.viewportWidth/gl.viewportHeight, 0.1, 1000.0);
@@ -822,19 +770,18 @@ export function main(){
 			//-------------------------------------------------------
 			if(bFluidSimPass == true)
 			{
-				//micanje barriera
-				//-------------------------------------------------------
+				//micanje barriera mišem
 				barrier.Update(dt, sys.mouse, Camera, bUpdateCamera, fluidSim);
-				//-------------------------------------------------------
-			
-				//barrier
+				
+				//simulacija micanja barriera
 				//-------------------------------------------------------
 				// let oscAmp = 0.25, oscSpeed = 0.75;
 				/* fluidSim.SphereBarrier.position = [0.5, 0.5 + oscAmp*Math.cos(oscSpeed*fluidSim.time), 0.5 ];
 				fluidSim.SphereBarrier.velocity = [0.0, -oscAmp*oscSpeed*Math.sin(oscSpeed*fluidSim.time), 0.0 ]; */
 				// fluidSim.SphereBarrier.setPosition([0.5, 0.5 + oscAmp*Math.cos(oscSpeed*fluidSim.time), 0.5 ], dt);
 				// fluidSim.SphereBarrier.addOffset(SphereBarrierPositionOffset, dt);
-				fluidSim.SphereBarrier.addOffsetFromScreenCoords(barrier.getDeltaPosition(), dt, Camera);
+				// fluidSim.SphereBarrier.addOffsetFromScreenCoords(barrier.getDeltaPosition(), dt, Camera);
+				fluidSim.SphereBarrier.Update(dt);
 				//-------------------------------------------------------
 				
 				fluidSim.SimStep(dt);
@@ -844,12 +791,12 @@ export function main(){
 				// gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);		
 				
 				// fluidSim.Display(); //display preko fluidsim/debug_display
+				
+				//postavljanje on screen pozicije kvadrata za micanje
+				barrier.setPositionAndSize(fluidSim.SphereBarrier.getPositionOnScreen(Camera), barrier.baseSize/fluidSim.SphereBarrier.getDistanceToCamera(Camera));
 			}
 			//-------------------------------------------------------
-			barrier.setPositionAndSize(fluidSim.SphereBarrier.getWorldPosition(), fluidSim.SphereBarrier.getPositionOnScreen(Camera), barrier.baseSize/fluidSim.SphereBarrier.getDistanceToCamera(Camera));
-			//-------------------------------------------------------
 			
-			fluidSim.SphereBarrier.PostUpdate();
 		}
 		
 			gl.enable(gl.DEPTH_TEST);
