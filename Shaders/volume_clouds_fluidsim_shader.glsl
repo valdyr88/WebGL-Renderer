@@ -31,6 +31,8 @@ uniform sampler2D txDepth;
 uniform sampler2D txBackground;
 uniform sampler3D txFluidSimVelocity;
 uniform sampler3D txFluidSimCloud;
+uniform sampler3D txFluidSimPressure;
+uniform sampler3D txFluidSimDivergence;
 
 uniform int uFlags;
 #define getBitFlag(bit) uint_getbit(uFlags, (bit))
@@ -67,32 +69,49 @@ float sample_clouds_sphere(in vec3 p, vec3 c, float r){
 	return 0.0;	
 }
 
+vec3 position_cloud(in vec3 p){
+	p = p * 0.25; 
+	p = p + 0.5;
+	return p;
+}
+bool is_in_cloud_space(in vec3 p){
+	if(p.x < p0.x || p.y < p0.y || p.z < p0.z) return false;
+	if(p.x > p1.x || p.y > p1.y || p.z > p1.z) return false;
+	return true;
+}
+
 float sample_clouds(in vec3 p)
 {
-	// return sample_clouds_sphere(p, vec3(0.0,0.0,0.0), 0.5);
-
-	p = p * 0.25; 
-	p = p + 0.5;// 
-	
-	// p = fract(p); 	
-	if(p.x < p0.x || p.y < p0.y || p.z < p0.z) return 0.0;
-	if(p.x > p1.x || p.y > p1.y || p.z > p1.z) return 0.0;
-	
-	// return 1.0;/**/
+	// return sample_clouds_sphere(p, vec3(0.0,0.0,0.0), 0.5);	
+	p = position_cloud(p);
+	if(is_in_cloud_space(p) == false) return 0.0;
 	
 	float d = texture3DLod(txFluidSimCloud, p, 0.0).x;
 	return d*0.5;
 }
 
 float3 sample_velocity(in vec3 p)
-{
-	p = p * 0.25; 
-	p = p + 0.5;// 
-	
-	if(p.x < p0.x || p.y < p0.y || p.z < p0.z) return vec3(0.0);
-	if(p.x > p1.x || p.y > p1.y || p.z > p1.z) return vec3(0.0);
+{	
+	p = position_cloud(p);
+	if(is_in_cloud_space(p) == false) return vec3(0.0);
 	
 	return texture3DLod(txFluidSimVelocity, p, 0.0).xyz;
+}
+
+float sample_pressure(in vec3 p)
+{
+	p = position_cloud(p);
+	if(is_in_cloud_space(p) == false) return 0.0;
+
+	return texture2DLod(txFluidSimPressure, p, 0.0).x;
+}
+
+float sample_divergence(in vec3 p)
+{
+	p = position_cloud(p);
+	if(is_in_cloud_space(p) == false) return 0.0;
+
+	return texture2DLod(txFluidSimDivergence, p, 0.0).x;
 }
 
 //===================================================================================================
@@ -246,7 +265,7 @@ vec4 RaymarchMulti(in vec3 start, in vec3 dir, in float tstart, in float maxt, i
 			#if defined(_DEBUG_Display_Velocity)
 				float velocitySize = length(velocity) / float((Raymarch_NofSteps));
 			#elif defined(_DEBUG_Display_VelocitySize)
-				float velocitySize = length(velocity)*displayBrightness/250.0;
+				float velocitySize = length(velocity)*displayBrightness/125.0;
 			#endif
 			
 			colorsum.a += velocitySize;
@@ -254,11 +273,17 @@ vec4 RaymarchMulti(in vec3 start, in vec3 dir, in float tstart, in float maxt, i
 		#endif
 		
 		#ifdef _DEBUG_Display_Pressure
+			float pressure = sample_pressure(ray)*displayBrightness/125.0;
 			
+			colorsum.a += abs(pressure);
+			colorsum.r += pressure;
 		#endif
 		
 		#ifdef _DEBUG_Display_Divergence
+			float diverg = sample_divergence(ray)*displayBrightness/125.0;
 			
+			colorsum.a += abs(diverg);
+			colorsum.r += diverg;
 		#endif
 		
 		#endif //_DEBUG_Display		
@@ -290,11 +315,12 @@ vec4 RaymarchMulti(in vec3 start, in vec3 dir, in float tstart, in float maxt, i
 		#endif
 		
 		#ifdef _DEBUG_Display_Pressure
-			
+			// return lerp3pt(vec4(0.0,0.5,1.0,1.0), vec4(0.5,0.5,0.5,1.0), vec4(1.0,0.0,0.0,1.0), colorsum.r*0.5+0.5);
+			return lerp3pt(vec4(0.0,0.0,0.0,1.0), vec4(0.5,0.5,0.5,1.0), vec4(1.0,1.0,1.0,1.0), colorsum.r*0.5+0.5);
 		#endif
 		
 		#ifdef _DEBUG_Display_Divergence
-			
+			return lerp3pt(vec4(0.0,0.0,0.0,1.0), vec4(0.5,0.5,0.5,1.0), vec4(1.0,1.0,1.0,1.0), colorsum.r*0.5+0.5);
 		#endif
 		
 		return vec4(1.0,0.0,1.0,1.0);

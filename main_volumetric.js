@@ -125,6 +125,8 @@ export function main(){
 	volume_clouds_shader.ULPixelAspect = volume_clouds_shader.getUniformLocation("PixelAspect");
 	volume_clouds_shader.ULTextureMass = volume_clouds_shader.getUniformLocation("txFluidSimCloud");
 	volume_clouds_shader.ULTextureVelocity = volume_clouds_shader.getUniformLocation("txFluidSimVelocity");
+	volume_clouds_shader.ULTexturePressure = volume_clouds_shader.getUniformLocation("txFluidSimPressure");
+	volume_clouds_shader.ULTextureDivergence = volume_clouds_shader.getUniformLocation("txFluidSimDivergence");
 	volume_clouds_shader.ULDisplayBrightness = volume_clouds_shader.getUniformLocation("displayBrightness");
 	volume_clouds_shader.ULTanHalfFOV = volume_clouds_shader.getUniformLocation("TanHalfFOV");
 		
@@ -934,6 +936,8 @@ export function main(){
 				txfbDepth.Bind(2, volume_clouds_shader.ULTextureBackgroundDepth);
 				fluidSim.txVelocity.Bind(3, volume_clouds_shader.ULTextureVelocity);
 				fluidSim.txMass.Bind(4, volume_clouds_shader.ULTextureMass);
+				fluidSim.txPressure.Bind(5, volume_clouds_shader.ULTexturePressure);
+				fluidSim.txDivergence.Bind(6, volume_clouds_shader.ULTextureDivergence);
 				
 				let brightness = fluidsimBrightnessSlider.fvalue();
 				// volume_clouds_shader.setViewMatrixUniform( Camera.ViewMatrix );
@@ -1073,6 +1077,8 @@ export function recompileShader(fragment_name){
 				case "volume_clouds_shader":
 					shader.ULTextureMass = shader.getUniformLocation("txFluidSimCloud");
 					shader.ULTextureVelocity = shader.getUniformLocation("txFluidSimVelocity");
+					shader.ULTexturePressure = shader.getUniformLocation("txFluidSimPressure");
+					shader.ULTextureDivergence = shader.getUniformLocation("txFluidSimDivergence");
 					shader.ULTextureNoiseRGB = shader.getUniformLocation("txNoiseRGB");
 					shader.ULTextureBackground = shader.getUniformLocation("txBackground");
 					shader.ULTextureBackgroundDepth = shader.getUniformLocation("txDepth");
