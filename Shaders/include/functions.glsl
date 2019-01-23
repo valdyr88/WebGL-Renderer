@@ -509,4 +509,49 @@ vec4 lerp3pt(vec4 a, vec4 b, vec4 c, float t){
 	if(t < 0.0) return lerp(a,b,1.0+t);
 	else return lerp(b,c,t);
 }
+
+//================================================================================================================
+
+bool intersectRaySphere(const vec3 rPos, const vec3 rDir, const vec3 sphPos, const float sphRad, out float2 t)
+{	
+	float a = 1.0; 
+	vec3 rPos2sphPos = rPos - sphPos;
+	float b = 2.0*dot(rDir, rPos2sphPos);
+	float c = dot(rPos2sphPos,rPos2sphPos) - sphRad*sphRad;
+	float D = b*b - 4.0*a*c;
+	
+	if(D < 0.0) return false;
+	if(D == 0.0){ t = float2(b / 2.0*a); return true; }
+	
+	float sqrtD = sqrt(D);	
+	
+	float t1 = (b - sqrtD) / 2.0*a;
+	float t2 = (b + sqrtD) / 2.0*a;
+	
+	t.x = t1; t.y = t2;
+	
+	return true;
+}
+
+//https://www.reddit.com/r/opengl/comments/8ntzz5/fast_glsl_ray_box_intersection/
+bool intersectRayBBox(const vec3 pos, const vec3 dir, const vec3 boxMin, const vec3 boxMax, out vec2 hit) {
+	
+	vec3 rinvDir = vec3(1.0/dir);
+
+	vec3 tbot = rinvDir * (boxMin - pos);
+	vec3 ttop = rinvDir * (boxMax - pos);
+	vec3 tmin = min(ttop, tbot);
+	vec3 tmax = max(ttop, tbot);
+	vec2 t = max(tmin.xx, tmin.yz);
+	float t0 = max(t.x, t.y);
+	t = min(tmax.xx, tmax.yz);
+	float t1 = min(t.x, t.y);
+	hit.x = t0;
+	hit.y = t1;
+	
+	return t1 > max(t0, 0.0);
+}
+
+//================================================================================================================
+
 #endif //GLSL_FUNCTIONS

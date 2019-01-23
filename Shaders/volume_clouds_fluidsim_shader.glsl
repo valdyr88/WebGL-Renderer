@@ -74,6 +74,12 @@ vec3 position_cloud(in vec3 p){
 	p = p + 0.5;
 	return p;
 }
+vec3 inverse_position_cloud(in vec3 p){
+	p = p - 0.5;
+	p = p / 0.25;
+	return p;
+}
+
 bool is_in_cloud_space(in vec3 p){
 	if(p.x < p0.x || p.y < p0.y || p.z < p0.z) return false;
 	if(p.x > p1.x || p.y > p1.y || p.z > p1.z) return false;
@@ -114,6 +120,10 @@ float sample_divergence(in vec3 p)
 	return texture2DLod(txFluidSimDivergence, p, 0.0).x;
 }
 
+void cloud_bounding_box(out vec3 a, out vec3 b){
+	a = inverse_position_cloud(vec3(0.0,0.0,0.0));
+	b = inverse_position_cloud(vec3(1.0,1.0,1.0));
+}
 //===================================================================================================
 // SDF gizmo container (scena)
 //===================================================================================================
@@ -179,8 +189,7 @@ vec3 calcNormal(in vec3 p){
 
 bool isEdge(in vec3 p){
 	const float eps = 0.005f;
-	p = p * 0.25; 
-	p = p + 0.5;// 
+	p = position_cloud(p);
 	
 	if(float_equals(p.x, 0.0f, eps) && float_equals(p.y, 0.0f, eps)) return true;
 	if(float_equals(p.x, 0.0f, eps) && float_equals(p.y, 1.0f, eps)) return true;
@@ -355,6 +364,24 @@ float RaymarchSDFfindT(in vec3 start, in vec3 dir, float t, float disttreshold, 
 }
 //===================================================================================================
 
+
+bool rayIntersectsCloudBSphere(vec3 pos, vec3 dir){
+	
+	vec3 C = inverse_position_cloud(vec3(0.5,0.5,0.5));
+	float R = length(inverse_position_cloud(vec3(1.0,1.0,1.0)));
+	
+	float2 t;
+	return intersectRaySphere(pos, dir, C, R, t);
+}
+
+bool rayIntersectsCloudBBox(vec3 pos, vec3 dir){
+	
+	vec3 bBox[2]; cloud_bounding_box(bBox[0], bBox[1]);
+	
+	float2 t;
+	return intersectRayBBox(pos, dir, bBox[0], bBox[1], t);
+}
+
 void main(void)
 {	
 	Light light0 = Lights[0].light;
@@ -381,7 +408,14 @@ void main(void)
 	float maxT = 4.0f;
 	
 	vec3 pos = CameraPosition;
-	rtn = RaymarchMulti(pos, ViewDir, startT, startT+maxT, depth, dither);
+	
+	// bool bTrace = rayIntersectsCloudBSphere(pos, ViewDir);
+	bool bTrace = rayIntersectsCloudBBox(pos, ViewDir);
+	
+	if(bTrace == true)
+		rtn = RaymarchMulti(pos, ViewDir, startT, startT+maxT, depth, dither);
+	else
+		rtn = vec4(0.0);
 	
 	#if defined(Quality_High)
 		if(bMaliRect == true) rtn.xyz = vec3(1.0,0.5,0.0);
