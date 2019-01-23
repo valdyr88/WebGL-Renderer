@@ -677,8 +677,6 @@ export function main(){
 		testv2D_1 = fluidSim.SphereBarrier.TransformToScreenCoordinates(testv3D_1, Camera);
 	}*/
 	
-	setInterval( function(){ window.requestAnimationFrame(renderFrame); }, delay_ms);
-	
 	function renderFrame()
 	{
 		time = sys.time.getSecondsSinceStart();
@@ -967,6 +965,22 @@ export function main(){
 		
 		oldframe_time = time;
 	}
+	
+	avg_frame_time = 1.0/60.0;
+	oldframe_time = sys.time.getSecondsSinceStart();
+	
+	if(sys.browser.isChrome == true)
+	{
+		renderFrame();
+		avg_frame_time = 1.0/60.0;
+		
+		setTimeout(function(){
+			oldframe_time = sys.time.getSecondsSinceStart();
+			setInterval( function(){ window.requestAnimationFrame(renderFrame); }, delay_ms);
+		}, 1000.0);
+	}
+	else
+		setInterval( function(){ window.requestAnimationFrame(renderFrame); }, delay_ms);
 	
 	return; /* */
 }
