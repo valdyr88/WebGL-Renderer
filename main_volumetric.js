@@ -19,6 +19,7 @@ export function main(){
 	var gs = sys.storage.GlobalStorage.getSingleton();
 	sys.mouse.InitMouse(document);
 	sys.keyboard.InitKeyboard(document);
+	sys.CheckWhatBrowser();
 		
 	gl = glext.glInit("glcanvas");
 	if(gl == null) return;

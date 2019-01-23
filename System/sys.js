@@ -7,6 +7,7 @@ import * as zip from "./zip.js"
 import * as keyboard from "./keyboard.js"
 import * as html from "./html.js"
 import * as fetch from "./fetch.js"
+import { browser, CheckWhatBrowser } from "./html.js"
 //============================================================================
 export { keyboard };
 export { zip };
@@ -15,3 +16,4 @@ export { time };
 export { storage };
 export { html };
 export { fetch };
+export { browser, CheckWhatBrowser };

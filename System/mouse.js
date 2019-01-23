@@ -1,3 +1,4 @@
+import { browser } from "./html.js"
 
 export class Mouse
 {
@@ -74,10 +75,16 @@ export class Mouse
 		if(this.AttachedMouse === undefined) return;
 		if(this.AttachedMouse == null) return;
 		
+		let scale = 1.0;
+		if(browser != undefined || browser != null){
+			if(browser.isFirefox == true) scale = 1.0;
+			else if(browser.isChrome == true) scale = 1.0/100.0;
+		}
+		
 		if(event.wheelDelta != undefined)
-			this.AttachedMouse.dz = event.wheelDelta;
+			this.AttachedMouse.dz = scale*event.wheelDelta;
 		else if(event.deltaMode != undefined && event.deltaMode == 1)
-			this.AttachedMouse.dz = -event.deltaY;
+			this.AttachedMouse.dz = -scale*event.deltaY;
 		else
 			this.AttachedMouse.dz = 1; //ne znamo u kojem smijeru!
 	}
