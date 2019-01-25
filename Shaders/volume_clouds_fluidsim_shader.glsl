@@ -253,7 +253,7 @@ vec4 RaymarchMulti(in vec3 start, in vec3 dir, in float tstart, in float maxt, i
 			
 			vec3 lightDir = light0.position.xyz - ray;
 			
-			float lited = lightIntensity / ((dot(lightDir,lightDir))); lited = clamp(lited,0.0,4.0*lightIntensity);
+			float lited = light0.intensity / ((dot(lightDir,lightDir))); lited = clamp(lited,0.0,4.0*light0.intensity);
 			float shadow = RaymarchCloudShadowSample(ray, normalize(lightDir), dt);
 					
 			float3 color = cloudColor;
@@ -417,7 +417,7 @@ void main(void)
 	else
 		rtn = vec4(0.0);
 	
-	#if defined(Quality_High)
+	/* #if defined(Quality_High)
 		if(bMaliRect == true) rtn.xyz = vec3(1.0,0.5,0.0);
 	#endif
 	#if defined(Quality_Med)
@@ -428,7 +428,7 @@ void main(void)
 	#endif
 	#if defined(Quality_UltraLow)
 		if(bMaliRect == true) rtn.xyz = vec3(0.0,0.2,1.0);
-	#endif
+	#endif */
 	
 	#ifndef _DEBUG
 		float alpha = (bckgDepth < 0.9999f)? saturate(rtn.a) : 1.0f;

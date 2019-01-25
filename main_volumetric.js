@@ -32,21 +32,45 @@ export function main(){
 	glext.InitDebugTextDOM("debug_text");
 	var debug_kvadrat = document.getElementById("debug_kvadrat");
 	
-	var bMouseOverCanvas = false;
-	gl.canvasObject.onmouseover = function(){ bMouseOverCanvas = true; }
+	sys.mouse.mouse.MouseControls = 0;
+	sys.mouse.mouse.MouseControlsNone = 0;
+	sys.mouse.mouse.MouseControlsView = 1;
+	sys.mouse.mouse.MouseControlsSphere = 2;
+	sys.mouse.mouse.MouseControlsLight = 3;
+	sys.mouse.mouse.IsFreeToTakeControl = function(who_asks){
+		if(this.MouseControls == this.MouseControlsNone || this.MouseControls == who_asks) return true;
+		return false;}
+	sys.mouse.mouse.SetMouseControl = function(to_who){
+		if(this.IsFreeToTakeControl(to_who) == false) return false;
+		this.MouseControls = to_who; return true;}
+	sys.mouse.mouse.ClearControl = function(who){
+		if(this.IsFreeToTakeControl(who) == false) return false;
+		this.MouseControls = this.MouseControlsNone; return true; }
+	sys.mouse.mouse.ForceClear = function(){ this.MouseControls = this.MouseControlsNone; }
+		
+	gl.canvasObject.bIsMouseOver = false;
+	gl.canvasObject.bIsMouseDown = false;
+	gl.canvasObject.onmouseover = function(){
+		// if(sys.mouse.get().SetMouseControl(sys.mouse.get().MouseControlsView) == false) return;		
+		this.bIsMouseOver = true;
+	}
 	gl.canvasObject.onmouseout = function(){
-		/* let mpos = sys.mouse.get().getPosition();
-		
-		if(mpos[0] > this.offsetLeft && mpos[0] < this.offsetLeft + this.offsetWidth &&
-		   mpos[1] > this.offsetTop && mpos[1] < this.offsetTop + this.offsetHeight){
-			return;
-		} */
-		
-		bMouseOverCanvas = false;
+		// sys.mouse.get().ClearControl(sys.mouse.get().MouseControlsView);		
+		this.bIsMouseOver = false;
+	}
+	gl.canvasObject.onmousedown = function(){
+		if(sys.mouse.get().SetMouseControl(sys.mouse.get().MouseControlsView) == false) return;
+		this.bIsMouseDown = true;
+	}
+	gl.canvasObject.onmouseup = function(){
+		if( this.bIsMouseDown == true && sys.mouse.get().btnLeft == true ) return;
+		sys.mouse.get().ClearControl(sys.mouse.get().MouseControlsView);
+		this.bIsMouseDown = false;
 	}
 	
-	// gl.canvasObject.addEventListener("mouseenter", function(){ bMouseOverCanvas = true; });
-	// gl.canvasObject.addEventListener("mouseleave", function(){ bMouseOverCanvas = false; });
+	// gl.canvasObject.addEventListener("mouseenter", function(){ this.bIsMouseOver = true; });
+	// gl.canvasObject.addEventListener("mouseleave", function(){ this.bIsMouseOver = false; });
+		
 	
 	gl.clearColor(0.0, 1.0, 1.0, 1.0);
 	gl.blendColor(1.0, 1.0, 1.0, 1.0);
@@ -162,6 +186,7 @@ export function main(){
 	// var lightUniforms_backbuffer_shader = glext.Light.getUniformLocationsFromShader(deferred_opaque_shade,"light0");
 	// atmosphere_shader.lightUniforms = glext.Light.getUniformLocationsFromShader(atmosphere_shader, "light0");
 	// light.AttachUniformBlockTo(shader);	
+	light.setPosition(1.0, 0.0, 2.5);
 	
 	var projectionMatrix = vMath.mat4.create();
 	var viewMatrix = vMath.mat4.create();
@@ -303,7 +328,16 @@ export function main(){
 		return v;
 	}
 	
+	var lightIntenitySlider = document.getElementById("light_intensity_slider");
+	if(lightIntenitySlider != null){
+		lightIntenitySlider.fvalue = function(){
+			var v = this.value;
+			return v / 10.0;
+		}
+	}
+	
 	var barrier = null;
+	var light_move = null;
 	
 	if(b3DFluidSim == true)
 	{
@@ -563,7 +597,7 @@ export function main(){
 		//div kvadrat koji reprezentira sphere barrier i njeno micanje u 2D planeu
 		//-----------------------------------------------------------------------------------------------
 		barrier = document.getElementById("barriermove_kvadrat");
-		barrier.bIsMouseOver = false;
+		// barrier.bIsMouseOver = false;
 		barrier.bIsMouseDown = false;
 		barrier.radius = fluidSim.SphereBarrier.radius * fluidSim.SphereBarrier.ToRealWorldScale;
 		barrier.baseWindowOffset = [gl.canvasObject.offsetLeft, gl.canvasObject.offsetTop];
@@ -585,13 +619,15 @@ export function main(){
 			this.style.height = size + "px";
 			this.setScreenPosition(pos);
 		}
-		// .addEventListener("mouseenter", 
-		barrier.onmouseover = function(){ if(this.mouse.get().btnLeft == false) this.bIsMouseOver = true; }
-		barrier.onmouseout = function(){ this.bIsMouseOver = false; }
-		barrier.onmousedown = function(){ if(this.bIsMouseOver == true) this.bIsMouseDown = true; }
-		barrier.onmouseup = function(){ this.bIsMouseDown = false; }
-		barrier.onmouseenter = barrier.onmouseover;
-		barrier.onmouseleave = barrier.onmouseout;
+		barrier.onmousedown = function(){
+			if(sys.mouse.get().SetMouseControl(sys.mouse.get().MouseControlsSphere) == false) return;
+			this.bIsMouseDown = true;
+		}
+		barrier.onmouseup = function(){
+			if( this.bIsMouseDown == true && sys.mouse.get().btnLeft == true ) return;
+			sys.mouse.get().ClearControl(sys.mouse.get().MouseControlsSphere);
+			this.bIsMouseDown = false;
+		}
 		
 		barrier.UpdateGoalPosition = function(mouse, Camera, bCameraUpdated, fluidSim){
 			if(bCameraUpdated == false && this.bIsMouseDown == true){
@@ -607,6 +643,115 @@ export function main(){
 		barrier.Update = function(dt, mouse, Camera, bCameraUpdated, fluidSim){
 			if(this.bIsMouseDown == true && mouse.get().btnLeft == false){ this.bIsMouseDown = false; }
 			this.UpdateGoalPosition(mouse, Camera, bCameraUpdated, fluidSim);
+		}
+		//-----------------------------------------------------------------------------------------------
+		
+		//div kvadrat koji upravlja pozicijom svjetla
+		//-----------------------------------------------------------------------------------------------
+		light_move = document.getElementById("lightmove_kvadrat");
+		// light_move.bIsMouseOver = false;
+		light_move.bIsMouseDown = false;
+		light_move.baseWindowOffset = [gl.canvasObject.offsetLeft, gl.canvasObject.offsetTop];
+		light_move.baseSize = 8;
+		light_move.position = [0.0,0.0,0.0];
+		light_move.position2D = [0.0,0.0];
+		
+		light_move.setScreenPosition = function(pos){
+			this.style.position = "absolute";
+			this.style.left =(pos[0] + this.baseWindowOffset[0] - 0.5*this.offsetWidth) + "px";
+			this.style.top = (pos[1] + this.baseWindowOffset[1] - 0.5*this.offsetHeight) + "px";
+			vMath.vec2.copy(this.position2D, pos);
+		}
+		light_move.setPositionAndSize = function(pos, size){
+			this.style.width = size + "px";
+			this.style.height = size + "px";
+			this.setScreenPosition(pos);
+		}
+		light_move.onmousedown = function(){
+			if(sys.mouse.get().SetMouseControl(sys.mouse.get().MouseControlsLight) == false) return;
+			this.bIsMouseDown = true;
+		}
+		light_move.onmouseup = function(){
+			if( this.bIsMouseDown == true && sys.mouse.get().btnLeft == true ) return;
+			sys.mouse.get().ClearControl(sys.mouse.get().MouseControlsLight);
+			this.bIsMouseDown = false;
+		}
+		light_move.mouse = sys.mouse;
+		vMath.vec3.copy(light_move.position, light.Position)
+		
+		//TransformToScreenCoordinates(): pos je 3D pozicija u fluidSim lokalnom prostoru
+		light_move.TransformToScreenCoordinates = function(pos, Camera){
+			let pos3D = [0.0,0.0,0.0]; vMath.vec3.copy(pos3D, pos); var pos2D = [0.0,0.0];
+			
+			vMath.vec3.subtract(pos3D, pos3D, Camera.Position);
+			
+			pos2D[0] = vMath.vec3.dot(pos3D, Camera.RightDir);
+			pos2D[1] = vMath.vec3.dot(pos3D, Camera.UpDir)*Camera.PixelAspect;
+			
+			let dist = vMath.vec3.dot(pos3D, Camera.ForwardDir); 
+			
+			vMath.vec2.scale(pos2D, pos2D, 1.0/dist);
+			
+			vMath.vec2.add(pos2D, pos2D, [1.0,1.0]);
+			vMath.vec2.scale(pos2D, pos2D, 0.5);
+			
+			vMath.vec2.multiply(pos2D, pos2D, [Camera.Width, Camera.Height]);
+			
+			return pos2D;
+		}
+		//TransformFromScreenCoordinates(): pos je 2D pozicija na screenu u screen-space prostoru
+		light_move.TransformFromScreenCoordinates = function(pos, Camera, bNaRavniniKojaSadrziPosition){
+			let pos2D = [0.0,0.0]; var pos3D = [0.0,0.0,0.0]; let v2 = [0.0,0.0,0.0];
+			
+			vMath.vec2.multiply(pos2D, pos, [1.0/Camera.Width, 1.0/Camera.Height]);
+			vMath.vec2.scale(pos2D, pos2D, 2.0);
+			vMath.vec2.subtract(pos2D, pos2D, [1.0,1.0]);
+			
+			vMath.vec3.scale(pos3D, Camera.RightDir, pos2D[0]);
+			vMath.vec3.scale(v2, Camera.UpDir, pos2D[1]);
+			vMath.vec3.add(pos3D, pos3D, v2);
+			
+			vMath.vec3.copy(v2, this.position);
+			vMath.vec3.subtract(v2, v2, Camera.Position);
+			let dist = vMath.vec3.dot(v2, Camera.ForwardDir); //testirat
+			
+			vMath.vec3.scale(pos3D, pos3D, dist);
+			
+			if(bNaRavniniKojaSadrziPosition == true){
+				vMath.vec3.scale(v2, Camera.ForwardDir, dist);
+				vMath.vec3.add(pos3D, pos3D, v2);
+				vMath.vec3.add(pos3D, pos3D, Camera.Position);
+			}
+			
+			return pos3D;
+		}
+		light_move.MoveScreenAligned = function(delta, Camera){
+			let deltaPos = [0,0];
+			
+			vMath.vec2.add(deltaPos, delta, [0.5*Camera.Width, 0.5*Camera.Height]);
+			let delta3D = this.TransformFromScreenCoordinates(deltaPos, Camera, false);
+			
+			vMath.vec3.add(this.position, this.position, delta3D);
+		}
+		light_move.Update = function(light, mouse, Camera, bCameraUpdated){
+			if(this.bIsMouseDown == true && mouse.get().btnLeft == false){ this.bIsMouseDown = false; }
+			
+			if(this.bIsMouseDown == true)
+			{
+				var mousePos = mouse.getPosition();
+				this.position = this.TransformFromScreenCoordinates(mousePos, Camera, true);
+				// var mouseDelta = mouse.getDeltaPosition();
+				// this.MoveScreenAligned(mouseDelta, Camera);
+				
+				if(light != null){
+					light.setPosition(this.position[0], this.position[1], this.position[2]);
+					this.setPositionAndSize(mousePos, this.baseSize);
+				}
+			}
+			else{
+				var pos2D = this.TransformToScreenCoordinates(this.position, Camera);
+				this.setPositionAndSize(pos2D, this.baseSize);
+			}
 		}
 		//-----------------------------------------------------------------------------------------------
 	}
@@ -728,12 +873,13 @@ export function main(){
 		
 		var SphereBarrierPositionOffset = [0.0,0.0,0.0];
 		
-		if(bMouseOverCanvas == true)
+		if(gl.canvasObject.bIsMouseOver == true)
 		{
 			orbital.dinclination = 0.0;
 			orbital.dazimuth = 0.0;
 			
-			if(sys.mouse.get().btnLeft == true && barrier.bIsMouseDown == false)
+			if(sys.mouse.get().btnLeft == true && barrier.bIsMouseDown == false &&
+				gl.canvasObject.bIsMouseDown == true && light_move.bIsMouseDown == false)
 			{
 				if(mouseDelta[0] != 0 || mouseDelta[1] != 0)
 				{
@@ -875,11 +1021,13 @@ export function main(){
 			gl.depthFunc(gl.LEQUAL);
 		
 		{
-			light.setPosition(1.0, 0.0, 2.5); //*ctime
+			light_move.Update(light, sys.mouse, Camera, bUpdateCamera);
+			// light.setPosition(1.0, 0.0, 2.5); //*ctime
 			light.setDisplaySize(5.0);
 			light.setDisplayColor(0.5,0.79,1.0,1.0);
 			light.setMatrices( Camera.ViewMatrix, Camera.ProjectionMatrix );
-			light.setIntensity(4.0);
+			if(lightIntenitySlider != null) light.setIntensity(lightIntenitySlider.fvalue());
+			else light.setIntensity(4.0);
 			light.setColor(0.5,0.79,1.0,1.0);
 			light.Update();
 			
@@ -959,6 +1107,7 @@ export function main(){
 		}
 		
 		sys.mouse.Update();
+		if(sys.mouse.get().btnLeft == false) sys.mouse.get().ForceClear();
 		sys.keyboard.Update();
 		gl.flush();
 		gs.Update();

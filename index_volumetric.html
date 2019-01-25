@@ -171,6 +171,9 @@
 			<div class="slidecontainer" title="viscosity">
 			  <input type="range" min="0" max="90" value="10" class="slider" id="fluidsim_viscosity_slider">
 			</div>
+			<!-- <div class="slidecontainer" title="light intensity">
+			  <input type="range" min="0" max="100" value="10" class="slider" id="light_intensity_slider">
+			</div> -->
 			<button id="pause_fluidsim", onclick="on_fluidsim_pause()" style="transform: translate(50%, 0%);">Pause FluidSim</button>
 			<br/>
 			<button id="reset_fluidsim", onclick="on_fluidsim_reset()" style="transform: translate(50%, 0%);">Reset FluidSim</button>
@@ -229,6 +232,7 @@
 			Your browser doesn't appear to support the HTML5 <code>&lt;canvas&gt;</code> element.
 		</canvas>
 		<div id="barriermove_kvadrat" style="cursor: move; background-color:#55aaff00; width:128px; height:128px; position:absolute"></div>
+		<div id="lightmove_kvadrat" style="cursor: move; background-color:#aaff5500; width:8px; height:8px; position:absolute"></div>
 	</div>
 	<!-- <div id="debug_kvadrat" style="background-color:#55aaff; width:128px; height:128px; position:absolute"></div> -->
   <script type="module">
