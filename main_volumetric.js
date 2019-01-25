@@ -652,7 +652,7 @@ export function main(){
 		// light_move.bIsMouseOver = false;
 		light_move.bIsMouseDown = false;
 		light_move.baseWindowOffset = [gl.canvasObject.offsetLeft, gl.canvasObject.offsetTop];
-		light_move.baseSize = 8;
+		light_move.baseSize = 16;
 		light_move.position = [0.0,0.0,0.0];
 		light_move.position2D = [0.0,0.0];
 		

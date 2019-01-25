@@ -123,6 +123,14 @@
 		  <input type="range" min="0" max="10" value="10" class="slider" id="fps_slider">
 		</div> -->
 		
+		<br>
+		
+		<p style="font-family:verdana; color:white; font-size:75%;" >
+			You can move the sphere and light source with left mouse button.<br>
+			Left mouse button also controls the view.<br>
+			Middle mouse (scroll) button zooms the view.<br>
+		</p>
+		
 		<div style="display: flex;">
 			<p style="font-family:verdana; color:white;" >Quality: </p>
 			<select id="select_Quality" onchange="on_shader_define_changed('volume_clouds_shader','select_Quality','Quality_Auto', null)" style=" height: 22px;  transform: translate(10%, 65%);">
@@ -133,9 +141,10 @@
 				<option value="Quality_UltraLow">UltraLow</option>
 			</select>
 		</div>
+		<!-- <p style="font-family:verdana; color:white; font-size:75%;">Changing to higher quality might affect performace</p> -->
 		
 		<div style="display: flex;">
-			<p style="font-family:verdana; color:white;">Debug: </p>
+			<p style="font-family:verdana; color:white;">ViewMode: </p>
 			<select id="select_Debug" onchange="on_shader_define_changed('volume_clouds_shader','select_Debug','Off', '_DEBUG')" style=" height: 22px;  transform: translate(10%, 65%);">
 				<option value="Off">Off</option>
 				<option value="_DEBUG_Clouds_StepCount">RayMarch_StepCount</option>
@@ -162,21 +171,33 @@
 			</select>
 		</div> -->
 			<div class="slidecontainer" title="brightness">
-			  <input type="range" min="1" max="100" value="35" class="slider" id="fluidsim_brightness_slider">
-			  <!-- <p>Value: <span id="demo"></span></p> -->
+				<input type="range" min="1" max="100" value="35" class="slider" id="fluidsim_brightness_slider">
+				<!-- <p>Value: <span id="demo"></span></p> -->
+				<p style="font-family:verdana; color:white; font-size:75%; transform: translate(5%, -25%);">brightness slider (for ViewModes)</p>
 			</div>
+			
 			<div class="slidecontainer" title="pressure iteration count">
-			  <input type="range" min="1" max="125" value="14" class="slider" id="fluidsim_pressure_iteration_count_slider">
+				<input type="range" min="1" max="125" value="14" class="slider" id="fluidsim_pressure_iteration_count_slider">
+				<p style="font-family:verdana; color:white; font-size:75%; transform: translate(5%, -25%);">pressure iteration slider</p>
 			</div>
+			
 			<div class="slidecontainer" title="viscosity">
-			  <input type="range" min="0" max="90" value="10" class="slider" id="fluidsim_viscosity_slider">
+			  <input type="range" min="5" max="90" value="10" class="slider" id="fluidsim_viscosity_slider">
+				<p style="font-family:verdana; color:white; font-size:75%; transform: translate(5%, -25%);">fluid viscosity slider</p>
 			</div>
+			
 			<!-- <div class="slidecontainer" title="light intensity">
 			  <input type="range" min="0" max="100" value="10" class="slider" id="light_intensity_slider">
-			</div> -->
-			<button id="pause_fluidsim", onclick="on_fluidsim_pause()" style="transform: translate(50%, 0%);">Pause FluidSim</button>
+			</div>
+			<p style="font-family:verdana; color:white; font-size:75%;">light intensity slider</p>
+			-->
+			
 			<br/>
+			<button id="pause_fluidsim", onclick="on_fluidsim_pause()" style="transform: translate(50%, 0%);">Pause FluidSim</button>
+			<p style="font-family:verdana; color:white; font-size:75%;">Toggles simulation on/off. Sphere is not movable if the sim is off.</p>
+			
 			<button id="reset_fluidsim", onclick="on_fluidsim_reset()" style="transform: translate(50%, 0%);">Reset FluidSim</button>
+			<p style="font-family:verdana; color:white; font-size:75%;">Resets the simulation to start condition, but the sphere keeps its position.</p>
 		
 		<!-- <p style="font-family:verdana; color:white; font-size:100%;" >
 			Simulacija interakcije fluida sa solidnim objektom<br>
@@ -201,7 +222,7 @@
 			može pomoći.<br>
 			Treći slider određuje viskoznost fluida.<br>
 		</p> -->
-		<p style="font-family:verdana; color:white; font-size:100%;" >
+		<!-- <p style="font-family:verdana; color:white; font-size:100%;" >
 			Simulation of interaction between fluid and solid object<br>
 		</p>
 		<p style="font-family:verdana; color:white; font-size:75%;" >
@@ -223,7 +244,7 @@
 			Second slider defines the number of iterations for pressure correction.<br>
 			If the simulation is heavy on the computer decreasing second slider might help<br>
 			Third slider defines the viscosity of the fluid.
-		</p>
+		</p> -->
 	
 	</div>
 	
@@ -232,7 +253,7 @@
 			Your browser doesn't appear to support the HTML5 <code>&lt;canvas&gt;</code> element.
 		</canvas>
 		<div id="barriermove_kvadrat" style="cursor: move; background-color:#55aaff00; width:128px; height:128px; position:absolute"></div>
-		<div id="lightmove_kvadrat" style="cursor: move; background-color:#aaff5500; width:8px; height:8px; position:absolute"></div>
+		<div id="lightmove_kvadrat" style="cursor: move; background-color:#aaff5500; width:16px; height:16px; position:absolute"></div>
 	</div>
 	<!-- <div id="debug_kvadrat" style="background-color:#55aaff; width:128px; height:128px; position:absolute"></div> -->
   <script type="module">
