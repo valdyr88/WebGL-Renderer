@@ -81,14 +81,14 @@
   <img id="txRock_AoRS" src="./Models/Rock_6_AoRS.png" type="tx2D/AoRS" style="display: none;"></img>
   <img id="txRock_N" src="./Models/Rock_6_N.png" type="tx2D/N" style="display: none;"></img> -->
   
-  <img id="txRock_D" src="./Models/gerasy_metal_pan_Bc.png" type="tx2D/D" style="display: none;"></img>
-  <img id="txRock_AoRS" src="./Models/gerasy_metal_pan_AoRMt.png" type="tx2D/AoRMt" style="display: none;"></img>
+  <!-- <img id="txRock_D" src="./Models/gerasy_metal_pan_Bc.png" type="tx2D/D" style="display: none;"></img> -->
+  <!-- <img id="txRock_AoRS" src="./Models/gerasy_metal_pan_AoRMt.png" type="tx2D/AoRMt" style="display: none;"></img> -->
   <img id="txRock_N" src="./Models/gerasy_metal_pan_N.png" type="tx2D/N" style="display: none;"></img>
   
-  <img id="txGlass_AoRS" src="./Models/glass_AoRS.png" type="tx2D/AoRS" style="display: none;"></img>
-  <img id="txGlass_N" src="./Models/glass_N.png" type="tx2D/N" style="display: none;"></img>
+  <!-- <img id="txGlass_AoRS" src="./Models/glass_AoRS.png" type="tx2D/AoRS" style="display: none;"></img> -->
+  <!-- <img id="txGlass_N" src="./Models/glass_N.png" type="tx2D/N" style="display: none;"></img> -->
   
-  <img id="txAtmosphere" src="./Models/atmosphere.png" type="tx2D/D" style="display: none;"></img>
+  <!-- <img id="txAtmosphere" src="./Models/atmosphere.png" type="tx2D/D" style="display: none;"></img> -->
   <!-- <img id="txcAmbient_xp" src="./Textures/Ambients/Ambient01_xp.png" -->
 					   <!-- srcset="./Textures/Ambients/Ambient01_xp.png" -->
 										<!-- style="display: none"></img> -->
@@ -98,7 +98,7 @@
   <!--<img id="tx128" src="./Textures/128.png"></img>-->
   <!-- <img id="tx128" src="./Textures/venice.hdr" style="display: none" type="txC/Amb:128/hdr"></img> -->
   
-  <img id="txBRDF_LUT" src="./Textures/BRDF_LUT.png" style="display: none" type="tx2D/LUT"></img>
+  <!-- <img id="txBRDF_LUT" src="./Textures/BRDF_LUT.png" style="display: none" type="tx2D/LUT"></img> -->
   
   <script src="./GLExt/GLExt.js" type="module" ></script>
   <script src="./main.js" type="script"></script>
@@ -125,10 +125,15 @@
 		
 		<br>
 		
-		<p style="font-family:verdana; color:white; font-size:75%;" >
+		<!-- <p style="font-family:verdana; color:white; font-size:75%;" >
 			You can move the sphere and light source with left mouse button.<br>
 			Left mouse button also controls the view.<br>
 			Middle mouse (scroll) button zooms the view.<br>
+		</p> -->
+		<p style="font-family:verdana; color:white; font-size:75%;" >
+			Kugla i svjetlo se mogu pomicati sa lijevom tipkom miša.<br>
+			Lijeva tipka miša kontrolira i pogled.<br>
+			Srednja tipka (scroll) miša približava/udaljuje pogled.<br>
 		</p>
 		
 		<div style="display: flex;">
@@ -173,17 +178,20 @@
 			<div class="slidecontainer" title="brightness">
 				<input type="range" min="1" max="100" value="35" class="slider" id="fluidsim_brightness_slider">
 				<!-- <p>Value: <span id="demo"></span></p> -->
-				<p style="font-family:verdana; color:white; font-size:75%; transform: translate(5%, -25%);">brightness slider (for ViewModes)</p>
+				<!-- <p style="font-family:verdana; color:white; font-size:75%; transform: translate(5%, -25%);">brightness slider (for ViewModes)</p> -->
+				<p style="font-family:verdana; color:white; font-size:75%; transform: translate(5%, -25%);">brightness slider (za ViewModes)</p>
 			</div>
 			
 			<div class="slidecontainer" title="pressure iteration count">
 				<input type="range" min="1" max="125" value="14" class="slider" id="fluidsim_pressure_iteration_count_slider">
+				<!-- <p style="font-family:verdana; color:white; font-size:75%; transform: translate(5%, -25%);">pressure iteration slider</p> -->
 				<p style="font-family:verdana; color:white; font-size:75%; transform: translate(5%, -25%);">pressure iteration slider</p>
 			</div>
 			
 			<div class="slidecontainer" title="viscosity">
 			  <input type="range" min="5" max="90" value="15" class="slider" id="fluidsim_viscosity_slider">
-				<p style="font-family:verdana; color:white; font-size:75%; transform: translate(5%, -25%);">fluid viscosity slider</p>
+				<!-- <p style="font-family:verdana; color:white; font-size:75%; transform: translate(5%, -25%);">fluid viscosity slider</p> -->
+				<p style="font-family:verdana; color:white; font-size:75%; transform: translate(5%, -25%);">slider za viskoznost fluida</p>
 			</div>
 			
 			<!-- <div class="slidecontainer" title="light intensity">
@@ -194,10 +202,12 @@
 			
 			<br/>
 			<button id="pause_fluidsim", onclick="on_fluidsim_pause()" style="transform: translate(50%, 0%);">Pause FluidSim</button>
-			<p style="font-family:verdana; color:white; font-size:75%;">Toggles simulation on/off. Sphere is not movable if the sim is off.</p>
+			<!-- <p style="font-family:verdana; color:white; font-size:75%;">Toggles simulation on/off. Sphere is not movable if the sim is off.</p> -->
+			<p style="font-family:verdana; color:white; font-size:75%;">Zaustavlja/nastavlja simulaciju. Sfera se ne može micati ako je sim zaustavljena.</p>
 			
 			<button id="reset_fluidsim", onclick="on_fluidsim_reset()" style="transform: translate(50%, 0%);">Reset FluidSim</button>
-			<p style="font-family:verdana; color:white; font-size:75%;">Resets the simulation to start condition, but the sphere keeps its position.</p>
+			<!-- <p style="font-family:verdana; color:white; font-size:75%;">Resets the simulation to start condition, but the sphere keeps its position.</p> -->
+			<p style="font-family:verdana; color:white; font-size:75%;">Postavlja simulaciju u startni položaj, no sfera zadržava trenutnu poziciju.</p>
 		
 		<!-- <p style="font-family:verdana; color:white; font-size:100%;" >
 			Simulacija interakcije fluida sa solidnim objektom<br>

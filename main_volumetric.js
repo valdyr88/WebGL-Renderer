@@ -164,17 +164,17 @@ export function main(){
 	var quad_model = new glext.Model(2);
 	glext.GenQuadModel(quad_model);
 	
-	var txBRDF_LUT = new glext.Texture(3); txBRDF_LUT.CreateFromFile("txBRDF_LUT");
-	txBRDF_LUT.setWrapTypeClampToEdge();
+	// var txBRDF_LUT = new glext.Texture(3); txBRDF_LUT.CreateFromFile("txBRDF_LUT");
+	// txBRDF_LUT.setWrapTypeClampToEdge();
 	
-	var txD = new glext.Texture(0); txD.CreateFromFile("txRock_D");
+	// var txD = new glext.Texture(0); txD.CreateFromFile("txRock_D");
 	var txN = new glext.Texture(1); txN.CreateFromFile("txRock_N");
-	var txAoRS = new glext.Texture(2); txAoRS.CreateFromFile("txRock_AoRS");
+	// var txAoRS = new glext.Texture(2); txAoRS.CreateFromFile("txRock_AoRS");
 	
-	var txGlassAoRS = new glext.Texture(-1); txGlassAoRS.CreateFromFile("txGlass_AoRS");
-	var txGlassN = new glext.Texture(-1); txGlassN.CreateFromFile("txGlass_N");
+	// var txGlassAoRS = new glext.Texture(-1); txGlassAoRS.CreateFromFile("txGlass_AoRS");
+	// var txGlassN = new glext.Texture(-1); txGlassN.CreateFromFile("txGlass_N");
 	
-	var txAtmosphere = new glext.Texture(-1); txAtmosphere.CreateFromFile("txAtmosphere");
+	// var txAtmosphere = new glext.Texture(-1); txAtmosphere.CreateFromFile("txAtmosphere");
 	
 	var txNoiseRGB = new glext.Texture(-1); txNoiseRGB.CreateFromFile("txNoiseRGB");
 	txNoiseRGB.setWrapTypeRepeat();
@@ -234,19 +234,19 @@ export function main(){
 	//------------------------------------------------------------------------
 		glext.LightList.addLight(light);
 		
-		glext.TextureList.addTexture(txD);
+		// glext.TextureList.addTexture(txD);
 		glext.TextureList.addTexture(txN);
-		glext.TextureList.addTexture(txAoRS);
-		glext.TextureList.addTexture(txGlassN);
-		glext.TextureList.addTexture(txGlassAoRS);
-		glext.TextureList.addTexture(txBRDF_LUT);
+		// glext.TextureList.addTexture(txAoRS);
+		// glext.TextureList.addTexture(txGlassN);
+		// glext.TextureList.addTexture(txGlassAoRS);
+		// glext.TextureList.addTexture(txBRDF_LUT);
 		// glext.TextureList.addTexture(txAmb);
 		glext.TextureList.addTexture(txfbColor);
 		glext.TextureList.addTexture(txfbNormal);
 		glext.TextureList.addTexture(txfbAoRSMt);
 		glext.TextureList.addTexture(txfbDepth);
 		glext.TextureList.addTexture(txfbHdrMipBlur);
-		glext.TextureList.addTexture(txAtmosphere);
+		// glext.TextureList.addTexture(txAtmosphere);
 		glext.TextureList.addTexture(txNoiseRGB);
 		
 		glext.ShaderList.addShader(simple_shader);
@@ -257,16 +257,16 @@ export function main(){
 		glext.ShaderList.addShader(atmosphere_shader);
 		glext.ShaderList.addShader(volume_clouds_shader);
 		
-		sphere_model.setTexture(txD,"txDiffuse");
+		// sphere_model.setTexture(txD,"txDiffuse");
 		sphere_model.setTexture(txN,"txNormal");
-		sphere_model.setTexture(txAoRS,"txAoRS");
+		// sphere_model.setTexture(txAoRS,"txAoRS");
 		// sphere_model.setTexture(txAmb,"txAmbient");
 		sphere_model.setShader(simple_shader);
 		
-		navigatorModel.setTexture(txGlassN,"txNormal");
-		navigatorModel.setTexture(txGlassAoRS,"txAoRS");
+		// navigatorModel.setTexture(txGlassN,"txNormal");
+		// navigatorModel.setTexture(txGlassAoRS,"txAoRS");
 		navigatorModel.setTexture(txfbDepth,"txDepth");
-		navigatorModel.setTexture(txBRDF_LUT,"txBRDF");
+		// navigatorModel.setTexture(txBRDF_LUT,"txBRDF");
 		// navigatorModel.setTexture(txAmb,"txAmbient");
 		navigatorModel.setTexture(txfbHdrMipBlur,"txBackground");
 		navigatorModel.setShader(transparent_shader);
@@ -275,7 +275,7 @@ export function main(){
 		quad_model.setTexture(txfbNormal,"txNormal");
 		quad_model.setTexture(txfbAoRSMt,"txAoRS");
 		// quad_model.setTexture(txfbDepth,"txDepth");
-		quad_model.setTexture(txBRDF_LUT,"txBRDF");
+		// quad_model.setTexture(txBRDF_LUT,"txBRDF");
 		// quad_model.setTexture(txAmb,"txAmbient");
 		quad_model.setShader(deferred_opaque_shade);
 		
@@ -786,13 +786,13 @@ export function main(){
 	
 	var IdentityMatrix = vMath.mat4.create();
 	vMath.mat4.identity(IdentityMatrix);
-	
+	/* 
 	var MipGen = new glext.MipMapGen();
 	if((bUseHDR == false) || (bUseHDR == true && bStoreHDRinRGBA8 == true))
 		MipGen.Create(gl.viewportWidth, gl.viewportHeight, gl.RGBA8, "mipmapVS", "3x3MipGenFS");
 	else
 		MipGen.Create(gl.viewportWidth, gl.viewportHeight, gl.RGBA16F, "mipmapVS", "3x3MipGenFS");
-	
+	 */
 	// var Flags = 1;
 	// var time_of_start = sys.time.getTimeµs();
 	glext.BlendMode.Enable();
@@ -1052,9 +1052,9 @@ export function main(){
 			
 			simple_shader.Bind();
 			
-				txD.Bind(0, simple_shader.ULTextureD);
+				// txD.Bind(0, simple_shader.ULTextureD);
 				txN.Bind(1, simple_shader.ULTextureN);
-				txAoRS.Bind(2, simple_shader.ULTextureAoRS);
+				// txAoRS.Bind(2, simple_shader.ULTextureAoRS);
 				// txAmb.Bind(3, simple_shader.ULTextureAmb);
 				
 				simple_shader.setViewMatrixUniform( Camera.ViewMatrix );
