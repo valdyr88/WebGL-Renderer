@@ -90,8 +90,8 @@ export function main()
 			layer.Draw();
 			layer.End();
 			
-		var txCopy = layer.CloneTexture();
-			
+		let txCopy = layer.CloneTexture();
+		
 		glext.Framebuffer.BindMainFB();	
 		gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
 		
@@ -103,6 +103,9 @@ export function main()
 		sys.keyboard.Update();
 		gl.flush();
 		gs.Update();
+		
+		txCopy.Delete();
+		txCopy = null;
 		
 		oldframe_time = time;
 	}

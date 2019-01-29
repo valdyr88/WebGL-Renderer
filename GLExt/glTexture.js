@@ -531,6 +531,10 @@ export class Texture{
 		gl.activeTexture(gl.TEXTURE0 + slot);
 		gl.bindTexture(gl.TEXTURE_2D, null);
 	}
+	
+	Delete(){
+		gl.deleteTexture(this.texture); this.texture = -1;
+	}
 }
 
 export class TextureCube{
