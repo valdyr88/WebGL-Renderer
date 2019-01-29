@@ -1,6 +1,7 @@
 import * as glext from "./../GLExt/GLExt.js"
 import * as sys from "./../System/sys.js"
 import * as vMath from "./../glMatrix/gl-matrix.js";
+import * as img from "./source/layer.js";
 
 var gl = null;
 
@@ -21,7 +22,9 @@ export function main()
 		 if(glext.glEnableExtension('OES_texture_float_linear') == false) alert("no extension: OES_texture_float_linear");
 		
 	glext.InitDebugTextDOM("debug_text");
-			
+	
+	glext.InitNDCQuadModel();
+	
 	gl.clearColor(0.0, 1.0, 1.0, 1.0);
 	gl.blendColor(1.0, 1.0, 1.0, 1.0);
 	gl.enable(gl.DEPTH_TEST);
@@ -36,7 +39,7 @@ export function main()
 	
 	glext.BlendMode.Init();
 		
-	glext.ShaderDefines.addGlobalDefine("MAX_LIGHTS", " "+glext.MAX_LIGHTS);
+	// glext.ShaderDefines.addGlobalDefine("MAX_LIGHTS", " "+glext.MAX_LIGHTS);
 
 	var projectionMatrix = vMath.mat4.create();
 	var viewMatrix = vMath.mat4.create();
@@ -49,7 +52,24 @@ export function main()
 	var FPSlabel = document.getElementById("label_FPS");
 		
 	glext.BlendMode.Enable();
-		
+	
+	var layer = new img.PaintableRasterLayer(gl.viewportWidth, gl.viewportHeight, "byte", "rgb");
+	var shader = new glext.Shader(-1);
+	if(shader.CompileFromFile("simpleVS", "simpleFS") == false) alert("nije kompajliran shader!");
+	shader.InitDefaultUniformLocations();
+	shader.InitDefaultAttribLocations();
+	shader.BindUniforms = function(){
+		// this.ULTime = time;
+	}
+	shader.UpdateUniforms = function(){
+		this.setFloatUniform(this.ULTime, time);
+	}
+	
+	var main_shader = new glext.Shader(-1);
+	if(main_shader.CompileFromFile("simpleVS", "mainFS") == false) alert("nije kompajliran shader!");
+	main_shader.InitDefaultUniformLocations();
+	main_shader.InitDefaultAttribLocations();
+	
 	setInterval( function(){ window.requestAnimationFrame(renderFrame); }, 17);
 	
 	function renderFrame()
@@ -65,7 +85,20 @@ export function main()
 		}
 		
 		FPSlabel.textContent = Number.parseFloat(avg_FPS).toFixed(2) + " FPS";
-						
+				
+			layer.Begin(shader);
+			layer.Draw();
+			layer.End();
+			
+		var txCopy = layer.CloneTexture();
+			
+		glext.Framebuffer.BindMainFB();	
+		gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
+		
+		main_shader.Bind();
+			txCopy.Bind(0, main_shader.txDiffuse);
+			glext.NDCQuadModel.RenderIndexedTriangles(main_shader);
+		
 		sys.mouse.Update();
 		sys.keyboard.Update();
 		gl.flush();

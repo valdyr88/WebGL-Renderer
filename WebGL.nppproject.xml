@@ -39,32 +39,6 @@
         <File name="main_volumetric.js" />
         <File name="index.html" />
         <File name="index_volumetric.html" />
-		<Folder name="apps">
-			<Folder name="appPhotoEditor">
-				<File name="appPhotoEditor\main_PhotoEditor.js" />
-				<File name="appPhotoEditor\PhotoEditor.html" />
-				<Folder name="toolbar">
-					<File name="appPhotoEditor\toolbar\toolbar.html"/>
-				</Folder>
-				<Folder name="menubar">
-					<File name="appPhotoEditor\menubar\menubar.html"/>
-					<File name="appPhotoEditor\menubar\file.html"/>
-					<File name="appPhotoEditor\menubar\edit.html"/>
-					<File name="appPhotoEditor\menubar\view.html"/>
-					<File name="appPhotoEditor\menubar\image.html"/>
-					<File name="appPhotoEditor\menubar\layers.html"/>
-					<File name="appPhotoEditor\menubar\select.html"/>
-					<File name="appPhotoEditor\menubar\filter.html"/>
-					<File name="appPhotoEditor\menubar\tools.html"/>
-					<File name="appPhotoEditor\menubar\settings.html"/>
-					<File name="appPhotoEditor\menubar\window.html"/>
-					<File name="appPhotoEditor\menubar\help.html"/>
-				</Folder>
-				<Folder name="windows">
-					<File name="appPhotoEditor\windows\newdocument.html"/>
-				</Folder>
-			</Folder>
-		</Folder>
         <Folder name="Shaders">
 			<Folder name="FluidSim">
 				<Folder name="2D">
@@ -122,5 +96,49 @@
                 <File name="Shaders\include\structs.glsl" />
             </Folder>
         </Folder>
+		<Folder name="styles">
+			<Folder name="default">
+				<File name="styles\default\main.css" />
+				<File name="styles\default\panel.css" />
+				<File name="styles\default\slider.css" />
+			</Folder>
+		</Folder>
+		<Folder name="apps">
+			<Folder name="appPhotoEditor">
+				<File name="appPhotoEditor\main_PhotoEditor.js" />
+				<File name="appPhotoEditor\PhotoEditor.html" />
+				<Folder name="toolbar">
+					<File name="appPhotoEditor\toolbar\toolbar.html"/>
+				</Folder>
+				<Folder name="menubar">
+					<File name="appPhotoEditor\menubar\menubar.html"/>
+					<File name="appPhotoEditor\menubar\file.html"/>
+					<File name="appPhotoEditor\menubar\edit.html"/>
+					<File name="appPhotoEditor\menubar\view.html"/>
+					<File name="appPhotoEditor\menubar\image.html"/>
+					<File name="appPhotoEditor\menubar\layers.html"/>
+					<File name="appPhotoEditor\menubar\select.html"/>
+					<File name="appPhotoEditor\menubar\filter.html"/>
+					<File name="appPhotoEditor\menubar\tools.html"/>
+					<File name="appPhotoEditor\menubar\settings.html"/>
+					<File name="appPhotoEditor\menubar\window.html"/>
+					<File name="appPhotoEditor\menubar\help.html"/>
+				</Folder>
+				<Folder name="windows">
+					<File name="appPhotoEditor\windows\newdocument.html"/>
+					<File name="appPhotoEditor\windows\document.html"/>
+				</Folder>
+				<Folder name="shaders">
+					<File name="appPhotoEditor\shaders\simple.vs.glsl"/>
+					<File name="appPhotoEditor\shaders\simple.fs.glsl"/>
+					<File name="appPhotoEditor\shaders\main.fs.glsl"/>
+				</Folder>
+				<Folder name="source">
+					<File name="appPhotoEditor\source\canvasHandler.js"/>
+					<File name="appPhotoEditor\source\document.js"/>
+					<File name="appPhotoEditor\source\layer.js"/>
+				</Folder>
+			</Folder>
+		</Folder>
     </Project>
 </NotepadPlus>

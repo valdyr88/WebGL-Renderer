@@ -5,6 +5,7 @@
 	overflow: hidden;
 	background-color: #333333;
 	position: relative;
+	cursor: move;
 }
 
 /* Hide the links inside the navigation menu (except for logo/home) */

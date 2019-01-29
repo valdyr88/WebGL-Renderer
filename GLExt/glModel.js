@@ -593,7 +593,6 @@ class ModelImport
 }
 
 
-
 export function GenCubeModel(model, min, max)
 {
 	if(min === undefined) min = -1.0;
@@ -721,3 +720,13 @@ export function GenQuadModel(model, min, max)
 	model.VertexType = "vt";
 	model.CreateBuffers();
 }
+
+var NDCQuadModel = null;
+export function InitNDCQuadModel(){
+	if(NDCQuadModel != null) return;
+	
+	NDCQuadModel = new Model(-1);
+	GenQuadModel(NDCQuadModel, -1, 1);
+}
+
+export { NDCQuadModel };

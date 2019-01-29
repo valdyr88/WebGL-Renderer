@@ -34,49 +34,18 @@
   <script id="ubMaterial" src="./../Shaders/include/uniformBuffers/ubMaterial.glsl" type="shader/fragment"></script>
   <script id="ubModel" src="./../Shaders/include/uniformBuffers/ubModel.glsl" type="shader/fragment"></script>
   
-  <script id="simpleVS" src="./../Shaders/simple.vs.glsl" type="shader/vertex"></script>
-  <script id="simpleFS" src="./../Shaders/simple.fs.glsl" type="shader/fragment"></script>
-  <script id="pbr_shader" src="./../Shaders/pbr_shader.fs.glsl" type="shader/fragment"></script>
-  <script id="skybox_shader" src="./../Shaders/skybox.fs.glsl" type="shader/fragment"></script>
-  <script id="backbuffer_shader" src="./../Shaders/backbuffer.fs.glsl" type="shader/fragment"></script>
-  <script id="deferred_opaque_shade" src="./../Shaders/deferred_opaque_shade.fs.glsl" type="shader/fragment"></script>
-  <script id="deferred_BcNAoRSMt" src="./../Shaders/deferred_BcNAoRSMt.fs.glsl" type="shader/fragment"></script>
-  <script id="deferred_skybox" src="./../Shaders/deferred_skybox.fs.glsl" type="shader/fragment"></script>
-  <script id="transparent_shader" src="./../Shaders/transparent_shader.fs.glsl" type="shader/fragment"></script>
-  <script id="atmosphere_shader" src="./../Shaders/atmosphere_shader.fs.glsl" type="shader/fragment"></script>
-  <script id="volume_clouds_shader" src="./../Shaders/volume_clouds_shader.fs.glsl" type="shader/fragment"></script>
-  <script id="volume_clouds_vs" src="./../Shaders/volume_clouds_shader.vs.glsl" type="shader/vertex"></script>
-    
+  <script id="simpleVS" src="./Shaders/simple.vs.glsl" type="shader/vertex"></script>
+  <script id="simpleFS" src="./Shaders/simple.fs.glsl" type="shader/fragment"></script>
+  <script id="mainFS" src="./Shaders/main.fs.glsl" type="shader/fragment"></script>
+   
   <script id="mipmapVS" src="./../Shaders/mipmapgen.vs.glsl" type="shader/vertex"></script>
   <script id="3x3MipGenFS" src="./../Shaders/3x3MipGen.fs.glsl" type="shader/fragment"></script>
   
   <!-- <script id="navigatorModel" src="./../Models/Rock_6.OBJ" type="model/obj"></script> -->
   <!--<script id="navigatorModel" src="./../Models/quadNT.obj" type="model/obj"></script>-->
   <script id="SphereModel" src="./../Models/Sphere.obj" type="model/obj"></script>
-  <script id="navigatorModel" src="./../Models/navigatorModel.obj" type="model/obj"></script>
-  
-  <!-- <img id="txRock_D" src="./../Models/Rock_6_D.png" type="tx2D/D" style="display: none;"></img>
-  <img id="txRock_AoRS" src="./../Models/Rock_6_AoRS.png" type="tx2D/AoRS" style="display: none;"></img>
-  <img id="txRock_N" src="./../Models/Rock_6_N.png" type="tx2D/N" style="display: none;"></img> -->
-  
-  <img id="txRock_D" src="./../Models/gerasy_metal_pan_Bc.png" type="tx2D/D" style="display: none;"></img>
-  <img id="txRock_AoRS" src="./../Models/gerasy_metal_pan_AoRMt.png" type="tx2D/AoRMt" style="display: none;"></img>
-  <img id="txRock_N" src="./../Models/gerasy_metal_pan_N.png" type="tx2D/N" style="display: none;"></img>
-  
-  <img id="txGlass_AoRS" src="./../Models/glass_AoRS.png" type="tx2D/AoRS" style="display: none;"></img>
-  <img id="txGlass_N" src="./../Models/glass_N.png" type="tx2D/N" style="display: none;"></img>
-  
-  <img id="txAtmosphere" src="./../Models/atmosphere.png" type="tx2D/D" style="display: none;"></img>
-  <!-- <img id="txcAmbient_xp" src="./../Textures/Ambients/Ambient01_xp.png" -->
-					   <!-- srcset="./../Textures/Ambients/Ambient01_xp.png" -->
-										<!-- style="display: none"></img> -->
 	
   <img id="txNoiseRGB" src="./../Textures/NoiseFromShaderToy.png" type="tx2D/D" style="display: none;"></img>
-	
-  <!--<img id="tx128" src="./../Textures/128.png"></img>-->
-  <img id="tx128" src="./../Textures/venice.hdr" style="display: none" type="txC/Amb:128/hdr"></img>
-  
-  <img id="txBRDF_LUT" src="./../Textures/BRDF_LUT.png" style="display: none" type="tx2D/LUT"></img>
   
   <script src="./../GLExt/GLExt.js" type="module" ></script>
   <script src="./../main.js" type="script"></script>
@@ -108,8 +77,7 @@
 	function wait(ms){ const start = performance.now(); while(performance.now() - start < ms); }
 	
 	var extern_files_list = ["functions", "structs", "pbr", "defines", "sdfunctions", "ubCamera", "ubLight", "ubMaterial", "ubModel", 
-							"simpleVS", "simpleFS", "pbr_shader", "skybox_shader", "backbuffer_shader", "SphereModel", "deferred_opaque_shade", "deferred_BcNAoRSMt", "deferred_skybox", "transparent_shader", 
-							"atmosphere_shader", "volume_clouds_shader", "volume_clouds_vs", "navigatorModel", "mipmapVS", "3x3MipGenFS",
+							"simpleVS", "simpleFS", "mainFS"
 							];//, "tx128"
 	var extern_files_loaded_number = 0;
 	
