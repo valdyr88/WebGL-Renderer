@@ -635,6 +635,10 @@ export class TextureCube{
 		gl.activeTexture(gl.TEXTURE0 + slot);
 		gl.bindTexture(this.targetType, null);
 	}
+		
+	Delete(){
+		gl.deleteTexture(this.texture); this.texture = -1;
+	}
 	
 	CreateFromDOMDataElements(id)
 	{	
@@ -845,6 +849,10 @@ export class Texture3D{
 	Unbind(){
 		gl.activeTexture(gl.TEXTURE0 + this.activeSlot);
 		gl.bindTexture(this.targetType, null);
+	}
+		
+	Delete(){
+		gl.deleteTexture(this.texture); this.texture = -1;
 	}
 	
 	static Unbind(slot){
