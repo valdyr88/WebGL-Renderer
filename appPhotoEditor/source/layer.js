@@ -68,7 +68,7 @@ export class CPaintableRasterLayer{
 			}
 		}
 	}
-			
+	
 	constructor(w, h, precision, components){
 		this.width = w;
 		this.height = h;
@@ -76,8 +76,13 @@ export class CPaintableRasterLayer{
 		this.framebuffer = new glext.CFramebuffer(false); this.framebuffer.Create();
 		this.precision = precision;
 		this.components = components;
-		this.texture = new glext.CTexture(-1);
-		CPaintableRasterLayer.CreateTexture(this.texture, this.width, this.height, this.precision, this.components);
+		this.texture0 = new glext.CTexture(-1);
+		this.texture1 = new glext.CTexture(-1);
+		CPaintableRasterLayer.CreateTexture(this.texture0, this.width, this.height, this.precision, this.components);
+		CPaintableRasterLayer.CreateTexture(this.texture1, this.width, this.height, this.precision, this.components);
+		
+		this.texture = this.texture0;
+		this.texture_old = this.texture1;
 	}
 	
 	CloneTexture(){
@@ -102,12 +107,16 @@ export class CPaintableRasterLayer{
 		return new_texture;
 	}
 	
+	SwapOldNew(){
+		let tmp = this.texture;
+		this.texture = this.texture_old;
+		this.texture_old = tmp; tmp = null;
+	}
+	
 	Begin(shader){
 		this.shader = shader;
 		
 		this.framebuffer.Bind();
-		this.framebuffer.AttachTexture(this.texture, 0);
-		this.framebuffer.SetupUsage();
 		
 		glext.gl.viewport(0, 0, this.width, this.height);
 		
@@ -116,7 +125,14 @@ export class CPaintableRasterLayer{
 	}
 	
 	Draw(){
+		this.SwapOldNew();
+		
+		this.framebuffer.AttachTexture(this.texture, 0);
+		this.framebuffer.SetupUsage();
+		
 		this.shader.UpdateUniforms();
+		this.texture_old.Bind(0, this.shader.ULTextureD);
+		
 		glext.NDCQuadModel.RenderIndexedTriangles(this.shader);
 	}
 	

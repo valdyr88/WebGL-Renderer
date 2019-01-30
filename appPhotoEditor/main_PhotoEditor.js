@@ -26,6 +26,15 @@ export function main()
 	
 	glext.InitNDCQuadModel();
 	
+	var doc = document.getElementById("document");
+	var doc_paint_canvas = document.getElementById("document_paint_canvas");
+	doc_paint_canvas.baseWindowOffset = [gl.canvasObject.offsetLeft, gl.canvasObject.offsetTop];
+	
+	doc_paint_canvas.transformMouseCoords = function(pos){
+		pos[0] = pos[0] - this.baseWindowOffset[0];
+		pos[1] = pos[1] - this.baseWindowOffset[1];
+	}
+	
 	gl.clearColor(0.0, 1.0, 1.0, 1.0);
 	gl.blendColor(1.0, 1.0, 1.0, 1.0);
 	gl.enable(gl.DEPTH_TEST);
@@ -74,6 +83,8 @@ export function main()
 	var abrush = new brush.CBrush();
 	abrush.AttachUniformBlockTo(shader);
 	
+	var bBtnLeft = false;
+	
 	setInterval( function(){ window.requestAnimationFrame(renderFrame); }, 17);
 	
 	function renderFrame()
@@ -87,13 +98,24 @@ export function main()
 			avg_frame_time = vMath.lerp(avg_frame_time, frame_time, 1.0 / 30.0);
 			avg_FPS = 1.0 / avg_frame_time;
 		}
+		doc_paint_canvas.baseWindowOffset = [gl.canvasObject.offsetLeft + doc.offsetLeft, gl.canvasObject.offsetTop + doc.offsetTop];
 		
 		var mousePos = sys.mouse.getPosition();
 		var mouseDelta = sys.mouse.getDeltaPosition();
 		
-		if(sys.mouse.get().btnLeft == true){
-			abrush.setPosition([mousePos[0] / 1024.0, mousePos[1] / 1024.0]);
+		if(sys.mouse.get().bLeftDown == true)
+			bBtnLeft = true;
+		if(sys.mouse.get().bLeftUp == true)
+			bBtnLeft = false;
+		doc_paint_canvas.transformMouseCoords(mousePos);
+		
+		
+		if(bBtnLeft == true){
+			abrush.setPosition([mousePos[0] / 500.0,1.0 - mousePos[1] / 500.0]);
 			abrush.setColor(Math.cos(time)*0.5+0.5, Math.sin(time)*0.5+0.5, 1.0-Math.sin(time)*0.5+0.5);
+		}
+		else if(sys.mouse.get().bLeftUp == true){
+			abrush.setColor(0.0,0.0,0.0,0.0);
 		}
 		abrush.Update();
 		

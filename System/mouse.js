@@ -19,9 +19,13 @@ export class CMouse
 		
 		this.objAttached = null;
 		
-		this.bLeftClicked = false;
-		this.bMiddleClicked = false;
-		this.bRightClicked = false;
+		this.bLeftDown = false;
+		this.bMiddleDown = false;
+		this.bRightDown = false;
+		
+		this.bLeftUp = false;
+		this.bMiddleUp = false;
+		this.bRightUp = false;
 		
 		// this.deltaZMode = 0;
 	}
@@ -59,15 +63,34 @@ export class CMouse
 		
 		if(this.AttachedMouse.dz === undefined || this.AttachedMouse.dz == null) this.AttachedMouse.dz = 0;
 		
+		let old_btnLeft = this.AttachedMouse.btnLeft;
+		let old_btnMiddle = this.AttachedMouse.btnMiddle;
+		let old_btnRight = this.AttachedMouse.btnRight;
+		
 		this.AttachedMouse.btnLeft = event.buttons & 0x01;
 		this.AttachedMouse.btnMiddle = event.buttons & 0x02;
 		this.AttachedMouse.btnRight = event.buttons & 0x04;
 		this.AttachedMouse.btn4 = event.buttons & 0x08;
 		this.AttachedMouse.btn5 = event.buttons & 0x10;
 		
-		if(this.AttachedMouse.btnLeft == true) this.AttachedMouse.bLeftClicked = this.AttachedMouse.btnLeft;
-		if(this.AttachedMouse.btnMiddle == true) this.AttachedMouse.bMiddleClicked = this.AttachedMouse.btnMiddle;
-		if(this.AttachedMouse.btnRight == true) this.AttachedMouse.bRightClicked = this.AttachedMouse.btnRight;
+		if(this.AttachedMouse.btnLeft === 1) this.AttachedMouse.btnLeft = true;
+		if(this.AttachedMouse.btnLeft === 0) this.AttachedMouse.btnLeft = false;
+		if(this.AttachedMouse.btnMiddle === 1) this.AttachedMouse.btnMiddle = true;
+		if(this.AttachedMouse.btnMiddle === 0) this.AttachedMouse.btnMiddle = false;
+		if(this.AttachedMouse.btnRight === 1) this.AttachedMouse.btnRight = true;
+		if(this.AttachedMouse.btnRight === 0) this.AttachedMouse.btnRight = false;
+		if(this.AttachedMouse.btn4 === 1) this.AttachedMouse.btn4 = true;
+		if(this.AttachedMouse.btn4 === 0) this.AttachedMouse.btn4 = false;
+		if(this.AttachedMouse.btn5 === 1) this.AttachedMouse.btn5 = true;
+		if(this.AttachedMouse.btn5 === 0) this.AttachedMouse.btn5 = false;
+		
+		if(this.AttachedMouse.btnLeft == true) this.AttachedMouse.bLeftDown = this.AttachedMouse.btnLeft;
+		if(this.AttachedMouse.btnMiddle == true) this.AttachedMouse.bMiddleDown = this.AttachedMouse.btnMiddle;
+		if(this.AttachedMouse.btnRight == true) this.AttachedMouse.bRightDown = this.AttachedMouse.btnRight;
+		
+		if(old_btnLeft != this.AttachedMouse.btnLeft && old_btnLeft == true) this.AttachedMouse.bLeftUp = true;
+		if(old_btnMiddle != this.AttachedMouse.btnMiddle && old_btnMiddle == true) this.AttachedMouse.bMiddleUp = true;
+		if(old_btnRight != this.AttachedMouse.btnRight && old_btnRight == true) this.AttachedMouse.bRightUp = true;
 	}
 	
 	OnMouseWheel(event)
@@ -102,12 +125,15 @@ export class CMouse
 	}
 	
 	Update(){
-		this.bLeftClicked = false;
-		this.bMiddleClicked = false;
-		this.bRightClicked = false;		
+		this.bLeftDown = false;
+		this.bMiddleDown = false;
+		this.bRightDown = false;		
 		this.dx = 0;
 		this.dy = 0;
 		this.dz = 0;
+		this.bLeftUp = false;
+		this.bMiddleUp = false;
+		this.bRightUp = false;
 	}
 	
 	getPosition(){ return [this.x, this.y, this.z]; }

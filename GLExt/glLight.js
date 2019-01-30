@@ -137,7 +137,7 @@ export class CLight{
 	}
 	setIntensity(i){ this.Intensity = i; this.bNeedsToUpdateUniformBlock = true; }
 	setColor(R,G,B,A){ this.Color[0] = R; this.Color[1] = G; this.Color[2] = B; this.Color[3] = A; this.bNeedsToUpdateUniformBlock = true; }
-		
+	
 	/*
 	static getUniformLocationsFromShader(shader, baseName){
 		

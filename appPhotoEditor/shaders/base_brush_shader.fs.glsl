@@ -1,6 +1,6 @@
 #version 300 es
 // #extension GL_EXT_shader_texture_lod : require
-precision mediump float;
+precision highp float;
 
 #include "defines"
 #include "functions"
@@ -33,9 +33,14 @@ varyin vec2 TexCoords;
 
 void main(void)
 {	
+	vec4 old = texture2D(txDiffuse, TexCoords);
+
 	vec2 toPos = Brush.position.xy - TexCoords.xy;
-	float distToPos = length(toPos) * 500.0;
-	float invDistToPos = 1.0 / max(0.01, distToPos);
+	float distToPos = length(toPos) * 500.0f;
+	float invDistToPos = 1.0f / max(0.01f, distToPos);
+	invDistToPos = saturate(invDistToPos-0.01f);
 	
-	gl_FragColor = invDistToPos*Brush.color;
+	vec4 add = invDistToPos*Brush.color;
+	
+	gl_FragColor = old + add;
 }
