@@ -2,6 +2,7 @@ import * as glext from "./../GLExt/GLExt.js"
 import * as sys from "./../System/sys.js"
 import * as vMath from "./../glMatrix/gl-matrix.js";
 import * as img from "./source/layer.js";
+import * as brush from "./source/brush.js";
 
 var gl = null;
 
@@ -55,7 +56,7 @@ export function main()
 	
 	var layer = new img.CPaintableRasterLayer(gl.viewportWidth, gl.viewportHeight, "byte", "rgb");
 	var shader = new glext.CShader(-1);
-	if(shader.CompileFromFile("simpleVS", "simpleFS") == false) alert("nije kompajliran shader!");
+	if(shader.CompileFromFile("simpleVS", "baseBrushFS") == false) alert("nije kompajliran shader!");
 	shader.InitDefaultUniformLocations();
 	shader.InitDefaultAttribLocations();
 	shader.BindUniforms = function(){
@@ -70,6 +71,9 @@ export function main()
 	main_shader.InitDefaultUniformLocations();
 	main_shader.InitDefaultAttribLocations();
 	
+	var abrush = new brush.CBrush();
+	abrush.AttachUniformBlockTo(shader);
+	
 	setInterval( function(){ window.requestAnimationFrame(renderFrame); }, 17);
 	
 	function renderFrame()
@@ -83,6 +87,15 @@ export function main()
 			avg_frame_time = vMath.lerp(avg_frame_time, frame_time, 1.0 / 30.0);
 			avg_FPS = 1.0 / avg_frame_time;
 		}
+		
+		var mousePos = sys.mouse.getPosition();
+		var mouseDelta = sys.mouse.getDeltaPosition();
+		
+		if(sys.mouse.get().btnLeft == true){
+			abrush.setPosition([mousePos[0] / 1024.0, mousePos[1] / 1024.0]);
+			abrush.setColor(Math.cos(time)*0.5+0.5, Math.sin(time)*0.5+0.5, 1.0-Math.sin(time)*0.5+0.5);
+		}
+		abrush.Update();
 		
 		FPSlabel.textContent = Number.parseFloat(avg_FPS).toFixed(2) + " FPS";
 				

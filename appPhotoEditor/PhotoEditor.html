@@ -33,9 +33,11 @@
   <script id="ubLight" src="./../Shaders/include/uniformBuffers/ubLight.glsl" type="shader/fragment"></script>
   <script id="ubMaterial" src="./../Shaders/include/uniformBuffers/ubMaterial.glsl" type="shader/fragment"></script>
   <script id="ubModel" src="./../Shaders/include/uniformBuffers/ubModel.glsl" type="shader/fragment"></script>
+  <script id="ubBrush" src="./Shaders/uniformBuffers/ubBrush.glsl" type="shader/fragment"></script>
   
   <script id="simpleVS" src="./Shaders/simple.vs.glsl" type="shader/vertex"></script>
   <script id="simpleFS" src="./Shaders/simple.fs.glsl" type="shader/fragment"></script>
+  <script id="baseBrushFS" src="./Shaders/base_brush_shader.fs.glsl" type="shader/fragment"></script>
   <script id="mainFS" src="./Shaders/main.fs.glsl" type="shader/fragment"></script>
    
   <script id="mipmapVS" src="./../Shaders/mipmapgen.vs.glsl" type="shader/vertex"></script>
@@ -77,7 +79,7 @@
 	function wait(ms){ const start = performance.now(); while(performance.now() - start < ms); }
 	
 	var extern_files_list = ["functions", "structs", "pbr", "defines", "sdfunctions", "ubCamera", "ubLight", "ubMaterial", "ubModel", 
-							"simpleVS", "simpleFS", "mainFS"
+							"simpleVS", "simpleFS", "mainFS", "baseBrushFS", "ubBrush"
 							];//, "tx128"
 	var extern_files_loaded_number = 0;
 	

@@ -132,6 +132,10 @@
 					<File name="appPhotoEditor\shaders\simple.vs.glsl"/>
 					<File name="appPhotoEditor\shaders\simple.fs.glsl"/>
 					<File name="appPhotoEditor\shaders\main.fs.glsl"/>
+					<File name="appPhotoEditor\shaders\base_brush_shader.fs.glsl"/>
+					<Folder name="uniformBuffers">
+						<File name="appPhotoEditor\shaders\uniformBuffers\ubBrush.glsl"/>
+					</Folder>
 				</Folder>
 				<Folder name="source">
 					<File name="appPhotoEditor\source\canvasHandler.js"/>

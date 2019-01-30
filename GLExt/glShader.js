@@ -167,9 +167,9 @@ export class CUniformBlockBuffer
 		this.size = 0;
 	}
 	
-	Create(NofComponents16bit)
+	Create(NofComponents16byte) //16byte = 4*float
 	{
-		this.size = 16*NofComponents16bit;
+		this.size = 16*NofComponents16byte;
 		if(this.buffer == -1) this.buffer = gl.createBuffer();
 		if(this.data == null) this.data = new Uint8Array(this.size);		
 		gl.bindBuffer(gl.UNIFORM_BUFFER, this.buffer);
@@ -209,14 +209,18 @@ export class CUniformBlockBinding
 			this.name = bindName;
 			this.bindPoint = bindNumber;
 			this.blockId = gl.getUniformBlockIndex(shader.program, this.name);
+			if(this.blockId == 4294967295) this.blockId = -1;
 			this.buffer = blockBuffer;
 			this.shader = shader;
+			if(this.blockId == -1) return false;
+			return true;
 		}
 		
 		Bind(){
 			if(this.shader == null) return;
 			if(this.buffer == null) return;
 			if(this.bindPoint == -1) return;
+			if(this.blockId == -1) return;
 			gl.uniformBlockBinding(this.shader.program, this.blockId, this.bindPoint);
 			gl.bindBufferBase(gl.UNIFORM_BUFFER, this.bindPoint, this.buffer.buffer);
 		}
