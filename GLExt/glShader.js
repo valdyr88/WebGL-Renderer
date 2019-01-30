@@ -61,7 +61,7 @@ function insertStringIntoSource(source, str, identifier){
 
 var globalDefines = null;
 
-export class ShaderDefines
+export class CShaderDefines
 {
 	constructor(){
 		this.defines = [];
@@ -116,14 +116,14 @@ export class ShaderDefines
 	}
 	
 	static CreateGlobalDefines(){
-		if(globalDefines == null) globalDefines = new ShaderDefines();
+		if(globalDefines == null) globalDefines = new CShaderDefines();
 	}
 	static getGlobalDefines(){
-		ShaderDefines.CreateGlobalDefines();
+		CShaderDefines.CreateGlobalDefines();
 		return globalDefines;
 	}
 	static addGlobalDefine(name, value){
-		ShaderDefines.getGlobalDefines().addDefine(name,value);
+		CShaderDefines.getGlobalDefines().addDefine(name,value);
 	}
 	
 	getAsOneString(){
@@ -138,7 +138,7 @@ export class ShaderDefines
 	insertIntoSource(source, bGetGlobalDefines){
 		var str = this.getAsOneString();
 		if(bGetGlobalDefines == true)
-			str = ShaderDefines.getGlobalDefines().getAsOneString() + str;
+			str = CShaderDefines.getGlobalDefines().getAsOneString() + str;
 		return parseForDefines(source, str);
 	}
 	
@@ -158,7 +158,7 @@ export class ShaderDefines
 		
 }
 
-export class UniformBlockBuffer
+export class CUniformBlockBuffer
 {
 	constructor(){
 		this.name = "";
@@ -195,7 +195,7 @@ export class UniformBlockBuffer
 	}
 }
 
-export class UniformBlockBinding
+export class CUniformBlockBinding
 {
 		constructor(){
 			this.name = "";
@@ -222,7 +222,7 @@ export class UniformBlockBinding
 		}
 }
 
-export class Shader
+export class CShader
 {
 	constructor(slotID){
 		
@@ -234,7 +234,7 @@ export class Shader
 		this.strVertexSource = "";
 		this.strFragmentSource = "";
 		
-		this.defines = new ShaderDefines();
+		this.defines = new CShaderDefines();
 		
 		//AttribLocation
 		this.ALVertexPosition = -1;
@@ -359,7 +359,7 @@ export class Shader
 	Recompile(bClearDefines){
 		
 		if(bClearDefines == true)
-			this.defines = new ShaderDefines();
+			this.defines = new CShaderDefines();
 		
 		//AttribLocation
 		this.ALVertexPosition = -1;
@@ -413,7 +413,7 @@ export class Shader
 	}
 	
 	addUniformBlock(name, buffer){
-		var binding = new UniformBlockBinding();
+		var binding = new CUniformBlockBinding();
 		
 		var slot = this.getUniformBlockID(name);
 		if(slot == -1)
@@ -452,7 +452,7 @@ export class Shader
 		this.defines.RemoveDefine(name);
 	}
 	RemoveAllDefines(){
-		this.defines = new ShaderDefines();		
+		this.defines = new CShaderDefines();		
 	}
 	
 	setVertexAttribLocations(position, normal, tangent, binormal, texture){
@@ -758,33 +758,33 @@ export class Shader
 
 var globalShaderList = null;
 
-export class ShaderList
+export class CShaderList
 {
 	constructor(){
 		this.shaders = [];
 	}
 	
 	static CreateShader(vertexFile, fragmentFile){
-		var SlotID = ShaderList.singleton().shaders.length;
-		var shader = new Shader(SlotID);
+		var SlotID = CShaderList.singleton().shaders.length;
+		var shader = new CShader(SlotID);
 		shader.CompileFromFile(vertexFile,fragmentFile);
-		ShaderList.singleton().shaders[SlotID] = shader;
+		CShaderList.singleton().shaders[SlotID] = shader;
 		return shader;
 	}
 	
 	static addShader(shader){
-		shader.SlotID = ShaderList.singleton().shaders.length;
-		ShaderList.singleton().shaders[ShaderList.singleton().shaders.length] = shader;
+		shader.SlotID = CShaderList.singleton().shaders.length;
+		CShaderList.singleton().shaders[CShaderList.singleton().shaders.length] = shader;
 	}
 	
 	static Init(){
 		if(globalShaderList == null)
-			globalShaderList = new ShaderList();
+			globalShaderList = new CShaderList();
 	}
 	
 	static get(SlotID){
-		if(SlotID < ShaderList.singleton().shaders.length){
-			return ShaderList.singleton().shaders[SlotID];
+		if(SlotID < CShaderList.singleton().shaders.length){
+			return CShaderList.singleton().shaders[SlotID];
 		}
 		return null;
 	}
@@ -794,7 +794,7 @@ export class ShaderList
 		if(name == "") return null;
 		
 		var rtnList = [];
-		var shaderList = ShaderList.singleton();
+		var shaderList = CShaderList.singleton();
 		
 		for(var i = 0; i < shaderList.shaders.length; ++i){
 			var shader = shaderList.shaders[i];
@@ -807,11 +807,11 @@ export class ShaderList
 	}
 	
 	static count(){
-		return ShaderList.singleton().shaders.length;
+		return CShaderList.singleton().shaders.length;
 	}
 	
 	static singleton(){
-		ShaderList.Init();
+		CShaderList.Init();
 		return globalShaderList;
 	}
 }

@@ -2,17 +2,17 @@ import * as glext from "./../../GLExt/GLExt.js"
 import * as sys from "./../../System/sys.js"
 import * as vMath from "./../../glMatrix/gl-matrix.js";
 
-import { Layer, RasterLayer, VectorLayer } from "./layer.js";
+import { CLayer, CRasterLayer, CVectorLayer } from "./layer.js";
 
-class LayerRenderer{
+class CLayerRenderer{
 	
 	/*
 		
 	*/
 	
 	constructor(){
-		this.framebuffer = new glext.Framebuffer(false); this.framebuffer.Create();
-		this.quad_model = new glext.Model(-1);
+		this.framebuffer = new glext.CFramebuffer(false); this.framebuffer.Create();
+		this.quad_model = new glext.CModel(-1);
 		glext.GenQuadModel(this.quad_model);
 	}
 	
@@ -21,7 +21,7 @@ class LayerRenderer{
 	}
 }
 
-export class Document{
+export class CDocument{
 	
 	constructor(w,h){
 		this.layers = [];

@@ -1,5 +1,5 @@
 //
-//{ StorageElement, GlobalStorage }
+//{ CStorageElement, CGlobalStorage }
 import * as storage from "./globalStorage.js"
 import * as time from "./time.js"
 import * as mouse from "./mouse.js"

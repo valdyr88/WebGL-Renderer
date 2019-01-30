@@ -1,8 +1,8 @@
 import { gl, getContentsFromFile, glPrintError } from "./glContext.js";
-import { Shader, ShaderList } from "./glShader.js";
+import { CShader, CShaderList } from "./glShader.js";
 import * as vMath from "../glMatrix/gl-matrix.js";
 
-export class Camera{
+export class CCamera{
 	
 	constructor(slotID, viewWidth, viewHeight)
 	{

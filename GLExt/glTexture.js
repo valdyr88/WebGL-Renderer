@@ -38,7 +38,7 @@ function getTextureTypeFromDOMType(strType)
 	return out;
 }
 
-export class HDRImage{
+export class CHDRImage{
 
 	constructor(data){		
 		this.rawData = data;//new Uint8Array();
@@ -119,7 +119,7 @@ export class HDRImage{
 					alert("DecodeHDRImageToFloatArray() component scanline width not matching!");}
 				
 				for(var p = 0; p < width; ++p){
-					var rgbf = HDRImage.DecodeHDRIPixel(Unp[0][p], Unp[1][p], Unp[2][p], Unp[3][p]);
+					var rgbf = CHDRImage.DecodeHDRIPixel(Unp[0][p], Unp[1][p], Unp[2][p], Unp[3][p]);
 					floatArray[3*currPix+0] = rgbf[0];
 					floatArray[3*currPix+1] = rgbf[1];
 					floatArray[3*currPix+2] = rgbf[2];
@@ -137,7 +137,7 @@ export class HDRImage{
 			
 			for(i = dataStart; i < data.length; )
 			{
-				var rgbf = HDRImage.DecodeHDRIPixel(data[i+0], data[i+1], data[i+2], data[i+3]); i+=4;
+				var rgbf = CHDRImage.DecodeHDRIPixel(data[i+0], data[i+1], data[i+2], data[i+3]); i+=4;
 				
 				var rle = 0;
 				if(i+4 < data.length){ //check for rle repeating of the prev pixel
@@ -226,7 +226,7 @@ export class HDRImage{
 			}
 		}
 				
-		this.floatData = HDRImage.DecodeHDRImageToFloatArray(this.rawData, this.dataStart, this.width, this.height);
+		this.floatData = CHDRImage.DecodeHDRImageToFloatArray(this.rawData, this.dataStart, this.width, this.height);
 		this.bDecoded = true;
 		
 		return true;
@@ -255,7 +255,7 @@ export function CalcNofMipLevels(width, height){
 	return ilevels;
 }
 
-export class Texture{
+export class CTexture{
 	
 	constructor(slotID){
 		this.SlotID = slotID;
@@ -487,7 +487,7 @@ export class Texture{
 		this.name = id;
 		var image = document.getElementById(id);
 		if(image == null){
-			alert("Texture.CreateFromFile(id) image == null, " + id); return; }
+			alert("CTexture.CreateFromFile(id) image == null, " + id); return; }
 		this.Type = image.type;
 		this.CreateWithDefaultParams(image);
 	}
@@ -537,7 +537,7 @@ export class Texture{
 	}
 }
 
-export class TextureCube{
+export class CTextureCube{
 		
 	constructor(slotID){
 		this.SlotID = slotID;
@@ -660,9 +660,9 @@ export class TextureCube{
 		
 		for(var i = 0; i < storeIDs.length; ++i){
 			// var obj = document.getElementById(storeIDs[i]);
-			var obj = sys.storage.GlobalStorage.get(storeIDs[i]);
+			var obj = sys.storage.CGlobalStorage.get(storeIDs[i]);
 			if(typeof obj === 'undefined' || obj == null){
-				obj = sys.storage.GlobalStorage.get(storeIDs[i]); }
+				obj = sys.storage.CGlobalStorage.get(storeIDs[i]); }
 			if(typeof obj.value === 'undefined' || obj.value == null) return false;
 			
 			var strFileType = "";
@@ -680,7 +680,7 @@ export class TextureCube{
 			switch(strFileType){
 				case "hdr":
 				{
-					var hdrImg = new HDRImage(obj.value);
+					var hdrImg = new CHDRImage(obj.value);
 					hdrImg.DecodeRAWData();
 					tx[side][level] = hdrImg.getData();
 					
@@ -704,7 +704,7 @@ export class TextureCube{
 	}
 }
 
-export class Texture3D{
+export class CTexture3D{
 	
 	constructor(slotID){
 		this.SlotID = slotID;
@@ -763,12 +763,12 @@ export class Texture3D{
 	
 	CreateFromZip(id)
 	{
-		var obj = sys.storage.GlobalStorage.get(id);
+		var obj = sys.storage.CGlobalStorage.get(id);
 		if(obj == null) return false;
-		if(obj instanceof sys.storage.StorageElement == false) return false;
+		if(obj instanceof sys.storage.CStorageElement == false) return false;
 		
 		var zip = obj.data;
-		if(zip instanceof sys.zip.Zip == false) return false;
+		if(zip instanceof sys.zip.CZip == false) return false;
 		
 		var info = getTextureTypeFromDOMType(obj.type);
 		if(info.type != "tx3D") return false;
@@ -864,7 +864,7 @@ export class Texture3D{
 
 var globalTextureList = null;
 
-export class TextureList
+export class CTextureList
 {
 	
 	constructor(){
@@ -872,49 +872,49 @@ export class TextureList
 	}
 	
 	static addTexture(texture){
-		texture.SlotID = TextureList.singleton().textures.length;
-		TextureList.singleton().textures[TextureList.singleton().textures.length] = texture;
+		texture.SlotID = CTextureList.singleton().textures.length;
+		CTextureList.singleton().textures[CTextureList.singleton().textures.length] = texture;
 	}
 	
 	static addTextures(new_textures){
 		for(var i = 0; i < new_textures.length; ++i)
-			TextureList.addTexture(new_textures[i]);
+			CTextureList.addTexture(new_textures[i]);
 	}
 	
 	static get(SlotID){
-		if(SlotID < TextureList.singleton().textures.length){
-			return TextureList.singleton().textures[SlotID];
+		if(SlotID < CTextureList.singleton().textures.length){
+			return CTextureList.singleton().textures[SlotID];
 		}
 		return null;
 	}
 	
 	static Init(){
 		if(globalTextureList == null)
-			globalTextureList = new TextureList();
+			globalTextureList = new CTextureList();
 	}
 	
 	static singleton(){
-		TextureList.Init();
+		CTextureList.Init();
 		return globalTextureList;
 	}
 	
 	static CreateTexture(){
-		var texture = new Texture(0);
-		TextureList.addTexture(texture);
+		var texture = new CTexture(0);
+		CTextureList.addTexture(texture);
 		return texture;
 	}
 	static CreateTextureCube(){
-		var texture = new TextureCube(0);
-		TextureList.addTexture(texture);
+		var texture = new CTextureCube(0);
+		CTextureList.addTexture(texture);
 		return texture;
 	}
 	static CreateTexture3D(){
-		var texture = new Texture3D(0);
-		TextureList.addTexture(texture);
+		var texture = new CTexture3D(0);
+		CTextureList.addTexture(texture);
 		return texture;
 	}
 	
-	static count(){ return TextureList.singleton().textures.length; }
+	static count(){ return CTextureList.singleton().textures.length; }
 }
 
 //----------------------------------------------------------------------------
@@ -922,7 +922,7 @@ export class TextureList
 
 //----------------------------------------------------------------------------
 //Cubemap i mipovi spremljeni u global storage listu. 
-//TextureCube klasa koristi CreateFromDOMDataElements() za ucitavanje iz globalne liste
+//CTextureCube klasa koristi CreateFromDOMDataElements() za ucitavanje iz globalne liste
 //----------------------------------------------------------------------------
 
 function StoreAsDOMElement(storeID, type, data){
@@ -938,7 +938,7 @@ function StoreAsDOMElement(storeID, type, data){
 }
 
 function StoreInGlobalStorage(storeID, type, data){
-	sys.storage.GlobalStorage.add(storeID, new sys.storage.StorageElement(storeID, type, data));
+	sys.storage.CGlobalStorage.add(storeID, new sys.storage.CStorageElement(storeID, type, data));
 	// console.log("StoreInGlobalStorage(): " + storeID);
 }
 
@@ -1030,7 +1030,7 @@ function fetchImage_txC(obj, onLoadFinish){
 //----------------------------------------------------------------------------
 
 //----------------------------------------------------------------------------
-// Texture3D 
+// CTexture3D 
 //----------------------------------------------------------------------------
 
 

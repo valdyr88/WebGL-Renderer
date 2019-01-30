@@ -1,13 +1,13 @@
 import { gl, glPrintError } from "./glContext.js";
 import * as vMath from "../glMatrix/gl-matrix.js";
-import { Shader, UniformBlockBuffer, UniformBlockBinding } from "./glShader.js";
+import { CShader, CUniformBlockBuffer, CUniformBlockBinding } from "./glShader.js";
 
 var PointShader = -1;
 
 function InitPointShader(){
 	if(PointShader != -1) return true;
 	
-	PointShader = new Shader(-1);
+	PointShader = new CShader(-1);
 	
 	var vsCode = 
 	"\
@@ -45,7 +45,7 @@ function InitPointShader(){
 
 export var MAX_LIGHTS = 1;
 
-export class Light{
+export class CLight{
 	
 	constructor(slotID){
 		
@@ -67,7 +67,7 @@ export class Light{
 	}
 	
 	/*
-		struct Light{
+		struct CLight{
 			vec4 position;			//1
 			vec4 color;				//2
 			float intensity;		//3
@@ -76,8 +76,8 @@ export class Light{
 	*/
 	
 	SerializeToUniformBlock(){
-		var FloatUint8 = UniformBlockBuffer.ConvertTypedArray( new Float32Array([this.Position[0],this.Position[1],this.Position[2],0.0,this.Color[0],this.Color[1],this.Color[2],this.Color[3],this.Intensity]), Uint8Array );
-		var IntUint8 =   UniformBlockBuffer.ConvertTypedArray( new Uint32Array([this.Flags, 0, 0]), Uint8Array );
+		var FloatUint8 = CUniformBlockBuffer.ConvertTypedArray( new Float32Array([this.Position[0],this.Position[1],this.Position[2],0.0,this.Color[0],this.Color[1],this.Color[2],this.Color[3],this.Intensity]), Uint8Array );
+		var IntUint8 =   CUniformBlockBuffer.ConvertTypedArray( new Uint32Array([this.Flags, 0, 0]), Uint8Array );
 		
 		var i = 0;
 		for(var b = 0; b < FloatUint8.length; ++b){
@@ -89,7 +89,7 @@ export class Light{
 	CreateUniformBlock(){		
 		if(this.UniformBlock != null) return;
 		
-		this.UniformBlock = new UniformBlockBuffer();
+		this.UniformBlock = new CUniformBlockBuffer();
 		this.UniformBlock.Create(3);
 	}
 	
@@ -166,7 +166,7 @@ export class Light{
 	
 	AttachUniformBlockTo(shader){
 		if(this.SlotID >= MAX_LIGHTS){
-			alert("Light.SlotID >= MAX_LIGHTS"); return;
+			alert("CLight.SlotID >= MAX_LIGHTS"); return;
 		}
 		
 		var strUBName = "ubLight["+this.SlotID+"]";
@@ -189,48 +189,48 @@ export class Light{
 
 var globalLightList = null;
 
-export class LightList
+export class CLightList
 {
 	constructor(){
 		this.lights = [];
 	}
 	
 	/* static CreateShader(vertexFile, fragmentFile){
-		var SlotID = LightList.singleton().lights.length;
-		var light = new Shader(SlotID);
+		var SlotID = CLightList.singleton().lights.length;
+		var light = new CShader(SlotID);
 		light.CompileFromFile(vertexFile,fragmentFile);
-		LightList.singleton().lights[SlotID] = light;
+		CLightList.singleton().lights[SlotID] = light;
 		return light;
 	} */
 	
 	static addLight(light){
-		light.SlotID = LightList.singleton().lights.length;
-		LightList.singleton().lights[LightList.singleton().lights.length] = light;
+		light.SlotID = CLightList.singleton().lights.length;
+		CLightList.singleton().lights[CLightList.singleton().lights.length] = light;
 	}
 	
 	static Init(){
 		if(globalLightList == null)
-			globalLightList = new LightList();
+			globalLightList = new CLightList();
 	}
 	
 	static get(SlotID){
-		if(SlotID < LightList.singleton().lights.length){
-			return LightList.singleton().lights[SlotID];
+		if(SlotID < CLightList.singleton().lights.length){
+			return CLightList.singleton().lights[SlotID];
 		}
 		return null;
 	}
 	
 	static count(){
-		return LightList.singleton().lights.length;
+		return CLightList.singleton().lights.length;
 	}
 	
 	static singleton(){
-		LightList.Init();
+		CLightList.Init();
 		return globalLightList;
 	}
 	
 	static Update(){
-		var list = LightList.singleton();
+		var list = CLightList.singleton();
 		for(var i = 0; i < list.lights.length; ++i){
 			list.lights[i].Update();
 		}

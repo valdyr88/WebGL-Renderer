@@ -4,7 +4,7 @@ import * as fetch from "./fetch.js"
 //----------------------------------------------------------------------------------------------------
 // inline HTML file. potrebno je dodat attribut data-inline-html (moze i neki drugi isto) i pozvat ParseForHTMLIncludes(document, 'data-inline-html')
 //----------------------------------------------------------------------------------------------------
-class inlineHTMLfileCounter{ constructor(){ this.counter = 0; } }
+class CInlineHTMLfileCounter{ constructor(){ this.counter = 0; } }
 
 export function inlineHTMLfile(src, obj, counter, callback){
 	fetch.fetchTextFileSrc(src, function(txt){
@@ -58,7 +58,7 @@ function ParseForHTMLIncludes_impl(doc, strAttribute, counter, callback){
 
 export function ParseForHTMLIncludes(doc, strAttribute, callback){
 	if(strAttribute == undefined || strAttribute == null) strAttribute = "data-inline-html";
-	var counter = new inlineHTMLfileCounter();
+	var counter = new CInlineHTMLfileCounter();
 	
 	//poziva rekurzivnu funkciju
 	ParseForHTMLIncludes_impl(doc, strAttribute, counter, callback);
@@ -71,7 +71,7 @@ export function ParseForHTMLIncludes(doc, strAttribute, callback){
 // movable elements
 //----------------------------------------------------------------------------------------------------
 
-class Rect{
+class CRect{
 	constructor(X0,Y0,X1,Y1){
 		this.x0 = X0;
 		this.x1 = X1;
@@ -168,7 +168,7 @@ function movable_findMovableRectFromAttrib(obj, strAttribute){
 			obj.selectRect = movable_findMovableRectFromAttrib(obj, obj.movable_element_handle_attrib);
 		}
 				
-		Rects[Rects.length] = new Rect(x0,y0,x1,y1);
+		Rects[Rects.length] = new CRect(x0,y0,x1,y1);
 	}
 	return Rects;	
 }
@@ -192,12 +192,12 @@ export function MakeElementMovable(elem, handle){
 	else if(typeof handle == 'string'){
 		obj.selectRect = movable_findMovableRectFromAttrib(obj, handle);}
 	else if(handle[0].length == undefined){
-		obj.selectRect = [new Rect(handle[0],handle[1],handle[2],handle[3])];}
+		obj.selectRect = [new CRect(handle[0],handle[1],handle[2],handle[3])];}
 	else{
 		obj.selectRect = [];
 		for(let i = 0; i < handle.length; ++i){
 			let r = handle[i];
-			obj.selectRect[i] = new Rect(r[0],r[1],r[2],r[3]);
+			obj.selectRect[i] = new CRect(r[0],r[1],r[2],r[3]);
 		}
 	}
 	

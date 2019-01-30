@@ -1,6 +1,6 @@
 import { gl, getContentsFromFile, glPrintError } from "./glContext.js";
-import { Shader, ShaderList } from "./glShader.js";
-import { Texture, TextureList } from "./glTexture.js";
+import { CShader, CShaderList } from "./glShader.js";
+import { CTexture, CTextureList } from "./glTexture.js";
 import * as vMath from "../glMatrix/gl-matrix.js";
 
 /*
@@ -31,7 +31,7 @@ function Float32ArrayFromBuffer(itemSize, Buffer){
 	return floatArray;
 }
 
-class TextureShaderLink
+class CTextureShaderLink
 {
 	constructor(textureSlotID, strUniformLocation){
 		this.TextureSlotID = textureSlotID;
@@ -61,7 +61,7 @@ export var BlendMode_Additive 	   = null;
 export var BlendMode_SrcOverride   = null;
 export var BlendMode_Default       = null;
 
-export class BlendMode{
+export class CBlendMode{
 	
 	static Zero(){ 					return gl.ZERO; }
 	static One(){					return gl.ONE; }
@@ -86,11 +86,11 @@ export class BlendMode{
 	
 	constructor(s,d,e)
 	{
-		if(s===undefined) this.src = BlendMode.One();
+		if(s===undefined) this.src = CBlendMode.One();
 		else this.src = s;
-		if(d===undefined) this.dst = BlendMode.Zero();
+		if(d===undefined) this.dst = CBlendMode.Zero();
 		else this.dst = d;
-		if(e===undefined) this.eq = BlendMode.EqAdd();
+		if(e===undefined) this.eq = CBlendMode.EqAdd();
 		else this.eq = e;
 	}
 	
@@ -111,7 +111,7 @@ export class BlendMode{
 	isEqual(b){ return (this.getSrcBlend() == b.getSrcBlend() && this.getDstBlend() == b.getDstBlend() && this.getEquation() == b.getEquation()); }
 	
 	Bind(){
-		if(ActiveBlendMode instanceof BlendMode)
+		if(ActiveBlendMode instanceof CBlendMode)
 			if(this.isEqual(ActiveBlendMode) == true) return;
 		gl.blendFunc(this.src, this.dst);
 		gl.blendEquation(this.eq);
@@ -122,12 +122,12 @@ export class BlendMode{
 	static setDefault(b){ BlendMode_Default.setBlendSrcDst(b.getSrcBlend(), b.getDstBlend()); BlendMode_Default.setBlendEquation(b.getEquation()); }
 	
 	static Init(){
-		BlendMode_AlphaBlend  = new BlendMode( BlendMode.SrcAlpha(), BlendMode.OneMinusSrcAlpha(), BlendMode.EqAdd() );
-		BlendMode_Additive 	  = new BlendMode( BlendMode.One(), BlendMode.One(), BlendMode.EqAdd() );
-		BlendMode_SrcOverride = new BlendMode( BlendMode.One(), BlendMode.Zero(), BlendMode.EqAdd() );
-		BlendMode_Default     = new BlendMode( BlendMode.One(), BlendMode.Zero(), BlendMode.EqAdd() );
+		BlendMode_AlphaBlend  = new CBlendMode( CBlendMode.SrcAlpha(), CBlendMode.OneMinusSrcAlpha(), CBlendMode.EqAdd() );
+		BlendMode_Additive 	  = new CBlendMode( CBlendMode.One(), CBlendMode.One(), CBlendMode.EqAdd() );
+		BlendMode_SrcOverride = new CBlendMode( CBlendMode.One(), CBlendMode.Zero(), CBlendMode.EqAdd() );
+		BlendMode_Default     = new CBlendMode( CBlendMode.One(), CBlendMode.Zero(), CBlendMode.EqAdd() );
 		
-		BlendMode.Enable();
+		CBlendMode.Enable();
 		BlendMode_Default.Bind();
 		ActiveBlendMode = BlendMode_Default;
 	}
@@ -140,7 +140,7 @@ export class BlendMode{
 	}
 }
 
-class BlendModeColorAttachment extends BlendMode
+class CBlendModeColorAttachment extends CBlendMode
 {
 	constructor(i,s,d,e){
 		super(s,d,e);
@@ -154,14 +154,14 @@ class BlendModeColorAttachment extends BlendMode
 	Bind(i){ if(i!==undefined) this.id = i; gl.blendFunci(this.id, this.src, this.dst); gl.blendEquationi(this.id, this.eq); ActiveBlendMode = this; }
 }
 
-export class BlendModeColorAttachments
+export class CBlendModeColorAttachments
 {
 	constructor(){
 		this.blendModes = [];
 	}
 	
 	addBlendMode(slot, blendMode){
-		this.blendModes[slot] = new BlendModeColorAttachment(slot, blendMode.getSrcBlend(), blendMode.getDstBlend(), blendMode.getEquation());
+		this.blendModes[slot] = new CBlendModeColorAttachment(slot, blendMode.getSrcBlend(), blendMode.getDstBlend(), blendMode.getEquation());
 	}
 	clearBlendMode(slot){
 		this.blendModes[slot] = null;
@@ -175,7 +175,7 @@ export class BlendModeColorAttachments
 	}
 }
 
-export class Model
+export class CModel
 {
 	constructor(slotID)
 	{
@@ -209,12 +209,12 @@ export class Model
 	}
 	
 	setBlendMode(b){
-		if(this.blendMode == null) this.blendMode = new BlendMode();
+		if(this.blendMode == null) this.blendMode = new CBlendMode();
 		this.blendMode.setBlendMode(b);
 	}
 	
 	setTexture(texture, uniformLocationStr){
-		this.textures[this.textures.length] = new TextureShaderLink(texture.SlotID, uniformLocationStr);
+		this.textures[this.textures.length] = new CTextureShaderLink(texture.SlotID, uniformLocationStr);
 	}
 	setShader(shader){
 		this.shaderID = shader.SlotID;
@@ -222,7 +222,7 @@ export class Model
 	
 	BindTextureToShader(slot, textureLink, shader){
 		var ULocation = shader.getPrefetchedUniformLocation(textureLink.UniformLocationStr);
-		var texture = TextureList.get(textureLink.TextureSlotID);
+		var texture = CTextureList.get(textureLink.TextureSlotID);
 		texture.Bind(slot, ULocation);
 	}
 	BindTexturesToShader(shader){
@@ -308,7 +308,7 @@ export class Model
 	ImportFromObj(string){
 		this.name = string;
 		
-		var ObjModelImport = new ModelImport();
+		var ObjModelImport = new CModelImport();
 		ObjModelImport.ImportOBJ(this, string);
 		ObjModelImport.CalcTangents(this);
 		
@@ -369,7 +369,7 @@ export class Model
 		gl.drawElements( mode, this.glIndexBuffer.numItems, gl.UNSIGNED_SHORT, 0);
 		
 		if(this.blendMode != null)
-			BlendMode.getDefault().Bind();
+			CBlendMode.getDefault().Bind();
 	}
 	
 	RenderIndexedTriangles(shader){
@@ -391,7 +391,7 @@ export class Model
 	}
 }
 
-class ModelImport
+class CModelImport
 {	
 	constructor(){
 		this.VertexBuffer = [];
@@ -725,7 +725,7 @@ var NDCQuadModel = null;
 export function InitNDCQuadModel(){
 	if(NDCQuadModel != null) return;
 	
-	NDCQuadModel = new Model(-1);
+	NDCQuadModel = new CModel(-1);
 	GenQuadModel(NDCQuadModel, -1, 1);
 }
 

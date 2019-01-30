@@ -3,7 +3,7 @@ import * as jsZip from "./jszip/dist/jszip.js"
 
 var bSupportsUint8Array = JSZip.support.uint8array;
 
-export class File{
+export class CFile{
 	constructor(file_name, full_file_path, file_data){
 		this.name = file_name;
 		this.data = file_data;
@@ -12,7 +12,7 @@ export class File{
 	}
 }
 
-export class Dir{
+export class CDir{
 	constructor(dir_name){
 		this.name = dir_name;
 		this.dirs = [];
@@ -27,7 +27,7 @@ export class Dir{
 	}
 	
 	addNewDir(dir_name){
-		var dir = new Dir(dir_name);
+		var dir = new CDir(dir_name);
 		this.addDir(dir);
 		return dir;
 	}
@@ -38,7 +38,7 @@ export class Dir{
 	}
 	
 	addNewFile(file_name, file_path, file_data){
-		var file = new File(file_name, file_path, file_data);
+		var file = new CFile(file_name, file_path, file_data);
 		this.addFile(file);
 		return file;
 	}
@@ -58,7 +58,7 @@ export class Dir{
 	}
 }
 
-export class Zip
+export class CZip
 {	
 	constructor()
 	{	
@@ -114,7 +114,7 @@ export class Zip
 	}
 	
 	private_FillZipData(zip, callback){
-		this.contents = new Dir("");
+		this.contents = new CDir("");
 		this.bUnpacked = false;
 		this.fileCount = 0;
 		

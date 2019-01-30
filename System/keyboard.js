@@ -1,5 +1,5 @@
 
-export class Keyboard{
+export class CKeyboard{
 
 	constructor()
 	{
@@ -74,7 +74,7 @@ export var keyboard = null;
 
 export function InitKeyboard(obj){
 	if(obj == null) obj = document;
-	keyboard = new Keyboard();
+	keyboard = new CKeyboard();
 	keyboard.AttachTo(obj);
 }
 

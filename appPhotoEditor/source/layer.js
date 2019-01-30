@@ -16,7 +16,7 @@ paintable layer
 		- testirat Begin() Draw() End() na testnom shaderu.
 		- inicijalizirat u mainu NDCQuadModel.
 */
-export class PaintableRasterLayer{
+export class CPaintableRasterLayer{
 	
 	static bIsBytePrecision(precision){
 		return precision == "byte" || precision == "8" || precision == "8bit" || precision == "uint8";
@@ -33,36 +33,36 @@ export class PaintableRasterLayer{
 			case "1":
 			case "a":
 			case "g":{
-				if(PaintableRasterLayer.bIsBytePrecision(precision) == true)
+				if(CPaintableRasterLayer.bIsBytePrecision(precision) == true)
 					texture.CreateEmptyRubyte(width, height);
-				else if(PaintableRasterLayer.bIsFloat32Precision(precision) == true)
+				else if(CPaintableRasterLayer.bIsFloat32Precision(precision) == true)
 					texture.CreateEmptyRfloat32(width, height);
 				break;
 			}
 			case "rg":
 			case "2":
 			case "xy":{
-				if(PaintableRasterLayer.bIsBytePrecision(precision) == true)
+				if(CPaintableRasterLayer.bIsBytePrecision(precision) == true)
 					texture.CreateEmptyRGubyte(width, height);
-				else if(PaintableRasterLayer.bIsFloat32Precision(precision) == true)
+				else if(CPaintableRasterLayer.bIsFloat32Precision(precision) == true)
 					texture.CreateEmptyRGfloat32(width, height);
 				break;
 			}
 			case "rgb":
 			case "3":
 			case "xyz":{
-				if(PaintableRasterLayer.bIsBytePrecision(precision) == true)
+				if(CPaintableRasterLayer.bIsBytePrecision(precision) == true)
 					texture.CreateEmptyRGBubyte(width, height);
-				else if(PaintableRasterLayer.bIsFloat32Precision(precision) == true)
+				else if(CPaintableRasterLayer.bIsFloat32Precision(precision) == true)
 					texture.CreateEmptyRGBfloat32(width, height);
 				break;
 			}
 			case "rgba":
 			case "4":
 			case "xyzw":{
-				if(PaintableRasterLayer.bIsBytePrecision(precision) == true)
+				if(CPaintableRasterLayer.bIsBytePrecision(precision) == true)
 					texture.CreateEmptyRGBAubyte(width, height);
-				else if(PaintableRasterLayer.bIsFloat32Precision(precision) == true)
+				else if(CPaintableRasterLayer.bIsFloat32Precision(precision) == true)
 					texture.CreateEmptyRGBAfloat32(width, height);
 				break;
 			}
@@ -73,18 +73,18 @@ export class PaintableRasterLayer{
 		this.width = w;
 		this.height = h;
 		this.shader = null; //predaje se u funkciji Begin() i brise u End()
-		this.framebuffer = new glext.Framebuffer(false); this.framebuffer.Create();
+		this.framebuffer = new glext.CFramebuffer(false); this.framebuffer.Create();
 		this.precision = precision;
 		this.components = components;
-		this.texture = new glext.Texture(-1);
-		PaintableRasterLayer.CreateTexture(this.texture, this.width, this.height, this.precision, this.components);
+		this.texture = new glext.CTexture(-1);
+		CPaintableRasterLayer.CreateTexture(this.texture, this.width, this.height, this.precision, this.components);
 	}
 	
 	CloneTexture(){
 		
-		var new_texture = new glext.Texture(-1);
+		var new_texture = new glext.CTexture(-1);
 		
-		PaintableRasterLayer.CreateTexture(new_texture, this.width, this.height, this.precision, this.components);
+		CPaintableRasterLayer.CreateTexture(new_texture, this.width, this.height, this.precision, this.components);
 		//ToDo: ovdje kopirat
 		this.framebuffer.Bind();
 		this.framebuffer.AttachTexture(this.texture, 0);
@@ -126,10 +126,10 @@ export class PaintableRasterLayer{
 	}
 }
 
-export class Layer{
+export class CLayer{
 	
 	constructor(w,h){
-		this.blendMode; //= new BlendMode();
+		this.blendMode; //= new CBlendMode();
 		this.width = w; this.height = h;
 		this.type = "layer";
 	}
@@ -137,16 +137,16 @@ export class Layer{
 	setBlendMode(){}
 }
 
-export class RasterLayer extends Layer{
+export class CRasterLayer extends CLayer{
 	
 	constructor(w, h){
 		super(w,h);
 		this.type = "raster";
-		this.paint_layer = new PaintableRasterLayer(w, h, "byte", "rgb");
+		this.paint_layer = new CPaintableRasterLayer(w, h, "byte", "rgb");
 	}
 }
 
-export class VectorLayer extends Layer{
+export class CVectorLayer extends CLayer{
 	
 	constructor(w, h){
 		super(w,h);

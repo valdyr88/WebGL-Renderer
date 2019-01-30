@@ -1,6 +1,6 @@
 import { browser } from "./html.js"
 
-export class Mouse
+export class CMouse
 {
 	constructor()
 	{
@@ -118,7 +118,7 @@ export var mouse = null;
 
 export function InitMouse(obj){
 	if(obj == null) obj = document;
-	mouse = new Mouse();
+	mouse = new CMouse();
 	mouse.AttachTo(obj);
 }
 

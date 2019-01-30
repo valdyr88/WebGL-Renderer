@@ -2,7 +2,7 @@
 
 var globalStorage = null;
 
-class GlobalStorageKeyData
+class CGlobalStorageKeyData
 {
 	constructor(k, d)
 	{
@@ -11,7 +11,7 @@ class GlobalStorageKeyData
 	}
 }
 
-export class StorageElement
+export class CStorageElement
 {
 	constructor(storeID, Type, Data){
 		this.id = storeID;
@@ -20,7 +20,7 @@ export class StorageElement
 	}
 }
 
-export class GlobalStorage
+export class CGlobalStorage
 {
 	constructor()
 	{
@@ -29,18 +29,18 @@ export class GlobalStorage
 	
 	static getSingleton(){
 		if(globalStorage == null){
-			globalStorage = new GlobalStorage();
+			globalStorage = new CGlobalStorage();
 		}
 		return globalStorage;
 	}
 	
 	static add(keyword, data){
-		var gs = GlobalStorage.getSingleton();
-		gs.list[gs.list.length] = new GlobalStorageKeyData(keyword, data);
+		var gs = CGlobalStorage.getSingleton();
+		gs.list[gs.list.length] = new CGlobalStorageKeyData(keyword, data);
 	}
 	
 	static get(keyword){
-		var gs = GlobalStorage.getSingleton();
+		var gs = CGlobalStorage.getSingleton();
 		for(var i = 0; i < gs.list.length; ++i){
 			if(gs.list[i].keyword == keyword)
 				return gs.list[i].data;
@@ -49,7 +49,7 @@ export class GlobalStorage
 	}
 	
 	static has(keyword){
-		var gs = GlobalStorage.getSingleton();
+		var gs = CGlobalStorage.getSingleton();
 		for(var i = 0; i < gs.list.length; ++i){
 			if(gs.list[i].keyword == keyword) return true;
 		}
@@ -57,7 +57,7 @@ export class GlobalStorage
 	}
 	
 	static idOf(keyword){
-		var gs = GlobalStorage.getSingleton();
+		var gs = CGlobalStorage.getSingleton();
 		for(var i = 0; i < gs.list.length; ++i){
 			if(gs.list[i].keyword == keyword) return i;
 		}
@@ -65,14 +65,14 @@ export class GlobalStorage
 	}
 	
 	static getById(id){
-		var gs = GlobalStorage.getSingleton();
+		var gs = CGlobalStorage.getSingleton();
 		if(id >= gs.list.length) return null;
 		return gs.list[id].data;
 	}
 	
 	/* static remove(keyword){
-		var gs = GlobalStorage.getSingleton();
-		var i = GlobalStorage.idOf(keyword);
+		var gs = CGlobalStorage.getSingleton();
+		var i = CGlobalStorage.idOf(keyword);
 		gs.list[i] = gs.list[gs.list.length-1];
 		gs.list[gs.list.length-1] = null;
 	} */

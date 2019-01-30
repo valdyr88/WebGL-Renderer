@@ -16,7 +16,7 @@ var bFluidSimPass = true;
 
 export function main(){
 	
-	var gs = sys.storage.GlobalStorage.getSingleton();
+	var gs = sys.storage.CGlobalStorage.getSingleton();
 	sys.mouse.InitMouse(document);
 	sys.keyboard.InitKeyboard(document);
 	sys.CheckWhatBrowser();
@@ -84,16 +84,16 @@ export function main(){
 	gl.disable(gl.BLEND);
 	gl.depthFunc(gl.LESS);
 	
-	glext.BlendMode.Init();
+	glext.CBlendMode.Init();
 	
 	if(bUseHDR == true && bStoreHDRinRGBA8 == true)
-		glext.ShaderDefines.addGlobalDefine("USE_HDR_RGBA8","");
+		glext.CShaderDefines.addGlobalDefine("USE_HDR_RGBA8","");
 	else if(bUseHDR == true)
-		glext.ShaderDefines.addGlobalDefine("USE_HDR","");
+		glext.CShaderDefines.addGlobalDefine("USE_HDR","");
 	
-	glext.ShaderDefines.addGlobalDefine("MAX_LIGHTS", " "+glext.MAX_LIGHTS);
+	glext.CShaderDefines.addGlobalDefine("MAX_LIGHTS", " "+glext.MAX_LIGHTS);
 	
-	var simple_shader = new glext.Shader(0);
+	var simple_shader = new glext.CShader(0);
 	if(simple_shader.CompileFromFile("simpleVS", "simpleFS") == false) alert("nije kompajliran shader!");
 	simple_shader.setVertexAttribLocations("aVertexPosition","aVertexNormal","aVertexTangent",null,"aTexCoords");
 	simple_shader.setTransformMatricesUniformLocation("ModelMatrix","ViewMatrix","ProjectionMatrix");
@@ -104,36 +104,36 @@ export function main(){
 	simple_shader.setCameraPositionUniformLocation("CameraPosition");
 	simple_shader.ULTextureAmb = simple_shader.getUniformLocation("txAmbient");
 	
-	var skybox_shader = new glext.Shader(1);
+	var skybox_shader = new glext.CShader(1);
 	if(skybox_shader.CompileFromFile("simpleVS", "deferred_skybox") == false) alert("nije kompajliran shader!");
 	skybox_shader.ULTextureAmb = skybox_shader.getUniformLocation("txAmbient");
 	skybox_shader.InitDefaultUniformLocations();
 	skybox_shader.InitDefaultAttribLocations();
 	
-	var deferred_opaque_shade = new glext.Shader(2);
+	var deferred_opaque_shade = new glext.CShader(2);
 	if(deferred_opaque_shade.CompileFromFile("simpleVS", "deferred_opaque_shade") == false) alert("nije kompajliran shader!");
 	deferred_opaque_shade.InitDefaultAttribLocations();
 	deferred_opaque_shade.InitDefaultUniformLocations();
 	deferred_opaque_shade.ULInvViewProjMatrix = deferred_opaque_shade.getUniformLocation("InverseViewProjectionMatrix");
 	
-	var transparent_shader = new glext.Shader(3);
+	var transparent_shader = new glext.CShader(3);
 	if(transparent_shader.CompileFromFile("simpleVS", "transparent_shader") == false) alert("nije kompajliran shader!");
 	transparent_shader.InitDefaultAttribLocations();
 	transparent_shader.InitDefaultUniformLocations();
 	transparent_shader.ULTextureAmb = transparent_shader.getUniformLocation("txAmbient");
 	transparent_shader.ULTextureBackground = transparent_shader.getUniformLocation("txBackground");
 	
-	var backbuffer_shader = new glext.Shader(4);
+	var backbuffer_shader = new glext.CShader(4);
 	if(backbuffer_shader.CompileFromFile("simpleVS", "backbuffer_shader") == false) alert("nije kompajliran shader!");
 	backbuffer_shader.InitDefaultAttribLocations();
 	backbuffer_shader.InitDefaultUniformLocations();
 	
-	var atmosphere_shader = new glext.Shader(5);
+	var atmosphere_shader = new glext.CShader(5);
 	if(atmosphere_shader.CompileFromFile("simpleVS", "atmosphere_shader") == false) alert("nije kompajliran shader!");
 	atmosphere_shader.InitDefaultAttribLocations();
 	atmosphere_shader.InitDefaultUniformLocations();
 	
-	var volume_clouds_shader = new glext.Shader(6);
+	var volume_clouds_shader = new glext.CShader(6);
 	volume_clouds_shader.addDefine(strQualitySelect[QualitySelect],"");//"Quality_Low"
 	if(volume_clouds_shader.CompileFromFile("volume_clouds_vs", "volume_clouds_shader") == false) alert("nije kompajliran shader!");
 	volume_clouds_shader.InitDefaultAttribLocations();
@@ -145,7 +145,7 @@ export function main(){
 	volume_clouds_shader.ULCameraForward = volume_clouds_shader.getUniformLocation("CameraForward");
 	volume_clouds_shader.ULCameraRight = volume_clouds_shader.getUniformLocation("CameraRight");
 	volume_clouds_shader.ULCameraUp = volume_clouds_shader.getUniformLocation("CameraUp");
-	volume_clouds_shader.ULMouse = volume_clouds_shader.getUniformLocation("Mouse");
+	volume_clouds_shader.ULMouse = volume_clouds_shader.getUniformLocation("CMouse");
 	volume_clouds_shader.ULResolution = volume_clouds_shader.getUniformLocation("Resolution");
 	volume_clouds_shader.ULPixelAspect = volume_clouds_shader.getUniformLocation("PixelAspect");
 	volume_clouds_shader.ULTextureMass = volume_clouds_shader.getUniformLocation("txFluidSimCloud");
@@ -155,36 +155,36 @@ export function main(){
 	volume_clouds_shader.ULDisplayBrightness = volume_clouds_shader.getUniformLocation("displayBrightness");
 	volume_clouds_shader.ULTanHalfFOV = volume_clouds_shader.getUniformLocation("TanHalfFOV");
 		
-	var sphere_model = new glext.Model(1);
+	var sphere_model = new glext.CModel(1);
 	sphere_model.ImportFrom("SphereModel");
 	
-	var navigatorModel = new glext.Model(2);
+	var navigatorModel = new glext.CModel(2);
 	navigatorModel.ImportFrom("navigatorModel");
 	
-	var quad_model = new glext.Model(2);
+	var quad_model = new glext.CModel(2);
 	glext.GenQuadModel(quad_model);
 	
-	// var txBRDF_LUT = new glext.Texture(3); txBRDF_LUT.CreateFromFile("txBRDF_LUT");
+	// var txBRDF_LUT = new glext.CTexture(3); txBRDF_LUT.CreateFromFile("txBRDF_LUT");
 	// txBRDF_LUT.setWrapTypeClampToEdge();
 	
-	// var txD = new glext.Texture(0); txD.CreateFromFile("txRock_D");
-	var txN = new glext.Texture(1); txN.CreateFromFile("txRock_N");
-	// var txAoRS = new glext.Texture(2); txAoRS.CreateFromFile("txRock_AoRS");
+	// var txD = new glext.CTexture(0); txD.CreateFromFile("txRock_D");
+	var txN = new glext.CTexture(1); txN.CreateFromFile("txRock_N");
+	// var txAoRS = new glext.CTexture(2); txAoRS.CreateFromFile("txRock_AoRS");
 	
-	// var txGlassAoRS = new glext.Texture(-1); txGlassAoRS.CreateFromFile("txGlass_AoRS");
-	// var txGlassN = new glext.Texture(-1); txGlassN.CreateFromFile("txGlass_N");
+	// var txGlassAoRS = new glext.CTexture(-1); txGlassAoRS.CreateFromFile("txGlass_AoRS");
+	// var txGlassN = new glext.CTexture(-1); txGlassN.CreateFromFile("txGlass_N");
 	
-	// var txAtmosphere = new glext.Texture(-1); txAtmosphere.CreateFromFile("txAtmosphere");
+	// var txAtmosphere = new glext.CTexture(-1); txAtmosphere.CreateFromFile("txAtmosphere");
 	
-	var txNoiseRGB = new glext.Texture(-1); txNoiseRGB.CreateFromFile("txNoiseRGB");
+	var txNoiseRGB = new glext.CTexture(-1); txNoiseRGB.CreateFromFile("txNoiseRGB");
 	txNoiseRGB.setWrapTypeRepeat();
 	
-	// var txAmb = new glext.TextureCube(0); txAmb.CreateFromDOMDataElements("tx128");	
+	// var txAmb = new glext.CTextureCube(0); txAmb.CreateFromDOMDataElements("tx128");	
 			
-	var light = new glext.Light(0);
-	// var lightUniforms = glext.Light.getUniformLocationsFromShader(shader,"light0");
-	// var lightUniforms_backbuffer_shader = glext.Light.getUniformLocationsFromShader(deferred_opaque_shade,"light0");
-	// atmosphere_shader.lightUniforms = glext.Light.getUniformLocationsFromShader(atmosphere_shader, "light0");
+	var light = new glext.CLight(0);
+	// var lightUniforms = glext.CLight.getUniformLocationsFromShader(shader,"light0");
+	// var lightUniforms_backbuffer_shader = glext.CLight.getUniformLocationsFromShader(deferred_opaque_shade,"light0");
+	// atmosphere_shader.lightUniforms = glext.CLight.getUniformLocationsFromShader(atmosphere_shader, "light0");
 	// light.AttachUniformBlockTo(shader);	
 	light.setPosition(1.0, 0.0, 2.5);
 	
@@ -206,56 +206,56 @@ export function main(){
 	var centerPt = vMath.vec3.fromValues(0.0,0.0,0.0);
 	var upDir = vMath.vec3.fromValues(0.0,0.0,-1.0);
 	
-	var Camera = new glext.Camera(0, gl.viewportWidth, gl.viewportHeight);
-	Camera.setPositionAndDir(eyePt, [1.0,0.0,0.0], upDir);
-	Camera.UpdateProjectionMatrix();
+	var CCamera = new glext.CCamera(0, gl.viewportWidth, gl.viewportHeight);
+	CCamera.setPositionAndDir(eyePt, [1.0,0.0,0.0], upDir);
+	CCamera.UpdateProjectionMatrix();
 	
 	//framebuffer
 	//------------------------------------------------------------------------
 	var fbo_width = gl.viewportWidth; var fbo_height = gl.viewportHeight;
-	var txfbColor = new glext.Texture(4); txfbColor.CreateEmptyRGBAubyte(fbo_width, fbo_height);
-	var txfbDepth = new glext.Texture(5); txfbDepth.CreateEmptyDepthfloat(fbo_width, fbo_height);
-	var txfbNormal= new glext.Texture(6); txfbNormal.CreateEmptyRGBAubyte(fbo_width, fbo_height);
-	var txfbAoRSMt= new glext.Texture(7); txfbAoRSMt.CreateEmptyRGBAubyte(fbo_width, fbo_height);
-	var fbo = new glext.Framebuffer(true);   fbo.Create(); 
+	var txfbColor = new glext.CTexture(4); txfbColor.CreateEmptyRGBAubyte(fbo_width, fbo_height);
+	var txfbDepth = new glext.CTexture(5); txfbDepth.CreateEmptyDepthfloat(fbo_width, fbo_height);
+	var txfbNormal= new glext.CTexture(6); txfbNormal.CreateEmptyRGBAubyte(fbo_width, fbo_height);
+	var txfbAoRSMt= new glext.CTexture(7); txfbAoRSMt.CreateEmptyRGBAubyte(fbo_width, fbo_height);
+	var fbo = new glext.CFramebuffer(true);   fbo.Create(); 
 	fbo.AttachTexture(txfbColor, 0);
 	fbo.AttachTexture(txfbNormal,1);
 	fbo.AttachTexture(txfbAoRSMt,2);
 	fbo.AttachDepth(txfbDepth);
 	fbo.CheckStatus();
 	
-	var fboHdrMipBlur = new glext.Framebuffer(true); fboHdrMipBlur.Create(); fboHdrMipBlur.Bind();
-	var txfbHdrMipBlur = new glext.Texture(8); txfbHdrMipBlur.CreateEmptyWithMipsRGBAubyte(fbo_width, fbo_height);
+	var fboHdrMipBlur = new glext.CFramebuffer(true); fboHdrMipBlur.Create(); fboHdrMipBlur.Bind();
+	var txfbHdrMipBlur = new glext.CTexture(8); txfbHdrMipBlur.CreateEmptyWithMipsRGBAubyte(fbo_width, fbo_height);
 	fboHdrMipBlur.AttachTexture(txfbHdrMipBlur, 0);
 	fboHdrMipBlur.AttachDepth(txfbDepth);
 	fboHdrMipBlur.CheckStatus();
 	
-	glext.Framebuffer.BindMainFB();	
+	glext.CFramebuffer.BindMainFB();	
 	//------------------------------------------------------------------------
-		glext.LightList.addLight(light);
+		glext.CLightList.addLight(light);
 		
-		// glext.TextureList.addTexture(txD);
-		glext.TextureList.addTexture(txN);
-		// glext.TextureList.addTexture(txAoRS);
-		// glext.TextureList.addTexture(txGlassN);
-		// glext.TextureList.addTexture(txGlassAoRS);
-		// glext.TextureList.addTexture(txBRDF_LUT);
-		// glext.TextureList.addTexture(txAmb);
-		glext.TextureList.addTexture(txfbColor);
-		glext.TextureList.addTexture(txfbNormal);
-		glext.TextureList.addTexture(txfbAoRSMt);
-		glext.TextureList.addTexture(txfbDepth);
-		glext.TextureList.addTexture(txfbHdrMipBlur);
-		// glext.TextureList.addTexture(txAtmosphere);
-		glext.TextureList.addTexture(txNoiseRGB);
+		// glext.CTextureList.addTexture(txD);
+		glext.CTextureList.addTexture(txN);
+		// glext.CTextureList.addTexture(txAoRS);
+		// glext.CTextureList.addTexture(txGlassN);
+		// glext.CTextureList.addTexture(txGlassAoRS);
+		// glext.CTextureList.addTexture(txBRDF_LUT);
+		// glext.CTextureList.addTexture(txAmb);
+		glext.CTextureList.addTexture(txfbColor);
+		glext.CTextureList.addTexture(txfbNormal);
+		glext.CTextureList.addTexture(txfbAoRSMt);
+		glext.CTextureList.addTexture(txfbDepth);
+		glext.CTextureList.addTexture(txfbHdrMipBlur);
+		// glext.CTextureList.addTexture(txAtmosphere);
+		glext.CTextureList.addTexture(txNoiseRGB);
 		
-		glext.ShaderList.addShader(simple_shader);
-		glext.ShaderList.addShader(skybox_shader);
-		glext.ShaderList.addShader(deferred_opaque_shade);
-		glext.ShaderList.addShader(transparent_shader);
-		glext.ShaderList.addShader(backbuffer_shader);
-		glext.ShaderList.addShader(atmosphere_shader);
-		glext.ShaderList.addShader(volume_clouds_shader);
+		glext.CShaderList.addShader(simple_shader);
+		glext.CShaderList.addShader(skybox_shader);
+		glext.CShaderList.addShader(deferred_opaque_shade);
+		glext.CShaderList.addShader(transparent_shader);
+		glext.CShaderList.addShader(backbuffer_shader);
+		glext.CShaderList.addShader(atmosphere_shader);
+		glext.CShaderList.addShader(volume_clouds_shader);
 		
 		// sphere_model.setTexture(txD,"txDiffuse");
 		sphere_model.setTexture(txN,"txNormal");
@@ -291,7 +291,7 @@ export function main(){
 	var fluidSim = null;
 	
 	if(b3DFluidSim == false){
-		fluidSim = new sim.FluidSim2D(200,200,
+		fluidSim = new sim.CFluidSim2D(200,200,
 			/* vertex, viscosity, advection, advection_correction,
 					divergence, pressure, divfree_velocity, display */
 			"fluidsim_quad_surface_shader", "fluidsim_viscosity_shader", "fluidsim_advection_shader", "fluidsim_advection_correction_shader",
@@ -299,7 +299,7 @@ export function main(){
 			);
 	}
 	else{
-		fluidSim = new sim.FluidSim3D(128,128,128,
+		fluidSim = new sim.CFluidSim3D(128,128,128,
 			/* vertex, viscosity, advection, advection_correction,
 					divergence, pressure, divfree_velocity, display */
 			"fluidsim_quad_surface_shader", "fluidsim_viscosity_shader", "fluidsim_advection_shader", "fluidsim_advection_correction_shader",
@@ -360,10 +360,10 @@ export function main(){
 		fluidSim.SphereBarrier.gravity_dir = [upDir[0],upDir[1],upDir[2]];
 		fluidSim.SphereBarrier.up_dir = [-upDir[0],-upDir[1],-upDir[2]];
 		fluidSim.SphereBarrier.down_dir = [upDir[0],upDir[1],upDir[2]];
-		fluidSim.SphereBarrier.right_dir = [Camera.RightDir[0], Camera.RightDir[1], Camera.RightDir[2]];
-		fluidSim.SphereBarrier.left_dir = [-Camera.RightDir[0], -Camera.RightDir[1], -Camera.RightDir[2]];
-		fluidSim.SphereBarrier.forward_dir = [Camera.ForwardDir[0], Camera.ForwardDir[1], Camera.ForwardDir[2]];
-		fluidSim.SphereBarrier.back_dir = [-Camera.ForwardDir[0], -Camera.ForwardDir[1], -Camera.ForwardDir[2]];
+		fluidSim.SphereBarrier.right_dir = [CCamera.RightDir[0], CCamera.RightDir[1], CCamera.RightDir[2]];
+		fluidSim.SphereBarrier.left_dir = [-CCamera.RightDir[0], -CCamera.RightDir[1], -CCamera.RightDir[2]];
+		fluidSim.SphereBarrier.forward_dir = [CCamera.ForwardDir[0], CCamera.ForwardDir[1], CCamera.ForwardDir[2]];
+		fluidSim.SphereBarrier.back_dir = [-CCamera.ForwardDir[0], -CCamera.ForwardDir[1], -CCamera.ForwardDir[2]];
 		fluidSim.SphereBarrier.floor_depth = 1.0;
 		fluidSim.SphereBarrier.ceiling_height = 1.0;
 		fluidSim.SphereBarrier.walls_dist = 1.0;
@@ -379,7 +379,7 @@ export function main(){
 		fluidSim.SphereBarrier.goal_position2D = [0.0,0.0];
 		fluidSim.SphereBarrier.position2D = [0.0,0.0];
 		fluidSim.SphereBarrier.bUpdateTowadsGoal = false;
-		fluidSim.SphereBarrier.Camera = Camera;
+		fluidSim.SphereBarrier.CCamera = CCamera;
 		
 		fluidSim.SphereBarrier.getPositionAndRadius = function(){ return [this.position[0]*0.5+0.5, this.position[1]*0.5+0.5, this.position[2]*0.5+0.5, this.radius]; }
 		fluidSim.SphereBarrier.getVelocity = function(){ return [ this.velScale*this.velocity[0], this.velScale*this.velocity[1], this.velScale*this.velocity[2]]; }
@@ -401,46 +401,46 @@ export function main(){
 		}
 		
 		//TransformToScreenCoordinates(): pos je 3D pozicija u fluidSim lokalnom prostoru
-		fluidSim.SphereBarrier.TransformToScreenCoordinates = function(pos, Camera){
+		fluidSim.SphereBarrier.TransformToScreenCoordinates = function(pos, CCamera){
 			let pos3D = [0.0,0.0,0.0]; vMath.vec3.copy(pos3D, pos); var pos2D = [0.0,0.0];
 			
 			vMath.vec3.scale(pos3D, pos, this.ToRealWorldScale);
-			vMath.vec3.subtract(pos3D, pos3D, Camera.Position);
+			vMath.vec3.subtract(pos3D, pos3D, CCamera.Position);
 			
-			pos2D[0] = vMath.vec3.dot(pos3D, Camera.RightDir);
-			pos2D[1] = vMath.vec3.dot(pos3D, Camera.UpDir)*Camera.PixelAspect;
+			pos2D[0] = vMath.vec3.dot(pos3D, CCamera.RightDir);
+			pos2D[1] = vMath.vec3.dot(pos3D, CCamera.UpDir)*CCamera.PixelAspect;
 			
-			let dist = vMath.vec3.dot(pos3D, Camera.ForwardDir); 
+			let dist = vMath.vec3.dot(pos3D, CCamera.ForwardDir); 
 			
 			vMath.vec2.scale(pos2D, pos2D, 1.0/dist);
 			
 			vMath.vec2.add(pos2D, pos2D, [1.0,1.0]);
 			vMath.vec2.scale(pos2D, pos2D, 0.5);
 			
-			vMath.vec2.multiply(pos2D, pos2D, [Camera.Width, Camera.Height]);
+			vMath.vec2.multiply(pos2D, pos2D, [CCamera.Width, CCamera.Height]);
 			
 			return pos2D;
 		}
 		//TransformFromScreenCoordinates(): pos je 2D pozicija na screenu u screen-space prostoru
-		fluidSim.SphereBarrier.TransformFromScreenCoordinates = function(pos, Camera, bNaRavniniKojaSadrziPosition){
+		fluidSim.SphereBarrier.TransformFromScreenCoordinates = function(pos, CCamera, bNaRavniniKojaSadrziPosition){
 			let pos2D = [0.0,0.0]; vMath.vec2.copy(pos2D, pos); var pos3D = [0.0,0.0,0.0]; let v2 = [0.0,0.0,0.0];
 			
-			vMath.vec2.multiply(pos2D, pos2D, [1.0/Camera.Width, 1.0/Camera.Height]);
+			vMath.vec2.multiply(pos2D, pos2D, [1.0/CCamera.Width, 1.0/CCamera.Height]);
 			vMath.vec2.scale(pos2D, pos2D, 2.0);
 			vMath.vec2.subtract(pos2D, pos2D, [1.0,1.0]);
 						
-			vMath.vec3.scale(pos3D, Camera.RightDir, pos2D[0]);
-			vMath.vec3.scale(v2, Camera.UpDir, pos2D[1]);
+			vMath.vec3.scale(pos3D, CCamera.RightDir, pos2D[0]);
+			vMath.vec3.scale(v2, CCamera.UpDir, pos2D[1]);
 			vMath.vec3.add(pos3D, pos3D, v2);
 			
 			vMath.vec3.scale(v2, this.position, this.ToRealWorldScale);
-			vMath.vec3.subtract(v2, v2, Camera.Position);
-			let dist = vMath.vec3.dot(v2, Camera.ForwardDir); //testirat
+			vMath.vec3.subtract(v2, v2, CCamera.Position);
+			let dist = vMath.vec3.dot(v2, CCamera.ForwardDir); //testirat
 			
 			vMath.vec3.scale(pos3D, pos3D, dist);
 			
 			if(bNaRavniniKojaSadrziPosition == true){
-				vMath.vec3.scale(v2, Camera.ForwardDir, dist);
+				vMath.vec3.scale(v2, CCamera.ForwardDir, dist);
 				vMath.vec3.add(pos3D, pos3D, v2);
 			}
 			
@@ -449,22 +449,22 @@ export function main(){
 			return pos3D;
 		}
 		
-		fluidSim.SphereBarrier.getPositionOnScreen = function(Camera){
-			this.position2D = this.TransformToScreenCoordinates(this.position, Camera);
+		fluidSim.SphereBarrier.getPositionOnScreen = function(CCamera){
+			this.position2D = this.TransformToScreenCoordinates(this.position, CCamera);
 			return this.position2D;
 		}
-		fluidSim.SphereBarrier.setGoalPosition2D = function(pos2D, Camera){
-			this.goal_position = this.TransformFromScreenCoordinates(pos2D, Camera, true);
+		fluidSim.SphereBarrier.setGoalPosition2D = function(pos2D, CCamera){
+			this.goal_position = this.TransformFromScreenCoordinates(pos2D, CCamera, true);
 			vMath.vec2.copy(this.goal_position2D, pos2D);
 		}
 		
-		fluidSim.SphereBarrier.getDistanceToCamera = function(Camera){
+		fluidSim.SphereBarrier.getDistanceToCamera = function(CCamera){
 			let pos3D = [0.0,0.0,0.0];
 			
 			vMath.vec3.scale(pos3D, this.position, this.ToRealWorldScale);
-			vMath.vec3.subtract(pos3D, pos3D, Camera.Position);
+			vMath.vec3.subtract(pos3D, pos3D, CCamera.Position);
 			
-			let dist = vMath.vec3.dot(pos3D, Camera.ForwardDir);
+			let dist = vMath.vec3.dot(pos3D, CCamera.ForwardDir);
 			
 			return dist;
 		}
@@ -499,7 +499,7 @@ export function main(){
 		fluidSim.SphereBarrier.UpdateMovementTowardsGoal2D = function(dt){
 			if(this.bUpdateTowadsGoal == false) return;
 			
-			//koordinate su u Screen space ([0,0] - [Camera.Width, Camera.Height])
+			//koordinate su u Screen space ([0,0] - [CCamera.Width, CCamera.Height])
 			let n = [0.0,0.0]; vMath.vec2.subtract(n, this.goal_position2D, this.position2D);
 			let d = vMath.vec2.length(n);
 			if(d < 0.1){ return; }
@@ -511,8 +511,8 @@ export function main(){
 			
 			let dv = [0.0,0.0]; vMath.vec2.scale(dv, a, dt);
 			
-			vMath.vec2.add(dv, dv, [0.5*this.Camera.Width, 0.5*this.Camera.Height]);
-			let dv3D = this.TransformFromScreenCoordinates(dv, this.Camera, false);
+			vMath.vec2.add(dv, dv, [0.5*this.CCamera.Width, 0.5*this.CCamera.Height]);
+			let dv3D = this.TransformFromScreenCoordinates(dv, this.CCamera, false);
 			
 			vMath.vec3.add(this.velocity, this.velocity, dv3D);
 		}
@@ -629,7 +629,7 @@ export function main(){
 			this.bIsMouseDown = false;
 		}
 		
-		barrier.UpdateGoalPosition = function(mouse, Camera, bCameraUpdated, fluidSim){
+		barrier.UpdateGoalPosition = function(mouse, CCamera, bCameraUpdated, fluidSim){
 			if(bCameraUpdated == false && this.bIsMouseDown == true){
 				vMath.vec2.copy(this.goal_position2D, mouse.getPosition());
 				this.bUpdateTowadsGoal = true;
@@ -638,11 +638,11 @@ export function main(){
 				this.bUpdateTowadsGoal = false;
 			}
 			fluidSim.SphereBarrier.bUpdateTowadsGoal = this.bUpdateTowadsGoal;
-			fluidSim.SphereBarrier.setGoalPosition2D(this.goal_position2D, Camera);
+			fluidSim.SphereBarrier.setGoalPosition2D(this.goal_position2D, CCamera);
 		}
-		barrier.Update = function(dt, mouse, Camera, bCameraUpdated, fluidSim){
+		barrier.Update = function(dt, mouse, CCamera, bCameraUpdated, fluidSim){
 			if(this.bIsMouseDown == true && mouse.get().btnLeft == false){ this.bIsMouseDown = false; }
-			this.UpdateGoalPosition(mouse, Camera, bCameraUpdated, fluidSim);
+			this.UpdateGoalPosition(mouse, CCamera, bCameraUpdated, fluidSim);
 		}
 		//-----------------------------------------------------------------------------------------------
 		
@@ -680,68 +680,68 @@ export function main(){
 		vMath.vec3.copy(light_move.position, light.Position)
 		
 		//TransformToScreenCoordinates(): pos je 3D pozicija u fluidSim lokalnom prostoru
-		light_move.TransformToScreenCoordinates = function(pos, Camera){
+		light_move.TransformToScreenCoordinates = function(pos, CCamera){
 			let pos3D = [0.0,0.0,0.0]; vMath.vec3.copy(pos3D, pos); var pos2D = [0.0,0.0];
 			
-			vMath.vec3.subtract(pos3D, pos3D, Camera.Position);
+			vMath.vec3.subtract(pos3D, pos3D, CCamera.Position);
 			
-			pos2D[0] = vMath.vec3.dot(pos3D, Camera.RightDir);
-			pos2D[1] = vMath.vec3.dot(pos3D, Camera.UpDir)*Camera.PixelAspect;
+			pos2D[0] = vMath.vec3.dot(pos3D, CCamera.RightDir);
+			pos2D[1] = vMath.vec3.dot(pos3D, CCamera.UpDir)*CCamera.PixelAspect;
 			
-			let dist = vMath.vec3.dot(pos3D, Camera.ForwardDir); 
+			let dist = vMath.vec3.dot(pos3D, CCamera.ForwardDir); 
 			
 			vMath.vec2.scale(pos2D, pos2D, 1.0/dist);
 			
 			vMath.vec2.add(pos2D, pos2D, [1.0,1.0]);
 			vMath.vec2.scale(pos2D, pos2D, 0.5);
 			
-			vMath.vec2.multiply(pos2D, pos2D, [Camera.Width, Camera.Height]);
+			vMath.vec2.multiply(pos2D, pos2D, [CCamera.Width, CCamera.Height]);
 			
 			return pos2D;
 		}
 		//TransformFromScreenCoordinates(): pos je 2D pozicija na screenu u screen-space prostoru
-		light_move.TransformFromScreenCoordinates = function(pos, Camera, bNaRavniniKojaSadrziPosition){
+		light_move.TransformFromScreenCoordinates = function(pos, CCamera, bNaRavniniKojaSadrziPosition){
 			let pos2D = [0.0,0.0]; var pos3D = [0.0,0.0,0.0]; let v2 = [0.0,0.0,0.0];
 			
-			vMath.vec2.multiply(pos2D, pos, [1.0/Camera.Width, 1.0/Camera.Height]);
+			vMath.vec2.multiply(pos2D, pos, [1.0/CCamera.Width, 1.0/CCamera.Height]);
 			vMath.vec2.scale(pos2D, pos2D, 2.0);
 			vMath.vec2.subtract(pos2D, pos2D, [1.0,1.0]);
 			
-			vMath.vec3.scale(pos3D, Camera.RightDir, pos2D[0]);
-			vMath.vec3.scale(v2, Camera.UpDir, pos2D[1]);
+			vMath.vec3.scale(pos3D, CCamera.RightDir, pos2D[0]);
+			vMath.vec3.scale(v2, CCamera.UpDir, pos2D[1]);
 			vMath.vec3.add(pos3D, pos3D, v2);
 			
 			vMath.vec3.copy(v2, this.position);
-			vMath.vec3.subtract(v2, v2, Camera.Position);
-			let dist = vMath.vec3.dot(v2, Camera.ForwardDir); //testirat
+			vMath.vec3.subtract(v2, v2, CCamera.Position);
+			let dist = vMath.vec3.dot(v2, CCamera.ForwardDir); //testirat
 			
 			vMath.vec3.scale(pos3D, pos3D, dist);
 			
 			if(bNaRavniniKojaSadrziPosition == true){
-				vMath.vec3.scale(v2, Camera.ForwardDir, dist);
+				vMath.vec3.scale(v2, CCamera.ForwardDir, dist);
 				vMath.vec3.add(pos3D, pos3D, v2);
-				vMath.vec3.add(pos3D, pos3D, Camera.Position);
+				vMath.vec3.add(pos3D, pos3D, CCamera.Position);
 			}
 			
 			return pos3D;
 		}
-		light_move.MoveScreenAligned = function(delta, Camera){
+		light_move.MoveScreenAligned = function(delta, CCamera){
 			let deltaPos = [0,0];
 			
-			vMath.vec2.add(deltaPos, delta, [0.5*Camera.Width, 0.5*Camera.Height]);
-			let delta3D = this.TransformFromScreenCoordinates(deltaPos, Camera, false);
+			vMath.vec2.add(deltaPos, delta, [0.5*CCamera.Width, 0.5*CCamera.Height]);
+			let delta3D = this.TransformFromScreenCoordinates(deltaPos, CCamera, false);
 			
 			vMath.vec3.add(this.position, this.position, delta3D);
 		}
-		light_move.Update = function(light, mouse, Camera, bCameraUpdated){
+		light_move.Update = function(light, mouse, CCamera, bCameraUpdated){
 			if(this.bIsMouseDown == true && mouse.get().btnLeft == false){ this.bIsMouseDown = false; }
 			
 			if(this.bIsMouseDown == true)
 			{
 				var mousePos = mouse.getPosition();
-				this.position = this.TransformFromScreenCoordinates(mousePos, Camera, true);
+				this.position = this.TransformFromScreenCoordinates(mousePos, CCamera, true);
 				// var mouseDelta = mouse.getDeltaPosition();
-				// this.MoveScreenAligned(mouseDelta, Camera);
+				// this.MoveScreenAligned(mouseDelta, CCamera);
 				
 				if(light != null){
 					light.setPosition(this.position[0], this.position[1], this.position[2]);
@@ -749,7 +749,7 @@ export function main(){
 				}
 			}
 			else{
-				var pos2D = this.TransformToScreenCoordinates(this.position, Camera);
+				var pos2D = this.TransformToScreenCoordinates(this.position, CCamera);
 				this.setPositionAndSize(pos2D, this.baseSize);
 			}
 		}
@@ -787,7 +787,7 @@ export function main(){
 	var IdentityMatrix = vMath.mat4.create();
 	vMath.mat4.identity(IdentityMatrix);
 	/* 
-	var MipGen = new glext.MipMapGen();
+	var MipGen = new glext.CMipMapGen();
 	if((bUseHDR == false) || (bUseHDR == true && bStoreHDRinRGBA8 == true))
 		MipGen.Create(gl.viewportWidth, gl.viewportHeight, gl.RGBA8, "mipmapVS", "3x3MipGenFS");
 	else
@@ -795,7 +795,7 @@ export function main(){
 	 */
 	// var Flags = 1;
 	// var time_of_start = sys.time.getTimeµs();
-	glext.BlendMode.Enable();
+	glext.CBlendMode.Enable();
 		
 	// var circularMov = [0.0, 0.0]; //azimuth, inclination
 	// var distFromObject = 7.0;
@@ -805,8 +805,8 @@ export function main(){
 	
 	var FOV = 75.0;
 	
-	Camera.setPositionAndLookPt(eyePt, [0.0,0.0,0.0], upDir);
-	Camera.setFOV(FOV);
+	CCamera.setPositionAndLookPt(eyePt, [0.0,0.0,0.0], upDir);
+	CCamera.setFOV(FOV);
 	
 	var bCtrlToggle = false;
 	var bShiftToggle = false;
@@ -818,8 +818,8 @@ export function main(){
 	
 	while(true){
 		
-		testv3D_1 = fluidSim.SphereBarrier.TransformFromScreenCoordinates(testv2D_1, Camera);
-		testv2D_1 = fluidSim.SphereBarrier.TransformToScreenCoordinates(testv3D_1, Camera);
+		testv3D_1 = fluidSim.SphereBarrier.TransformFromScreenCoordinates(testv2D_1, CCamera);
+		testv2D_1 = fluidSim.SphereBarrier.TransformToScreenCoordinates(testv3D_1, CCamera);
 	}*/
 	
 	function renderFrame()
@@ -860,9 +860,9 @@ export function main(){
 		var ctime10 = Math.cos(10*time);
 		
 		// if(checkWindowsSizeAndResizeCanvas() == true){
-			// Camera.setViewportWidthHeight(gl.viewportWidth,gl.viewportHeight);}
+			// CCamera.setViewportWidthHeight(gl.viewportWidth,gl.viewportHeight);}
 		
-		// glext.Framebuffer.BindMainFB();
+		// glext.CFramebuffer.BindMainFB();
 		
 		//Calc camera view i proj
 		//-------------------------------------------------------------------------------------
@@ -902,26 +902,26 @@ export function main(){
 			{			
 				// eyePt = vMath.sph2cart3D(orbital.azimuth, orbital.inclination, orbital.radius);
 				var sinA = Math.sin(vMath.deg2rad(orbital.dazimuth)); var sinI = Math.sin(vMath.deg2rad(orbital.dinclination));
-				vMath.vec3.scale(RightAdd, Camera.RightDir, orbital.radius * sinA);
-				vMath.vec3.scale(UpAdd, Camera.UpDir, orbital.radius * sinI);
+				vMath.vec3.scale(RightAdd, CCamera.RightDir, orbital.radius * sinA);
+				vMath.vec3.scale(UpAdd, CCamera.UpDir, orbital.radius * sinI);
 				vMath.vec3.add(eyePt, eyePt, RightAdd);
 				vMath.vec3.add(eyePt, eyePt, UpAdd);
 				
 				vMath.vec3.normalize(eyePt, eyePt);
 				vMath.vec3.scale(eyePt, eyePt, orbital.radius);
 				
-				Camera.setPositionAndLookPt(eyePt, [0.0,0.0,0.0], upDir);
-				Camera.CalcInverseViewProjectionMatrix();
+				CCamera.setPositionAndLookPt(eyePt, [0.0,0.0,0.0], upDir);
+				CCamera.CalcInverseViewProjectionMatrix();
 				
-				vMath.vec3.copy(upDir, Camera.UpDir);
+				vMath.vec3.copy(upDir, CCamera.UpDir);
 			}
 			/* else
 			{
 				let deltaX = [0.0,0.0,0.0];
 				let deltaY = [0.0,0.0,0.0];
 				
-				vMath.vec3.copy(deltaX, Camera.RightDir);
-				vMath.vec3.copy(deltaY, Camera.UpDir);
+				vMath.vec3.copy(deltaX, CCamera.RightDir);
+				vMath.vec3.copy(deltaY, CCamera.UpDir);
 				
 				if(orbital.radius < 0.1) orbital.radius = 0.1;
 				
@@ -938,8 +938,8 @@ export function main(){
 				
 			if(sys.mouse.get().btnLeft == true)
 				if(sys.mouse.get().dx != 0 || sys.mouse.get().dy != 0){
-					Camera.Rotate(sys.mouse.get().dx / 100.0, sys.mouse.get().dy / 100.0);
-					Camera.CalcInverseViewProjectionMatrix();
+					CCamera.Rotate(sys.mouse.get().dx / 100.0, sys.mouse.get().dy / 100.0);
+					CCamera.CalcInverseViewProjectionMatrix();
 				}
 				
 			var MovementDelta = .01;
@@ -948,19 +948,19 @@ export function main(){
 			if(bCtrlToggle == true) MovementDelta *= 0.1;
 			else if(bShiftToggle == true) MovementDelta *= 10.0;
 			
-			if(sys.keyboard.isKeyPressed("w"))      Camera.MoveForward(MovementDelta);
-			else if(sys.keyboard.isKeyPressed("s")) Camera.MoveForward(-MovementDelta);
+			if(sys.keyboard.isKeyPressed("w"))      CCamera.MoveForward(MovementDelta);
+			else if(sys.keyboard.isKeyPressed("s")) CCamera.MoveForward(-MovementDelta);
 			
-			if(sys.keyboard.isKeyPressed("a"))      Camera.MoveRight(MovementDelta);
-			else if(sys.keyboard.isKeyPressed("d")) Camera.MoveRight(-MovementDelta);
+			if(sys.keyboard.isKeyPressed("a"))      CCamera.MoveRight(MovementDelta);
+			else if(sys.keyboard.isKeyPressed("d")) CCamera.MoveRight(-MovementDelta);
 			
-			if(sys.keyboard.isKeyPressed("r"))      Camera.MoveUp(MovementDelta);
-			else if(sys.keyboard.isKeyPressed("f")) Camera.MoveUp(-MovementDelta);
+			if(sys.keyboard.isKeyPressed("r"))      CCamera.MoveUp(MovementDelta);
+			else if(sys.keyboard.isKeyPressed("f")) CCamera.MoveUp(-MovementDelta);
 			
-			if(sys.keyboard.isKeyPressed("e"))      Camera.Tilt(0.1*MovementDelta);
-			else if(sys.keyboard.isKeyPressed("q")) Camera.Tilt(-0.1*MovementDelta);
+			if(sys.keyboard.isKeyPressed("e"))      CCamera.Tilt(0.1*MovementDelta);
+			else if(sys.keyboard.isKeyPressed("q")) CCamera.Tilt(-0.1*MovementDelta);
 			
-			Camera.CalcInverseViewMatrix();
+			CCamera.CalcInverseViewMatrix();
 		}
 		*/
 		
@@ -989,7 +989,7 @@ export function main(){
 			if(bFluidSimPass == true)
 			{
 				//micanje barriera mišem
-				barrier.Update(dt, sys.mouse, Camera, bUpdateCamera, fluidSim);
+				barrier.Update(dt, sys.mouse, CCamera, bUpdateCamera, fluidSim);
 				
 				//simulacija micanja barriera
 				//-------------------------------------------------------
@@ -998,20 +998,20 @@ export function main(){
 				fluidSim.SphereBarrier.velocity = [0.0, -oscAmp*oscSpeed*Math.sin(oscSpeed*fluidSim.time), 0.0 ]; */
 				// fluidSim.SphereBarrier.setPosition([0.5, 0.5 + oscAmp*Math.cos(oscSpeed*fluidSim.time), 0.5 ], dt);
 				// fluidSim.SphereBarrier.addOffset(SphereBarrierPositionOffset, dt);
-				// fluidSim.SphereBarrier.addOffsetFromScreenCoords(barrier.getDeltaPosition(), dt, Camera);
+				// fluidSim.SphereBarrier.addOffsetFromScreenCoords(barrier.getDeltaPosition(), dt, CCamera);
 				fluidSim.SphereBarrier.Update(dt);
 				//-------------------------------------------------------
 				
 				fluidSim.SimStep(dt);
 				fluidSim.AdvectMass(dt);
 				
-				// glext.Framebuffer.BindMainFB();	
+				// glext.CFramebuffer.BindMainFB();	
 				// gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);		
 				
 				// fluidSim.Display(); //display preko fluidsim/debug_display
 				
 				//postavljanje on screen pozicije kvadrata za micanje
-				barrier.setPositionAndSize(fluidSim.SphereBarrier.getPositionOnScreen(Camera), barrier.baseSize/fluidSim.SphereBarrier.getDistanceToCamera(Camera));
+				barrier.setPositionAndSize(fluidSim.SphereBarrier.getPositionOnScreen(CCamera), barrier.baseSize/fluidSim.SphereBarrier.getDistanceToCamera(CCamera));
 			}
 			//-------------------------------------------------------
 			
@@ -1021,11 +1021,11 @@ export function main(){
 			gl.depthFunc(gl.LEQUAL);
 		
 		{
-			light_move.Update(light, sys.mouse, Camera, bUpdateCamera);
+			light_move.Update(light, sys.mouse, CCamera, bUpdateCamera);
 			// light.setPosition(1.0, 0.0, 2.5); //*ctime
 			light.setDisplaySize(5.0);
 			light.setDisplayColor(0.5,0.79,1.0,1.0);
-			light.setMatrices( Camera.ViewMatrix, Camera.ProjectionMatrix );
+			light.setMatrices( CCamera.ViewMatrix, CCamera.ProjectionMatrix );
 			if(lightIntenitySlider != null) light.setIntensity(lightIntenitySlider.fvalue());
 			else light.setIntensity(4.0);
 			light.setColor(0.5,0.79,1.0,1.0);
@@ -1042,7 +1042,7 @@ export function main(){
 			fbo.Bind();
 			
 			gl.viewport(0, 0, fbo.width, fbo.height);
-			// Camera.setViewportWidthHeight(fbo.width, fbo.height);
+			// CCamera.setViewportWidthHeight(fbo.width, fbo.height);
 			
 			gl.clearColor(0.0, 0.0, 0.0, 1.0);
 			gl.clearDepth(1.0);
@@ -1057,21 +1057,21 @@ export function main(){
 				// txAoRS.Bind(2, simple_shader.ULTextureAoRS);
 				// txAmb.Bind(3, simple_shader.ULTextureAmb);
 				
-				simple_shader.setViewMatrixUniform( Camera.ViewMatrix );
-				simple_shader.setProjectionMatrixUniform( Camera.ProjectionMatrix );
+				simple_shader.setViewMatrixUniform( CCamera.ViewMatrix );
+				simple_shader.setProjectionMatrixUniform( CCamera.ProjectionMatrix );
 				
 				simple_shader.setTimeUniform(time);
 				
-				simple_shader.setCameraPositionUniform(Camera.Position);
+				simple_shader.setCameraPositionUniform(CCamera.Position);
 				
 				sphere_model.RenderIndexedTriangles(simple_shader);
 		}
 		
 		//Render fluidsim cloud
 		{
-			glext.Framebuffer.BindMainFB();	
+			glext.CFramebuffer.BindMainFB();	
 			gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);		
-			// Camera.setViewportWidthHeight(gl.viewportWidth, gl.viewportHeight);
+			// CCamera.setViewportWidthHeight(gl.viewportWidth, gl.viewportHeight);
 			
 			gl.clearColor(0.0, 0.0, 0.0, 1.0);
 			gl.clearDepth(1.0);
@@ -1087,12 +1087,12 @@ export function main(){
 				fluidSim.txDivergence.Bind(6, volume_clouds_shader.ULTextureDivergence);
 				
 				let brightness = fluidsimBrightnessSlider.fvalue();
-				// volume_clouds_shader.setViewMatrixUniform( Camera.ViewMatrix );
-				// volume_clouds_shader.setProjectionMatrixUniform( Camera.ProjectionMatrix );
-				// volume_clouds_shader.setMatrix4Uniform( volume_clouds_shader.ULInverseViewMatrix, Camera.InverseViewMatrix);
-				volume_clouds_shader.setFloat3Uniform( volume_clouds_shader.ULCameraForward, Camera.ForwardDir );
-				volume_clouds_shader.setFloat3Uniform( volume_clouds_shader.ULCameraRight, Camera.RightDir );
-				volume_clouds_shader.setFloat3Uniform( volume_clouds_shader.ULCameraUp, Camera.UpDir );
+				// volume_clouds_shader.setViewMatrixUniform( CCamera.ViewMatrix );
+				// volume_clouds_shader.setProjectionMatrixUniform( CCamera.ProjectionMatrix );
+				// volume_clouds_shader.setMatrix4Uniform( volume_clouds_shader.ULInverseViewMatrix, CCamera.InverseViewMatrix);
+				volume_clouds_shader.setFloat3Uniform( volume_clouds_shader.ULCameraForward, CCamera.ForwardDir );
+				volume_clouds_shader.setFloat3Uniform( volume_clouds_shader.ULCameraRight, CCamera.RightDir );
+				volume_clouds_shader.setFloat3Uniform( volume_clouds_shader.ULCameraUp, CCamera.UpDir );
 				volume_clouds_shader.setFloat2Uniform( volume_clouds_shader.ULMouse, mousePos );
 				volume_clouds_shader.setFloat2Uniform( volume_clouds_shader.ULResolution, [gl.viewportWidth,gl.viewportHeight] );
 				volume_clouds_shader.setFloatUniform( volume_clouds_shader.ULPixelAspect, gl.viewportWidth/gl.viewportHeight );
@@ -1101,7 +1101,7 @@ export function main(){
 				
 				volume_clouds_shader.setTimeUniform(time);
 				
-				volume_clouds_shader.setCameraPositionUniform(Camera.Position);			
+				volume_clouds_shader.setCameraPositionUniform(CCamera.Position);			
 				
 				quad_model.RenderIndexedTriangles(volume_clouds_shader);		
 		}
@@ -1176,7 +1176,7 @@ function RenderModels(fbo, bClearFBO, time, camera, models){
 	
 	for(var m = 0; m < models.length; ++m){
 		var model = models[m];
-		var shader = glext.ShaderList.get(model.shaderID);
+		var shader = glext.CShaderList.get(model.shaderID);
 		
 		shader.Bind();
 		
@@ -1195,9 +1195,9 @@ function RenderModels(fbo, bClearFBO, time, camera, models){
 export function recompileShader(fragment_name){
 	if(gl == null) return;
 	
-	for(var i = 0; i < glext.ShaderList.count(); ++i)
+	for(var i = 0; i < glext.CShaderList.count(); ++i)
 	{
-		var shader = glext.ShaderList.get(i);
+		var shader = glext.CShaderList.get(i);
 		if(shader.FragmentShaderName == fragment_name)
 		{
 			var bResetDefines = true;
@@ -1225,18 +1225,18 @@ export function recompileShader(fragment_name){
 				case "transparent_shader":
 					shader.ULTextureAmb = shader.getUniformLocation("txAmbient");
 					shader.ULTextureBackground = shader.getUniformLocation("txBackground");
-					glext.LightList.get(0).AttachUniformBlockTo(shader);
+					glext.CLightList.get(0).AttachUniformBlockTo(shader);
 				break;
 				case "deferred_opaque_shade":
 					shader.ULInvViewProjMatrix = shader.getUniformLocation("InverseViewProjectionMatrix");
-					glext.LightList.get(0).AttachUniformBlockTo(shader);
+					glext.CLightList.get(0).AttachUniformBlockTo(shader);
 				break;
 				case "deferred_BcNAoRSMt":
 					shader.ULTextureAmb = shader.getUniformLocation("txAmbient");
 				break;
 				case "atmosphere_shader":
-					// shader.lightUniforms = glext.Light.getUniformLocationsFromShader(shader, "light0");
-					glext.LightList.get(0).AttachUniformBlockTo(shader);
+					// shader.lightUniforms = glext.CLight.getUniformLocationsFromShader(shader, "light0");
+					glext.CLightList.get(0).AttachUniformBlockTo(shader);
 				break;
 				case "volume_clouds_shader":
 					shader.ULTextureMass = shader.getUniformLocation("txFluidSimCloud");
@@ -1248,12 +1248,12 @@ export function recompileShader(fragment_name){
 					shader.ULTextureBackgroundDepth = shader.getUniformLocation("txDepth");
 					shader.ULDisplayBrightness = shader.getUniformLocation("displayBrightness");
 					shader.ULTanHalfFOV = shader.getUniformLocation("TanHalfFOV");
-					glext.LightList.get(0).AttachUniformBlockTo(shader);
+					glext.CLightList.get(0).AttachUniformBlockTo(shader);
 					// shader.ULInverseViewMatrix = shader.getUniformLocation("InverseViewMatrix");
 					shader.ULCameraForward = shader.getUniformLocation("CameraForward");
 					shader.ULCameraRight = shader.getUniformLocation("CameraRight");
 					shader.ULCameraUp = shader.getUniformLocation("CameraUp");
-					shader.ULMouse = shader.getUniformLocation("Mouse");
+					shader.ULMouse = shader.getUniformLocation("CMouse");
 					shader.ULResolution = shader.getUniformLocation("Resolution");
 					shader.ULPixelAspect = shader.getUniformLocation("PixelAspect");
 				break;
@@ -1269,9 +1269,9 @@ export function recompileShader(fragment_name){
 export function reloadTexture(texture_name){
 	if(gl == null) return;
 	
-	for(var i = 0; i < glext.TextureList.count(); ++i)
+	for(var i = 0; i < glext.CTextureList.count(); ++i)
 	{
-		var texture = glext.TextureList.get(i);
+		var texture = glext.CTextureList.get(i);
 		if(texture.name == texture_name){
 			texture.Reload();
 			break;
@@ -1295,7 +1295,7 @@ export function onShaderDefineChanged(shader_name, select_element_id, default_va
 	var select_element = document.getElementById(select_element_id);
 	if(select_element == null) return;
 	
-	var shaders = glext.ShaderList.getAllWithName(shader_name);
+	var shaders = glext.CShaderList.getAllWithName(shader_name);
 	if(shaders.length <= 0) return;
 	
 	var setting = select_element.value;
@@ -1324,7 +1324,7 @@ export function onShaderDefineChanged(shader_name, select_element_id, default_va
 export function SetAutoQualitySelection(bOn){
 	bAutoQualitySelect = bOn;
 		
-	var shaders = glext.ShaderList.getAllWithName("volume_clouds_shader");
+	var shaders = glext.CShaderList.getAllWithName("volume_clouds_shader");
 	if(shaders.length <= 0) return;
 	
 	for(var i = 0; i < shaders.length; ++i){

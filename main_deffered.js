@@ -9,7 +9,7 @@ var bStoreHDRinRGBA8 = true;
 
 export function main(){
 	
-	var gs = sys.storage.GlobalStorage.getSingleton();
+	var gs = sys.storage.CGlobalStorage.getSingleton();
 	sys.mouse.InitMouse(document);
 	
 	gl = glext.glInit("glcanvas");
@@ -20,7 +20,7 @@ export function main(){
 	
 	glext.InitDebugTextDOM("debug_text");
 	
-	var zA = new sys.zip.Zip();
+	var zA = new sys.zip.CZip();
 	zA.AsyncFetchAndLoadFile("Textures/venice_hdr.zip", true, function(zB){
 		if(zB.isUnpacked() == false) alert("zB.isUnpacked() == false");
 	});
@@ -37,16 +37,16 @@ export function main(){
 	gl.disable(gl.BLEND);
 	gl.depthFunc(gl.LESS);
 	
-	glext.BlendMode.Init();
+	glext.CBlendMode.Init();
 	
 	if(bUseHDR == true && bStoreHDRinRGBA8 == true)
-		glext.ShaderDefines.addGlobalDefine("USE_HDR_RGBA8","");
+		glext.CShaderDefines.addGlobalDefine("USE_HDR_RGBA8","");
 	else if(bUseHDR == true)
-		glext.ShaderDefines.addGlobalDefine("USE_HDR","");
+		glext.CShaderDefines.addGlobalDefine("USE_HDR","");
 	
-	glext.ShaderDefines.addGlobalDefine("MAX_LIGHTS", " "+glext.MAX_LIGHTS);
+	glext.CShaderDefines.addGlobalDefine("MAX_LIGHTS", " "+glext.MAX_LIGHTS);
 	
-	var shader = new glext.Shader(0);
+	var shader = new glext.CShader(0);
 	if(shader.CompileFromFile("simpleVS", "deferred_BcNAoRSMt") == false) alert("nije kompajliran shader!");
 	shader.setVertexAttribLocations("aVertexPosition","aVertexNormal","aVertexTangent",null,"aTexCoords");
 	shader.setTransformMatricesUniformLocation("ModelMatrix","ViewMatrix","ProjectionMatrix");
@@ -58,69 +58,69 @@ export function main(){
 	
 	shader.ULTextureAmb = shader.getUniformLocation("txAmbient");
 	
-	var skybox_shader = new glext.Shader(1);
+	var skybox_shader = new glext.CShader(1);
 	if(skybox_shader.CompileFromFile("simpleVS", "deferred_skybox") == false) alert("nije kompajliran shader!");
 	skybox_shader.ULTextureAmb = skybox_shader.getUniformLocation("txAmbient");
 	skybox_shader.InitDefaultUniformLocations();
 	skybox_shader.InitDefaultAttribLocations();
 	
-	var deferred_opaque_shade = new glext.Shader(2);
+	var deferred_opaque_shade = new glext.CShader(2);
 	if(deferred_opaque_shade.CompileFromFile("simpleVS", "deferred_opaque_shade") == false) alert("nije kompajliran shader!");
 	deferred_opaque_shade.InitDefaultAttribLocations();
 	deferred_opaque_shade.InitDefaultUniformLocations();
 	deferred_opaque_shade.ULInvViewProjMatrix = deferred_opaque_shade.getUniformLocation("InverseViewProjectionMatrix");
 	
-	var transparent_shader = new glext.Shader(3);
+	var transparent_shader = new glext.CShader(3);
 	if(transparent_shader.CompileFromFile("simpleVS", "transparent_shader") == false) alert("nije kompajliran shader!");
 	transparent_shader.InitDefaultAttribLocations();
 	transparent_shader.InitDefaultUniformLocations();
 	transparent_shader.ULTextureAmb = transparent_shader.getUniformLocation("txAmbient");
 	transparent_shader.ULTextureBackground = transparent_shader.getUniformLocation("txBackground");
 	
-	var backbuffer_shader = new glext.Shader(4);
+	var backbuffer_shader = new glext.CShader(4);
 	if(backbuffer_shader.CompileFromFile("simpleVS", "backbuffer_shader") == false) alert("nije kompajliran shader!");
 	backbuffer_shader.InitDefaultAttribLocations();
 	backbuffer_shader.InitDefaultUniformLocations();
 	
-	var atmosphere_shader = new glext.Shader(5);
+	var atmosphere_shader = new glext.CShader(5);
 	if(atmosphere_shader.CompileFromFile("simpleVS", "atmosphere_shader") == false) alert("nije kompajliran shader!");
 	atmosphere_shader.InitDefaultAttribLocations();
 	atmosphere_shader.InitDefaultUniformLocations();
 	
-	var SkySphereModel = new glext.Model(0);
+	var SkySphereModel = new glext.CModel(0);
 	SkySphereModel.ImportFrom("SphereModel");
 	// glext.GenCubeModel(model);
 	
-	var model = new glext.Model(1);
+	var model = new glext.CModel(1);
 	model.ImportFrom("SphereModel");
 	
-	var navigatorModel = new glext.Model(2);
+	var navigatorModel = new glext.CModel(2);
 	navigatorModel.ImportFrom("navigatorModel");
 	
-	var quad_model = new glext.Model(2);
+	var quad_model = new glext.CModel(2);
 	glext.GenQuadModel(quad_model);
 	
-	var AtmoSphereModel = new glext.Model(4);
+	var AtmoSphereModel = new glext.CModel(4);
 	AtmoSphereModel.ImportFrom("SphereModel");
 	
-	var txBRDF_LUT = new glext.Texture(3); txBRDF_LUT.CreateFromFile("txBRDF_LUT");
+	var txBRDF_LUT = new glext.CTexture(3); txBRDF_LUT.CreateFromFile("txBRDF_LUT");
 	txBRDF_LUT.setWrapTypeClampToEdge();
 	
-	var txD = new glext.Texture(0); txD.CreateFromFile("txRock_D");
-	var txN = new glext.Texture(1); txN.CreateFromFile("txRock_N");
-	var txAoRS = new glext.Texture(2); txAoRS.CreateFromFile("txRock_AoRS");
+	var txD = new glext.CTexture(0); txD.CreateFromFile("txRock_D");
+	var txN = new glext.CTexture(1); txN.CreateFromFile("txRock_N");
+	var txAoRS = new glext.CTexture(2); txAoRS.CreateFromFile("txRock_AoRS");
 	
-	var txGlassAoRS = new glext.Texture(-1); txGlassAoRS.CreateFromFile("txGlass_AoRS");
-	var txGlassN = new glext.Texture(-1); txGlassN.CreateFromFile("txGlass_N");
+	var txGlassAoRS = new glext.CTexture(-1); txGlassAoRS.CreateFromFile("txGlass_AoRS");
+	var txGlassN = new glext.CTexture(-1); txGlassN.CreateFromFile("txGlass_N");
 	
-	var txAtmosphere = new glext.Texture(-1); txAtmosphere.CreateFromFile("txAtmosphere");
+	var txAtmosphere = new glext.CTexture(-1); txAtmosphere.CreateFromFile("txAtmosphere");
 	
-	var txAmb = new glext.TextureCube(0); txAmb.CreateFromDOMDataElements("tx128");	
+	var txAmb = new glext.CTextureCube(0); txAmb.CreateFromDOMDataElements("tx128");	
 			
-	var light = new glext.Light(0);
-	// var lightUniforms = glext.Light.getUniformLocationsFromShader(shader,"light0");
-	// var lightUniforms_backbuffer_shader = glext.Light.getUniformLocationsFromShader(deferred_opaque_shade,"light0");
-	// atmosphere_shader.lightUniforms = glext.Light.getUniformLocationsFromShader(atmosphere_shader, "light0");
+	var light = new glext.CLight(0);
+	// var lightUniforms = glext.CLight.getUniformLocationsFromShader(shader,"light0");
+	// var lightUniforms_backbuffer_shader = glext.CLight.getUniformLocationsFromShader(deferred_opaque_shade,"light0");
+	// atmosphere_shader.lightUniforms = glext.CLight.getUniformLocationsFromShader(atmosphere_shader, "light0");
 	// light.AttachUniformBlockTo(shader);	
 	
 	var projectionMatrix = vMath.mat4.create();
@@ -133,47 +133,47 @@ export function main(){
 	//framebuffer
 	//------------------------------------------------------------------------
 	var fbo_width = gl.viewportWidth; var fbo_height = gl.viewportHeight;
-	var txfbColor = new glext.Texture(4); txfbColor.CreateEmptyRGBAubyte(fbo_width, fbo_height);
-	var txfbDepth = new glext.Texture(5); txfbDepth.CreateEmptyDepthfloat(fbo_width, fbo_height);
-	var txfbNormal= new glext.Texture(6); txfbNormal.CreateEmptyRGBAubyte(fbo_width, fbo_height);
-	var txfbAoRSMt= new glext.Texture(7); txfbAoRSMt.CreateEmptyRGBAubyte(fbo_width, fbo_height);
-	var fbo = new glext.Framebuffer(true);   fbo.Create(); 
+	var txfbColor = new glext.CTexture(4); txfbColor.CreateEmptyRGBAubyte(fbo_width, fbo_height);
+	var txfbDepth = new glext.CTexture(5); txfbDepth.CreateEmptyDepthfloat(fbo_width, fbo_height);
+	var txfbNormal= new glext.CTexture(6); txfbNormal.CreateEmptyRGBAubyte(fbo_width, fbo_height);
+	var txfbAoRSMt= new glext.CTexture(7); txfbAoRSMt.CreateEmptyRGBAubyte(fbo_width, fbo_height);
+	var fbo = new glext.CFramebuffer(true);   fbo.Create(); 
 	fbo.AttachTexture(txfbColor, 0);
 	fbo.AttachTexture(txfbNormal,1);
 	fbo.AttachTexture(txfbAoRSMt,2);
 	fbo.AttachDepth(txfbDepth);
 	fbo.CheckStatus();
 	
-	var fboHdrMipBlur = new glext.Framebuffer(true); fboHdrMipBlur.Create(); fboHdrMipBlur.Bind();
-	var txfbHdrMipBlur = new glext.Texture(8); txfbHdrMipBlur.CreateEmptyWithMipsRGBAubyte(fbo_width, fbo_height);
+	var fboHdrMipBlur = new glext.CFramebuffer(true); fboHdrMipBlur.Create(); fboHdrMipBlur.Bind();
+	var txfbHdrMipBlur = new glext.CTexture(8); txfbHdrMipBlur.CreateEmptyWithMipsRGBAubyte(fbo_width, fbo_height);
 	fboHdrMipBlur.AttachTexture(txfbHdrMipBlur, 0);
 	fboHdrMipBlur.AttachDepth(txfbDepth);
 	fboHdrMipBlur.CheckStatus();
 	
-	glext.Framebuffer.BindMainFB();	
+	glext.CFramebuffer.BindMainFB();	
 	//------------------------------------------------------------------------
-		glext.LightList.addLight(light);
+		glext.CLightList.addLight(light);
 		
-		glext.TextureList.addTexture(txD);
-		glext.TextureList.addTexture(txN);
-		glext.TextureList.addTexture(txAoRS);
-		glext.TextureList.addTexture(txGlassN);
-		glext.TextureList.addTexture(txGlassAoRS);
-		glext.TextureList.addTexture(txBRDF_LUT);
-		glext.TextureList.addTexture(txAmb);
-		glext.TextureList.addTexture(txfbColor);
-		glext.TextureList.addTexture(txfbNormal);
-		glext.TextureList.addTexture(txfbAoRSMt);
-		glext.TextureList.addTexture(txfbDepth);
-		glext.TextureList.addTexture(txfbHdrMipBlur);
-		glext.TextureList.addTexture(txAtmosphere);
+		glext.CTextureList.addTexture(txD);
+		glext.CTextureList.addTexture(txN);
+		glext.CTextureList.addTexture(txAoRS);
+		glext.CTextureList.addTexture(txGlassN);
+		glext.CTextureList.addTexture(txGlassAoRS);
+		glext.CTextureList.addTexture(txBRDF_LUT);
+		glext.CTextureList.addTexture(txAmb);
+		glext.CTextureList.addTexture(txfbColor);
+		glext.CTextureList.addTexture(txfbNormal);
+		glext.CTextureList.addTexture(txfbAoRSMt);
+		glext.CTextureList.addTexture(txfbDepth);
+		glext.CTextureList.addTexture(txfbHdrMipBlur);
+		glext.CTextureList.addTexture(txAtmosphere);
 		
-		glext.ShaderList.addShader(shader);
-		glext.ShaderList.addShader(skybox_shader);
-		glext.ShaderList.addShader(deferred_opaque_shade);
-		glext.ShaderList.addShader(transparent_shader);
-		glext.ShaderList.addShader(backbuffer_shader);
-		glext.ShaderList.addShader(atmosphere_shader);
+		glext.CShaderList.addShader(shader);
+		glext.CShaderList.addShader(skybox_shader);
+		glext.CShaderList.addShader(deferred_opaque_shade);
+		glext.CShaderList.addShader(transparent_shader);
+		glext.CShaderList.addShader(backbuffer_shader);
+		glext.CShaderList.addShader(atmosphere_shader);
 		
 		model.setTexture(txD,"txDiffuse");
 		model.setTexture(txN,"txNormal");
@@ -217,9 +217,9 @@ export function main(){
 	// vMath.mat4.identity(viewMatrix);
 	// vMath.mat4.translate(viewMatrix, viewMatrix, [0.0, 0.0, -7.0]);
 	
-	var Camera = new glext.Camera(0, gl.viewportWidth, gl.viewportHeight);
-	Camera.setPositionAndDir(eyePt, [1.0,0.0,0.0], upDir);
-	Camera.UpdateProjectionMatrix();
+	var CCamera = new glext.CCamera(0, gl.viewportWidth, gl.viewportHeight);
+	CCamera.setPositionAndDir(eyePt, [1.0,0.0,0.0], upDir);
+	CCamera.UpdateProjectionMatrix();
 	
 	vMath.mat4.identity(model.Transform);
 	// vMath.mat4.scale(model.Transform, model.Transform, [4.0,4.0,4.0]);
@@ -240,7 +240,7 @@ export function main(){
 	var IdentityMatrix = vMath.mat4.create();
 	vMath.mat4.identity(IdentityMatrix);
 	
-	var MipGen = new glext.MipMapGen();
+	var MipGen = new glext.CMipMapGen();
 	if((bUseHDR == false) || (bUseHDR == true && bStoreHDRinRGBA8 == true))
 		MipGen.Create(gl.viewportWidth, gl.viewportHeight, gl.RGBA8, "mipmapVS", "3x3MipGenFS");
 	else
@@ -248,7 +248,7 @@ export function main(){
 	
 	// var Flags = 1;
 	// var time_of_start = sys.time.getTimeµs();
-	glext.BlendMode.Enable();
+	glext.CBlendMode.Enable();
 	
 	setInterval( function(){ window.requestAnimationFrame(renderFrame); }, 25);
 		
@@ -273,7 +273,7 @@ export function main(){
 		var ctime10 = Math.cos(10*time);
 		
 		if(checkWindowsSizeAndResizeCanvas() == true){
-			Camera.setViewportWidthHeight(gl.viewportWidth,gl.viewportHeight);}
+			CCamera.setViewportWidthHeight(gl.viewportWidth,gl.viewportHeight);}
 		
 		vMath.mat4.identity(model.Transform);
 		vMath.mat4.rotate(model.Transform, model.Transform, vMath.deg2rad(time*10), [0,0,1]);/*  */
@@ -281,7 +281,7 @@ export function main(){
 		vMath.mat4.identity(navigatorModel.Transform);
 		vMath.mat4.setTranslation(navigatorModel.Transform, navigatorModel.Transform, [ -1.0, -ctime*0.5, 0.0]);
 		vMath.mat4.rotate(navigatorModel.Transform, navigatorModel.Transform, vMath.deg2rad(90), [0,1,0]);
-		// glext.Framebuffer.BindMainFB();
+		// glext.CFramebuffer.BindMainFB();
 		
 		//Calc camera view i proj
 		//-------------------------------------------------------------------------------------
@@ -316,33 +316,33 @@ export function main(){
 		{			
 			// eyePt = vMath.sph2cart3D(orbital.azimuth, orbital.inclination, orbital.radius);
 			var sinA = Math.sin(vMath.deg2rad(orbital.dazimuth)); var sinI = Math.sin(vMath.deg2rad(orbital.dinclination));
-			vMath.vec3.scale(RightAdd, Camera.RightDir, orbital.radius * sinA);
-			vMath.vec3.scale(UpAdd, Camera.UpDir, orbital.radius * sinI);
+			vMath.vec3.scale(RightAdd, CCamera.RightDir, orbital.radius * sinA);
+			vMath.vec3.scale(UpAdd, CCamera.UpDir, orbital.radius * sinI);
 			vMath.vec3.add(eyePt, eyePt, RightAdd);
 			vMath.vec3.add(eyePt, eyePt, UpAdd);
 			
 			vMath.vec3.normalize(eyePt, eyePt);
 			vMath.vec3.scale(eyePt, eyePt, orbital.radius);
 			
-			Camera.setPositionAndLookPt(eyePt, [0.0,0.0,0.0], upDir);
-			Camera.CalcInverseViewProjectionMatrix();
+			CCamera.setPositionAndLookPt(eyePt, [0.0,0.0,0.0], upDir);
+			CCamera.CalcInverseViewProjectionMatrix();
 			
-			vMath.vec3.copy(upDir, Camera.UpDir);
+			vMath.vec3.copy(upDir, CCamera.UpDir);
 		}
 		
 		/*
 		if(sys.mouse.get().btnLeft == true)
 			if(sys.mouse.get().dx != 0 || sys.mouse.get().dy != 0){
-				Camera.Rotate(sys.mouse.get().dx / 100.0, sys.mouse.get().dy / 100.0);
-				Camera.CalcInverseViewProjectionMatrix();
+				CCamera.Rotate(sys.mouse.get().dx / 100.0, sys.mouse.get().dy / 100.0);
+				CCamera.CalcInverseViewProjectionMatrix();
 			} 
 		*/
 		//-------------------------------------------------------------------------------------
 		
-		glext.Texture.Unbind(0);
-		glext.Texture.Unbind(1);
-		glext.Texture.Unbind(2);
-		glext.Texture.Unbind(3);
+		glext.CTexture.Unbind(0);
+		glext.CTexture.Unbind(1);
+		glext.CTexture.Unbind(2);
+		glext.CTexture.Unbind(3);
 		
 		gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);		
 		
@@ -352,22 +352,22 @@ export function main(){
 		gl.depthFunc(gl.LEQUAL);
 		gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 		
-		RenderModels(fbo, true, time, Camera, [SkySphereModel, model]);
+		RenderModels(fbo, true, time, CCamera, [SkySphereModel, model]);
 		
 		light.setPosition(-2.0*ctime, 2.0, 2.0);
 		light.setDisplaySize(5.0);
 		light.setDisplayColor(0.5,0.79,1.0,1.0);
-		light.setMatrices( Camera.ViewMatrix, Camera.ProjectionMatrix );
+		light.setMatrices( CCamera.ViewMatrix, CCamera.ProjectionMatrix );
 		light.RenderPosition();
 		light.setIntensity(4.0);
 		light.setColor(0.5,0.79,1.0,1.0);
 		light.Update();
 			
 		/* 	 */
-		glext.Texture.Unbind(0);
-		glext.Texture.Unbind(1);
-		glext.Texture.Unbind(2);
-		glext.Texture.Unbind(3);
+		glext.CTexture.Unbind(0);
+		glext.CTexture.Unbind(1);
+		glext.CTexture.Unbind(2);
+		glext.CTexture.Unbind(3);
 		
 		
 		fboHdrMipBlur.Bind();
@@ -390,8 +390,8 @@ export function main(){
 				
 				deferred_opaque_shade.setTimeUniform(time);
 				
-				deferred_opaque_shade.setCameraPositionUniform(Camera.Position);
-				deferred_opaque_shade.setMatrix4Uniform(deferred_opaque_shade.ULInvViewProjMatrix, Camera.InverseViewProjectionMatrix);
+				deferred_opaque_shade.setCameraPositionUniform(CCamera.Position);
+				deferred_opaque_shade.setMatrix4Uniform(deferred_opaque_shade.ULInvViewProjMatrix, CCamera.InverseViewProjectionMatrix);
 				
 				// light.UploadToShader(deferred_opaque_shade, lightUniforms_backbuffer_shader);
 				
@@ -400,19 +400,19 @@ export function main(){
 		//atmosphere render
 		fboHdrMipBlur.AttachDepth(txfbDepth);
 		// light.UploadToShader(atmosphere_shader, atmosphere_shader.lightUniforms);
-		RenderModels(null, false, time, Camera, [AtmoSphereModel]);
+		RenderModels(null, false, time, CCamera, [AtmoSphereModel]);
 		
 		//gen mipmapa za renderirani color buffer
-		glext.Framebuffer.CopyTextureFromFBColorAttachment(txfbHdrMipBlur, 0, txfbColor, 0, MipGen.framebuffer, true);
+		glext.CFramebuffer.CopyTextureFromFBColorAttachment(txfbHdrMipBlur, 0, txfbColor, 0, MipGen.framebuffer, true);
 		MipGen.Generate(txfbHdrMipBlur);
 		
 		gl.viewport(0, 0, txfbColor.width, txfbColor.height);
 		
 			fbo.AttachTexture(txfbColor, 0);
-			RenderModels(fbo, false, time, Camera, [navigatorModel]);
+			RenderModels(fbo, false, time, CCamera, [navigatorModel]);
 		
 		//render to main FB, sa shaderom koji prikazuje mipove.
-		glext.Framebuffer.BindMainFB();	
+		glext.CFramebuffer.BindMainFB();	
 		gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
 		
 		backbuffer_shader.Bind();
@@ -423,7 +423,7 @@ export function main(){
 			backbuffer_shader.setViewMatrixUniform( IdentityMatrix );
 			backbuffer_shader.setProjectionMatrixUniform( IdentityMatrix );
 			backbuffer_shader.setTimeUniform(time);
-			backbuffer_shader.setCameraPositionUniform(Camera.Position);
+			backbuffer_shader.setCameraPositionUniform(CCamera.Position);
 			
 			quad_model.RenderIndexedTriangles(backbuffer_shader);
 		
@@ -446,7 +446,7 @@ function RenderModels(fbo, bClearFBO, time, camera, models){
 	
 	for(var m = 0; m < models.length; ++m){
 		var model = models[m];
-		var shader = glext.ShaderList.get(model.shaderID);
+		var shader = glext.CShaderList.get(model.shaderID);
 		
 		shader.Bind();
 		
@@ -465,9 +465,9 @@ function RenderModels(fbo, bClearFBO, time, camera, models){
 export function recompileShader(fragment_name){
 	if(gl == null) return;
 	
-	for(var i = 0; i < glext.ShaderList.count(); ++i)
+	for(var i = 0; i < glext.CShaderList.count(); ++i)
 	{
-		var shader = glext.ShaderList.get(i);
+		var shader = glext.CShaderList.get(i);
 		if(shader.FragmentShaderName == fragment_name)
 		{
 			shader.Recompile();
@@ -478,18 +478,18 @@ export function recompileShader(fragment_name){
 				case "transparent_shader":
 					shader.ULTextureAmb = shader.getUniformLocation("txAmbient");
 					shader.ULTextureBackground = shader.getUniformLocation("txBackground");
-					glext.LightList.get(0).AttachUniformBlockTo(shader);
+					glext.CLightList.get(0).AttachUniformBlockTo(shader);
 				break;
 				case "deferred_opaque_shade":
 					shader.ULInvViewProjMatrix = shader.getUniformLocation("InverseViewProjectionMatrix");
-					glext.LightList.get(0).AttachUniformBlockTo(shader);
+					glext.CLightList.get(0).AttachUniformBlockTo(shader);
 				break;
 				case "deferred_BcNAoRSMt":
 					shader.ULTextureAmb = shader.getUniformLocation("txAmbient");
 				break;
 				case "atmosphere_shader":
-					// shader.lightUniforms = glext.Light.getUniformLocationsFromShader(shader, "light0");
-					glext.LightList.get(0).AttachUniformBlockTo(shader);
+					// shader.lightUniforms = glext.CLight.getUniformLocationsFromShader(shader, "light0");
+					glext.CLightList.get(0).AttachUniformBlockTo(shader);
 				break;
 				default: break;
 			}
@@ -503,9 +503,9 @@ export function recompileShader(fragment_name){
 export function reloadTexture(texture_name){
 	if(gl == null) return;
 	
-	for(var i = 0; i < glext.TextureList.count(); ++i)
+	for(var i = 0; i < glext.CTextureList.count(); ++i)
 	{
-		var texture = glext.TextureList.get(i);
+		var texture = glext.CTextureList.get(i);
 		if(texture.name == texture_name){
 			texture.Reload();
 			break;

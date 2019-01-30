@@ -6,7 +6,7 @@ var gl = null;
 
 export function main(){
 	
-	var gs = sys.storage.GlobalStorage.getSingleton();
+	var gs = sys.storage.CGlobalStorage.getSingleton();
 	
 	gl = glext.glInit("glcanvas");
 		 if(glext.isWGL2 && glext.glEnableExtension('OES_texture_float') == false) alert("no extension: OES_texture_float");
@@ -29,7 +29,7 @@ export function main(){
 	// gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
 	gl.blendFunc(gl.ONE, gl.ZERO);
 	
-	var shader = new glext.Shader(0);
+	var shader = new glext.CShader(0);
 	if(shader.CompileFromFile("simpleVS", "pbr_shader") == false) alert("nije kompajliran shader!");
 	shader.setVertexAttribLocations("aVertexPosition","aVertexNormal","aVertexTangent",null,"aTexCoords");
 	shader.setTransformMatricesUniformLocation("ModelMatrix","ViewMatrix","ProjectionMatrix");
@@ -41,37 +41,37 @@ export function main(){
 	
 	shader.ULTextureAmb = shader.getUniformLocation("txAmbient");
 	
-	var skybox_shader = new glext.Shader(0);
+	var skybox_shader = new glext.CShader(0);
 	if(skybox_shader.CompileFromFile("simpleVS", "skybox_shader") == false) alert("nije kompajliran shader!");
 	skybox_shader.ULTextureAmb = skybox_shader.getUniformLocation("txAmbient");
 	skybox_shader.InitDefaultUniformLocations();
 	skybox_shader.InitDefaultAttribLocations();
 	
-	var backbuffer_shader = new glext.Shader(0);
+	var backbuffer_shader = new glext.CShader(0);
 	if(backbuffer_shader.CompileFromFile("simpleVS", "backbuffer_shader") == false) alert("nije kompajliran shader!");
 	backbuffer_shader.InitDefaultAttribLocations();
 	backbuffer_shader.InitDefaultUniformLocations();
 	
-	var SphereModel = new glext.Model(0);
+	var SphereModel = new glext.CModel(0);
 	SphereModel.ImportFrom("SphereModel");
 	// setupCubeModel(model);
 	
-	var model = new glext.Model(1);
+	var model = new glext.CModel(1);
 	model.ImportFrom("navigatorModel");
 	
-	var quad_model = new glext.Model(2);
+	var quad_model = new glext.CModel(2);
 	setupQuadModel(quad_model);
 	
-	var txBRDF_LUT = new glext.Texture(3); txBRDF_LUT.CreateFromFile("txBRDF_LUT");
+	var txBRDF_LUT = new glext.CTexture(3); txBRDF_LUT.CreateFromFile("txBRDF_LUT");
 	txBRDF_LUT.setWrapTypeClampToEdge();
 	
-	var txD = new glext.Texture(0); txD.CreateFromFile("txRock_D");
-	var txN = new glext.Texture(1); txN.CreateFromFile("txRock_N");
-	var txAoRS = new glext.Texture(2); txAoRS.CreateFromFile("txRock_AoRS");
+	var txD = new glext.CTexture(0); txD.CreateFromFile("txRock_D");
+	var txN = new glext.CTexture(1); txN.CreateFromFile("txRock_N");
+	var txAoRS = new glext.CTexture(2); txAoRS.CreateFromFile("txRock_AoRS");
 	
-	var txAmb = new glext.TextureCube(0); txAmb.CreateFromDOMDataElements("tx128");
+	var txAmb = new glext.CTextureCube(0); txAmb.CreateFromDOMDataElements("tx128");
 	
-	var light = new glext.Light(-1);
+	var light = new glext.CLight(-1);
 	var lightUniforms = light.getUniformLocationsFromShader(shader,"light0");
 	
 	var projectionMatrix = vMath.mat4.create();
@@ -84,9 +84,9 @@ export function main(){
 	//framebuffer
 	//------------------------------------------------------------------------
 	var fbo_width = 640; var fbo_height = 480;
-	var txfbColor = new glext.Texture(4); txfbColor.CreateEmptyRGBAubyte(fbo_width,fbo_height);
-	var txfbDepth = new glext.Texture(5); txfbDepth.CreateEmptyDepthfloat(fbo_width,fbo_height);
-	var fbo = new glext.Framebuffer(0);   fbo.Create(); fbo.AttachTexture(txfbColor, 0); fbo.AttachDepth(txfbDepth);
+	var txfbColor = new glext.CTexture(4); txfbColor.CreateEmptyRGBAubyte(fbo_width,fbo_height);
+	var txfbDepth = new glext.CTexture(5); txfbDepth.CreateEmptyDepthfloat(fbo_width,fbo_height);
+	var fbo = new glext.CFramebuffer(0);   fbo.Create(); fbo.AttachTexture(txfbColor, 0); fbo.AttachDepth(txfbDepth);
 	//------------------------------------------------------------------------
 	
 	vMath.mat4.perspective(projectionMatrix, vMath.deg2rad(40.0), gl.viewportWidth/gl.viewportHeight, 0.1, 1000.0);
@@ -189,7 +189,7 @@ export function main(){
 				// shader.Unbind();
 				
 			
-			glext.Framebuffer.BindMainFB();	
+			glext.CFramebuffer.BindMainFB();	
 			gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);		
 				
 				gl.clearColor(0.5, 0.5, 0.5, 1.0);

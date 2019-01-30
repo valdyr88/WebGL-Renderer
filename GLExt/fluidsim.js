@@ -1,16 +1,16 @@
 import { gl, WriteDebug } from "./glContext.js";
-import { Shader, ShaderList } from "./glShader.js";
+import { CShader, CShaderList } from "./glShader.js";
 import * as vMath from "../glMatrix/gl-matrix.js";
-import { Texture, Texture3D, TextureList } from "./glTexture.js";
-import { Model, GenQuadModel } from "./glModel.js"
-import { Framebuffer } from "./glFramebuffer.js";
+import { CTexture, CTexture3D, CTextureList } from "./glTexture.js";
+import { CModel, GenQuadModel } from "./glModel.js"
+import { CFramebuffer } from "./glFramebuffer.js";
 
-export class FluidSim2D
+export class CFluidSim2D
 {
 	constructor(w, h, vertex, viscosity, advection, advection_correction,
 				divergence, pressure, divfree_velocity, display)
 	{
-		this.quad_model = new Model(-1);
+		this.quad_model = new CModel(-1);
 		GenQuadModel(this.quad_model);
 		
 		this.width = Math.floor(w);
@@ -18,7 +18,7 @@ export class FluidSim2D
 		this.aspect = [1.0 / this.width, 1.0 / this.height];
 		this.str_vec2Res = "vec2(" + this.width.toString()+ ".0," + this.height.toString() + ".0)";
 		
-		this.viscosity_shader = new Shader(-1);
+		this.viscosity_shader = new CShader(-1);
 		this.viscosity_shader.addDefine("Resolution",this.str_vec2Res);
 		if(this.viscosity_shader.CompileFromFile(vertex, viscosity) == false) alert("nije kompajliran shader!");
 		this.viscosity_shader.InitDefaultAttribLocations();
@@ -32,7 +32,7 @@ export class FluidSim2D
 		this.viscosity_shader.ULk = this.viscosity_shader.getUniformLocation("k");
 		this.viscosity_shader.ULTextureVelocity = this.viscosity_shader.getUniformLocation("txVelocity");
 				
-		this.advection_shader = new Shader(-1);
+		this.advection_shader = new CShader(-1);
 		this.advection_shader.addDefine("Resolution",this.str_vec2Res);
 		if(this.advection_shader.CompileFromFile(vertex, advection) == false) alert("nije kompajliran shader!");
 		this.advection_shader.InitDefaultAttribLocations();
@@ -44,7 +44,7 @@ export class FluidSim2D
 		this.advection_shader.ULdT = this.advection_shader.getUniformLocation("dT");
 		this.advection_shader.ULTextureVelocity = this.advection_shader.getUniformLocation("txVelocity");
 				
-		this.advection_correction_shader = new Shader(-1);
+		this.advection_correction_shader = new CShader(-1);
 		this.advection_correction_shader.addDefine("Resolution",this.str_vec2Res);
 		if(this.advection_correction_shader.CompileFromFile(vertex, advection_correction) == false) alert("nije kompajliran shader!");
 		this.advection_correction_shader.InitDefaultAttribLocations();
@@ -58,7 +58,7 @@ export class FluidSim2D
 		this.advection_correction_shader.ULTextureVelocity = this.advection_correction_shader.getUniformLocation("txVelocity");
 		this.advection_correction_shader.ULTextureAdvectedVelocity = this.advection_correction_shader.getUniformLocation("txAdvectedVelocity");
 				
-		this.divergence_shader = new Shader(-1);
+		this.divergence_shader = new CShader(-1);
 		this.divergence_shader.addDefine("Resolution",this.str_vec2Res);
 		if(this.divergence_shader.CompileFromFile(vertex, divergence) == false) alert("nije kompajliran shader!");
 		this.divergence_shader.InitDefaultAttribLocations();
@@ -70,7 +70,7 @@ export class FluidSim2D
 		this.divergence_shader.ULdT = this.divergence_shader.getUniformLocation("dT");
 		this.divergence_shader.ULTexture = this.divergence_shader.getUniformLocation("txTexture");
 				
-		this.pressure_shader = new Shader(-1);
+		this.pressure_shader = new CShader(-1);
 		this.pressure_shader.addDefine("Resolution",this.str_vec2Res);
 		if(this.pressure_shader.CompileFromFile(vertex, pressure) == false) alert("nije kompajliran shader!");
 		this.pressure_shader.InitDefaultAttribLocations();
@@ -84,7 +84,7 @@ export class FluidSim2D
 		this.pressure_shader.ULTexturePressure = this.pressure_shader.getUniformLocation("txPressure");
 		this.pressure_shader.ULTextureDivergence = this.pressure_shader.getUniformLocation("txDivergence");
 				
-		this.divfree_velocity_shader = new Shader(-1);
+		this.divfree_velocity_shader = new CShader(-1);
 		this.divfree_velocity_shader.addDefine("Resolution",this.str_vec2Res);
 		if(this.divfree_velocity_shader.CompileFromFile(vertex, divfree_velocity) == false) alert("nije kompajliran shader!");
 		this.divfree_velocity_shader.InitDefaultAttribLocations();
@@ -98,7 +98,7 @@ export class FluidSim2D
 		this.divfree_velocity_shader.ULTexturePressure = this.divfree_velocity_shader.getUniformLocation("txPressure");
 		this.divfree_velocity_shader.ULTextureVelocity = this.divfree_velocity_shader.getUniformLocation("txVelocity");
 				
-		this.display_shader = new Shader(-1);
+		this.display_shader = new CShader(-1);
 		this.display_shader.addDefine("_DEBUG_Display_Velocity","");
 		this.display_shader.addDefine("Resolution",this.str_vec2Res);
 		if(this.display_shader.CompileFromFile(vertex, display) == false) alert("nije kompajliran shader!");
@@ -119,13 +119,13 @@ export class FluidSim2D
 		this.display_shader.ULTextureVelocity = this.display_shader.getUniformLocation("txVelocity");
 		this.display_shader.ULTextureDivergence = this.display_shader.getUniformLocation("txVelocityDivergence");
 				
-		ShaderList.addShader(this.viscosity_shader);
-		ShaderList.addShader(this.advection_shader);
-		ShaderList.addShader(this.advection_correction_shader);
-		ShaderList.addShader(this.divergence_shader);
-		ShaderList.addShader(this.pressure_shader);
-		ShaderList.addShader(this.divfree_velocity_shader);
-		ShaderList.addShader(this.display_shader);
+		CShaderList.addShader(this.viscosity_shader);
+		CShaderList.addShader(this.advection_shader);
+		CShaderList.addShader(this.advection_correction_shader);
+		CShaderList.addShader(this.divergence_shader);
+		CShaderList.addShader(this.pressure_shader);
+		CShaderList.addShader(this.divfree_velocity_shader);
+		CShaderList.addShader(this.display_shader);
 		
 		/*
 			texture:
@@ -134,9 +134,9 @@ export class FluidSim2D
 				Pressure_0,Pressure_1 : x float
 		*/
 		
-		this.txVelocity0 = new Texture(-1); this.txVelocity0.CreateEmptyRGBAfloat32(this.width, this.height);
-		this.txVelocity1 = new Texture(-1); this.txVelocity1.CreateEmptyRGBAfloat32(this.width, this.height);
-		this.txVelocity2 = new Texture(-1); this.txVelocity2.CreateEmptyRGBAfloat32(this.width, this.height);
+		this.txVelocity0 = new CTexture(-1); this.txVelocity0.CreateEmptyRGBAfloat32(this.width, this.height);
+		this.txVelocity1 = new CTexture(-1); this.txVelocity1.CreateEmptyRGBAfloat32(this.width, this.height);
+		this.txVelocity2 = new CTexture(-1); this.txVelocity2.CreateEmptyRGBAfloat32(this.width, this.height);
 		
 		//ovo swappa 
 		this.txDiffusedVelocity = this.txVelocity0;
@@ -145,22 +145,22 @@ export class FluidSim2D
 		this.txOldVelocity = this.txVelocity0;
 		
 		//ovo mozda optimizirat i strpat ove tri teksture kao komponente txAdvectedVelocity (ili one koja se ne koristi)?
-		this.txDivergence = new Texture(-1); this.txDivergence.CreateEmptyRfloat32(this.width, this.height);
-		this.txPressure0 = new Texture(-1); this.txPressure0.CreateEmptyRfloat32(this.width, this.height);
-		this.txPressure1 = new Texture(-1); this.txPressure1.CreateEmptyRfloat32(this.width, this.height);
+		this.txDivergence = new CTexture(-1); this.txDivergence.CreateEmptyRfloat32(this.width, this.height);
+		this.txPressure0 = new CTexture(-1); this.txPressure0.CreateEmptyRfloat32(this.width, this.height);
+		this.txPressure1 = new CTexture(-1); this.txPressure1.CreateEmptyRfloat32(this.width, this.height);
 		
 		this.txPressure = this.txPressure0;
 		this.txOldPressure = this.txPressure1;
 		
-		// this.txDepth = new Texture(-1); this.txDepth.CreateEmptyDepthfloat(this.width, this.height);
+		// this.txDepth = new CTexture(-1); this.txDepth.CreateEmptyDepthfloat(this.width, this.height);
 		
-		TextureList.addTexture(this.txVelocity0);
-		TextureList.addTexture(this.txVelocity1);
-		TextureList.addTexture(this.txVelocity2);
-		TextureList.addTexture(this.txDivergence);
-		TextureList.addTexture(this.txPressure0);
-		TextureList.addTexture(this.txPressure1);
-		// TextureList.addTexture(this.txDepth);
+		CTextureList.addTexture(this.txVelocity0);
+		CTextureList.addTexture(this.txVelocity1);
+		CTextureList.addTexture(this.txVelocity2);
+		CTextureList.addTexture(this.txDivergence);
+		CTextureList.addTexture(this.txPressure0);
+		CTextureList.addTexture(this.txPressure1);
+		// CTextureList.addTexture(this.txDepth);
 		
 		this.txVelocity0.setMinMagFilterLinearLinear();
 		this.txVelocity1.setMinMagFilterLinearLinear();
@@ -177,7 +177,7 @@ export class FluidSim2D
 		this.txPressure1.setWrapTypeClampToEdge();
 		
 		//framebuffer
-		this.framebuffer = new Framebuffer(false); this.framebuffer.Create();
+		this.framebuffer = new CFramebuffer(false); this.framebuffer.Create();
 		// this.framebuffer.AttachDepth(this.txDepth);
 		
 		this.kinematicViscosity = 1.0;
@@ -227,7 +227,7 @@ export class FluidSim2D
 		this.framebuffer.CheckStatus();
 		gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 		
-		Framebuffer.Bind(oldFB);
+		CFramebuffer.Bind(oldFB);
 	}
 	
 	SimStep(dT){
@@ -361,7 +361,7 @@ export class FluidSim2D
 				this.quad_model.RenderIndexedTriangles(this.divfree_velocity_shader);
 		}
 		
-		Framebuffer.Bind(oldFB);
+		CFramebuffer.Bind(oldFB);
 		
 		this.time += dT;
 	}
@@ -488,14 +488,14 @@ export class FluidSim2D
 	}
 }
 
-export class FluidSim3D
+export class CFluidSim3D
 {
 	constructor(w, h, d, vertex, viscosity, advection, advection_correction,
 				divergence, pressure, divfree_velocity, display)
 	{
 		this.NumOutBuffers = 8;
 		
-		this.quad_model = new Model(-1);
+		this.quad_model = new CModel(-1);
 		GenQuadModel(this.quad_model);
 		
 		this.width = Math.floor(w);
@@ -510,7 +510,7 @@ export class FluidSim3D
 			this.str_WriteOutBuffers += "out_buffer[" + i.toString() + "] = out_variable[" + i.toString() + "];";
 		}
 		
-		this.viscosity_shader = new Shader(-1);
+		this.viscosity_shader = new CShader(-1);
 		this.viscosity_shader.addDefine("Resolution",this.str_vec3Res);
 		this.viscosity_shader.addDefine("NUM_OUT_BUFFERS", this.NumOutBuffers.toString());
 		this.viscosity_shader.addDefine("WriteOutput(out_buffer, out_variable)", this.str_WriteOutBuffers);
@@ -530,7 +530,7 @@ export class FluidSim3D
 		
 		this.pre_viscosity_pass_function = function(){};
 			
-		this.advection_shader = new Shader(-1);
+		this.advection_shader = new CShader(-1);
 		this.advection_shader.addDefine("Resolution",this.str_vec3Res);
 		this.advection_shader.addDefine("NUM_OUT_BUFFERS", this.NumOutBuffers.toString());
 		this.advection_shader.addDefine("WriteOutput(out_buffer, out_variable)", this.str_WriteOutBuffers);
@@ -548,7 +548,7 @@ export class FluidSim3D
 				
 		this.pre_advection_pass_function = function(){};
 		
-		this.advection_correction_shader = new Shader(-1);
+		this.advection_correction_shader = new CShader(-1);
 		this.advection_correction_shader.addDefine("Resolution",this.str_vec3Res);
 		this.advection_correction_shader.addDefine("NUM_OUT_BUFFERS", this.NumOutBuffers.toString());
 		this.advection_correction_shader.addDefine("WriteOutput(out_buffer, out_variable)", this.str_WriteOutBuffers);
@@ -568,7 +568,7 @@ export class FluidSim3D
 				
 		this.pre_advection_correction_pass_function = function(){};
 		
-		this.divergence_shader = new Shader(-1);
+		this.divergence_shader = new CShader(-1);
 		this.divergence_shader.addDefine("Resolution",this.str_vec3Res);
 		this.divergence_shader.addDefine("NUM_OUT_BUFFERS", this.NumOutBuffers.toString());
 		this.divergence_shader.addDefine("WriteOutput(out_buffer, out_variable)", this.str_WriteOutBuffers);
@@ -586,7 +586,7 @@ export class FluidSim3D
 				
 		this.pre_divergence_pass_function = function(){};
 		
-		this.pressure_shader = new Shader(-1);
+		this.pressure_shader = new CShader(-1);
 		this.pressure_shader.addDefine("Resolution",this.str_vec3Res);
 		this.pressure_shader.addDefine("NUM_OUT_BUFFERS", this.NumOutBuffers.toString());
 		this.pressure_shader.addDefine("WriteOutput(out_buffer, out_variable)", this.str_WriteOutBuffers);
@@ -606,7 +606,7 @@ export class FluidSim3D
 				
 		this.pre_pressure_pass_function = function(){};
 		
-		this.divfree_velocity_shader = new Shader(-1);
+		this.divfree_velocity_shader = new CShader(-1);
 		this.divfree_velocity_shader.addDefine("Resolution",this.str_vec3Res);
 		this.divfree_velocity_shader.addDefine("NUM_OUT_BUFFERS", this.NumOutBuffers.toString());
 		this.divfree_velocity_shader.addDefine("WriteOutput(out_buffer, out_variable)", this.str_WriteOutBuffers);
@@ -626,7 +626,7 @@ export class FluidSim3D
 				
 		this.pre_divfree_velocity_pass_function = function(){};
 		
-		this.display_shader = new Shader(-1);
+		this.display_shader = new CShader(-1);
 		this.display_shader.addDefine("_DEBUG_Display_Velocity","");
 		this.display_shader.addDefine("Resolution",this.str_vec3Res);
 		this.display_shader.addDefine("NUM_OUT_BUFFERS", this.NumOutBuffers.toString());
@@ -650,13 +650,13 @@ export class FluidSim3D
 		
 		this.on_recompile_fluidsim_shaders = function(){};
 		
-		ShaderList.addShader(this.viscosity_shader);
-		ShaderList.addShader(this.advection_shader);
-		ShaderList.addShader(this.advection_correction_shader);
-		ShaderList.addShader(this.divergence_shader);
-		ShaderList.addShader(this.pressure_shader);
-		ShaderList.addShader(this.divfree_velocity_shader);
-		ShaderList.addShader(this.display_shader);
+		CShaderList.addShader(this.viscosity_shader);
+		CShaderList.addShader(this.advection_shader);
+		CShaderList.addShader(this.advection_correction_shader);
+		CShaderList.addShader(this.divergence_shader);
+		CShaderList.addShader(this.pressure_shader);
+		CShaderList.addShader(this.divfree_velocity_shader);
+		CShaderList.addShader(this.display_shader);
 		
 		/*
 			texture:
@@ -665,9 +665,9 @@ export class FluidSim3D
 				Pressure_0,Pressure_1 : x float
 		*/
 		
-		this.txVelocity0 = new Texture3D(-1); this.txVelocity0.CreateEmptyRGBAfloat32(this.width, this.height, this.depth);
-		this.txVelocity1 = new Texture3D(-1); this.txVelocity1.CreateEmptyRGBAfloat32(this.width, this.height, this.depth);
-		this.txVelocity2 = new Texture3D(-1); this.txVelocity2.CreateEmptyRGBAfloat32(this.width, this.height, this.depth);
+		this.txVelocity0 = new CTexture3D(-1); this.txVelocity0.CreateEmptyRGBAfloat32(this.width, this.height, this.depth);
+		this.txVelocity1 = new CTexture3D(-1); this.txVelocity1.CreateEmptyRGBAfloat32(this.width, this.height, this.depth);
+		this.txVelocity2 = new CTexture3D(-1); this.txVelocity2.CreateEmptyRGBAfloat32(this.width, this.height, this.depth);
 		
 		//ovo swappa 
 		this.txDiffusedVelocity = this.txVelocity0;
@@ -676,22 +676,22 @@ export class FluidSim3D
 		this.txOldVelocity = this.txVelocity0;
 		
 		//ovo mozda optimizirat i strpat ove tri teksture kao komponente txAdvectedVelocity (ili one koja se ne koristi)?
-		this.txDivergence = new Texture3D(-1);this.txDivergence.CreateEmptyRfloat32(this.width, this.height, this.depth);
-		this.txPressure0 = new Texture3D(-1);  this.txPressure0.CreateEmptyRfloat32(this.width, this.height, this.depth);
-		this.txPressure1 = new Texture3D(-1);  this.txPressure1.CreateEmptyRfloat32(this.width, this.height, this.depth);
+		this.txDivergence = new CTexture3D(-1);this.txDivergence.CreateEmptyRfloat32(this.width, this.height, this.depth);
+		this.txPressure0 = new CTexture3D(-1);  this.txPressure0.CreateEmptyRfloat32(this.width, this.height, this.depth);
+		this.txPressure1 = new CTexture3D(-1);  this.txPressure1.CreateEmptyRfloat32(this.width, this.height, this.depth);
 		
 		this.txPressure = this.txPressure0;
 		this.txOldPressure = this.txPressure1;
 		
-		// this.txDepth = new Texture(-1); this.txDepth.CreateEmptyDepthfloat(this.width, this.height);
+		// this.txDepth = new CTexture(-1); this.txDepth.CreateEmptyDepthfloat(this.width, this.height);
 		
-		TextureList.addTexture(this.txVelocity0);
-		TextureList.addTexture(this.txVelocity1);
-		TextureList.addTexture(this.txVelocity2);
-		TextureList.addTexture(this.txDivergence);
-		TextureList.addTexture(this.txPressure0);
-		TextureList.addTexture(this.txPressure1);
-		// TextureList.addTexture(this.txDepth);
+		CTextureList.addTexture(this.txVelocity0);
+		CTextureList.addTexture(this.txVelocity1);
+		CTextureList.addTexture(this.txVelocity2);
+		CTextureList.addTexture(this.txDivergence);
+		CTextureList.addTexture(this.txPressure0);
+		CTextureList.addTexture(this.txPressure1);
+		// CTextureList.addTexture(this.txDepth);
 		
 		this.txVelocity0.setMinMagFilterLinearLinear();
 		this.txVelocity1.setMinMagFilterLinearLinear();
@@ -708,7 +708,7 @@ export class FluidSim3D
 		this.txPressure1.setWrapTypeClampToEdge();
 		
 		//framebuffer
-		this.framebuffer = new Framebuffer(false); this.framebuffer.Create();
+		this.framebuffer = new CFramebuffer(false); this.framebuffer.Create();
 		// this.framebuffer.AttachDepth(this.txDepth);
 		
 		this.kinematicViscosity = 1.0;
@@ -745,7 +745,7 @@ export class FluidSim3D
 		}
 		this.framebuffer.DetachAllTextures();
 				
-		Framebuffer.Bind(oldFB);
+		CFramebuffer.Bind(oldFB);
 	}
 	
 	SimStep(dT){
@@ -947,7 +947,7 @@ export class FluidSim3D
 		this.framebuffer.DetachAllTextures();
 		this.framebuffer.bAutoSetupUsage = true;
 		
-		Framebuffer.Bind(oldFB);
+		CFramebuffer.Bind(oldFB);
 		
 		this.time += dT;
 	}
@@ -971,7 +971,7 @@ export class FluidSim3D
 	{
 		if(this.viscosity_shader == 'undefined' || this.viscosity_shader == null) return false;
 		
-		this.shader3DRender = new Shader(-1);//test_3d_texture_render "fluidsim_quad_surface_shader", "test_3d_texture_render"
+		this.shader3DRender = new CShader(-1);//test_3d_texture_render "fluidsim_quad_surface_shader", "test_3d_texture_render"
 		this.shader3DRender.addDefine("Resolution",this.str_vec3Res);
 		this.shader3DRender.addDefine("NUM_OUT_BUFFERS", this.NumOutBuffers.toString());
 		this.shader3DRender.addDefine("WriteOutput(out_buffer, out_variable)", this.str_WriteOutBuffers);
@@ -981,7 +981,7 @@ export class FluidSim3D
 		this.shader3DRender.ULz = this.shader3DRender.getUniformLocation("z");
 		this.shader3DRender.ULdT = this.shader3DRender.getUniformLocation("dT");
 		
-		ShaderList.addShader(this.shader3DRender);
+		CShaderList.addShader(this.shader3DRender);
 		
 		return true;
 	}
@@ -1010,7 +1010,7 @@ export class FluidSim3D
 		}
 		this.framebuffer.DetachAllTextures(); //potrebno je kod sljedecih poziva framebuffer.Bind() moze ostat bindane teksture na out
 				
-		Framebuffer.Bind(oldFB);
+		CFramebuffer.Bind(oldFB);
 	}
 	
 	//-----------------------------------------------------------------------------------------------------------
@@ -1024,9 +1024,9 @@ export class FluidSim3D
 		this.mass_height = h;
 		this.mass_depth = d;
 		
-		this.txMass0 = new Texture3D(-1);
-		this.txMass1 = new Texture3D(-1);
-		this.txMass2 = new Texture3D(-1);
+		this.txMass0 = new CTexture3D(-1);
+		this.txMass1 = new CTexture3D(-1);
+		this.txMass2 = new CTexture3D(-1);
 		
 		if(bColorAndDensity == true){
 			if(bFloat == true){
@@ -1064,7 +1064,7 @@ export class FluidSim3D
 		
 		var vertex_shader = this.viscosity_shader.VertexShaderName;
 		
-		this.mass_init_shader = new Shader(-1);
+		this.mass_init_shader = new CShader(-1);
 		this.mass_init_shader.addDefine("Resolution",this.str_vec3Res);
 		this.mass_init_shader.addDefine("MassResolution",this.str_mass_vec3Res);
 		this.mass_init_shader.addDefine("bHasColorComponent",this.str_mass_bHasColorComponent);
@@ -1087,7 +1087,7 @@ export class FluidSim3D
 		this.mass_init_shader.ULTextureNoiseRGB = this.mass_init_shader.getUniformLocation("txNoiseRGB");
 		this.mass_init_shader.ULTextureVelocity = this.mass_init_shader.getUniformLocation("txVelocity");
 		
-		this.mass_advect_shader = new Shader(-1);
+		this.mass_advect_shader = new CShader(-1);
 		this.mass_advect_shader.addDefine("Resolution",this.str_vec3Res);
 		this.mass_advect_shader.addDefine("MassResolution",this.str_mass_vec3Res);
 		this.mass_advect_shader.addDefine("bHasColorComponent",this.str_mass_bHasColorComponent);
@@ -1109,7 +1109,7 @@ export class FluidSim3D
 		this.mass_advect_shader.ULTextureMass = this.mass_advect_shader.getUniformLocation("txMass");
 		this.mass_advect_shader.ULTextureVelocity = this.mass_advect_shader.getUniformLocation("txVelocity");
 		
-		this.mass_advect_correction_shader = new Shader(-1);
+		this.mass_advect_correction_shader = new CShader(-1);
 		this.mass_advect_correction_shader.addDefine("Resolution",this.str_vec3Res);
 		this.mass_advect_correction_shader.addDefine("MassResolution",this.str_mass_vec3Res);
 		this.mass_advect_correction_shader.addDefine("bHasColorComponent",this.str_mass_bHasColorComponent);
@@ -1132,12 +1132,12 @@ export class FluidSim3D
 		this.mass_advect_correction_shader.ULTextureAdvectedMass = this.mass_advect_correction_shader.getUniformLocation("txAdvectedMass");
 		this.mass_advect_correction_shader.ULTextureVelocity = this.mass_advect_correction_shader.getUniformLocation("txVelocity");
 		
-		ShaderList.addShader(this.mass_init_shader);
-		ShaderList.addShader(this.mass_advect_shader);
-		ShaderList.addShader(this.mass_advect_correction_shader);
-		TextureList.addTexture(this.txMass0);
-		TextureList.addTexture(this.txMass1);
-		TextureList.addTexture(this.txMass2);
+		CShaderList.addShader(this.mass_init_shader);
+		CShaderList.addShader(this.mass_advect_shader);
+		CShaderList.addShader(this.mass_advect_correction_shader);
+		CTextureList.addTexture(this.txMass0);
+		CTextureList.addTexture(this.txMass1);
+		CTextureList.addTexture(this.txMass2);
 		
 		this.ResetMass();
 	}
@@ -1171,7 +1171,7 @@ export class FluidSim3D
 				this.quad_model.RenderIndexedTriangles(this.mass_init_shader);	
 			}
 		
-		Framebuffer.Bind(oldFB);
+		CFramebuffer.Bind(oldFB);
 	}
 	
 	AdvectMass(dT)
@@ -1224,7 +1224,7 @@ export class FluidSim3D
 			}		
 		
 		
-		Framebuffer.Bind(oldFB);
+		CFramebuffer.Bind(oldFB);
 		
 		{
 			var tmp = this.txMass2;
