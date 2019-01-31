@@ -111,6 +111,8 @@ function movable_OnMouseDown(e){
 	
 	if(bInSelectRect == true){
 		e.preventDefault();
+		document.movable_temp_onmouseup = document.onmouseup; //hack kako se nebi izgubio mouse.OnMouseEvent()
+		document.movable_temp_onmousemove = document.onmousemove; //hack kako se nebi izgubio mouse.OnMouseEvent()
 		document.onmouseup = movable_StopMovement;
 		document.onmousemove = movable_DragElement;
 		document.movable_element = this;
@@ -133,8 +135,8 @@ function movable_DragElement(e){
 }
 
 function movable_StopMovement(e){
-	document.onmouseup = null;
-	document.onmousemove = null;
+	document.onmouseup = document.movable_temp_onmouseup;
+	document.onmousemove = document.movable_temp_onmousemove;
 	document.movable_element = null;
 }
 

@@ -26,9 +26,11 @@ export function main()
 	
 	glext.InitNDCQuadModel();
 	
-	var doc = document.getElementById("document");
+	var doc = document.getElementById("documentfile");
 	var doc_paint_canvas = document.getElementById("document_paint_canvas");
 	doc_paint_canvas.baseWindowOffset = [gl.canvasObject.offsetLeft, gl.canvasObject.offsetTop];
+	
+	var label_Debug = document.getElementById("label_Debug");
 	
 	doc_paint_canvas.transformMouseCoords = function(pos){
 		pos[0] = pos[0] - this.baseWindowOffset[0];
@@ -98,6 +100,8 @@ export function main()
 			avg_frame_time = vMath.lerp(avg_frame_time, frame_time, 1.0 / 30.0);
 			avg_FPS = 1.0 / avg_frame_time;
 		}
+		
+		//ToDo: popravit ovo sa misem, ne radi down/up detekcija dobro. i smislit kako imat vise gl.canvasObject-a.
 		doc_paint_canvas.baseWindowOffset = [gl.canvasObject.offsetLeft + doc.offsetLeft, gl.canvasObject.offsetTop + doc.offsetTop];
 		
 		var mousePos = sys.mouse.getPosition();
@@ -108,11 +112,12 @@ export function main()
 		if(sys.mouse.get().bLeftUp == true)
 			bBtnLeft = false;
 		doc_paint_canvas.transformMouseCoords(mousePos);
-		
-		
+				
 		if(bBtnLeft == true){
 			abrush.setPosition([mousePos[0] / 500.0,1.0 - mousePos[1] / 500.0]);
 			abrush.setColor(Math.cos(time)*0.5+0.5, Math.sin(time)*0.5+0.5, 1.0-Math.sin(time)*0.5+0.5);
+			abrush.setDeltaTime(avg_frame_time);
+			abrush.setTime(time);
 		}
 		else if(sys.mouse.get().bLeftUp == true){
 			abrush.setColor(0.0,0.0,0.0,0.0);
@@ -120,6 +125,7 @@ export function main()
 		abrush.Update();
 		
 		FPSlabel.textContent = Number.parseFloat(avg_FPS).toFixed(2) + " FPS";
+		label_Debug.textContent = "mouse: [" + mousePos[0] + ", " + mousePos[1] + "], " + bBtnLeft;
 				
 			layer.Begin(shader);
 			layer.Draw();

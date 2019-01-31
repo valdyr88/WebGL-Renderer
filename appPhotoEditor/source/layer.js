@@ -9,12 +9,6 @@ paintable layer
 	zatim se poziva Draw() koji zove shader.UpdateUniforms()
 	kad se zavrsi crtanje potrebno je pozvati End().
 	Begin() funkcija vraca kopiju (za undo) trenutnog stanja teksture koja se crta
-	
-	
-	ToDo:
-		- napravit kloniranje texture za undo (funkcija CloneTexture())
-		- testirat Begin() Draw() End() na testnom shaderu.
-		- inicijalizirat u mainu NDCQuadModel.
 */
 export class CPaintableRasterLayer{
 	

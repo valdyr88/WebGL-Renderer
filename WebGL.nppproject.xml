@@ -141,6 +141,7 @@
 					<File name="appPhotoEditor\source\canvasHandler.js"/>
 					<File name="appPhotoEditor\source\document.js"/>
 					<File name="appPhotoEditor\source\layer.js"/>
+					<File name="appPhotoEditor\source\brush.js"/>
 				</Folder>
 			</Folder>
 		</Folder>
