@@ -11,6 +11,7 @@ export class CBrush{
 		this.offset = [0,0];
 		this.dt = 0.0;
 		this.time = 0.0;
+		this.random = 0.0;
 		this.UniformBlock = null;
 		this.CreateUniformBlock();
 		
@@ -22,12 +23,13 @@ export class CBrush{
 	setOffset(offs){ this.offset[0] = offs[0]; this.offset[1] = offs[1]; this.bNeedsToUpdateUniformBlock = true; }
 	setColor(R,G,B,A){ this.color[0] = R; this.color[1] = G; this.color[2] = B; this.color[3] = A; this.bNeedsToUpdateUniformBlock = true; }
 	setDeltaTime(deltaT){ this.dt = deltaT; this.bNeedsToUpdateUniformBlock = true; }
-	setTime(T){ this.time= T; this.bNeedsToUpdateUniformBlock = true; }
+	setTime(T){ this.time = T; this.bNeedsToUpdateUniformBlock = true; }
+	setRandom(r){ this.random = r; this.bNeedsToUpdateUniformBlock = true; }
 	
 	SerializeToUniformBlock(){
 		var FloatUint8 = CUniformBlockBuffer.ConvertTypedArray( new Float32Array([this.position[0], this.position[1], this.rotation[0], this.rotation[1],
 																this.color[0], this.color[1], this.color[2], this.color[3],
-																this.offset[0], this.offset[1], this.dt, this.time]),
+																this.offset[0], this.offset[1], this.dt, this.random]),
 																Uint8Array);
 		var i = 0;
 		for(var b = 0; b < FloatUint8.length; ++b){

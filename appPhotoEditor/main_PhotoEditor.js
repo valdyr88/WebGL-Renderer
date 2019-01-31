@@ -112,12 +112,12 @@ export function main()
 		if(sys.mouse.get().bLeftUp == true)
 			bBtnLeft = false;
 		doc_paint_canvas.transformMouseCoords(mousePos);
-				
+		
 		if(bBtnLeft == true){
 			abrush.setPosition([mousePos[0] / 500.0,1.0 - mousePos[1] / 500.0]);
 			abrush.setColor(Math.cos(time)*0.5+0.5, Math.sin(time)*0.5+0.5, 1.0-Math.sin(time)*0.5+0.5);
 			abrush.setDeltaTime(avg_frame_time);
-			abrush.setTime(time);
+			abrush.setRandom(Math.random());
 		}
 		else if(sys.mouse.get().bLeftUp == true){
 			abrush.setColor(0.0,0.0,0.0,0.0);
@@ -126,11 +126,11 @@ export function main()
 		
 		FPSlabel.textContent = Number.parseFloat(avg_FPS).toFixed(2) + " FPS";
 		label_Debug.textContent = "mouse: [" + mousePos[0] + ", " + mousePos[1] + "], " + bBtnLeft;
-				
+		
 			layer.Begin(shader);
 			layer.Draw();
 			layer.End();
-			
+		
 		let txCopy = layer.CloneTexture();
 		
 		glext.CFramebuffer.BindMainFB();	
