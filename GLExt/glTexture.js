@@ -658,7 +658,8 @@ export class CTextureCube{
 		var dataType = gl.UNSIGNED_BYTE;
 		var width = 0;
 		
-		for(var i = 0; i < storeIDs.length; ++i){
+		for(var i = 0; i < storeIDs.length; ++i)
+		{
 			// var obj = document.getElementById(storeIDs[i]);
 			var obj = sys.storage.CGlobalStorage.get(storeIDs[i]);
 			if(typeof obj === 'undefined' || obj == null){

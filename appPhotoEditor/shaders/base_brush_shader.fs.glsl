@@ -33,17 +33,17 @@ varyin vec2 TexCoords;
 
 void main(void)
 {	
-	float dither = 0.0275f*(rand(TexCoords+vec2(Brush.offset_dt_time.w, frac(Brush.offset_dt_time.w))));
+	float4 dither = 0.0275f*(randf4(TexCoords+vec2(Brush.offset_dt_rand.w, 1.0-Brush.offset_dt_rand.w)));
 	
 	vec4 old = texture2D(txDiffuse, TexCoords);
 	
-	float dT = Brush.offset_dt_time.z;
+	float dT = Brush.offset_dt_rand.z;
 	vec2 toPos = Brush.position_rotation.xy - TexCoords.xy;
 	float distToPos = length(toPos) * 500.0f;
 	float invDistToPos = 1.0f / max(0.01f, distToPos);
 	invDistToPos = saturate(invDistToPos-0.01f);
 	
-	vec4 add = (10.0+100.0*dither)*dT*invDistToPos*Brush.color;
+	vec4 add = (vec4(10.0)+150.0*dither)*dT*invDistToPos*Brush.color;
 	
 	gl_FragColor = old + add;
 }
