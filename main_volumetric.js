@@ -28,6 +28,7 @@ export function main(){
 		 if(gl.isWGL2 == false && glext.glEnableExtension('EXT_shader_texture_lod') == false) alert("no extension: EXT_shader_texture_lod");
 		 if(glext.glEnableExtension('EXT_color_buffer_float') == false) alert("no extension: EXT_color_buffer_float");
 		 if(glext.glEnableExtension('OES_texture_float_linear') == false) alert("no extension: OES_texture_float_linear");
+		 // if(gl.isWGL2 == false && glext.glEnableExtension('EXT_draw_buffers') == false) alert("no extension: EXT_draw_buffers");
 		
 	glext.InitDebugTextDOM("debug_text");
 	var debug_kvadrat = document.getElementById("debug_kvadrat");
@@ -219,8 +220,6 @@ export function main(){
 	var txfbAoRSMt= new glext.CTexture(7); txfbAoRSMt.CreateEmptyRGBAubyte(fbo_width, fbo_height);
 	var fbo = new glext.CFramebuffer(true);   fbo.Create(); 
 	fbo.AttachTexture(txfbColor, 0);
-	fbo.AttachTexture(txfbNormal,1);
-	fbo.AttachTexture(txfbAoRSMt,2);
 	fbo.AttachDepth(txfbDepth);
 	fbo.CheckStatus();
 	
