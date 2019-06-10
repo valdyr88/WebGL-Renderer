@@ -22,6 +22,27 @@ function parseForDefines(source, defines){
 	source = source.replace("#global_defines", defines);
 	return source;
 }
+
+function parseForLinesIncluding(source, keywords){
+	
+	var source2 = source.replace(/(?:\\[rn]|[\r\n]+)+/g, "\n");
+	var sourceLines = source2.split("\n");
+	var outLines = [];
+	
+	for(var l in sourceLines){
+		var line = sourceLines[l];
+		var hasAllKeywords = true;
+		for(var k in keywords){
+			var keyword = keywords[k];
+			if(line.indexOf(keyword) == -1){ hasAllKeywords = false; break; }
+		}
+		
+		if(hasAllKeywords == true)
+			outLines[outLines.length] = line;
+	}
+	
+	return outLines;
+}
 	
 function getSourceFromFile(id, bParseForIncludes){
 	var shaderScript = document.getElementById(id);
@@ -158,6 +179,16 @@ export class CShaderDefines
 		
 }
 
+export class CFragDataLocation
+{
+	constructor(){
+		this.name = "";
+		this.location = -1;
+	}
+	
+	set(n, l){ this.name = n; this.location = l; }
+}
+
 export class CUniformBlockBuffer
 {
 	constructor(){
@@ -267,6 +298,7 @@ export class CShader
 		this.FragmentShaderName = "-";
 		
 		this.UniformBlocks = [];
+		this.FragDataLocations = [];
 	}
 	
 	CreateAll(){
@@ -356,8 +388,13 @@ export class CShader
 		gl.attachShader(this.program,this.vertex);
 		gl.attachShader(this.program,this.fragment);
 		gl.linkProgram(this.program);
-
-		return this.isLinked();
+		
+		var bIsLinked = this.isLinked();
+		
+		if(bIsLinked == true){
+			this.queryFragmentShaderOutputs(fsSource);
+		}
+		return bIsLinked;
 	}
 	
 	Recompile(bClearDefines){
@@ -758,6 +795,38 @@ export class CShader
 	}
 	
 	isBinded(){ return this.program === gl.currentShaderProgram; }
+	
+	queryFragmentShaderOutputs(source){
+		
+		var lines = parseForLinesIncluding(source, ["layout","location","out"]);
+		
+		var potentialOutputs = [];
+		var outputs = [];
+				
+		for(var l in lines){
+			var line = lines[l];
+			line = line.replace(";", " ");
+			line = line.replace("\t"," ");
+			var words = line.split(" ");
+			
+			var words2 = words.filter(function(el){
+				return el != null && el != "" && el != '';
+			});
+			
+			potentialOutputs[potentialOutputs.length] = words2[words2.length-1];
+		}
+		
+		for(var o in potentialOutputs){
+			var output = potentialOutputs[o];
+			var loc = gl.getFragDataLocation(this.program, output);
+			
+			if(loc != -1){
+				var fragDataLoc = new CFragDataLocation();
+				fragDataLoc.set(output, loc);
+				this.FragDataLocations[this.FragDataLocations.length] = fragDataLoc;
+			}
+		}
+	}
 }
 
 var globalShaderList = null;
