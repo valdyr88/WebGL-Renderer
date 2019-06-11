@@ -64,11 +64,11 @@ export function main(){
 	skybox_shader.InitDefaultUniformLocations();
 	skybox_shader.InitDefaultAttribLocations();
 	
-	var deferred_opaque_shade = new glext.CShader(2);
-	if(deferred_opaque_shade.CompileFromFile("simpleVS", "deferred_opaque_shade") == false) alert("nije kompajliran shader!");
-	deferred_opaque_shade.InitDefaultAttribLocations();
-	deferred_opaque_shade.InitDefaultUniformLocations();
-	deferred_opaque_shade.ULInvViewProjMatrix = deferred_opaque_shade.getUniformLocation("InverseViewProjectionMatrix");
+	var deferred_opaque_shader = new glext.CShader(2);
+	if(deferred_opaque_shader.CompileFromFile("simpleVS", "deferred_opaque_shader") == false) alert("nije kompajliran shader!");
+	deferred_opaque_shader.InitDefaultAttribLocations();
+	deferred_opaque_shader.InitDefaultUniformLocations();
+	deferred_opaque_shader.ULInvViewProjMatrix = deferred_opaque_shader.getUniformLocation("InverseViewProjectionMatrix");
 	
 	var transparent_shader = new glext.CShader(3);
 	if(transparent_shader.CompileFromFile("simpleVS", "transparent_shader") == false) alert("nije kompajliran shader!");
@@ -119,7 +119,7 @@ export function main(){
 			
 	var light = new glext.CLight(0);
 	// var lightUniforms = glext.CLight.getUniformLocationsFromShader(shader,"light0");
-	// var lightUniforms_backbuffer_shader = glext.CLight.getUniformLocationsFromShader(deferred_opaque_shade,"light0");
+	// var lightUniforms_backbuffer_shader = glext.CLight.getUniformLocationsFromShader(deferred_opaque_shader,"light0");
 	// atmosphere_shader.lightUniforms = glext.CLight.getUniformLocationsFromShader(atmosphere_shader, "light0");
 	// light.AttachUniformBlockTo(shader);	
 	
@@ -170,7 +170,7 @@ export function main(){
 		
 		glext.CShaderList.addShader(shader);
 		glext.CShaderList.addShader(skybox_shader);
-		glext.CShaderList.addShader(deferred_opaque_shade);
+		glext.CShaderList.addShader(deferred_opaque_shader);
 		glext.CShaderList.addShader(transparent_shader);
 		glext.CShaderList.addShader(backbuffer_shader);
 		glext.CShaderList.addShader(atmosphere_shader);
@@ -202,9 +202,9 @@ export function main(){
 		quad_model.setTexture(txfbDepth,"txDepth");
 		quad_model.setTexture(txBRDF_LUT,"txBRDF");
 		quad_model.setTexture(txAmb,"txAmbient");
-		quad_model.setShader(deferred_opaque_shade);
+		quad_model.setShader(deferred_opaque_shader);
 		
-		light.AttachUniformBlockTo(deferred_opaque_shade);	
+		light.AttachUniformBlockTo(deferred_opaque_shader);	
 		light.AttachUniformBlockTo(transparent_shader);	
 		light.AttachUniformBlockTo(atmosphere_shader);	
 		
@@ -380,27 +380,29 @@ export function main(){
 			gl.depthFunc(gl.LEQUAL);
 			gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 			
-			deferred_opaque_shade.Bind();
+			fboHdrMipBlur.ActivateDrawBuffers(deferred_opaque_shader);
 			
-				// txfbColor.Bind(0, deferred_opaque_shade.ULTextureD);
-				quad_model.BindTexturesToShader(deferred_opaque_shade);
+			deferred_opaque_shader.Bind();
+			
+				// txfbColor.Bind(0, deferred_opaque_shader.ULTextureD);
+				quad_model.BindTexturesToShader(deferred_opaque_shader);
 				
-				deferred_opaque_shade.setViewMatrixUniform( IdentityMatrix );
-				deferred_opaque_shade.setProjectionMatrixUniform( IdentityMatrix );
+				deferred_opaque_shader.setViewMatrixUniform( IdentityMatrix );
+				deferred_opaque_shader.setProjectionMatrixUniform( IdentityMatrix );
 				
-				deferred_opaque_shade.setTimeUniform(time);
+				deferred_opaque_shader.setTimeUniform(time);
 				
-				deferred_opaque_shade.setCameraPositionUniform(CCamera.Position);
-				deferred_opaque_shade.setMatrix4Uniform(deferred_opaque_shade.ULInvViewProjMatrix, CCamera.InverseViewProjectionMatrix);
+				deferred_opaque_shader.setCameraPositionUniform(CCamera.Position);
+				deferred_opaque_shader.setMatrix4Uniform(deferred_opaque_shader.ULInvViewProjMatrix, CCamera.InverseViewProjectionMatrix);
 				
-				// light.UploadToShader(deferred_opaque_shade, lightUniforms_backbuffer_shader);
+				// light.UploadToShader(deferred_opaque_shader, lightUniforms_backbuffer_shader);
 				
-				quad_model.RenderIndexedTriangles(deferred_opaque_shade);		
+				quad_model.RenderIndexedTriangles(deferred_opaque_shader);		
 		
 		//atmosphere render
 		fboHdrMipBlur.AttachDepth(txfbDepth);
 		// light.UploadToShader(atmosphere_shader, atmosphere_shader.lightUniforms);
-		RenderModels(null, false, time, CCamera, [AtmoSphereModel]);
+		RenderModels(fboHdrMipBlur, false, time, CCamera, [AtmoSphereModel]);
 		
 		//gen mipmapa za renderirani color buffer
 		glext.CFramebuffer.CopyTextureFromFBColorAttachment(txfbHdrMipBlur, 0, txfbColor, 0, MipGen.framebuffer, true);
@@ -448,6 +450,8 @@ function RenderModels(fbo, bClearFBO, time, camera, models){
 		var model = models[m];
 		var shader = glext.CShaderList.get(model.shaderID);
 		
+		if(fbo != null) fbo.ActivateDrawBuffers(shader);
+		
 		shader.Bind();
 		
 			model.BindTexturesToShader(shader);
@@ -480,7 +484,7 @@ export function recompileShader(fragment_name){
 					shader.ULTextureBackground = shader.getUniformLocation("txBackground");
 					glext.CLightList.get(0).AttachUniformBlockTo(shader);
 				break;
-				case "deferred_opaque_shade":
+				case "deferred_opaque_shader":
 					shader.ULInvViewProjMatrix = shader.getUniformLocation("InverseViewProjectionMatrix");
 					glext.CLightList.get(0).AttachUniformBlockTo(shader);
 				break;

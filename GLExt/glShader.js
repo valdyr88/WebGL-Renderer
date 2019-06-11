@@ -23,7 +23,7 @@ function parseForDefines(source, defines){
 	return source;
 }
 
-function parseForLinesIncluding(source, keywords){
+function parseForLinesIncludingAll(source, keywords){
 	
 	var source2 = source.replace(/(?:\\[rn]|[\r\n]+)+/g, "\n");
 	var sourceLines = source2.split("\n");
@@ -38,6 +38,27 @@ function parseForLinesIncluding(source, keywords){
 		}
 		
 		if(hasAllKeywords == true)
+			outLines[outLines.length] = line;
+	}
+	
+	return outLines;
+}
+
+function parseForLinesIncludingAtLeastOne(source, keywords){
+	
+	var source2 = source.replace(/(?:\\[rn]|[\r\n]+)+/g, "\n");
+	var sourceLines = source2.split("\n");
+	var outLines = [];
+	
+	for(var l in sourceLines){
+		var line = sourceLines[l];
+		var hasKeyword = false;
+		for(var k in keywords){
+			var keyword = keywords[k];
+			if(line.indexOf(keyword) != -1){ hasKeyword = true; break; }
+		}
+		
+		if(hasKeyword == true)
 			outLines[outLines.length] = line;
 	}
 	
@@ -392,7 +413,7 @@ export class CShader
 		var bIsLinked = this.isLinked();
 		
 		if(bIsLinked == true){
-			this.queryFragmentShaderOutputs(fsSource);
+			this.queryFragmentDataLocations(fsSource);
 		}
 		return bIsLinked;
 	}
@@ -796,9 +817,13 @@ export class CShader
 	
 	isBinded(){ return this.program === gl.currentShaderProgram; }
 	
-	queryFragmentShaderOutputs(source){
+	getFragDataLocations(){
+		return this.FragDataLocations;
+	}
+	
+	queryFragmentDataLocations(source){
 		
-		var lines = parseForLinesIncluding(source, ["layout","location","out"]);
+		var lines = parseForLinesIncludingAtLeastOne(source, ["layout","location","out"]);
 		
 		var potentialOutputs = [];
 		var outputs = [];
@@ -826,6 +851,26 @@ export class CShader
 				this.FragDataLocations[this.FragDataLocations.length] = fragDataLoc;
 			}
 		}
+		
+		//ckeck for duplicated
+		for(var i = 0; i < this.FragDataLocations.length; ++i){
+			var loc = this.FragDataLocations[i];
+			
+			for(var j = i+1; j < this.FragDataLocations.length; ++j){
+				var loc2 = this.FragDataLocations[j];
+				
+				if(loc.location == loc2.location){
+					loc2.location = -1;
+				}
+			}
+		}
+		//remove duplicated
+		this.FragDataLocations = this.FragDataLocations.filter(function (el){ return el.location != -1; });
+		//sort the array
+		this.FragDataLocations.sort(function(a, b){ return a.location - b.location; });
+		
+		var i = 0;
+		i = 1;
 	}
 }
 

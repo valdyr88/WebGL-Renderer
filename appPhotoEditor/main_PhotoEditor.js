@@ -193,7 +193,7 @@ export function recompileShader(fragment_name){
 			switch(fragment_name){
 				case "transparent_shader":
 				break;
-				case "deferred_opaque_shade":
+				case "deferred_opaque_shader":
 				break;
 				case "deferred_BcNAoRSMt":
 				break;
@@ -215,7 +215,7 @@ export function recompileShader(fragment_name){
 					shader.ULTextureBackground = shader.getUniformLocation("txBackground");
 					glext.CLightList.get(0).AttachUniformBlockTo(shader);
 				break;
-				case "deferred_opaque_shade":
+				case "deferred_opaque_shader":
 					shader.ULInvViewProjMatrix = shader.getUniformLocation("InverseViewProjectionMatrix");
 					glext.CLightList.get(0).AttachUniformBlockTo(shader);
 				break;

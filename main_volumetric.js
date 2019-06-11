@@ -28,7 +28,7 @@ export function main(){
 		 if(gl.isWGL2 == false && glext.glEnableExtension('EXT_shader_texture_lod') == false) alert("no extension: EXT_shader_texture_lod");
 		 if(glext.glEnableExtension('EXT_color_buffer_float') == false) alert("no extension: EXT_color_buffer_float");
 		 if(glext.glEnableExtension('OES_texture_float_linear') == false) alert("no extension: OES_texture_float_linear");
-		 // if(gl.isWGL2 == false && glext.glEnableExtension('EXT_draw_buffers') == false) alert("no extension: EXT_draw_buffers");
+		 // if(gl.isWGL2 == false && glext.glEnableExtension('WEBGL_draw_buffers') == false) alert("no extension: WEBGL_draw_buffers");
 		
 	glext.InitDebugTextDOM("debug_text");
 	var debug_kvadrat = document.getElementById("debug_kvadrat");
@@ -111,11 +111,11 @@ export function main(){
 	skybox_shader.InitDefaultUniformLocations();
 	skybox_shader.InitDefaultAttribLocations();
 	
-	var deferred_opaque_shade = new glext.CShader(2);
-	if(deferred_opaque_shade.CompileFromFile("simpleVS", "deferred_opaque_shade") == false) alert("nije kompajliran shader!");
-	deferred_opaque_shade.InitDefaultAttribLocations();
-	deferred_opaque_shade.InitDefaultUniformLocations();
-	deferred_opaque_shade.ULInvViewProjMatrix = deferred_opaque_shade.getUniformLocation("InverseViewProjectionMatrix");
+	var deferred_opaque_shader = new glext.CShader(2);
+	if(deferred_opaque_shader.CompileFromFile("simpleVS", "deferred_opaque_shader") == false) alert("nije kompajliran shader!");
+	deferred_opaque_shader.InitDefaultAttribLocations();
+	deferred_opaque_shader.InitDefaultUniformLocations();
+	deferred_opaque_shader.ULInvViewProjMatrix = deferred_opaque_shader.getUniformLocation("InverseViewProjectionMatrix");
 	
 	var transparent_shader = new glext.CShader(3);
 	if(transparent_shader.CompileFromFile("simpleVS", "transparent_shader") == false) alert("nije kompajliran shader!");
@@ -184,7 +184,7 @@ export function main(){
 			
 	var light = new glext.CLight(0);
 	// var lightUniforms = glext.CLight.getUniformLocationsFromShader(shader,"light0");
-	// var lightUniforms_backbuffer_shader = glext.CLight.getUniformLocationsFromShader(deferred_opaque_shade,"light0");
+	// var lightUniforms_backbuffer_shader = glext.CLight.getUniformLocationsFromShader(deferred_opaque_shader,"light0");
 	// atmosphere_shader.lightUniforms = glext.CLight.getUniformLocationsFromShader(atmosphere_shader, "light0");
 	// light.AttachUniformBlockTo(shader);	
 	light.setPosition(1.0, 0.0, 2.5);
@@ -250,7 +250,7 @@ export function main(){
 		
 		glext.CShaderList.addShader(simple_shader);
 		glext.CShaderList.addShader(skybox_shader);
-		glext.CShaderList.addShader(deferred_opaque_shade);
+		glext.CShaderList.addShader(deferred_opaque_shader);
 		glext.CShaderList.addShader(transparent_shader);
 		glext.CShaderList.addShader(backbuffer_shader);
 		glext.CShaderList.addShader(atmosphere_shader);
@@ -276,9 +276,9 @@ export function main(){
 		// quad_model.setTexture(txfbDepth,"txDepth");
 		// quad_model.setTexture(txBRDF_LUT,"txBRDF");
 		// quad_model.setTexture(txAmb,"txAmbient");
-		quad_model.setShader(deferred_opaque_shade);
+		quad_model.setShader(deferred_opaque_shader);
 		
-		light.AttachUniformBlockTo(deferred_opaque_shade);	
+		light.AttachUniformBlockTo(deferred_opaque_shader);	
 		light.AttachUniformBlockTo(transparent_shader);	
 		light.AttachUniformBlockTo(atmosphere_shader);
 		light.AttachUniformBlockTo(volume_clouds_shader);
@@ -1204,7 +1204,7 @@ export function recompileShader(fragment_name){
 			switch(fragment_name){
 				case "transparent_shader":
 				break;
-				case "deferred_opaque_shade":
+				case "deferred_opaque_shader":
 				break;
 				case "deferred_BcNAoRSMt":
 				break;
@@ -1226,7 +1226,7 @@ export function recompileShader(fragment_name){
 					shader.ULTextureBackground = shader.getUniformLocation("txBackground");
 					glext.CLightList.get(0).AttachUniformBlockTo(shader);
 				break;
-				case "deferred_opaque_shade":
+				case "deferred_opaque_shader":
 					shader.ULInvViewProjMatrix = shader.getUniformLocation("InverseViewProjectionMatrix");
 					glext.CLightList.get(0).AttachUniformBlockTo(shader);
 				break;

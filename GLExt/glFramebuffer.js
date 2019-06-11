@@ -222,6 +222,15 @@ export class CFramebuffer{
 		
 		gl.currentFramebuffer = framebuffer;
 	}
+	
+	ActivateDrawBuffers(shader){
+		var fragDataLocations = shader.getFragDataLocations();
+		
+		var buffers = [];
+		for(let i = 0; i < fragDataLocations.length; ++i)
+			buffers[buffers.length] = gl.COLOR_ATTACHMENT0+fragDataLocations[i].location;
+		gl.drawBuffers(buffers);
+	}
 }
 
 export class CMipMapGen{

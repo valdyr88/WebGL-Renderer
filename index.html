@@ -29,7 +29,7 @@
   <script id="pbr_shader" src="./Shaders/pbr_shader.fs.glsl" type="shader/fragment"></script>
   <script id="skybox_shader" src="./Shaders/skybox.fs.glsl" type="shader/fragment"></script>
   <script id="backbuffer_shader" src="./Shaders/backbuffer.fs.glsl" type="shader/fragment"></script>
-  <script id="deferred_opaque_shade" src="./Shaders/deferred_opaque_shade.fs.glsl" type="shader/fragment"></script>
+  <script id="deferred_opaque_shader" src="./Shaders/deferred_opaque_shader.fs.glsl" type="shader/fragment"></script>
   <script id="deferred_BcNAoRSMt" src="./Shaders/deferred_BcNAoRSMt.fs.glsl" type="shader/fragment"></script>
   <script id="deferred_skybox" src="./Shaders/deferred_skybox.fs.glsl" type="shader/fragment"></script>
   <script id="transparent_shader" src="./Shaders/transparent_shader.fs.glsl" type="shader/fragment"></script>
@@ -69,7 +69,7 @@
   
   </head>
 <body>
-	<img id="reload_shader_btn" onclick="reload_shader('deferred_opaque_shade')" title="deferred_opaque_shade" src="./misc/reload_ico.png"></img>
+	<img id="reload_shader_btn" onclick="reload_shader('deferred_opaque_shader')" title="deferred_opaque_shader" src="./misc/reload_ico.png"></img>
 	<img id="reload_shader_btn" onclick="reload_shader('transparent_shader')" title="transparent_shader" src="./misc/reload_ico.png"></img>
 	<img id="reload_shader_btn" onclick="reload_shader('atmosphere_shader')" title="atmosphere_shader" src="./misc/reload_ico.png"></img>
 	<img id="reload_shader_btn" onclick="reload_shader('deferred_skybox')" title="deferred_skybox" src="./misc/reload_ico.png"></img>
@@ -87,7 +87,7 @@
 	import { fetchImage } from "./GLExt/glTexture.js";
 	function wait(ms){ const start = performance.now(); while(performance.now() - start < ms); }
 	
-	var extern_files_list = ["functions", "structs", "pbr", "defines", "ubCamera", "ubLight", "ubMaterial", "ubModel", "simpleVS", "simpleFS", "pbr_shader", "skybox_shader", "backbuffer_shader", "SphereModel", "deferred_opaque_shade", "deferred_BcNAoRSMt", "deferred_skybox", "transparent_shader", "atmosphere_shader", "navigatorModel", "mipmapVS", "3x3MipGenFS", "tx128"];
+	var extern_files_list = ["functions", "structs", "pbr", "defines", "ubCamera", "ubLight", "ubMaterial", "ubModel", "simpleVS", "simpleFS", "pbr_shader", "skybox_shader", "backbuffer_shader", "SphereModel", "deferred_opaque_shader", "deferred_BcNAoRSMt", "deferred_skybox", "transparent_shader", "atmosphere_shader", "navigatorModel", "mipmapVS", "3x3MipGenFS", "tx128"];
 	var extern_files_loaded_number = 0;
 	
 	//function recompileShader(fragment_name)
