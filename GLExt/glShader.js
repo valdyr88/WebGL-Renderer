@@ -823,7 +823,7 @@ export class CShader
 	
 	queryFragmentDataLocations(source){
 		
-		var lines = parseForLinesIncludingAtLeastOne(source, ["layout","location","out"]);
+		var lines = parseForLinesIncludingAtLeastOne(source, ["out","layout","location"]);
 		
 		var potentialOutputs = [];
 		var outputs = [];

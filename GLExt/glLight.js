@@ -1,6 +1,7 @@
 import { gl, glPrintError } from "./glContext.js";
 import * as vMath from "../glMatrix/gl-matrix.js";
 import { CShader, CUniformBlockBuffer, CUniformBlockBinding } from "./glShader.js";
+import { CFramebuffer } from "./glFramebuffer.js";
 
 var PointShader = -1;
 
@@ -10,13 +11,13 @@ function InitPointShader(){
 	PointShader = new CShader(-1);
 	
 	var vsCode = 
-	"\
-	attribute vec4 aVertexPosition;\
+	"#version 300 es\n \
+	in vec4 aVertexPosition;\
 	uniform mat4 ViewMatrix;\
 	uniform mat4 ProjectionMatrix;\
 	uniform float PointSize;\
 	uniform vec3 VertexPosition;\
-	varying vec3 oaVertexPosition;\
+	out vec3 oaVertexPosition;\
 	\
 	void main(void){ \
 		gl_Position = (ProjectionMatrix * (ViewMatrix * vec4(VertexPosition,1.0)));\
@@ -26,11 +27,13 @@ function InitPointShader(){
 	";
 	
 	var fsCode =
-	"precision mediump float;\
+	"#version 300 es\n \
+	precision mediump float;\
 	uniform vec4 Color;\
+	out vec4 glFragColor; \
 	\
 	void main(void){ \
-		gl_FragColor = Color;\
+		glFragColor = Color;\
 	}\
 	";
 	if(PointShader.Compile(vsCode, fsCode) == false) return false;
@@ -177,6 +180,8 @@ export class CLight{
 	
 	RenderPosition(){
 		if(PointShader.isBinded() == false) PointShader.Bind();
+			
+			CFramebuffer.ActivateDrawBuffers(PointShader);
 			
 			gl.bindBuffer(gl.ARRAY_BUFFER, this.glVertexBuffer);
 			gl.vertexAttribPointer(PointShader.ALVertexPosition, this.glVertexBuffer.itemSize, gl.FLOAT, false, 0, 0);
