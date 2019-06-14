@@ -62,8 +62,9 @@
 	<div id="inlineMovableHTMLFile2" style="position: absolute;" data-inline-html="./inlineMovableHTMLFile.html"></div> -->
 	<div id="menubar" data-inline-html="./menubar/menubar.html"></div>
 	<div id="toolbar" style="position: absolute;" data-inline-html="./toolbar/toolbar.html"></div>
-	<div id="documentfile" style="position: absolute;" data-inline-html="./windows/document.html"></div>
+	<div id="documentfile" style="position: absolute;" data-inline-html="./windows/document.html" onclick="document_onclick(this.id)"></div>
 	<div id="newdocument" style="position: absolute;" data-inline-html="./windows/newdocument.html"></div>
+	<div id="documentfile2" style="position: absolute;" data-inline-html="./windows/document.html" onclick="document_onclick(this.id)"></div>
 	
 	<!-- <div id="workarea" class="main" width="100%" height="100%">
 	  <canvas id="glcanvas" width="1%" height="1%">
@@ -73,7 +74,7 @@
 	
   <script type="module">
 	import { ParseForHTMLIncludes, MakeElementMovable, MakeElementsMovable } from "./../System/html.js"
-	import { main, recompileShader, reloadTexture, onShaderDefineChanged } from "./main_PhotoEditor.js";
+	import { main, recompileShader, reloadTexture, onShaderDefineChanged, attachGLCanvasToDocument, createNewFile } from "./main_PhotoEditor.js";
 	import { fetchImage } from "./../GLExt/glTexture.js";
 	function wait(ms){ const start = performance.now(); while(performance.now() - start < ms); }
 	
@@ -204,6 +205,14 @@
 		obj.src = str + "?reload=" + new Date().getTime();
 	}
 	
+	window.document_onclick = function document_onclick(id){
+		attachGLCanvasToDocument(id);
+	}
+	
+	window.btn_new_file = function btn_new_file(){
+		createNewFile();
+	}
+	
 	window.on_shader_define_changed = function on_shader_define_changed(shader_name, select_element_id, default_value, additional_define){		
 		onShaderDefineChanged(shader_name, select_element_id, default_value, additional_define);
 	}
@@ -214,7 +223,7 @@
 //-------------------------------------------------------------------------------------------
 	window.onload = function(){
 		ParseForHTMLIncludes(document, "data-inline-html", function(){
-			MakeElementsMovable(["toolbar","newdocument","documentfile"], "data-movable-element-handle");
+			MakeElementsMovable(["toolbar","newdocument","documentfile","documentfile2"], "data-movable-element-handle");
 			LoadAllExternFiles(function(){
 				main();
 			});

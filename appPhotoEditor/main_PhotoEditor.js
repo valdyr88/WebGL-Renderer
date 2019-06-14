@@ -3,6 +3,7 @@ import * as sys from "./../System/sys.js"
 import * as vMath from "./../glMatrix/gl-matrix.js"
 import * as img from "./source/layer.js"
 import * as brush from "./source/brush.js"
+import * as app from "./source/app.js"
 
 var gl = null;
 
@@ -29,6 +30,8 @@ export function main()
 	var doc = document.getElementById("documentfile");
 	var doc_paint_canvas = document.getElementById("document_paint_canvas");
 	doc_paint_canvas.baseWindowOffset = [gl.canvasObject.offsetLeft, gl.canvasObject.offsetTop];
+	
+	gl.activeDoc = doc;
 	
 	var label_Debug = document.getElementById("label_Debug");
 	
@@ -101,6 +104,8 @@ export function main()
 			avg_FPS = 1.0 / avg_frame_time;
 		}
 		
+		doc = gl.activeDoc;
+		
 		//ToDo: popravit ovo sa misem, ne radi down/up detekcija dobro. i smislit kako imat vise gl.canvasObject-a.
 		doc_paint_canvas.baseWindowOffset = [gl.canvasObject.offsetLeft + doc.offsetLeft, gl.canvasObject.offsetTop + doc.offsetTop];
 		
@@ -152,6 +157,42 @@ export function main()
 	}
 	
 	return; /* */
+}
+
+export function attachGLCanvasToDocument(id){
+	var docObj = document.getElementById(id);	
+	if(gl == null) return;
+	if(gl.activeDoc === docObj) return;
+	
+	var obj = sys.utils.getGrandchild(docObj, ["panelmain","divA","divB","document_paint_area"]);
+	var objtwo = gl.canvasObject.parentNode;
+	var objtwoChildPos = sys.utils.getChildPosition(objtwo, "document_paint_canvas");
+	var oldCanvasObject = sys.utils.getChild(obj, "document_paint_canvas");
+	var doctwo = sys.utils.getGrandparent(gl.canvasObject, ["document_paint_area","divB","divA","panelmain"]);
+	
+	//replaceChild( new, old );
+	obj.replaceChild(gl.canvasObject, oldCanvasObject);
+	if(objtwoChildPos != -1) objtwo.insertBefore(oldCanvasObject, objtwo.children[objtwoChildPos]);
+		
+	//add mous functions to paint document object
+	docObj.baseWindowOffset = [gl.canvasObject.offsetLeft, gl.canvasObject.offsetTop];
+	
+	docObj.transformMouseCoords = function(pos){
+		pos[0] = pos[0] - this.baseWindowOffset[0];
+		pos[1] = pos[1] - this.baseWindowOffset[1];
+	}
+	
+	gl.activeDoc = docObj;
+	
+	//set to front
+	docObj.style.zIndex = 1;
+	//set to back
+	doctwo.style.zIndex = -1;
+}
+
+export function createNewFile(){
+	var doc = new app.document.CDocument(null);
+	doc.CreateNew(100,100);
 }
 
 function RenderModels(fbo, bClearFBO, time, camera, models){
@@ -300,9 +341,4 @@ export function onShaderDefineChanged(shader_name, select_element_id, default_va
 		}
 	}
 }
-
-
-
-
-
 

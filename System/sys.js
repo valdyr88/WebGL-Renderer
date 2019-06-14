@@ -8,6 +8,7 @@ import * as keyboard from "./keyboard.js"
 import * as html from "./html.js"
 import * as fetch from "./fetch.js"
 import { browser, CheckWhatBrowser } from "./html.js"
+import * as utils from "./utils.js"
 //============================================================================
 export { keyboard };
 export { zip };
@@ -17,3 +18,4 @@ export { storage };
 export { html };
 export { fetch };
 export { browser, CheckWhatBrowser };
+export { utils };

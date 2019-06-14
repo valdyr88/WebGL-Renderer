@@ -402,7 +402,7 @@ export function main(){
 		//atmosphere render
 		fboHdrMipBlur.AttachDepth(txfbDepth);
 		// light.UploadToShader(atmosphere_shader, atmosphere_shader.lightUniforms);
-		RenderModels(fboHdrMipBlur, false, time, CCamera, [AtmoSphereModel]);
+		// RenderModels(fboHdrMipBlur, false, time, CCamera, [AtmoSphereModel]);
 		
 		//gen mipmapa za renderirani color buffer
 		glext.CFramebuffer.CopyTextureFromFBColorAttachment(txfbHdrMipBlur, 0, txfbColor, 0, MipGen.framebuffer, true);

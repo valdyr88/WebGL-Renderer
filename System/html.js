@@ -68,11 +68,45 @@ export function ParseForHTMLIncludes(doc, strAttribute, callback){
 
 
 //----------------------------------------------------------------------------------------------------
+// create DOM element from html
+//----------------------------------------------------------------------------------------------------
+// https://stackoverflow.com/questions/494143/creating-a-new-dom-element-from-an-html-string-using-built-in-dom-methods-or-pro/35385518#35385518
+
+export function CreateDOMFromHTML(html){
+	var template = document.createElement('template');
+	html = html.trim();
+	template.innerHTML = html;
+	return template.content.firstChild;
+}
+
+export function CreateDOMFromHTMLFile(callee, src, callback){
+	fetch.fetchTextFileSrc(src, function(html){
+		var obj = CreateDOMFromHTML(html);
+		callback(callee, obj);
+	});
+}
+
+//----------------------------------------------------------------------------------------------------
+
+
+//----------------------------------------------------------------------------------------------------
 // movable elements
 //----------------------------------------------------------------------------------------------------
 
 class CRect{
-	constructor(X0,Y0,X1,Y1){
+	
+	constructor(el, par){
+		this.x0 = 0;
+		this.x1 = 0;
+		this.y0 = 0;
+		this.y1 = 0;
+		this.width = -1;
+		this.height = -1;
+		this.el = el;
+		this.par = par;
+	}
+	
+	set(X0,Y0,X1,Y1){
 		this.x0 = X0;
 		this.x1 = X1;
 		this.y0 = Y0;
@@ -82,6 +116,21 @@ class CRect{
 	}
 	isWithin(x,y){
 		return (x >= this.x0 && x <= this.x1 && y >= this.y0 && y <= this.y1);
+	}
+	invalidate(){
+		if(this.width != -1) return;
+		
+		let elRect = this.el.getBoundingClientRect();
+		var objRect = this.par.getBoundingClientRect();
+		
+		let x0 = elRect.left - objRect.left;
+		let x1 = x0 + elRect.width;
+		let y0 = elRect.top - objRect.top;
+		let y1 = y0 + elRect.height;
+		
+		if(x0 == 0 && y0 == 0 && x1 == 0 && y1 == 0) return;
+		
+		this.set(x0,y0,x1,y1);
 	}
 }
 
@@ -103,6 +152,7 @@ function movable_OnMouseDown(e){
 		
 		for(let i = 0; i < this.selectRect.length; ++i){
 			let rect = this.selectRect[i];
+			rect.invalidate();
 			if(rect.isWithin(localX,localY) == true){ 
 				bInSelectRect = true; break;
 			}
@@ -144,7 +194,7 @@ function movable_findMovableRectFromAttrib(obj, strAttribute){
 	if(strAttribute == undefined || strAttribute == null) return;
 	var allElements = obj.getElementsByTagName("*");
 	
-	var objRect = obj.getBoundingClientRect();
+	//var objRect = obj.getBoundingClientRect();
 	var Rects = [];
 	
 	obj.movable_element_handle_attrib = strAttribute;
@@ -159,18 +209,18 @@ function movable_findMovableRectFromAttrib(obj, strAttribute){
 		if(bHasAttrib == false){ continue; }
 		
 		// el.removeAttribute(strAttribute);
-		let elRect = el.getBoundingClientRect();
+		// let elRect = el.getBoundingClientRect();
 		
-		let x0 = elRect.left - objRect.left;
+		/*let x0 = elRect.left - objRect.left;
 		let x1 = x0 + elRect.width;
 		let y0 = elRect.top - objRect.top;
-		let y1 = y0 + elRect.height;
+		let y1 = y0 + elRect.height;*/
 		
 		el.onresize = function(){ 
 			obj.selectRect = movable_findMovableRectFromAttrib(obj, obj.movable_element_handle_attrib);
 		}
-				
-		Rects[Rects.length] = new CRect(x0,y0,x1,y1);
+		
+		Rects[Rects.length] = new CRect(el,obj);
 	}
 	return Rects;	
 }
