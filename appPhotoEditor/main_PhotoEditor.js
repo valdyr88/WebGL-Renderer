@@ -7,6 +7,32 @@ import * as app from "./source/app.js"
 
 var gl = null;
 
+function initPaintCanvas(doc, ogl){
+	
+	var doc_paint_canvas = ogl.canvasObject;
+	doc_paint_canvas.baseWindowOffset = [ogl.canvasObject.offsetLeft, ogl.canvasObject.offsetTop];
+	
+	ogl.activeDoc = doc;
+	
+	doc_paint_canvas.width = doc.width;
+	doc_paint_canvas.height = doc.height;	
+	glext.ResizeCanvas(doc.width, doc.height);
+	
+	doc_paint_canvas.transformMouseCoords = function(pos){
+		pos[0] = pos[0] - this.baseWindowOffset[0];
+		pos[1] = pos[1] - this.baseWindowOffset[1];
+	}
+	
+	return doc_paint_canvas;
+}
+function resizePaintCavas(doc, canvasObject){
+	if(canvasObject.width != doc.width || canvasObject.height != doc.height){
+		canvasObject.width = doc.width;
+		canvasObject.height = doc.height;
+		glext.ResizeCanvas(doc.width, doc.height);
+	}
+}
+
 export function main()
 {
 	document.addEventListener('contextmenu', event => event.preventDefault());
@@ -14,7 +40,7 @@ export function main()
 	var gs = sys.storage.CGlobalStorage.getSingleton();
 	sys.mouse.InitMouse(document);
 	sys.keyboard.InitKeyboard(document);
-		
+	
 	gl = glext.glInit("document_paint_canvas");
 	if(gl == null) return;
 	
@@ -27,18 +53,8 @@ export function main()
 	
 	glext.InitNDCQuadModel();
 	
-	var doc = document.getElementById("documentfile");
-	var doc_paint_canvas = document.getElementById("document_paint_canvas");
-	doc_paint_canvas.baseWindowOffset = [gl.canvasObject.offsetLeft, gl.canvasObject.offsetTop];
-	
-	gl.activeDoc = doc;
-	
+	var doc_paint_canvas = null;
 	var label_Debug = document.getElementById("label_Debug");
-	
-	doc_paint_canvas.transformMouseCoords = function(pos){
-		pos[0] = pos[0] - this.baseWindowOffset[0];
-		pos[1] = pos[1] - this.baseWindowOffset[1];
-	}
 	
 	gl.clearColor(0.0, 1.0, 1.0, 1.0);
 	gl.blendColor(1.0, 1.0, 1.0, 1.0);
@@ -104,10 +120,18 @@ export function main()
 			avg_FPS = 1.0 / avg_frame_time;
 		}
 		
-		doc = gl.activeDoc;
+		let doc = app.document.CDocuments.getActive();
+		if(doc == null) return;
+		
+		if(doc_paint_canvas == null){
+			doc_paint_canvas = initPaintCanvas(doc, gl); }
+		
+		resizePaintCavas(doc, doc_paint_canvas);
+		
+		gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
 		
 		//ToDo: popravit ovo sa misem, ne radi down/up detekcija dobro. i smislit kako imat vise gl.canvasObject-a.
-		doc_paint_canvas.baseWindowOffset = [gl.canvasObject.offsetLeft + doc.offsetLeft, gl.canvasObject.offsetTop + doc.offsetTop];
+		doc_paint_canvas.baseWindowOffset = [gl.canvasObject.offsetLeft + doc.getDOM().offsetLeft, gl.canvasObject.offsetTop + doc.getDOM().offsetTop];
 		
 		var mousePos = sys.mouse.getPosition();
 		var mouseDelta = sys.mouse.getDeltaPosition();
@@ -191,8 +215,9 @@ export function attachGLCanvasToDocument(id){
 }
 
 export function createNewFile(){
-	var doc = new app.document.CDocument(null);
-	doc.CreateNew(100,100);
+	// var doc = new app.document.CDocument(null);
+	// doc.CreateNew(100,100);
+	app.document.CDocuments.CreateDocument(500,500);
 }
 
 function RenderModels(fbo, bClearFBO, time, camera, models){

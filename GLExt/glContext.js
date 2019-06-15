@@ -23,7 +23,6 @@ function glInitWebGLContext(canvas){
 	for(var i = 0; i < contextNames.length; ++i){
 		try{// Try to grab the context.
 			gl = canvas.getContext(contextNames[i]);
-			gl.windowCanvas = canvas;
 			glContextName = contextNames[i];
 			gl.contextName = glContextName;
 			
@@ -97,6 +96,7 @@ export function glPrintError(){
 
 export function glInit(canvasID) {
 	var canvas = document.getElementById(canvasID);//"glcanvas"
+	if(canvas == null) return;
 	
 	gl = glInitWebGLContext(canvas);			// Initialize the GL context
 	
@@ -108,11 +108,11 @@ export function glInit(canvasID) {
 }
 
 export function ResizeCanvas(width, height){
-	gl.windowCanvas.width = width;
-	gl.windowCanvas.height = height;
+	gl.canvasObject.width = width;
+	gl.canvasObject.height = height;
 
-	gl.viewportWidth = gl.windowCanvas.width;
-	gl.viewportHeight = gl.windowCanvas.height;
+	gl.viewportWidth = gl.canvasObject.width;
+	gl.viewportHeight = gl.canvasObject.height;
 }
 
 export function InitDebugTextDOM(objID){
