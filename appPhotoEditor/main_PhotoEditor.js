@@ -18,7 +18,6 @@ function initPaintCanvas(doc, ogl){
 	doc_paint_canvas.height = doc.height;	
 	glext.ResizeCanvas(doc.width, doc.height);
 	
-	//ToDo: fix for negative dw/dh
 	let dw = doc.width - doc.layer.width;
 	let dh = doc.height - doc.layer.height;
 		
@@ -37,7 +36,6 @@ function resizePaintCavas(doc, canvasObject){
 		canvasObject.height = doc.height;
 		glext.ResizeCanvas(doc.width, doc.height);
 		
-		//ToDo: fix for negative dw/dh
 		let dw = doc.width - doc.layer.width;
 		let dh = doc.height - doc.layer.height;
 		
@@ -143,7 +141,7 @@ export function main()
 		
 		gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
 		
-		//ToDo: fix mouse, up/down detection not working properly. and figure out how to have multiple gl.canvasObjects -> mostly finished
+		//ToDo: fix mouse, up/down detection not working properly.
 		doc_paint_canvas.baseWindowOffset = [gl.canvasObject.offsetLeft + doc.getDOM().offsetLeft, gl.canvasObject.offsetTop + doc.getDOM().offsetTop];
 		
 		var mousePos = sys.mouse.getPosition();
@@ -228,8 +226,6 @@ export function attachGLCanvasToDocument(id){
 }
 
 export function createNewFile(){
-	// var doc = new app.document.CDocument(null);
-	// doc.CreateNew(100,100);
 	app.document.CDocuments.CreateDocument(500,500);
 }
 

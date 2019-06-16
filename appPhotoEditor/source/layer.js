@@ -79,7 +79,11 @@ export class CPaintableRasterLayer{
 		this.texture_old = this.texture1;
 	}
 	
-	CopyIntoTexture(tx, xstart, ystart, w, h){
+	CopyIntoTexture(tx, xoffset, yoffset, w, h){
+		
+		let x = 0; let y = 0;
+		if(xoffset < 0){ x = -xoffset; xoffset = 0; }
+		if(yoffset < 0){ y = -yoffset; yoffset = 0; }
 		
 		this.framebuffer.Bind();
 		this.framebuffer.AttachTexture(this.texture, 0);
@@ -88,7 +92,7 @@ export class CPaintableRasterLayer{
 		
 		glext.gl.activeTexture(glext.gl.TEXTURE0);
 		glext.gl.bindTexture(glext.gl.TEXTURE_2D, tx.texture);
-		glext.gl.copyTexSubImage2D(glext.gl.TEXTURE_2D, 0, xstart, ystart, 0, 0, w, h);
+		glext.gl.copyTexSubImage2D(glext.gl.TEXTURE_2D, 0, xoffset, yoffset, x, y, w, h);
 		
 		glext.gl.bindTexture(glext.gl.TEXTURE_2D, null);
 		this.framebuffer.DetachAllTextures();
@@ -110,8 +114,8 @@ export class CPaintableRasterLayer{
 		
 		var new_texture = new glext.CTexture(-1);
 		CPaintableRasterLayer.CreateTexture(new_texture, w, h, this.precision, this.components);
-	
-		this.CopyIntoTexture(new_texture, dleft, dright, this.width, this.height);
+		
+		this.CopyIntoTexture(new_texture, dleft, dup, Math.min(w, this.width), Math.min(h, this.height));
 		
 		this.texture.Delete();
 		this.texture = new_texture;		
