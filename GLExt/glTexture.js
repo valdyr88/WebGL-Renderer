@@ -258,7 +258,12 @@ export function CalcNofMipLevels(width, height){
 export class CTexture{
 	
 	constructor(slotID){
+		this.init();
 		this.SlotID = slotID;
+	}
+	
+	init(){
+		this.SlotID = -1;
 		this.Type = "tx2D";
 		this.texture = -1;
 		this.activeSlot = -1;
@@ -534,6 +539,7 @@ export class CTexture{
 	
 	Delete(){
 		gl.deleteTexture(this.texture); this.texture = -1;
+		this.init();
 	}
 }
 

@@ -22,6 +22,7 @@
   <link rel="stylesheet" type="text/css" href="./../styles/default/main.css">
   <link rel="stylesheet" type="text/css" href="./../styles/default/slider.css">
   <link rel="stylesheet" type="text/css" href="./../styles/default/panel.css">
+  <link rel="stylesheet" type="text/css" href="./styles/main.css">
   
   <script id="functions" src="./../Shaders/include/functions.glsl" type="shader/fragment"></script>
   <script id="structs" src="./../Shaders/include/structs.glsl" type="shader/fragment"></script>
@@ -75,7 +76,7 @@
 	
   <script type="module">
 	import { ParseForHTMLIncludes, MakeElementMovable, MakeElementsMovable } from "./../System/html.js"
-	import { main, recompileShader, reloadTexture, onShaderDefineChanged, attachGLCanvasToDocument, createNewFile } from "./main_PhotoEditor.js";
+	import { main, recompileShader, reloadTexture, onShaderDefineChanged, attachGLCanvasToDocument, createNewFile, cropResize } from "./main_PhotoEditor.js";
 	import { fetchImage } from "./../GLExt/glTexture.js";
 	function wait(ms){ const start = performance.now(); while(performance.now() - start < ms); }
 	
@@ -216,6 +217,10 @@
 	
 	window.on_shader_define_changed = function on_shader_define_changed(shader_name, select_element_id, default_value, additional_define){		
 		onShaderDefineChanged(shader_name, select_element_id, default_value, additional_define);
+	}
+	
+	window.btn_crop_resize = function btn_crop_resize(){
+		cropResize();
 	}
 	
 	window.fetch_text_file = fetchTextFile;

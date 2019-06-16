@@ -18,6 +18,12 @@ function initPaintCanvas(doc, ogl){
 	doc_paint_canvas.height = doc.height;	
 	glext.ResizeCanvas(doc.width, doc.height);
 	
+	//ToDo: fix for negative dw/dh
+	let dw = doc.width - doc.layer.width;
+	let dh = doc.height - doc.layer.height;
+		
+	doc.layer.ResizeCanvas(Math.floor(dw/2.0), Math.floor(dw/2.0), Math.ceil(dh/2.0), Math.ceil(dh/2.0));
+	
 	doc_paint_canvas.transformMouseCoords = function(pos){
 		pos[0] = pos[0] - this.baseWindowOffset[0];
 		pos[1] = pos[1] - this.baseWindowOffset[1];
@@ -30,6 +36,12 @@ function resizePaintCavas(doc, canvasObject){
 		canvasObject.width = doc.width;
 		canvasObject.height = doc.height;
 		glext.ResizeCanvas(doc.width, doc.height);
+		
+		//ToDo: fix for negative dw/dh
+		let dw = doc.width - doc.layer.width;
+		let dh = doc.height - doc.layer.height;
+		
+		doc.layer.ResizeCanvas(Math.floor(dw/2.0), Math.floor(dw/2.0), Math.ceil(dh/2.0), Math.ceil(dh/2.0));
 	}
 }
 
@@ -122,6 +134,7 @@ export function main()
 		
 		let doc = app.document.CDocuments.getActive();
 		if(doc == null) return;
+		doc.layer = layer;
 		
 		if(doc_paint_canvas == null){
 			doc_paint_canvas = initPaintCanvas(doc, gl); }
@@ -130,7 +143,7 @@ export function main()
 		
 		gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
 		
-		//ToDo: popravit ovo sa misem, ne radi down/up detekcija dobro. i smislit kako imat vise gl.canvasObject-a.
+		//ToDo: fix mouse, up/down detection not working properly. and figure out how to have multiple gl.canvasObjects -> mostly finished
 		doc_paint_canvas.baseWindowOffset = [gl.canvasObject.offsetLeft + doc.getDOM().offsetLeft, gl.canvasObject.offsetTop + doc.getDOM().offsetTop];
 		
 		var mousePos = sys.mouse.getPosition();
@@ -143,7 +156,7 @@ export function main()
 		doc_paint_canvas.transformMouseCoords(mousePos);
 		
 		if(bBtnLeft == true){
-			abrush.setPosition([mousePos[0] / 500.0,1.0 - mousePos[1] / 500.0]);
+			abrush.setPosition([mousePos[0] /doc.width,1.0 - mousePos[1] / doc.height]);
 			abrush.setColor(Math.cos(time)*0.5+0.5, Math.sin(time)*0.5+0.5, 1.0-Math.sin(time)*0.5+0.5);
 			abrush.setDeltaTime(avg_frame_time);
 			abrush.setRandom(Math.random());
@@ -166,7 +179,7 @@ export function main()
 		gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
 		
 		main_shader.Bind();
-			txCopy.Bind(0, main_shader.txDiffuse);
+			txCopy.Bind(0, main_shader.ULTextureD);
 			glext.NDCQuadModel.RenderIndexedTriangles(main_shader);
 		
 		sys.mouse.Update();
@@ -218,6 +231,13 @@ export function createNewFile(){
 	// var doc = new app.document.CDocument(null);
 	// doc.CreateNew(100,100);
 	app.document.CDocuments.CreateDocument(500,500);
+}
+
+export function cropResize(){
+	let doc = app.document.CDocuments.getActive();
+	doc.layer.ResizeCanvas(50,50,50,50);
+	doc.width += 100;
+	doc.height += 100;
 }
 
 function RenderModels(fbo, bClearFBO, time, camera, models){

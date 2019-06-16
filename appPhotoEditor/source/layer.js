@@ -79,26 +79,48 @@ export class CPaintableRasterLayer{
 		this.texture_old = this.texture1;
 	}
 	
-	CloneTexture(){
+	CopyIntoTexture(tx, xstart, ystart, w, h){
 		
-		var new_texture = new glext.CTexture(-1);
-		
-		CPaintableRasterLayer.CreateTexture(new_texture, this.width, this.height, this.precision, this.components);
-		//ToDo: ovdje kopirat
 		this.framebuffer.Bind();
 		this.framebuffer.AttachTexture(this.texture, 0);
 		this.framebuffer.SetupUsage();
 		glext.gl.readBuffer(glext.gl.COLOR_ATTACHMENT0);
 		
 		glext.gl.activeTexture(glext.gl.TEXTURE0);
-		glext.gl.bindTexture(glext.gl.TEXTURE_2D, new_texture.texture);
+		glext.gl.bindTexture(glext.gl.TEXTURE_2D, tx.texture);
+		glext.gl.copyTexSubImage2D(glext.gl.TEXTURE_2D, 0, xstart, ystart, 0, 0, w, h);
 		
-		// glext.gl.copyTextureSubImage2D(this.texture.texture, 0, 0, 0, 0, 0, this.width, this.height);
-		glext.gl.copyTexSubImage2D(glext.gl.TEXTURE_2D, 0, 0, 0, 0, 0, this.width, this.height);
-		
+		glext.gl.bindTexture(glext.gl.TEXTURE_2D, null);
 		this.framebuffer.DetachAllTextures();
+	}
+	
+	CloneTexture(){
 		
+		var new_texture = new glext.CTexture(-1);
+		CPaintableRasterLayer.CreateTexture(new_texture, this.width, this.height, this.precision, this.components);
+		this.CopyIntoTexture(new_texture, 0, 0, this.width, this.height);
 		return new_texture;
+	}
+	
+	//ToDo:
+	ResizeCanvas(dleft, dright, dup, ddown){
+		
+		let w = this.width + dleft + dright;
+		let h = this.height + dup + ddown;
+		
+		var new_texture = new glext.CTexture(-1);
+		CPaintableRasterLayer.CreateTexture(new_texture, w, h, this.precision, this.components);
+	
+		this.CopyIntoTexture(new_texture, dleft, dright, this.width, this.height);
+		
+		this.texture.Delete();
+		this.texture = new_texture;		
+		this.width = w;
+		this.height = h;
+		this.texture_old.Delete();
+		this.texture_old = this.CloneTexture();
+		this.texture0 = this.texture;
+		this.texture1 = this.texture_old;
 	}
 	
 	SwapOldNew(){
