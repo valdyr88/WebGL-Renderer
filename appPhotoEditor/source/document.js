@@ -46,13 +46,31 @@ export class CDocument{
 		
 		this.paintCanvas = null;
 		this.parentCDocument = null;
+		
+		this.activeLayerID = 0;
 	}
 	
 	CollapseForDisplay(){
 		//collapsat layere od 0 - editingID-1 u donju teksturu, a editingID+1 do layers.length-1 u gornju.
 	}
 	
+	CreateLayerExt(type, w, h){
+		if(type == "raster"){ this.layers[this.layers.length] = new CRasterLayer(w, h); } else
+		if(type == "vector"){ this.layers[this.layers.length] = new CVectorLayer(w, h); }
+	}
+	
+	CreateLayer(type){
+		this.CreateLayerExt(type, this.width, this.height); }
+	
 	getDOM(){ return this.htmlObj; }
+	
+	setSize(w, h){
+		let sizeobj = sys.utils.getGrandchild(this.htmlObj, CDocument.ids_to_size);
+		sizeobj.style.width = (w + 32).toString() + "px";
+		sizeobj.style.height = (h + 32).toString() + "px";
+		this.width = w;
+		this.height = h;
+	}
 	
 	CreateNew(w, h){
 		
@@ -65,6 +83,8 @@ export class CDocument{
 			callee.htmlObj.id = callee.id;
 			callee.htmlObj.appendChild(obj);
 			callee.htmlObj.parentCDocument = callee;
+		
+			callee.setSize(w, h);
 			
 			document.body.appendChild(callee.htmlObj);
 			
@@ -75,6 +95,8 @@ export class CDocument{
 		});
 	}
 	
+	getActivePaintLayer(){ return this.layers[this.activeLayerID].getPaintLayer(); }
+	
 	AttachGLCanvas(){
 		//this function operates on htmlObj from CDocument
 		let gl = glext.gl;
@@ -84,11 +106,11 @@ export class CDocument{
 		
 		if(CDocuments.Count() > 1){
 			
-			let obj = sys.utils.getGrandchild(this, ["panelmain","divA","divB","document_paint_area"]);
+			let obj = sys.utils.getGrandchild(this, CDocument.ids_to_paint_area);
 			let objtwo = gl.canvasObject.parentNode;
-			let objtwoChildPos = sys.utils.getChildPosition(objtwo, "document_paint_canvas");
-			let oldCanvasObject = sys.utils.getChild(obj, "document_paint_canvas");
-			let doctwo = sys.utils.getGrandparent(gl.canvasObject, ["document_paint_area","divB","divA","panelmain"]).parentNode;
+			let objtwoChildPos = sys.utils.getChildPosition(objtwo, CDocument.id_paint_canvas);
+			let oldCanvasObject = sys.utils.getChild(obj, CDocument.id_paint_canvas);
+			let doctwo = sys.utils.getGrandparent(gl.canvasObject, CDocument.ids_to_paint_area_reversed).parentNode;
 			
 			//replaceChild( new, old );
 			obj.replaceChild(gl.canvasObject, oldCanvasObject);
@@ -116,8 +138,8 @@ export class CDocument{
 		}
 		else if(CDocuments.Count() == 1){
 			
-			let obj = sys.utils.getGrandchild(this, ["panelmain","divA","divB","document_paint_area"]);
-			let oldCanvasObject = sys.utils.getChild(obj, "document_paint_canvas");
+			let obj = sys.utils.getGrandchild(this, CDocument.ids_to_paint_area);
+			let oldCanvasObject = sys.utils.getChild(obj, CDocument.id_paint_canvas);
 
 			obj.replaceChild(gl.canvasObject, oldCanvasObject);
 			this.baseWindowOffset = [gl.canvasObject.offsetLeft, gl.canvasObject.offsetTop];
@@ -135,9 +157,21 @@ export class CDocument{
 	}
 	
 	getPaintCanvas(){ return this.paintCanvas; }
+	
+	Delete(){
+		for(let i = 0; i < this.layers.length; ++i){
+			this.layers[i].Delete();
+			this.layers[i] = null;
+		}
+		this.layers = [];
+	}
 }
 
 CDocument.createdCount = 0;
+CDocument.ids_to_paint_area = ["panelmain","document_size","document_display_grid","document_paint_area"];
+CDocument.ids_to_paint_area_reversed = ["document_paint_area","document_display_grid","document_size","panelmain"];
+CDocument.id_paint_canvas = "document_paint_canvas";
+CDocument.ids_to_size = ["panelmain","document_size"];
 
 export class CDocuments{
 	

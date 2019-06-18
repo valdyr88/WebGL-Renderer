@@ -10,6 +10,7 @@ var gl = null;
 function initPaintCanvas(doc, ogl){
 	
 	var doc_paint_canvas = ogl.canvasObject;
+	doc_paint_canvas.style.visibility = "visible";
 	doc_paint_canvas.baseWindowOffset = [ogl.canvasObject.offsetLeft, ogl.canvasObject.offsetTop];
 	
 	ogl.activeDoc = doc;
@@ -18,10 +19,10 @@ function initPaintCanvas(doc, ogl){
 	doc_paint_canvas.height = doc.height;	
 	glext.ResizeCanvas(doc.width, doc.height);
 	
-	let dw = doc.width - doc.layer.width;
-	let dh = doc.height - doc.layer.height;
+	let dw = doc.width - doc.getActivePaintLayer().width;
+	let dh = doc.height - doc.getActivePaintLayer().height;
 		
-	doc.layer.ResizeCanvas(Math.floor(dw/2.0), Math.floor(dw/2.0), Math.ceil(dh/2.0), Math.ceil(dh/2.0));
+	doc.getActivePaintLayer().ResizeCanvas(Math.floor(dw/2.0), Math.floor(dw/2.0), Math.ceil(dh/2.0), Math.ceil(dh/2.0));
 	
 	doc_paint_canvas.transformMouseCoords = function(pos){
 		pos[0] = pos[0] - this.baseWindowOffset[0];
@@ -36,10 +37,10 @@ function resizePaintCavas(doc, canvasObject){
 		canvasObject.height = doc.height;
 		glext.ResizeCanvas(doc.width, doc.height);
 		
-		let dw = doc.width - doc.layer.width;
-		let dh = doc.height - doc.layer.height;
+		let dw = doc.width - doc.getActivePaintLayer().width;
+		let dh = doc.height - doc.getActivePaintLayer().height;
 		
-		doc.layer.ResizeCanvas(Math.floor(dw/2.0), Math.floor(dw/2.0), Math.ceil(dh/2.0), Math.ceil(dh/2.0));
+		doc.getActivePaintLayer().ResizeCanvas(Math.floor(dw/2.0), Math.floor(dw/2.0), Math.ceil(dh/2.0), Math.ceil(dh/2.0));
 	}
 }
 
@@ -94,7 +95,7 @@ export function main()
 		
 	glext.CBlendMode.Enable();
 	
-	var layer = new img.CPaintableRasterLayer(gl.viewportWidth, gl.viewportHeight, "byte", "rgb");
+	// var layer = new img.CPaintableRasterLayer(gl.viewportWidth, gl.viewportHeight, "byte", "rgb");
 	var shader = new glext.CShader(-1);
 	if(shader.CompileFromFile("simpleVS", "baseBrushFS") == false) alert("nije kompajliran shader!");
 	shader.InitDefaultUniformLocations();
@@ -116,7 +117,7 @@ export function main()
 	
 	var bBtnLeft = false;
 	
-	setInterval( function(){ window.requestAnimationFrame(renderFrame); }, 17);
+	setInterval( function(){ window.requestAnimationFrame(renderFrame); }, 5);
 	
 	function renderFrame()
 	{
@@ -132,7 +133,7 @@ export function main()
 		
 		let doc = app.document.CDocuments.getActive();
 		if(doc == null) return;
-		doc.layer = layer;
+		let layer = doc.getActivePaintLayer();
 		
 		if(doc_paint_canvas == null){
 			doc_paint_canvas = initPaintCanvas(doc, gl); }
@@ -171,13 +172,14 @@ export function main()
 			layer.Draw();
 			layer.End();
 		
-		let txCopy = layer.CloneTexture();
+		// let txCopy = layer.CloneTexture();
 		
 		glext.CFramebuffer.BindMainFB();	
 		gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
 		
 		main_shader.Bind();
-			txCopy.Bind(0, main_shader.ULTextureD);
+			// txCopy.Bind(0, main_shader.ULTextureD);
+			layer.texture.Bind(0, main_shader.ULTextureD);
 			glext.NDCQuadModel.RenderIndexedTriangles(main_shader);
 		
 		sys.mouse.Update();
@@ -185,8 +187,8 @@ export function main()
 		gl.flush();
 		gs.Update();
 		
-		txCopy.Delete();
-		txCopy = null;
+		// txCopy.Delete();
+		// txCopy = null;
 		
 		oldframe_time = time;
 	}
@@ -194,44 +196,14 @@ export function main()
 	return; /* */
 }
 
-export function attachGLCanvasToDocument(id){
-	var docObj = document.getElementById(id);	
-	if(gl == null) return;
-	if(gl.activeDoc === docObj) return;
-	
-	var obj = sys.utils.getGrandchild(docObj, ["panelmain","divA","divB","document_paint_area"]);
-	var objtwo = gl.canvasObject.parentNode;
-	var objtwoChildPos = sys.utils.getChildPosition(objtwo, "document_paint_canvas");
-	var oldCanvasObject = sys.utils.getChild(obj, "document_paint_canvas");
-	var doctwo = sys.utils.getGrandparent(gl.canvasObject, ["document_paint_area","divB","divA","panelmain"]);
-	
-	//replaceChild( new, old );
-	obj.replaceChild(gl.canvasObject, oldCanvasObject);
-	if(objtwoChildPos != -1) objtwo.insertBefore(oldCanvasObject, objtwo.children[objtwoChildPos]);
-		
-	//add mous functions to paint document object
-	docObj.baseWindowOffset = [gl.canvasObject.offsetLeft, gl.canvasObject.offsetTop];
-	
-	docObj.transformMouseCoords = function(pos){
-		pos[0] = pos[0] - this.baseWindowOffset[0];
-		pos[1] = pos[1] - this.baseWindowOffset[1];
-	}
-	
-	gl.activeDoc = docObj;
-	
-	//set to front
-	docObj.style.zIndex = 1;
-	//set to back
-	doctwo.style.zIndex = -1;
-}
-
 export function createNewFile(){
-	app.document.CDocuments.CreateDocument(500,500);
+	let doc = app.document.CDocuments.CreateDocument(500,500);
+	doc.CreateLayer("raster");
 }
 
 export function cropResize(){
 	let doc = app.document.CDocuments.getActive();
-	doc.layer.ResizeCanvas(50,50,50,50);
+	doc.getActivePaintLayer().ResizeCanvas(50,50,50,50);
 	doc.width += 100;
 	doc.height += 100;
 }

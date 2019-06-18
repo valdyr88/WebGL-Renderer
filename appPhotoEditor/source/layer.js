@@ -160,6 +160,13 @@ export class CPaintableRasterLayer{
 		this.framebuffer.DetachAllTextures();
 		this.shader = null;
 	}
+	
+	Delete(){
+		this.texture0.Delete();
+		this.texture1.Delete();
+		this.texture = null;
+		this.texture_old = null;
+	}
 }
 
 export class CLayer{
@@ -168,9 +175,19 @@ export class CLayer{
 		this.blendMode; //= new CBlendMode();
 		this.width = w; this.height = h;
 		this.type = "layer";
+		this.paint_layer = null;
 	}
 	
 	setBlendMode(){}
+	
+	getPaintLayer(){ return this.paint_layer; }
+	
+	Delete(){
+		if(this.paint_layer != null){
+			this.paint_layer.Delete();
+			this.paint_layer = null;
+		}
+	}
 }
 
 export class CRasterLayer extends CLayer{
