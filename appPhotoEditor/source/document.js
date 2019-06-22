@@ -94,7 +94,7 @@ export class CDocument extends ui.CGUIElement{
 			_this.htmlObj.appendChild(obj);
 			
 			_this.CreateFromDOM(_this.htmlObj, _this);
-			_this.htmlObj.uiobject = _this;
+			_this.htmlObj.uiObj = _this;
 		
 			_this.setSize(w, h);
 			
@@ -102,19 +102,31 @@ export class CDocument extends ui.CGUIElement{
 			
 			_this.htmlObj.style.position = "absolute";
 			// _this.htmlObj.onclick = document.window.document_onclick(_this.id);
-			_this.htmlObj.onclick = _this.AttachGLCanvas;
+			
+			_this.htmlObj.AttachGLCanvas = _this.AttachGLCanvas;
+			// _this.htmlObj.onclick = _this.AttachGLCanvas;
+			_this.addOnClick(_this);
+			
 			sys.html.MakeElementMovable(_this.htmlObj, "data-movable-element-handle");
 		});
 	}
 	
 	getActivePaintLayer(){ return this.layers[this.activeLayerID].getPaintLayer(); }
 	
+	BringToFront(){
+		this.uiObj.setZIndex( ui.CGUIElement.zIndex_Document+1 );
+	}
+	
+	onClick(){
+		this.htmlObj.AttachGLCanvas();
+	}
+	
 	AttachGLCanvas(){
-		//this function operates on htmlObj from CDocument
+		//this function operates on htmlObj from CDocument (this ptr is htmlObj)
 		let gl = glext.gl;
 		if(gl == null) return;
 		// assert(CDocuments.Count() != 0);
-		if(CDocuments.getActive() === this.uiobject) return;
+		if(CDocuments.getActive() === this.uiObj) return;
 		
 		if(CDocuments.Count() > 1){
 			
@@ -137,18 +149,15 @@ export class CDocument extends ui.CGUIElement{
 			}
 			
 			// gl.activeDoc = this;
-			CDocuments.setActive(this.uiobject);
+			CDocuments.setActive(this.uiObj);
 			
-			this.uiobject.paintCanvas = gl.canvasObject;
-			doctwo.uiobject.paintCanvas = null;
+			this.uiObj.paintCanvas = gl.canvasObject;
+			doctwo.uiObj.paintCanvas = null;
 			
-			//ToDo: zIndex not working
 			//set to front
-			// this.style.zIndex = 1;
-			this.uiobject.setZIndex( ui.CGUIElement.zIndex_Document );
+			this.uiObj.setZIndex( ui.CGUIElement.zIndex_Document );
 			//set to back
-			// doctwo.style.zIndex = -1;
-			doctwo.uiobject.setZIndex( ui.CGUIElement.zIndex_ToBack );
+			doctwo.uiObj.setZIndex( ui.CGUIElement.zIndex_ToBack );
 		}
 		else if(CDocuments.Count() == 1){
 			
@@ -163,11 +172,10 @@ export class CDocument extends ui.CGUIElement{
 				pos[1] = pos[1] - this.baseWindowOffset[1];
 			}
 			
-			CDocuments.setActive(this.uiobject);
+			CDocuments.setActive(this.uiObj);
 			
-			this.uiobject.paintCanvas = gl.canvasObject;
-			// this.style.zIndex = 1;
-			this.uiobject.setZIndex( ui.CGUIElement.zIndex_Document );
+			this.uiObj.paintCanvas = gl.canvasObject;
+			this.uiObj.setZIndex( ui.CGUIElement.zIndex_Document );
 		}
 	}
 	

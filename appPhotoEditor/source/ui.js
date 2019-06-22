@@ -9,7 +9,7 @@ import * as vMath from "./../../glMatrix/gl-matrix.js";
 class CDOMEventListerners{
 	
 	constructor(){
-		this.uiobject = null;
+		this.uiObj = null;
 		
 		this.onMouseDownCallbacks = [];
 		this.onMouseUpCallbacks = [];
@@ -23,8 +23,8 @@ class CDOMEventListerners{
 	}
 	
 	RegisterEventListeners(obj){
-		this.uiobject = obj;
-		obj.htmlObj.uiobject = obj;
+		this.uiObj = obj;
+		obj.htmlObj.uiObj = obj;
 		
 		obj.htmlObj.addEventListener("mousedown", this.eventListener_onMouseDown);
 		obj.htmlObj.addEventListener("mouseup", this.eventListener_onMouseUp);
@@ -38,49 +38,49 @@ class CDOMEventListerners{
 	}
 	
 	eventListener_onMouseDown(){
-		let _this = this.uiobject;
+		let _this = this.uiObj;
 		let callbacks = _this.onMouseDownCallbacks;
 		for(let i = 0; i < callbacks.length; ++i) callbacks[i].onMouseDown();
 	}
 	eventListener_onMouseUp(){
-		let _this = this.uiobject;
+		let _this = this.uiObj;
 		let callbacks = _this.onMouseUpCallbacks;
 		for(let i = 0; i < callbacks.length; ++i) callbacks[i].onMouseUp();
 	}
 	eventListener_onMouseEnter(){
-		let _this = this.uiobject;
+		let _this = this.uiObj;
 		let callbacks = _this.onMouseEnterCallbacks;
 		for(let i = 0; i < callbacks.length; ++i) callbacks[i].onMouseEnter();
 	}
 	eventListener_onMouseLeave(){
-		let _this = this.uiobject;
+		let _this = this.uiObj;
 		let callbacks = _this.onMouseLeaveCallbacks;
 		for(let i = 0; i < callbacks.length; ++i) callbacks[i].onMouseLeave();
 	}
 	
 	eventListener_onClick(){
-		let _this = this.uiobject;
+		let _this = this.uiObj;
 		let callbacks = _this.onClickCallbacks;
 		for(let i = 0; i < callbacks.length; ++i) callbacks[i].onClick();
 	}
 	
 	eventListener_onTouchStart(){
-		let _this = this.uiobject;
+		let _this = this.uiObj;
 		let callbacks = _this.onTouchStartCallbacks;
 		for(let i = 0; i < callbacks.length; ++i) callbacks[i].onTouchStart();
 	}
 	eventListener_onTouchMove(){
-		let _this = this.uiobject;
+		let _this = this.uiObj;
 		let callbacks = _this.onTouchMoveCallbacks;
 		for(let i = 0; i < callbacks.length; ++i) callbacks[i].onTouchMove();
 	}
 	eventListener_onTouchEnd(){
-		let _this = this.uiobject;
+		let _this = this.uiObj;
 		let callbacks = _this.onTouchEndCallbacks;
 		for(let i = 0; i < callbacks.length; ++i) callbacks[i].onTouchEnd();
 	}
 	eventListener_onTouchCancel(){
-		let _this = this.uiobject;
+		let _this = this.uiObj;
 		let callbacks = _this.onTouchCancelCallbacks;
 		for(let i = 0; i < callbacks.length; ++i) callbacks[i].onTouchCancel();
 	}
@@ -135,7 +135,7 @@ export class CGUIElement extends CDOMEventListerners{
 		if(typeof dom === 'string')
 			dom = document.getElementById(dom);
 		this.htmlObj = dom;
-		this.htmlObj.uiobject = this;
+		this.htmlObj.uiObj = this;
 		
 		this.RegisterEventListeners(caller);
 	}
@@ -182,7 +182,7 @@ export class CButton extends CGUIElement{
 		let _this = (caller == null || caller == undefined)? this : caller;
 		super.CreateFromDOM(dom, _this);
 		
-		this.htmlObj.uiobject = this;
+		this.htmlObj.uiObj = this;
 		super.addOnMouseDown(this);
 		super.addOnMouseUp(this);
 		super.addOnMouseEnter(this);
