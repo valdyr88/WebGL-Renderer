@@ -14,7 +14,7 @@ export class CBrush{
 		this.random = 0.0;
 		this.UniformBlock = null;
 		this.CreateUniformBlock();
-		
+		this.shader = null;
 		this.bNeedsToUpdateUniformBlock = true;
 	}
 	
@@ -54,11 +54,26 @@ export class CBrush{
 		this.UpdateUniformBlock();
 	}
 	
-	AttachUniformBlockTo(shader){
-		
+	AttachUniformBlockTo(shdr){
 		var strUBName = "ubBrush";
-		// shader.UBLights[i] = gl.getUniformBlockIndex(shader.program, "Lights[" + i + "]");
-		// var bindingPoint = shader.getUniformBlockBindingPoint(strUBName);
-		shader.addUniformBlock(strUBName, this.UniformBlock); 
+		// shdr.UBLights[i] = gl.getUniformBlockIndex(shdr.program, "Lights[" + i + "]");
+		// var bindingPoint = shdr.getUniformBlockBindingPoint(strUBName);
+		shdr.addUniformBlock(strUBName, this.UniformBlock); 
 	}
+	
+	CreateBrushShader(str_brush_shader){
+		this.shader = new CShader(-1);
+		if(this.shader.CompileFromFile("simpleVS", str_brush_shader) == false) alert("nije kompajliran brush shader: " + str_brush_shader);
+		this.shader.InitDefaultUniformLocations();
+		this.shader.InitDefaultAttribLocations();
+		this.AttachUniformBlockTo(this.shader);
+	}
+	
+	setUniformUpdateFunction(func){
+		this.shader.UpdateUniforms = func;
+	}
+	setUniformBindFunction(func){
+		this.shader.BindUniforms = func;
+	}
+	
 }

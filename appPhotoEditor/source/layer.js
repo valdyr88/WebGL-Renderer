@@ -197,6 +197,11 @@ export class CRasterLayer extends CLayer{
 		this.type = "raster";
 		this.paint_layer = new CPaintableRasterLayer(w, h, "byte", "rgb");
 	}
+	
+	ResizeCanvas(dleft, dright, dup, ddown){
+		if(this.paint_layer != null) this.paint_layer.ResizeCanvas(dleft, dright, dup, ddown);
+	}
+	
 }
 
 export class CVectorLayer extends CLayer{

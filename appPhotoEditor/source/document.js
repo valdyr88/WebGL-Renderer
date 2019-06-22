@@ -78,20 +78,20 @@ export class CDocument{
 		this.height = h;
 		
 		//load html file and create dom elements from it (callback function)
-		sys.html.CreateDOMFromHTMLFile(this, "./windows/document.html", function(callee, obj){
-			callee.htmlObj = document.createElement('div');
-			callee.htmlObj.id = callee.id;
-			callee.htmlObj.appendChild(obj);
-			callee.htmlObj.parentCDocument = callee;
+		sys.html.CreateDOMFromHTMLFile(this, "./windows/document.html", function(_this, obj){
+			_this.htmlObj = document.createElement('div');
+			_this.htmlObj.id = _this.id;
+			_this.htmlObj.appendChild(obj);
+			_this.htmlObj.parentCDocument = _this;
 		
-			callee.setSize(w, h);
+			_this.setSize(w, h);
 			
-			document.body.appendChild(callee.htmlObj);
+			document.body.appendChild(_this.htmlObj);
 			
-			callee.htmlObj.style.position = "absolute";
-			// callee.htmlObj.onclick = document.window.document_onclick(callee.id);
-			callee.htmlObj.onclick = callee.AttachGLCanvas;
-			sys.html.MakeElementMovable(callee.htmlObj, "data-movable-element-handle");
+			_this.htmlObj.style.position = "absolute";
+			// _this.htmlObj.onclick = document.window.document_onclick(_this.id);
+			_this.htmlObj.onclick = _this.AttachGLCanvas;
+			sys.html.MakeElementMovable(_this.htmlObj, "data-movable-element-handle");
 		});
 	}
 	

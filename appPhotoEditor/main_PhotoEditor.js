@@ -80,13 +80,10 @@ export function main()
 	gl.depthFunc(gl.LESS);
 	
 	glext.CBlendMode.Init();
-		
-	// glext.CShaderDefines.addGlobalDefine("MAX_LIGHTS", " "+glext.MAX_LIGHTS);
-
+	
 	var projectionMatrix = vMath.mat4.create();
 	var viewMatrix = vMath.mat4.create();
 	
-	var time = 0.0;
 	sys.time.init();
 	
 	var oldframe_time = -1.0;
@@ -94,42 +91,27 @@ export function main()
 	var FPSlabel = document.getElementById("label_FPS");
 		
 	glext.CBlendMode.Enable();
-	
-	// var layer = new img.CPaintableRasterLayer(gl.viewportWidth, gl.viewportHeight, "byte", "rgb");
-	var shader = new glext.CShader(-1);
-	if(shader.CompileFromFile("simpleVS", "baseBrushFS") == false) alert("nije kompajliran shader!");
-	shader.InitDefaultUniformLocations();
-	shader.InitDefaultAttribLocations();
-	shader.BindUniforms = function(){
-		// this.ULTime = time;
-	}
-	shader.UpdateUniforms = function(){
-		this.setFloatUniform(this.ULTime, time);
-	}
-	
+		
 	var main_shader = new glext.CShader(-1);
 	if(main_shader.CompileFromFile("simpleVS", "mainFS") == false) alert("nije kompajliran shader!");
 	main_shader.InitDefaultUniformLocations();
 	main_shader.InitDefaultAttribLocations();
 	
 	var abrush = new brush.CBrush();
-	abrush.AttachUniformBlockTo(shader);
-	
+	abrush.CreateBrushShader("baseBrushFS");
+	abrush.setUniformUpdateFunction(function(){
+		this.setFloatUniform(this.ULTime, sys.time.getFrameTime());
+	});
+	abrush.setUniformBindFunction(function(){});
+		
 	var bBtnLeft = false;
 	
 	setInterval( function(){ window.requestAnimationFrame(renderFrame); }, 5);
 	
 	function renderFrame()
 	{
-		time = sys.time.getSecondsSinceStart();
-		var frame_time = time - oldframe_time;
-		
-		var avg_FPS = 1.0 / avg_frame_time;
-		
-		if(oldframe_time > 0.0 && frame_time > 1.0 / 70.0){
-			avg_frame_time = vMath.lerp(avg_frame_time, frame_time, 1.0 / 30.0);
-			avg_FPS = 1.0 / avg_frame_time;
-		}
+		let time = sys.time.update();
+		let dTime = sys.time.getAvgDeltaTime();
 		
 		let doc = app.document.CDocuments.getActive();
 		if(doc == null) return;
@@ -157,7 +139,7 @@ export function main()
 		if(bBtnLeft == true){
 			abrush.setPosition([mousePos[0] /doc.width,1.0 - mousePos[1] / doc.height]);
 			abrush.setColor(Math.cos(time)*0.5+0.5, Math.sin(time)*0.5+0.5, 1.0-Math.sin(time)*0.5+0.5);
-			abrush.setDeltaTime(avg_frame_time);
+			abrush.setDeltaTime(Math.min(dTime, 1.0/15.0));
 			abrush.setRandom(Math.random());
 		}
 		else if(sys.mouse.get().bLeftUp == true){
@@ -165,20 +147,17 @@ export function main()
 		}
 		abrush.Update();
 		
-		FPSlabel.textContent = Number.parseFloat(avg_FPS).toFixed(2) + " FPS";
+		FPSlabel.textContent = Number.parseFloat(sys.time.getAvgFPS()).toFixed(2) + " FPS";
 		label_Debug.textContent = "mouse: [" + mousePos[0] + ", " + mousePos[1] + "], " + bBtnLeft;
 		
-			layer.Begin(shader);
+			layer.Begin(abrush.shader);
 			layer.Draw();
 			layer.End();
-		
-		// let txCopy = layer.CloneTexture();
 		
 		glext.CFramebuffer.BindMainFB();	
 		gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
 		
 		main_shader.Bind();
-			// txCopy.Bind(0, main_shader.ULTextureD);
 			layer.texture.Bind(0, main_shader.ULTextureD);
 			glext.NDCQuadModel.RenderIndexedTriangles(main_shader);
 		
@@ -187,13 +166,10 @@ export function main()
 		gl.flush();
 		gs.Update();
 		
-		// txCopy.Delete();
-		// txCopy = null;
-		
 		oldframe_time = time;
 	}
 	
-	return; /* */
+	return;
 }
 
 export function createNewFile(){
