@@ -163,6 +163,7 @@ export class CGUIElement extends CDOMEventListerners{
 CGUIElement.zIndex_Menu = 10;
 CGUIElement.zIndex_Document = 1;
 CGUIElement.zIndex_OutOfFocus = -1;
+CGUIElement.zIndex_ToBack = -1;
 
 //==================================================================================
 // CButton

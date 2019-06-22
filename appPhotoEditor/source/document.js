@@ -1,6 +1,7 @@
 import * as glext from "./../../GLExt/GLExt.js"
 import * as sys from "./../../System/sys.js"
 import * as vMath from "./../../glMatrix/gl-matrix.js";
+import * as ui from "./ui.js"
 
 import { CLayer, CRasterLayer, CVectorLayer } from "./layer.js";
 
@@ -21,9 +22,11 @@ class CLayerRenderer{
 	}
 }
 
-export class CDocument{
+export class CDocument extends ui.CGUIElement{
 	
 	constructor(id){
+		super();
+		
 		++CDocument.createdCount;
 		
 		if(id != null){
@@ -45,9 +48,16 @@ export class CDocument{
 		this.editingID = 0; //id layera u listi layers koji se trenutno editira
 		
 		this.paintCanvas = null;
-		this.parentCDocument = null;
+		// this.parentCDocument = null;
 		
 		this.activeLayerID = 0;
+	}
+	
+	CreateFromDOM(dom, caller){
+		let _this = (caller == null || caller == undefined)? this : caller;
+		super.CreateFromDOM(dom, _this);
+		
+		this.setZIndex( ui.CGUIElement.zIndex_Document );
 	}
 	
 	CollapseForDisplay(){
@@ -82,7 +92,9 @@ export class CDocument{
 			_this.htmlObj = document.createElement('div');
 			_this.htmlObj.id = _this.id;
 			_this.htmlObj.appendChild(obj);
-			_this.htmlObj.parentCDocument = _this;
+			
+			_this.CreateFromDOM(_this.htmlObj, _this);
+			_this.htmlObj.uiobject = _this;
 		
 			_this.setSize(w, h);
 			
@@ -102,7 +114,7 @@ export class CDocument{
 		let gl = glext.gl;
 		if(gl == null) return;
 		// assert(CDocuments.Count() != 0);
-		if(CDocuments.getActive() === this.parentCDocument) return;
+		if(CDocuments.getActive() === this.uiobject) return;
 		
 		if(CDocuments.Count() > 1){
 			
@@ -125,16 +137,18 @@ export class CDocument{
 			}
 			
 			// gl.activeDoc = this;
-			CDocuments.setActive(this.parentCDocument);
+			CDocuments.setActive(this.uiobject);
 			
-			this.parentCDocument.paintCanvas = gl.canvasObject;
-			doctwo.parentCDocument.paintCanvas = null;
+			this.uiobject.paintCanvas = gl.canvasObject;
+			doctwo.uiobject.paintCanvas = null;
 			
 			//ToDo: zIndex not working
 			//set to front
-			this.style.zIndex = 1;
+			// this.style.zIndex = 1;
+			this.uiobject.setZIndex( ui.CGUIElement.zIndex_Document );
 			//set to back
-			doctwo.style.zIndex = -1;
+			// doctwo.style.zIndex = -1;
+			doctwo.uiobject.setZIndex( ui.CGUIElement.zIndex_ToBack );
 		}
 		else if(CDocuments.Count() == 1){
 			
@@ -149,10 +163,11 @@ export class CDocument{
 				pos[1] = pos[1] - this.baseWindowOffset[1];
 			}
 			
-			CDocuments.setActive(this.parentCDocument);
+			CDocuments.setActive(this.uiobject);
 			
-			this.parentCDocument.paintCanvas = gl.canvasObject;
-			this.style.zIndex = 1;
+			this.uiobject.paintCanvas = gl.canvasObject;
+			// this.style.zIndex = 1;
+			this.uiobject.setZIndex( ui.CGUIElement.zIndex_Document );
 		}
 	}
 	
