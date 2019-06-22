@@ -2,6 +2,10 @@ import * as glext from "./../../GLExt/GLExt.js"
 import * as sys from "./../../System/sys.js"
 import * as vMath from "./../../glMatrix/gl-matrix.js";
 
+//==================================================================================
+// CDOMEventListerners
+//==================================================================================
+
 class CDOMEventListerners{
 	
 	constructor(){
@@ -36,81 +40,85 @@ class CDOMEventListerners{
 	eventListener_onMouseDown(){
 		let _this = this.uiobject;
 		let callbacks = _this.onMouseDownCallbacks;
-		for(let i = 0; i < callbacks.length; ++i) callbacks[i](_this);
+		for(let i = 0; i < callbacks.length; ++i) callbacks[i].onMouseDown();
 	}
 	eventListener_onMouseUp(){
 		let _this = this.uiobject;
 		let callbacks = _this.onMouseUpCallbacks;
-		for(let i = 0; i < callbacks.length; ++i) callbacks[i](_this);
+		for(let i = 0; i < callbacks.length; ++i) callbacks[i].onMouseUp();
 	}
 	eventListener_onMouseEnter(){
 		let _this = this.uiobject;
 		let callbacks = _this.onMouseEnterCallbacks;
-		for(let i = 0; i < callbacks.length; ++i) callbacks[i](_this);
+		for(let i = 0; i < callbacks.length; ++i) callbacks[i].onMouseEnter();
 	}
 	eventListener_onMouseLeave(){
 		let _this = this.uiobject;
 		let callbacks = _this.onMouseLeaveCallbacks;
-		for(let i = 0; i < callbacks.length; ++i) callbacks[i](_this);
+		for(let i = 0; i < callbacks.length; ++i) callbacks[i].onMouseLeave();
 	}
 	
 	eventListener_onClick(){
 		let _this = this.uiobject;
 		let callbacks = _this.onClickCallbacks;
-		for(let i = 0; i < callbacks.length; ++i) callbacks[i](_this);
+		for(let i = 0; i < callbacks.length; ++i) callbacks[i].onClick();
 	}
 	
 	eventListener_onTouchStart(){
 		let _this = this.uiobject;
 		let callbacks = _this.onTouchStartCallbacks;
-		for(let i = 0; i < callbacks.length; ++i) callbacks[i](_this);
+		for(let i = 0; i < callbacks.length; ++i) callbacks[i].onTouchStart();
 	}
 	eventListener_onTouchMove(){
 		let _this = this.uiobject;
 		let callbacks = _this.onTouchMoveCallbacks;
-		for(let i = 0; i < callbacks.length; ++i) callbacks[i](_this);
+		for(let i = 0; i < callbacks.length; ++i) callbacks[i].onTouchMove();
 	}
 	eventListener_onTouchEnd(){
 		let _this = this.uiobject;
 		let callbacks = _this.onTouchEndCallbacks;
-		for(let i = 0; i < callbacks.length; ++i) callbacks[i](this);
+		for(let i = 0; i < callbacks.length; ++i) callbacks[i].onTouchEnd();
 	}
 	eventListener_onTouchCancel(){
 		let _this = this.uiobject;
 		let callbacks = _this.onTouchCancelCallbacks;
-		for(let i = 0; i < callbacks.length; ++i) callbacks[i](_this);
+		for(let i = 0; i < callbacks.length; ++i) callbacks[i].onTouchCancel();
 	}
 	
-	addOnMouseDown(func){
+	addOnMouseDown(obj){
 		let callbacks = this.onMouseDownCallbacks;
-		callbacks[callbacks.length] = func; }
-	addOnMouseUp(func){
+		callbacks[callbacks.length] = obj; }
+	addOnMouseUp(obj){
 		let callbacks = this.onMouseUpCallbacks;
-		callbacks[callbacks.length] = func; }
-	addOnMouseEnter(func){
+		callbacks[callbacks.length] = obj; }
+	addOnMouseEnter(obj){
 		let callbacks = this.onMouseEnterCallbacks;
-		callbacks[callbacks.length] = func; }
-	addOnMouseLeave(func){
+		callbacks[callbacks.length] = obj; }
+	addOnMouseLeave(obj){
 		let callbacks = this.onMouseLeaveCallbacks;
-		callbacks[callbacks.length] = func; }
+		callbacks[callbacks.length] = obj; }
 	
-	addOnClick(func){
+	addOnClick(obj){
 		let callbacks = this.onClickCallbacks;
-		callbacks[callbacks.length] = func; }
+		callbacks[callbacks.length] = obj; }
 		
-	addOnTouchStart(func){
+	addOnTouchStart(obj){
 		let callbacks = this.onTouchStartCallbacks;
-		callbacks[callbacks.length] = func; }
-	addOnTouchMove(func){
+		callbacks[callbacks.length] = obj; }
+	addOnTouchMove(obj){
 		let callbacks = this.onTouchMoveCallbacks;
-		callbacks[callbacks.length] = func; }
-	addOnTouchEnd(func){
+		callbacks[callbacks.length] = obj; }
+	addOnTouchEnd(obj){
 		let callbacks = this.onTouchEndCallbacks;
-		callbacks[callbacks.length] = func; }
-	addOnTouchCancel(func){
+		callbacks[callbacks.length] = obj; }
+	addOnTouchCancel(obj){
 		let callbacks = this.onTouchCancelCallbacks;
-		callbacks[callbacks.length] = func; }
+		callbacks[callbacks.length] = obj; }
 }
+
+//==================================================================================
+// CGUIElement
+//==================================================================================
 
 export class CGUIElement extends CDOMEventListerners{
 	
@@ -152,6 +160,14 @@ export class CGUIElement extends CDOMEventListerners{
 	}
 }
 
+CGUIElement.zIndex_Menu = 10;
+CGUIElement.zIndex_Document = 1;
+CGUIElement.zIndex_OutOfFocus = -1;
+
+//==================================================================================
+// CButton
+//==================================================================================
+
 export class CButton extends CGUIElement{
 	constructor(){
 		super();		
@@ -166,40 +182,40 @@ export class CButton extends CGUIElement{
 		super.CreateFromDOM(dom, _this);
 		
 		this.htmlObj.uiobject = this;
-		super.addOnMouseDown(this.onMouseDown);
-		super.addOnMouseUp(this.onMouseUp);
-		super.addOnMouseEnter(this.onMouseEnter);
-		super.addOnMouseLeave(this.onMouseLeave);
-		super.addOnTouchStart(this.onTouchStart);
-		super.addOnTouchMove(this.onTouchMove);
-		super.addOnTouchEnd(this.onTouchEnd);
-		super.addOnTouchCancel(this.onTouchCancel);
+		super.addOnMouseDown(this);
+		super.addOnMouseUp(this);
+		super.addOnMouseEnter(this);
+		super.addOnMouseLeave(this);
+		super.addOnTouchStart(this);
+		super.addOnTouchMove(this);
+		super.addOnTouchEnd(this);
+		super.addOnTouchCancel(this);
 		
 		this.name = this.htmlObj.innerText;
 	}
 	
-	onMouseDown(_this){
-		_this.bPressed = true;
+	onMouseDown(){
+		this.bPressed = true;
 	}
-	onMouseUp(_this){
-		_this.bPressed = false;
+	onMouseUp(){
+		this.bPressed = false;
 	}
-	onMouseEnter(_this){
-		_this.bPressed = false;
+	onMouseEnter(){
+		this.bPressed = false;
 	}
-	onMouseLeave(_this){
-		_this.bPressed = false;
+	onMouseLeave(){
+		this.bPressed = false;
 	}
-	onTouchStart(_this){
-		_this.bPressed = true;
+	onTouchStart(){
+		this.bPressed = true;
 	}
-	onTouchMove(_this){
+	onTouchMove(){
 	}
-	onTouchEnd(_this){
-		_this.bPressed = false;
+	onTouchEnd(){
+		this.bPressed = false;
 	}
-	onTouchCancel(_this){
-		_this.bPressed = false;
+	onTouchCancel(){
+		this.bPressed = false;
 	}
 		
 	onClick(){
@@ -222,6 +238,10 @@ export class CButton extends CGUIElement{
 		this.EndUpdate();
 	}
 }
+
+//==================================================================================
+// CDropdown & CDropdownList
+//==================================================================================
 
 export class CDropdown extends CGUIElement{
 	
@@ -247,6 +267,7 @@ export class CDropdownList extends CDropdown{
 		super.CreateFromDOM(dom, _this);
 		
 		this.setVisibility(false);
+		this.setZIndex( CGUIElement.zIndex_Menu );
 	}
 	
 	setVisibility(bVisible){
@@ -264,14 +285,16 @@ export class CDropdownList extends CDropdown{
 	Update(){}
 }
 
-
+//==================================================================================
+// CMenubar
+//==================================================================================
 
 function overrideUpdateMenubarButton(menubar){
 	this.Update();
 	
 	if(this.bClicked == true){
 		this.dropDownList.toggleVisibility();
-		this.dropDownList.setZIndex(10);
+		// this.dropDownList.setZIndex( CGUIElement.zIndex_Menu );
 	}else if(menubar.bClicked == true){
 		this.dropDownList.setVisibility(false);
 	}
@@ -304,7 +327,7 @@ export class CMenubar extends CGUIElement{
 		eventListener_onDocumentClick._this = this;
 		document.addEventListener('click', eventListener_onDocumentClick);
 		
-		super.addOnClick(this.onClick);
+		super.addOnClick(this);
 		
 		for(let i = 0; i < domBtnList.length; ++i){
 			let dom = domBtnList[i];
@@ -320,13 +343,15 @@ export class CMenubar extends CGUIElement{
 			btn.dropDownList = drpdwn;
 			btn.UpdateMenubarButton = overrideUpdateMenubarButton;
 		}
+		
+		this.setZIndex( CGUIElement.zIndex_Menu );
 	}
 	
 	onDocumentClick(){
 		this.bClickedDocument = true;
 	}
-	onClick(_this){
-		_this.bClicked = true;
+	onClick(){
+		this.bClicked = true;
 	}
 	
 	BeginUpdate(){
@@ -348,3 +373,5 @@ export class CMenubar extends CGUIElement{
 }
 
 export var menubar = new CMenubar();
+
+//==================================================================================
