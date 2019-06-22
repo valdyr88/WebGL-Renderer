@@ -44,6 +44,12 @@ function resizePaintCavas(doc, canvasObject){
 	}
 }
 
+function initUI(){
+	let domMenubars = document.getElementsByClassName("menubar");
+	let menubar = new app.ui.CMenubar();
+	menubar.CreateFromDOM(domMenubars[0]);
+}
+
 export function main()
 {
 	document.addEventListener('contextmenu', event => event.preventDefault());
@@ -91,6 +97,8 @@ export function main()
 	var FPSlabel = document.getElementById("label_FPS");
 		
 	glext.CBlendMode.Enable();
+	
+	initUI();
 		
 	var main_shader = new glext.CShader(-1);
 	if(main_shader.CompileFromFile("simpleVS", "mainFS") == false) alert("nije kompajliran shader!");
