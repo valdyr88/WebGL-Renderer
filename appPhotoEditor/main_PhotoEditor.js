@@ -46,7 +46,7 @@ function resizePaintCavas(doc, canvasObject){
 
 function initUI(){
 	let domMenubars = document.getElementsByClassName("menubar");
-	let menubar = new app.ui.CMenubar();
+	let menubar = app.ui.menubar;
 	menubar.CreateFromDOM(domMenubars[0]);
 }
 
@@ -99,6 +99,7 @@ export function main()
 	glext.CBlendMode.Enable();
 	
 	initUI();
+	let menubar = app.ui.menubar;
 		
 	var main_shader = new glext.CShader(-1);
 	if(main_shader.CompileFromFile("simpleVS", "mainFS") == false) alert("nije kompajliran shader!");
@@ -120,6 +121,8 @@ export function main()
 	{
 		let time = sys.time.Update();
 		let dTime = sys.time.getAvgDeltaTime();
+		
+		menubar.Update();
 		
 		let doc = app.document.CDocuments.getActive();
 		if(doc == null) return;

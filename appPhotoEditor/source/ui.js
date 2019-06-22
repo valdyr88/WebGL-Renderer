@@ -30,7 +30,8 @@ class CDOMEventListerners{
 		obj.htmlObj.addEventListener("touchmove", this.eventListener_onTouchMove);
 		obj.htmlObj.addEventListener("touchend", this.eventListener_onTouchEnd);
 		obj.htmlObj.addEventListener("touchcancel", this.eventListener_onTouchCancel);
-	}	
+		obj.htmlObj.addEventListener("click", this.eventListener_onClick);
+	}
 	
 	eventListener_onMouseDown(){
 		let _this = this.uiobject;
@@ -120,6 +121,7 @@ export class CGUIElement extends CDOMEventListerners{
 		this.dTime = 0.0;
 	}
 	
+	//inheritors to this class should implement this function and pass in them self as caller (or a parent of theirs)
 	CreateFromDOM(dom, caller){
 		if(typeof dom === 'string')
 			dom = document.getElementById(dom);
@@ -140,6 +142,7 @@ export class CButton extends CGUIElement{
 		this.bPressed = false;
 		this.bClicked = false;
 		this.bOldPressed = false;
+		this.name = "";
 	}
 	
 	CreateFromDOM(dom, caller){
@@ -155,6 +158,8 @@ export class CButton extends CGUIElement{
 		super.addOnTouchMove(this.onTouchMove);
 		super.addOnTouchEnd(this.onTouchEnd);
 		super.addOnTouchCancel(this.onTouchCancel);
+		
+		this.name = this.htmlObj.innerText;
 	}
 	
 	onMouseDown(_this){
@@ -169,9 +174,6 @@ export class CButton extends CGUIElement{
 	onMouseLeave(_this){
 		_this.bPressed = false;
 	}
-	onClick(_this){
-		_this.bClicked = true;
-	}
 	onTouchStart(_this){
 		_this.bPressed = true;
 	}
@@ -182,6 +184,11 @@ export class CButton extends CGUIElement{
 	}
 	onTouchCancel(_this){
 		_this.bPressed = false;
+	}
+	
+	
+	onClick(){
+		this.bClicked = true;
 	}
 		
 	BeginUpdate(){
@@ -199,14 +206,82 @@ export class CButton extends CGUIElement{
 		
 		this.EndUpdate();
 	}
-	
 }
+
+export class CDropdown extends CGUIElement{
+	
+	constructor(){
+		super();
+	}
+	
+	CreateFromDOM(dom, caller){
+		let _this = (caller == null || caller == undefined)? this : caller;
+		super.CreateFromDOM(dom, _this);
+	}
+}
+
+export class CDropdownList extends CDropdown{
+	
+	constructor(){
+		super();
+		this.bVisible;
+	}
+	
+	CreateFromDOM(dom, caller){
+		let _this = (caller == null || caller == undefined)? this : caller;
+		super.CreateFromDOM(dom, _this);
+		
+		this.setVisibility(false);
+	}
+	
+	setVisibility(bVisible){
+		this.bVisible = bVisible;
+		if(this.bVisible == true){
+			this.htmlObj.style.visibility = 'visible';
+			this.htmlObj.style.display = 'block';
+		}
+		else{	
+			this.htmlObj.style.visibility = 'hidden';
+			this.htmlObj.style.display = 'none';
+		}
+	}
+	
+	toggleVisibility(){
+		this.bVisible = !this.bVisible;
+		this.setVisibility(this.bVisible);
+	}
+	
+	Update(){}
+}
+
+
+
+function overrideUpdateMenubarButton(menubar){
+	this.Update();
+	
+	if(this.bClicked == true){
+		this.dropDownList.toggleVisibility();
+	}else if(menubar.bClicked == true){
+		this.dropDownList.setVisibility(false);
+	}
+	
+	//out of boundary click
+	if(menubar.bClickedDocument == true && menubar.bClicked == false)
+		this.dropDownList.setVisibility(false);
+}
+
+function eventListener_onDocumentClick(){
+	menubar.onDocumentClick(); };
+
+
 
 export class CMenubar extends CGUIElement{
 	
 	constructor(){
 		super();
 		this.buttons = [];
+		this.bClickedDocument = false;
+		this.bClicked = false;
 	}
 	
 	CreateFromDOM(dom, caller){
@@ -215,17 +290,47 @@ export class CMenubar extends CGUIElement{
 		
 		let domBtnList = sys.utils.getAllByClassFrom(this.htmlObj, "menubar-dropdown");
 		
+		eventListener_onDocumentClick._this = this;
+		document.addEventListener('click', eventListener_onDocumentClick);
+		
+		super.addOnClick(this.onClick);
+		
 		for(let i = 0; i < domBtnList.length; ++i){
 			let dom = domBtnList[i];
 			let btn = new CButton();
+			let drpdwn = new CDropdownList();
 			this.buttons[this.buttons.length] = btn;
 			
 			let domBtn = dom.childNodes[0];
 			let domDroplist = dom.childNodes[1];
 			
 			btn.CreateFromDOM(domBtn);
+			drpdwn.CreateFromDOM(domDroplist);
+			btn.dropDownList = drpdwn;
+			btn.UpdateMenubarButton = overrideUpdateMenubarButton;
 		}
 	}
-};
+	
+	onDocumentClick(){
+		this.bClickedDocument = true;
+	}
+	onClick(_this){
+		_this.bClicked = true;
+	}
+	
+	BeginUpdate(){ }
+	EndUpdate(){
+		this.bClickedDocument = false;
+		this.bClicked = false;}
+		
+	Update(){
+		this.BeginUpdate();
+		
+		for(let i = 0; i < this.buttons.length; ++i)
+			this.buttons[i].UpdateMenubarButton(this);
+		
+		this.EndUpdate();
+	}
+}
 
-var menubar = new CMenubar();
+export var menubar = new CMenubar();
