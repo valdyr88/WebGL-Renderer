@@ -119,6 +119,7 @@ export class CGUIElement extends CDOMEventListerners{
 		this.name = "";
 		this.htmlObj = null;
 		this.dTime = 0.0;
+		this.bVisible = true;
 	}
 	
 	//inheritors to this class should implement this function and pass in them self as caller (or a parent of theirs)
@@ -133,6 +134,21 @@ export class CGUIElement extends CDOMEventListerners{
 	
 	Update(){
 		this.dTime = sys.time.getDeltaTime();
+	}
+	
+	setZIndex(z){
+		this.htmlObj.style.zIndex = z;
+	}
+	
+	setVisibility(bVisible){
+		this.bVisible = bVisible;
+		if(this.bVisible == true){ this.htmlObj.style.visibility = 'visible'; }
+		else{ this.htmlObj.style.visibility = 'hidden'; }
+	}
+	
+	toggleVisibility(){
+		this.bVisible = !this.bVisible;
+		this.setVisibility(this.bVisible);
 	}
 }
 
@@ -185,8 +201,7 @@ export class CButton extends CGUIElement{
 	onTouchCancel(_this){
 		_this.bPressed = false;
 	}
-	
-	
+		
 	onClick(){
 		this.bClicked = true;
 	}
@@ -224,7 +239,7 @@ export class CDropdownList extends CDropdown{
 	
 	constructor(){
 		super();
-		this.bVisible;
+		this.bVisible = false;
 	}
 	
 	CreateFromDOM(dom, caller){
@@ -246,11 +261,6 @@ export class CDropdownList extends CDropdown{
 		}
 	}
 	
-	toggleVisibility(){
-		this.bVisible = !this.bVisible;
-		this.setVisibility(this.bVisible);
-	}
-	
 	Update(){}
 }
 
@@ -261,12 +271,12 @@ function overrideUpdateMenubarButton(menubar){
 	
 	if(this.bClicked == true){
 		this.dropDownList.toggleVisibility();
+		this.dropDownList.setZIndex(10);
 	}else if(menubar.bClicked == true){
 		this.dropDownList.setVisibility(false);
 	}
 	
-	//out of boundary click
-	if(menubar.bClickedDocument == true && menubar.bClicked == false)
+	if(menubar.bClickedOutOfBoundary == true)
 		this.dropDownList.setVisibility(false);
 }
 
@@ -280,6 +290,7 @@ export class CMenubar extends CGUIElement{
 	constructor(){
 		super();
 		this.buttons = [];
+		this.bClickedOutOfBoundary = false;
 		this.bClickedDocument = false;
 		this.bClicked = false;
 	}
@@ -318,7 +329,10 @@ export class CMenubar extends CGUIElement{
 		_this.bClicked = true;
 	}
 	
-	BeginUpdate(){ }
+	BeginUpdate(){
+		//out of boundary click
+		this.bClickedOutOfBoundary = this.bClickedDocument == true && this.bClicked == false;
+	}
 	EndUpdate(){
 		this.bClickedDocument = false;
 		this.bClicked = false;}
