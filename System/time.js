@@ -52,7 +52,7 @@ export function getFrameTime(){ return currentFrameTime; }
 
 function lerp(a, b, t){ return (1.0-t)*a + t*b; }
 
-export function update(){
+export function Update(){
 
 	currentFrameTime = getSecondsSinceStart();
 	deltaTime = currentFrameTime - oldFrameTime;

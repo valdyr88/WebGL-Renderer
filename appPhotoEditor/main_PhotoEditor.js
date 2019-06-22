@@ -110,7 +110,7 @@ export function main()
 	
 	function renderFrame()
 	{
-		let time = sys.time.update();
+		let time = sys.time.Update();
 		let dTime = sys.time.getAvgDeltaTime();
 		
 		let doc = app.document.CDocuments.getActive();

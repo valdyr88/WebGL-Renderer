@@ -1,0 +1,155 @@
+/* Panel top */
+/*----------------------------------------------------------------------------------------------------------------*/ 
+ /* Style the navigation menu */
+.paneltop {
+	overflow: hidden;
+	background-color: #333333;
+	position: relative;
+	cursor: move;
+}
+
+/* Hide the links inside the navigation menu (except for logo/home) */
+.paneltop #myLinks {
+	display: none;
+}
+
+/* Style navigation menu links */
+.paneltop a {
+	color: white;
+	padding: 1.1rem 1.6rem;
+	text-decoration: none;
+	font-size: 1.0rem;
+	display: block;
+}
+
+/* Style the hamburger menu */
+.paneltop a.icon {
+	background: black;
+	display: block;
+	position: absolute;
+	right: 0;
+	top: 0;
+}
+
+/* Add a grey background color on mouse-over */
+.paneltop a:hover {
+	background-color: #dddddd;
+	color: black;
+}
+
+/* Style the text */
+.paneltop text, .paneltop button {
+	background-color: #4CAF50;
+	color: white;
+	padding: 0.5rem 1.6rem;
+	text-decoration: none;
+	font-size: 1.0rem;
+	display: block;
+} 
+/*----------------------------------------------------------------------------------------------------------------*/ 
+
+/* Panel main area */
+/*----------------------------------------------------------------------------------------------------------------*/ 
+.panelmain {
+	margin: auto;
+	background-color: #555555;
+	color: white;
+	background-image: linear-gradient(to left, #555555, #444444);
+	box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+}
+/*----------------------------------------------------------------------------------------------------------------*/ 
+
+
+/* Panel menu bar */
+/*----------------------------------------------------------------------------------------------------------------*/ 
+.menubar{
+	
+}
+
+.menubar ul{
+	list-style-type: none;
+	margin: 0;
+	padding: 0;
+	overflow: hidden;
+	/* background-color: #555555; */
+	background-image: linear-gradient(to bottom, #555555, #444444);
+}
+.menubar li{
+	float: left;
+}
+.menubar li a, .menubar li text, .menubar li button, .menubar-dropbtn{
+	display: inline-block;
+	color: white;
+	text-align: center;
+	padding: 1.0rem 1.2rem;
+	text-decoration: none;
+	background-image: linear-gradient(to bottom, #555555, #444444);
+	border: none;
+}
+.menubar li a:hover, .menubar li text:hover, .menubar li button:hover, .menubar-dropdown:hover .menubar-dropbtn{
+	/* background-color: white; */
+	background-image: linear-gradient(to bottom, #dddddd, #bbbbbb);
+	color: #555555;
+}
+.menubar li .menubar-dropbtn{
+	display: inline-block;
+}
+
+.menubar-dropdown-content {
+	display: none;
+	position: absolute;
+	/* background-color: #f9f9f9; */
+	background-image: linear-gradient(to bottom, #dddddd, #bbbbbb);
+	min-width: 12.0rem;
+	box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+	z-index: 1;
+}
+.menubar-dropdown-content ul{
+	display: flex;
+	flex-direction: column;
+	flex-wrap: wrap;
+}
+.menubar-dropdown-content ul li{
+}
+.menubar-dropdown-content ul li * {
+	padding: 1.0rem 1.0rem;
+	text-decoration: none;
+	display: block;
+	width:100%;
+	background-image: linear-gradient(to left, #555555, #444444);
+}
+
+.menubar-dropdown-content a:hover, .menubar-dropdown-content text:hover, .menubar-dropdown-content button:hover {
+	background-color: #f1f1f1
+}
+
+.menubar-dropdown:hover .menubar-dropdown-content {
+	display: block;
+}
+
+/*----------------------------------------------------------------------------------------------------------------*/ 
+
+/*----------------------------------------------------------------------------------------------------------------*/ 
+/* toolbox icon  */
+/*----------------------------------------------------------------------------------------------------------------*/ 
+.noselect {
+  -webkit-touch-callout: none; /* iOS Safari */
+    -webkit-user-select: none; /* Safari */
+     -khtml-user-select: none; /* Konqueror HTML */
+       -moz-user-select: none; /* Firefox */
+        -ms-user-select: none; /* Internet Explorer/Edge */
+            user-select: none; /* Non-prefixed version, currently
+                                  supported by Chrome and Opera */
+}
+
+.icon-select{
+	user-select: none;
+}
+.icon-select:hover{
+	user-select: none;
+	box-shadow: -2px -2px 4px 0px rgba(0,0,0,0.2);
+	position: relative;
+	left: 1px;
+	top: 1px;
+}
+/*----------------------------------------------------------------------------------------------------------------*/ 
