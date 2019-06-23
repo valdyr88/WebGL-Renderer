@@ -120,6 +120,40 @@ export class CDocument extends ui.CGUIElement{
 	onClick(){
 		this.htmlObj.AttachGLCanvas();
 	}
+		
+	RenderVisibleLayersToCanvas(){
+		let shader = glext.NDCQuadModel.mainDisplayShader;
+		glext.CFramebuffer.BindMainFB();	
+		glext.gl.viewport(0, 0, glext.gl.viewportWidth, glext.gl.viewportHeight);
+		glext.gl.clearColor(0.0,0.0,0.0,1.0);
+		glext.gl.clear(glext.gl.COLOR_BUFFER_BIT | glext.gl.DEPTH_BUFFER_BIT);
+		
+		shader.Bind();
+			this.getActivePaintLayer().texture.Bind(0, shader.ULTextureD);
+			glext.NDCQuadModel.RenderIndexedTriangles(shader);
+	}
+	
+	getHMTLImageFromCanvas(){
+		this.RenderVisibleLayersToCanvas();				
+		let img = document.createElement('img');
+		img.src = glext.gl.canvasObject.toDataURL();
+		return img;
+	}
+	
+	AddHTMLImage(htmlImg){
+		htmlImg.id = this.id + "_img";
+		// htmlImg.style.position = "absolute";
+		htmlImg.style = glext.gl.canvasObject.style;
+		let obj = sys.utils.getGrandchild(this.htmlObj, CDocument.ids_to_paint_area);
+		obj.appendChild(htmlImg);
+	}
+	
+	RemoveHTMLImage(){
+		let obj = sys.utils.getGrandchild(this.htmlObj, CDocument.ids_to_paint_area);
+		let i = sys.utils.getChildPosition(obj, this.id + "_img");
+		if(i != -1)
+			obj.removeChild(obj.childNodes[i]);
+	}
 	
 	AttachGLCanvas(){
 		//this function operates on htmlObj from CDocument (this ptr is htmlObj)
@@ -135,6 +169,9 @@ export class CDocument extends ui.CGUIElement{
 			let objtwoChildPos = sys.utils.getChildPosition(objtwo, CDocument.id_paint_canvas);
 			let oldCanvasObject = sys.utils.getChild(obj, CDocument.id_paint_canvas);
 			let doctwo = sys.utils.getGrandparent(gl.canvasObject, CDocument.ids_to_paint_area_reversed).parentNode;
+			
+			let htmlImg = doctwo.uiObj.getHMTLImageFromCanvas();
+			doctwo.uiObj.AddHTMLImage(htmlImg);
 			
 			//replaceChild( new, old );
 			obj.replaceChild(gl.canvasObject, oldCanvasObject);
@@ -152,6 +189,8 @@ export class CDocument extends ui.CGUIElement{
 			CDocuments.setActive(this.uiObj);
 			
 			this.uiObj.paintCanvas = gl.canvasObject;
+			this.uiObj.RenderVisibleLayersToCanvas();
+			this.uiObj.RemoveHTMLImage();
 			doctwo.uiObj.paintCanvas = null;
 			
 			//set to front

@@ -106,6 +106,8 @@ export function main()
 	main_shader.InitDefaultUniformLocations();
 	main_shader.InitDefaultAttribLocations();
 	
+	glext.NDCQuadModel.mainDisplayShader = main_shader;
+	
 	var abrush = new brush.CBrush();
 	abrush.CreateBrushShader("baseBrushFS");
 	abrush.setUniformUpdateFunction(function(){

@@ -253,6 +253,9 @@ export class CDropdown extends CGUIElement{
 	CreateFromDOM(dom, caller){
 		let _this = (caller == null || caller == undefined)? this : caller;
 		super.CreateFromDOM(dom, _this);
+		
+		this.setVisibility(false);
+		this.setZIndex( CGUIElement.zIndex_Menu );
 	}
 }
 
@@ -261,6 +264,7 @@ export class CDropdownList extends CDropdown{
 	constructor(){
 		super();
 		this.bVisible = false;
+		this.buttons = [];
 	}
 	
 	CreateFromDOM(dom, caller){
@@ -269,6 +273,14 @@ export class CDropdownList extends CDropdown{
 		
 		this.setVisibility(false);
 		this.setZIndex( CGUIElement.zIndex_Menu );
+		
+		let domBtns = sys.utils.getAllByTagName(this.htmlObj, "BUTTON");
+		for(let i = 0; i < domBtns.length; ++i){
+			let btn = new CButton();
+			this.buttons[this.buttons.length] = btn;
+			
+			btn.CreateFromDOM(domBtns[i]);
+		}
 	}
 	
 	setVisibility(bVisible){
@@ -336,16 +348,18 @@ export class CMenubar extends CGUIElement{
 			let drpdwn = new CDropdownList();
 			this.buttons[this.buttons.length] = btn;
 			
-			let domBtn = dom.childNodes[0];
-			let domDroplist = dom.childNodes[1];
+			let domBtn = sys.utils.getAllByClassFrom(dom, "menubar-dropbtn");
+			let domDroplist = sys.utils.getAllByClassFrom(dom, "menubar-dropdown-content");
 			
-			btn.CreateFromDOM(domBtn);
-			drpdwn.CreateFromDOM(domDroplist);
+			btn.CreateFromDOM(domBtn[0]);
+			drpdwn.CreateFromDOM(domDroplist[0]);
 			btn.dropDownList = drpdwn;
 			btn.UpdateMenubarButton = overrideUpdateMenubarButton;
 		}
 		
 		this.setZIndex( CGUIElement.zIndex_Menu );
+		for(let i = 0; i < this.buttons.length; ++i)
+			this.buttons[i].setZIndex( CGUIElement.zIndex_Menu );
 	}
 	
 	onDocumentClick(){

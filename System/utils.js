@@ -96,3 +96,9 @@ export function getAllByClassFrom(obj, classId){
 		return (o.className == classId);
 	});
 }
+
+export function getAllByTagName(obj, tagName){
+	return getAllByPropertyFrom(obj, function(o){
+		return (o.tagName == tagName);
+	});
+}
