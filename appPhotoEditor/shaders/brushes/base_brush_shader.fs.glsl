@@ -46,4 +46,5 @@ void main(void)
 	vec4 add = (vec4(10.0)+150.0*dither)*dT*invDistToPos*Brush.color;
 	
 	gl_FragColor = old + add;
+	gl_FragColor.a = length(glFragColor.xyz);
 }

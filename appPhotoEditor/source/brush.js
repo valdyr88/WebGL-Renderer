@@ -15,10 +15,11 @@ export class CBrush{
 		this.UniformBlock = null;
 		this.CreateUniformBlock();
 		this.shader = null;
+		this.shaderName = "";
 		this.bNeedsToUpdateUniformBlock = true;
 	}
 	
-	setPosition(pos){ this.position[0] = pos[0]; this.position[1] = pos[1]; this.bNeedsToUpdateUniformBlock = true; }
+	setPosition(pos){ this.position[0] = pos[0]; this.position[1] = 1.0 - pos[1]; this.bNeedsToUpdateUniformBlock = true; }
 	setRotation(rot){ this.rotation[0] = rot[0]; this.rotation[1] = rot[1]; this.bNeedsToUpdateUniformBlock = true; }
 	setOffset(offs){ this.offset[0] = offs[0]; this.offset[1] = offs[1]; this.bNeedsToUpdateUniformBlock = true; }
 	setColor(R,G,B,A){ this.color[0] = R; this.color[1] = G; this.color[2] = B; this.color[3] = A; this.bNeedsToUpdateUniformBlock = true; }
@@ -67,6 +68,7 @@ export class CBrush{
 		this.shader.InitDefaultUniformLocations();
 		this.shader.InitDefaultAttribLocations();
 		this.AttachUniformBlockTo(this.shader);
+		this.shaderName = str_brush_shader;
 	}
 	
 	setUniformUpdateFunction(func){

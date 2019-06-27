@@ -22,6 +22,29 @@ class CLayerRenderer{
 	}
 }
 
+class CCursor{
+	
+	constructor(w, h){
+		this.width = w;
+		this.height = h;
+		this.X = 0.0;
+		this.Y = 0.0;
+		this.x = 0.0;
+		this.y = 0.0;
+		this.Pos = [0.0,0.0];
+		this.pos = [0.0,0.0];
+	}
+	
+	set(posX, posY){
+		this.X = posX;
+		this.Y = posY;
+		this.x = this.X / this.width;
+		this.y = this.Y / this.height;
+		this.Pos = [this.X, this.Y];
+		this.pos = [this.x, this.y];
+	}
+}
+
 export class CDocument extends ui.CGUIElement{
 	
 	constructor(id){
@@ -51,6 +74,17 @@ export class CDocument extends ui.CGUIElement{
 		// this.parentCDocument = null;
 		
 		this.activeLayerID = 0;
+		
+		this.brush = null;
+		this.cursor = null;
+	}
+	
+	setBrush(brsh){
+		this.brush = brsh;
+	}
+	
+	clearBrush(){
+		this.brush = null;
 	}
 	
 	CreateFromDOM(dom, caller){
@@ -80,6 +114,7 @@ export class CDocument extends ui.CGUIElement{
 		sizeobj.style.height = (h + 32).toString() + "px";
 		this.width = w;
 		this.height = h;
+		this.cursor = new CCursor(w, h);
 	}
 	
 	CreateNew(w, h){
@@ -120,7 +155,7 @@ export class CDocument extends ui.CGUIElement{
 	onClick(){
 		this.htmlObj.AttachGLCanvas();
 	}
-		
+	
 	RenderVisibleLayersToCanvas(){
 		let shader = glext.NDCQuadModel.mainDisplayShader;
 		glext.CFramebuffer.BindMainFB();	
@@ -132,7 +167,7 @@ export class CDocument extends ui.CGUIElement{
 			this.getActivePaintLayer().texture.Bind(0, shader.ULTextureD);
 			glext.NDCQuadModel.RenderIndexedTriangles(shader);
 	}
-	
+		
 	getHMTLImageFromCanvas(){
 		this.RenderVisibleLayersToCanvas();				
 		let img = document.createElement('img');
@@ -153,6 +188,21 @@ export class CDocument extends ui.CGUIElement{
 		let i = sys.utils.getChildPosition(obj, this.id + "_img");
 		if(i != -1)
 			obj.removeChild(obj.childNodes[i]);
+	}
+	
+	ResizePaintCavas(){
+		if(this.paintCanvas == null) return;
+		
+		if(this.paintCanvas.width != this.width || this.paintCanvas.height != this.height){
+			this.paintCanvas.width = this.width;
+			this.paintCanvas.height = this.height;
+			glext.ResizeCanvas(this.width, this.height);
+			
+			let dw = this.width - this.getActivePaintLayer().width;
+			let dh = this.height - this.getActivePaintLayer().height;
+			
+			this.getActivePaintLayer().ResizeCanvas(Math.floor(dw/2.0), Math.floor(dw/2.0), Math.ceil(dh/2.0), Math.ceil(dh/2.0));
+		}
 	}
 	
 	AttachGLCanvas(){
@@ -189,9 +239,10 @@ export class CDocument extends ui.CGUIElement{
 			CDocuments.setActive(this.uiObj);
 			
 			this.uiObj.paintCanvas = gl.canvasObject;
+			doctwo.uiObj.paintCanvas = null;
+			this.uiObj.ResizePaintCavas();
 			this.uiObj.RenderVisibleLayersToCanvas();
 			this.uiObj.RemoveHTMLImage();
-			doctwo.uiObj.paintCanvas = null;
 			
 			//set to front
 			this.uiObj.setZIndex( ui.CGUIElement.zIndex_Document );
@@ -219,6 +270,56 @@ export class CDocument extends ui.CGUIElement{
 	}
 	
 	getPaintCanvas(){ return this.paintCanvas; }
+	
+//----------------------------------------------------------------------
+//	Update()
+//----------------------------------------------------------------------
+	
+	updateCursor(X, Y){
+		if(this.cursor == null) return;
+		let pos = [X, Y];
+		this.uiObj.paintCanvas.transformMouseCoords(pos);
+		this.cursor.set(pos[0], pos[1]);
+	}
+	
+	updateBrush(bPressed){
+		if(this.brush == null) return;
+		if(this.cursor == null) return;
+		
+		if(bPressed == false){
+			this.brush.setColor(0.0,0.0,0.0);
+		}
+		else{
+			let time = sys.time.getFrameTime();
+			let dTime = sys.time.getAvgDeltaTime();
+			
+			this.brush.setPosition( this.cursor.pos );
+			this.brush.setColor(Math.cos(time)*0.5+0.5, Math.sin(time)*0.5+0.5, 1.0-Math.sin(time)*0.5+0.5);
+			this.brush.setDeltaTime(Math.min(dTime, 1.0/15.0));
+			this.brush.setRandom(Math.random());
+		}
+		this.brush.Update();
+	}
+	
+	updateLayers(){
+		//updating of all layers
+		for(let i = 0; i < this.layers.length; ++i){
+			let layer = this.layers[i].getPaintLayer();
+			if(layer != null){
+				layer.Begin(this.brush.shader);
+				layer.Draw();
+				layer.End();
+			}
+		}
+	}
+	
+	Update(X, W, bPressed){
+		this.updateCursor(X, W);
+		this.updateBrush(bPressed);
+		this.updateLayers();
+	}
+	
+//----------------------------------------------------------------------
 	
 	Delete(){
 		for(let i = 0; i < this.layers.length; ++i){

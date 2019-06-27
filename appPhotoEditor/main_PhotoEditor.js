@@ -114,7 +114,7 @@ export function main()
 		this.setFloatUniform(this.ULTime, sys.time.getFrameTime());
 	});
 	abrush.setUniformBindFunction(function(){});
-		
+			
 	var bBtnLeft = false;
 	
 	setInterval( function(){ window.requestAnimationFrame(renderFrame); }, 5);
@@ -124,55 +124,36 @@ export function main()
 		let time = sys.time.Update();
 		let dTime = sys.time.getAvgDeltaTime();
 		
+		var mousePos = sys.mouse.getPosition();
+		var mouseDelta = sys.mouse.getDeltaPosition();
+		
+		FPSlabel.textContent = Number.parseFloat(sys.time.getAvgFPS()).toFixed(2) + " FPS";
+		label_Debug.textContent = "mouse: [" + mousePos[0] + ", " + mousePos[1] + "], " + bBtnLeft;
+		
 		menubar.Update();
 		
 		let doc = app.document.CDocuments.getActive();
 		if(doc == null) return;
-		let layer = doc.getActivePaintLayer();
 		
 		if(doc_paint_canvas == null){
 			doc_paint_canvas = initPaintCanvas(doc, gl); }
 		
-		resizePaintCavas(doc, doc_paint_canvas);
+		// resizePaintCavas(doc, doc_paint_canvas);
 		
 		gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
 		
 		//ToDo: fix mouse, up/down detection not working properly.
 		doc_paint_canvas.baseWindowOffset = [gl.canvasObject.offsetLeft + doc.getDOM().offsetLeft, gl.canvasObject.offsetTop + doc.getDOM().offsetTop];
 		
-		var mousePos = sys.mouse.getPosition();
-		var mouseDelta = sys.mouse.getDeltaPosition();
-		
 		if(sys.mouse.get().bLeftDown == true)
 			bBtnLeft = true;
 		if(sys.mouse.get().bLeftUp == true)
 			bBtnLeft = false;
-		doc_paint_canvas.transformMouseCoords(mousePos);
 		
-		if(bBtnLeft == true){
-			abrush.setPosition([mousePos[0] /doc.width,1.0 - mousePos[1] / doc.height]);
-			abrush.setColor(Math.cos(time)*0.5+0.5, Math.sin(time)*0.5+0.5, 1.0-Math.sin(time)*0.5+0.5);
-			abrush.setDeltaTime(Math.min(dTime, 1.0/15.0));
-			abrush.setRandom(Math.random());
-		}
-		else if(sys.mouse.get().bLeftUp == true){
-			abrush.setColor(0.0,0.0,0.0,0.0);
-		}
-		abrush.Update();
+		doc.setBrush(abrush);
+		doc.Update(mousePos[0], mousePos[1], bBtnLeft);
 		
-		FPSlabel.textContent = Number.parseFloat(sys.time.getAvgFPS()).toFixed(2) + " FPS";
-		label_Debug.textContent = "mouse: [" + mousePos[0] + ", " + mousePos[1] + "], " + bBtnLeft;
-		
-			layer.Begin(abrush.shader);
-			layer.Draw();
-			layer.End();
-		
-		glext.CFramebuffer.BindMainFB();	
-		gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
-		
-		main_shader.Bind();
-			layer.texture.Bind(0, main_shader.ULTextureD);
-			glext.NDCQuadModel.RenderIndexedTriangles(main_shader);
+		doc.RenderVisibleLayersToCanvas();
 		
 		sys.mouse.Update();
 		sys.keyboard.Update();
@@ -181,7 +162,6 @@ export function main()
 		
 		oldframe_time = time;
 	}
-	
 	return;
 }
 
