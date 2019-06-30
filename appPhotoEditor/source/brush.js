@@ -1,10 +1,13 @@
 import { gl, glPrintError } from "./../../GLExt/glContext.js";
 import * as vMath from "./../../glMatrix/gl-matrix.js";
 import { CShader, CUniformBlockBuffer, CUniformBlockBinding } from "./../../GLExt/glShader.js";
+import * as command from "./command.js"
 
-export class CBrush{
+export class CBrush extends command.ICommandExecute{
 	
 	constructor(){
+		super();
+		this.setType("CBrush");
 		this.position = [0,0];
 		this.rotation = [0,0];
 		this.color = [1,1,1,1];
@@ -77,5 +80,21 @@ export class CBrush{
 	setUniformBindFunction(func){
 		this.shader.BindUniforms = func;
 	}
+	
+}
+
+CBrush.Type_Airbrush_Gauss = 1
+CBrush.Type_Airbrush_OneOverLength = 2
+CBrush.Type_Pencil_Aliased = 3
+CBrush.Type_Pencil_AntiAliased = 4
+
+//ToDo: continue this class
+export class CPencil extends CBrush{
+	
+	constructor(){
+		super();
+		this.setType("CPencil");
+	}
+	
 	
 }

@@ -75,7 +75,7 @@
 	
   <script type="module">
 	import { ParseForHTMLIncludes, MakeElementMovable, MakeElementsMovable } from "./../System/html.js"
-	import { main, recompileShader, reloadTexture, onShaderDefineChanged, createNewFile, cropResize } from "./main_PhotoEditor.js";
+	import { main, recompileShader, reloadTexture, onShaderDefineChanged, createNewFile, cropResize, replayCommandList } from "./main_PhotoEditor.js";
 	import { fetchImage } from "./../GLExt/glTexture.js";
 	function wait(ms){ const start = performance.now(); while(performance.now() - start < ms); }
 	
@@ -216,6 +216,10 @@
 	
 	window.btn_crop_resize = function btn_crop_resize(){
 		cropResize();
+	}
+	
+	window.btn_replay_command_list = function btn_replay_command_list(){
+		replayCommandList();
 	}
 	
 	window.fetch_text_file = fetchTextFile;

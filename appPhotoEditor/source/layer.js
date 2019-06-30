@@ -1,6 +1,7 @@
 import * as glext from "./../../GLExt/GLExt.js"
 import * as sys from "./../../System/sys.js"
 import * as vMath from "./../../glMatrix/gl-matrix.js";
+import * as command from "./command.js"
 
 /*
 paintable layer
@@ -10,7 +11,7 @@ paintable layer
 	kad se zavrsi crtanje potrebno je pozvati End().
 	Begin() funkcija vraca kopiju (za undo) trenutnog stanja teksture koja se crta
 */
-export class CPaintableRasterLayer{
+export class CPaintableRasterLayer extends command.ICommandExecute{
 	
 	static bIsBytePrecision(precision){
 		return precision == "byte" || precision == "8" || precision == "8bit" || precision == "uint8";
@@ -64,6 +65,8 @@ export class CPaintableRasterLayer{
 	}
 	
 	constructor(w, h, precision, components){
+		super();
+		this.setType("CPaintableRasterLayer");
 		this.width = w;
 		this.height = h;
 		this.shader = null; //predaje se u funkciji Begin() i brise u End()
@@ -169,9 +172,11 @@ export class CPaintableRasterLayer{
 	}
 }
 
-export class CLayer{
+export class CLayer extends command.ICommandExecute{
 	
 	constructor(w,h){
+		super();
+		this.setType("CPaintableRasterLayer");
 		this.blendMode; //= new CBlendMode();
 		this.width = w; this.height = h;
 		this.type = "layer";
@@ -194,6 +199,7 @@ export class CRasterLayer extends CLayer{
 	
 	constructor(w, h){
 		super(w,h);
+		this.setType("CRasterLayer");
 		this.type = "raster";
 		this.paint_layer = new CPaintableRasterLayer(w, h, "byte", "rgb");
 	}
@@ -208,6 +214,7 @@ export class CVectorLayer extends CLayer{
 	
 	constructor(w, h){
 		super(w,h);
+		this.setType("CVectorLayer");
 		this.type = "vector"
 	}
 	

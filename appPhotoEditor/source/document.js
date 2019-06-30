@@ -2,16 +2,19 @@ import * as glext from "./../../GLExt/GLExt.js"
 import * as sys from "./../../System/sys.js"
 import * as vMath from "./../../glMatrix/gl-matrix.js";
 import * as ui from "./ui.js"
+import * as command from "./command.js"
 
 import { CLayer, CRasterLayer, CVectorLayer } from "./layer.js";
 
-class CLayerRenderer{
+class CLayerRenderer extends command.ICommandExecute{
 	
 	/*
 		
 	*/
 	
 	constructor(){
+		super();
+		this.setType("CLayerRenderer");
 		this.framebuffer = new glext.CFramebuffer(false); this.framebuffer.Create();
 		this.quad_model = new glext.CModel(-1);
 		glext.GenQuadModel(this.quad_model);
@@ -22,9 +25,11 @@ class CLayerRenderer{
 	}
 }
 
-class CCursor{
+class CCursor extends command.ICommandExecute{
 	
 	constructor(w, h){
+		super();
+		this.setType("CCursor");
 		this.width = w;
 		this.height = h;
 		this.X = 0.0;
@@ -47,21 +52,22 @@ class CCursor{
 
 export class CDocument extends ui.CGUIElement{
 	
-	constructor(id){
+	constructor(docId){
 		super();
+		this.setType("CDocument");
 		
 		++CDocument.createdCount;
 		
-		if(id != null){
-			this.htmlObj = document.getElementById(id);
-			this.id = id;
+		if(docId != null){
+			this.htmlObj = document.getElementById(docId);
+			this.docId = docId;
 			//ToDo: init width/height from htmlObj
 			this.width = 0;
 			this.height = 0;
 		}
 		else{
 			this.htmlObj = null;
-			this.id = "document_file_" + CDocument.createdCount.toString();
+			this.docId = "document_file_" + CDocument.createdCount.toString();
 			this.width = 0;
 			this.height = 0;
 		}
@@ -125,7 +131,7 @@ export class CDocument extends ui.CGUIElement{
 		//load html file and create dom elements from it (callback function)
 		sys.html.CreateDOMFromHTMLFile(this, "./windows/document.html", function(_this, obj){
 			_this.htmlObj = document.createElement('div');
-			_this.htmlObj.id = _this.id;
+			_this.htmlObj.docId = _this.docId;
 			_this.htmlObj.appendChild(obj);
 			
 			_this.CreateFromDOM(_this.htmlObj, _this);
@@ -136,7 +142,7 @@ export class CDocument extends ui.CGUIElement{
 			document.body.appendChild(_this.htmlObj);
 			
 			_this.htmlObj.style.position = "absolute";
-			// _this.htmlObj.onclick = document.window.document_onclick(_this.id);
+			// _this.htmlObj.onclick = document.window.document_onclick(_this.docId);
 			
 			_this.htmlObj.AttachGLCanvas = _this.AttachGLCanvas;
 			// _this.htmlObj.onclick = _this.AttachGLCanvas;
@@ -176,7 +182,7 @@ export class CDocument extends ui.CGUIElement{
 	}
 	
 	AddHTMLImage(htmlImg){
-		htmlImg.id = this.id + "_img";
+		htmlImg.id = this.docId + "_img";
 		// htmlImg.style.position = "absolute";
 		htmlImg.style = glext.gl.canvasObject.style;
 		let obj = sys.utils.getGrandchild(this.htmlObj, CDocument.ids_to_paint_area);
@@ -185,7 +191,7 @@ export class CDocument extends ui.CGUIElement{
 	
 	RemoveHTMLImage(){
 		let obj = sys.utils.getGrandchild(this.htmlObj, CDocument.ids_to_paint_area);
-		let i = sys.utils.getChildPosition(obj, this.id + "_img");
+		let i = sys.utils.getChildPosition(obj, this.docId + "_img");
 		if(i != -1)
 			obj.removeChild(obj.childNodes[i]);
 	}
@@ -277,9 +283,7 @@ export class CDocument extends ui.CGUIElement{
 	
 	updateCursor(X, Y){
 		if(this.cursor == null) return;
-		let pos = [X, Y];
-		this.uiObj.paintCanvas.transformMouseCoords(pos);
-		this.cursor.set(pos[0], pos[1]);
+		this.cursor.set(X, Y);
 	}
 	
 	updateBrush(bPressed){
@@ -313,10 +317,36 @@ export class CDocument extends ui.CGUIElement{
 		}
 	}
 	
-	Update(X, W, bPressed){
-		this.updateCursor(X, W);
+	Update(cmd){ //X, W, bPressed
+		
+		if(cmd != undefined && cmd != null){
+			this.exec(cmd);
+		}
+	}
+	
+//----------------------------------------------------------------------
+	
+	execMouseEvent(cmd){
+		let cmdP = cmd.commandParams;
+		
+		let bPressed = cmdP.params[0].value;
+		let pos = cmdP.params[1].value;
+		if(cmdP.params[2].value == "absoluteMousePos"){
+			this.uiObj.paintCanvas.transformMouseCoords(pos);
+			cmdP.params[2].value = "relativeMousePos";
+		}
+		
+		this.updateCursor(pos[0], pos[1]);
 		this.updateBrush(bPressed);
 		this.updateLayers();
+	}
+	
+	exec(cmd){
+		if(cmd.objectType != "CDocument")
+			return;
+		
+		if(cmd.command == "mouseEvent")
+			this.execMouseEvent(cmd);
 	}
 	
 //----------------------------------------------------------------------
@@ -336,9 +366,11 @@ CDocument.ids_to_paint_area_reversed = ["document_paint_area","document_display_
 CDocument.id_paint_canvas = "document_paint_canvas";
 CDocument.ids_to_size = ["panelmain","document_size"];
 
-export class CDocuments{
+export class CDocuments extends command.ICommandExecute{
 	
 	constructor(){
+		super();
+		this.setType("CDocuments");
 	}
 	
 	static CreateDocument(w,h){

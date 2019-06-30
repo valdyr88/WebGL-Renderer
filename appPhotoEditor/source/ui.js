@@ -1,14 +1,18 @@
 import * as glext from "./../../GLExt/GLExt.js"
 import * as sys from "./../../System/sys.js"
 import * as vMath from "./../../glMatrix/gl-matrix.js";
+import * as command from "./command.js"
 
 //==================================================================================
 // CDOMEventListerners
 //==================================================================================
 
-class CDOMEventListerners{
+class CDOMEventListerners extends command.ICommandExecute{
 	
 	constructor(){
+		super();
+		this.setType("CDOMEventListerners");
+		
 		this.uiObj = null;
 		
 		this.onMouseDownCallbacks = [];
@@ -124,6 +128,7 @@ export class CGUIElement extends CDOMEventListerners{
 	
 	constructor(){
 		super();
+		this.setType("CGUIElement");
 		this.name = "";
 		this.htmlObj = null;
 		this.dTime = 0.0;
@@ -170,8 +175,10 @@ CGUIElement.zIndex_ToBack = -1;
 //==================================================================================
 
 export class CButton extends CGUIElement{
+	
 	constructor(){
-		super();		
+		super();
+		this.setType("CButton");
 		this.bPressed = false;
 		this.bClicked = false;
 		this.bOldPressed = false;
@@ -248,6 +255,7 @@ export class CDropdown extends CGUIElement{
 	
 	constructor(){
 		super();
+		this.setType("CDropdown");
 	}
 	
 	CreateFromDOM(dom, caller){
@@ -263,6 +271,7 @@ export class CDropdownList extends CDropdown{
 	
 	constructor(){
 		super();
+		this.setType("CDropdownList");
 		this.bVisible = false;
 		this.buttons = [];
 	}
@@ -325,6 +334,7 @@ export class CMenubar extends CGUIElement{
 	
 	constructor(){
 		super();
+		this.setType("CMenubar");
 		this.buttons = [];
 		this.bClickedOutOfBoundary = false;
 		this.bClickedDocument = false;

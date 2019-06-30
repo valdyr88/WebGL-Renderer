@@ -6,6 +6,7 @@ import * as brush from "./source/brush.js"
 import * as app from "./source/app.js"
 
 var gl = null;
+var bReplayCommands = false;
 
 function initPaintCanvas(doc, ogl){
 	
@@ -117,8 +118,15 @@ export function main()
 			
 	var bBtnLeft = false;
 	
+	var commandList = [];
+	
 	setInterval( function(){ window.requestAnimationFrame(renderFrame); }, 5);
 	
+	//ToDo: how to design undo code for brush strokes -> every brush stroke needs to be undoable (to a certan history limit)
+	/*
+		for filters that operate with settings:
+			call method: createExecutableCommand() which returns new CCommand() with current settings as params
+	*/
 	function renderFrame()
 	{
 		let time = sys.time.Update();
@@ -140,6 +148,7 @@ export function main()
 		
 		// resizePaintCavas(doc, doc_paint_canvas);
 		
+		
 		gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
 		
 		//ToDo: fix mouse, up/down detection not working properly.
@@ -149,9 +158,22 @@ export function main()
 			bBtnLeft = true;
 		if(sys.mouse.get().bLeftUp == true)
 			bBtnLeft = false;
+				
+		let cmd = null;
+		if(bBtnLeft == true){
+			cmd = new app.command.CCommand();
+			cmd.set(doc.objectId, "CDocument", "mouseEvent", bBtnLeft, mousePos, "absoluteMousePos");
+		}
 		
 		doc.setBrush(abrush);
-		doc.Update(mousePos[0], mousePos[1], bBtnLeft);
+		doc.Update(cmd); //mousePos[0], mousePos[1], bBtnLeft
+		
+		if(bReplayCommands == true){
+			for(let c = 0; c < commandList.length; ++c){
+				let icmd = commandList[c];
+				doc.Update(icmd);
+			}
+		}
 		
 		doc.RenderVisibleLayersToCanvas();
 		
@@ -161,6 +183,11 @@ export function main()
 		gs.Update();
 		
 		oldframe_time = time;
+		
+		if(cmd != null)
+			commandList[commandList.length] = cmd;
+		
+		bReplayCommands = false;
 	}
 	return;
 }
@@ -175,6 +202,10 @@ export function cropResize(){
 	doc.getActivePaintLayer().ResizeCanvas(50,50,50,50);
 	doc.width += 100;
 	doc.height += 100;
+}
+
+export function replayCommandList(){
+	bReplayCommands = true;
 }
 
 function RenderModels(fbo, bClearFBO, time, camera, models){
