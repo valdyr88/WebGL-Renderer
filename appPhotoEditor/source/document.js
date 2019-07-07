@@ -123,6 +123,13 @@ export class CDocument extends ui.CGUIElement{
 		this.cursor = new CCursor(w, h);
 	}
 	
+	Resize(dleft, dright, dup, ddown){
+		this.getActivePaintLayer().ResizeCanvas(dleft, dright, dup, ddown);
+		let dw = dleft + dright; let dh = dup + ddown;
+		this.setSize(this.width+dw, this.height+dh);
+		this.UpdatePaintCanvasSize();
+	}
+	
 	CreateNew(w, h){
 		
 		this.width = w;
@@ -196,7 +203,8 @@ export class CDocument extends ui.CGUIElement{
 			obj.removeChild(obj.childNodes[i]);
 	}
 	
-	ResizePaintCavas(){
+	//updates the OpenGL paint canvas, if this is active document
+	UpdatePaintCanvasSize(){
 		if(this.paintCanvas == null) return;
 		
 		if(this.paintCanvas.width != this.width || this.paintCanvas.height != this.height){
@@ -246,7 +254,7 @@ export class CDocument extends ui.CGUIElement{
 			
 			this.uiObj.paintCanvas = gl.canvasObject;
 			doctwo.uiObj.paintCanvas = null;
-			this.uiObj.ResizePaintCavas();
+			this.uiObj.UpdatePaintCanvasSize();
 			this.uiObj.RenderVisibleLayersToCanvas();
 			this.uiObj.RemoveHTMLImage();
 			
@@ -289,19 +297,17 @@ export class CDocument extends ui.CGUIElement{
 	updateBrush(bPressed){
 		if(this.brush == null) return;
 		if(this.cursor == null) return;
-		
+		/*
+		brush has only position update here,
+		because other params are state of the brush and should be updated elsewhere
+		document only cares about position where to draw with brush, 
+		and brush gets it color/size/type from other places (i.e. palette...)
+		*/
 		if(bPressed == false){
-			this.brush.setColor(0.0,0.0,0.0);
-		}
-		else{
-			let time = sys.time.getFrameTime();
-			let dTime = sys.time.getAvgDeltaTime();
-			
-			this.brush.setPosition( this.cursor.pos );
-			this.brush.setColor(Math.cos(time)*0.5+0.5, Math.sin(time)*0.5+0.5, 1.0-Math.sin(time)*0.5+0.5);
-			this.brush.setDeltaTime(Math.min(dTime, 1.0/15.0));
-			this.brush.setRandom(Math.random());
-		}
+			this.brush.setColor(0.0,0.0,0.0); } //ToDo: make brush disabling with other option, color value should be kept by the brush
+		else{			
+			this.brush.setPosition( this.cursor.pos ); }
+		
 		this.brush.Update();
 	}
 	

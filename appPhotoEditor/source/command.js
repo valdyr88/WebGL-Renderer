@@ -25,7 +25,7 @@ export class CParam{
 	
 	set(param){
 		
-		if(param.length == undefined || typeof(param) == "string"){
+		if(param.length == undefined || typeof(param) == "string" || typeof(param) == "function"){
 			this.type = CParam.DecideParamType(param);
 			this.value = param;
 			this.count = 1;
@@ -131,6 +131,11 @@ export class CCommand{
 		this.commandId = CCommand.createdCount;
 	}
 	
+	getObjectType(){ return this.objectType; }
+	getObjectId(){ return this.objectId; }
+	getCommandType(){ return this.command; }
+	getCommandParams(){ return this.commandParams.params; }
+	
 	set(){ //objId, objType, cmd
 		this.objectId = arguments[0];
 		this.objectType = arguments[1];
@@ -160,6 +165,9 @@ export class ICommandExecute{
 	setType(typ){ this.type = typ; }
 	
 	exec(){ console.log(this.type + "::exec() not implemented!, objectId == " + this.objectId); }
+	
+	SaveAsCommand(){ console.log(this.type + "::SaveAsCommand() not implemented!, objectId == " + this.objectId); return null; }
+	LoadFromCommand(cmd){ console.log(this.type + "::LoadFromCommand() not implemented!, objectId == " + this.objectId); return false; }
 }
 
 ICommandExecute.createdCount = 0;

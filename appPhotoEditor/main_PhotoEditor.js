@@ -115,7 +115,7 @@ export function main()
 		this.setFloatUniform(this.ULTime, sys.time.getFrameTime());
 	});
 	abrush.setUniformBindFunction(function(){});
-			
+	
 	var bBtnLeft = false;
 	
 	var commandList = [];
@@ -148,7 +148,6 @@ export function main()
 		
 		// resizePaintCavas(doc, doc_paint_canvas);
 		
-		
 		gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
 		
 		//ToDo: fix mouse, up/down detection not working properly.
@@ -158,12 +157,16 @@ export function main()
 			bBtnLeft = true;
 		if(sys.mouse.get().bLeftUp == true)
 			bBtnLeft = false;
-				
+		
 		let cmd = null;
 		if(bBtnLeft == true){
 			cmd = new app.command.CCommand();
 			cmd.set(doc.objectId, "CDocument", "mouseEvent", bBtnLeft, mousePos, "absoluteMousePos");
 		}
+		
+		abrush.setColor(Math.cos(time)*0.5+0.5, Math.sin(time)*0.5+0.5, 1.0-Math.sin(time)*0.5+0.5);
+		abrush.setDeltaTime(Math.min(dTime, 1.0/15.0));
+		abrush.setRandom(Math.random());
 		
 		doc.setBrush(abrush);
 		doc.Update(cmd); //mousePos[0], mousePos[1], bBtnLeft
@@ -171,6 +174,7 @@ export function main()
 		if(bReplayCommands == true){
 			for(let c = 0; c < commandList.length; ++c){
 				let icmd = commandList[c];
+				abrush.LoadFromCommand(icmd);
 				doc.Update(icmd);
 			}
 		}
@@ -184,8 +188,10 @@ export function main()
 		
 		oldframe_time = time;
 		
-		if(cmd != null)
+		if(cmd != null){
+			commandList[commandList.length] = abrush.SaveAsCommand();
 			commandList[commandList.length] = cmd;
+		}
 		
 		bReplayCommands = false;
 	}
@@ -199,9 +205,7 @@ export function createNewFile(){
 
 export function cropResize(){
 	let doc = app.document.CDocuments.getActive();
-	doc.getActivePaintLayer().ResizeCanvas(50,50,50,50);
-	doc.width += 100;
-	doc.height += 100;
+	doc.Resize(50,50,50,50);
 }
 
 export function replayCommandList(){
