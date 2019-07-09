@@ -230,10 +230,41 @@ export class CUniformBlockBuffer
 		gl.bindBuffer(gl.UNIFORM_BUFFER, null);
 	}
 	
+	/*
 	static ConvertTypedArray(src, type){
 		var buffer = new ArrayBuffer(src.byteLength);
 		var baseView = new src.constructor(buffer).set(src);
 		return new type(buffer);
+	}
+	*/
+	static ConvertTypedArray(){
+		let blist = []; let blengths = []; let fullByteLength = 0;
+		
+		var type = arguments[arguments.length-1];
+		
+		for(let i = 0; i < arguments.length-1; ++i){
+			let src = arguments[i]
+			let b = new ArrayBuffer(src.byteLength);
+			let baseView = new src.constructor(b).set(src);
+			
+			blist[blist.length] = new type(b);
+			blengths[blengths.length] = src.byteLength;
+			fullByteLength += src.byteLength;
+		}
+		
+		let length = 0;
+		var buffer = new type(new ArrayBuffer(fullByteLength));
+		
+		for(let i = 0; i < blist.length; ++i){
+			let blength = blengths[i];
+			let cpyfrom = blist[i];
+			for(let b = 0; b < blength; ++b){
+				buffer[length+b] = cpyfrom[b];
+			}
+			length += blength;
+		}
+		
+		return buffer;
 	}
 	
 	Update()
