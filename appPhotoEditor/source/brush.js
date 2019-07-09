@@ -38,8 +38,9 @@ export class CBrush extends command.ICommandExecute{
 											  this.offset[0], this.offset[1], this.dt, this.random]),
 											Uint8Array);
 		var i = 0;
-		for(var b = 0; b < FloatUint8.length; ++b){
-			this.UniformBlock.data[i] = FloatUint8[b]; ++i; }
+		/* for(var b = 0; b < FloatUint8.length; ++b){
+			this.UniformBlock.data[i] = FloatUint8[b]; ++i; } */
+		this.UniformBlock.setData(FloatUint8);
 	}
 	
 	CreateUniformBlock(){

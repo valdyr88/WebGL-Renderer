@@ -230,6 +230,16 @@ export class CUniformBlockBuffer
 		gl.bindBuffer(gl.UNIFORM_BUFFER, null);
 	}
 	
+	setData(d){
+		if(d.length % 16 != 0) return false;
+		this.data = d;
+		if(d.length != this.size){
+			//ToDo: check if resize of this.buffer in OpenGL is needed
+			this.size = d.length;
+		}
+		return true;
+	}
+	
 	/*
 	static ConvertTypedArray(src, type){
 		var buffer = new ArrayBuffer(src.byteLength);
