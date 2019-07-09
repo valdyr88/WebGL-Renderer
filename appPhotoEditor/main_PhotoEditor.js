@@ -205,7 +205,7 @@ export function createNewFile(){
 
 export function cropResize(){
 	let doc = app.document.CDocuments.getActive();
-	doc.Resize(50,50,50,50);
+	doc.Resize("pixels",50,50,50,50);
 }
 
 export function replayCommandList(){

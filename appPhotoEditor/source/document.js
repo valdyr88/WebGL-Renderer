@@ -114,6 +114,10 @@ export class CDocument extends ui.CGUIElement{
 	
 	getDOM(){ return this.htmlObj; }
 	
+//----------------------------------------------------------------------
+//	set size
+//----------------------------------------------------------------------
+	
 	setSize(w, h){
 		let sizeobj = sys.utils.getGrandchild(this.htmlObj, CDocument.ids_to_size);
 		sizeobj.style.width = (w + 32).toString() + "px";
@@ -123,12 +127,61 @@ export class CDocument extends ui.CGUIElement{
 		this.cursor = new CCursor(w, h);
 	}
 	
-	Resize(dleft, dright, dup, ddown){
-		this.getActivePaintLayer().ResizeCanvas(dleft, dright, dup, ddown);
+	/*resizes the document and every layer in it. */
+	ResizeInPixels(dleft, dright, dup, ddown){
+		for(let i = 0; i < this.layers.length; ++i){
+			this.layers[i].ResizeCanvas(dleft, dright, dup, ddown); }
 		let dw = dleft + dright; let dh = dup + ddown;
 		this.setSize(this.width+dw, this.height+dh);
 		this.UpdatePaintCanvasSize();
 	}
+	
+	RescaleInPixels(dleft, dright, dup, ddown){
+		for(let i = 0; i < this.layers.length; ++i){
+			this.layers[i].ScaleCanvas(dleft, dright, dup, ddown); }
+		let dw = dleft + dright; let dh = dup + ddown;
+		this.setSize(this.width+dw, this.height+dh);
+		this.UpdatePaintCanvasSize();
+	}
+	
+	ResizeInPercentage(pleft, pright, pup, pdown){
+		let dleft = pleft * this.width;
+		let dright = pright * this.width;
+		let dup = pup * this.height;
+		let ddown = pdown * this.height;
+		this.ResizeInPixels(dleft, dright, dup, ddown);
+	}
+	
+	RescaleInPercentage(pleft, pright, pup, pdown){
+		let dleft = pleft * this.width;
+		let dright = pright * this.width;
+		let dup = pup * this.height;
+		let ddown = pdown * this.height;
+		this.RescaleInPixels(dleft, dright, dup, ddown);
+	}
+	
+	Resize(){
+		let func = (arguments[0] == "percent")? this.ResizeInPercentage.bind(this) : this.ResizeInPixels.bind(this);
+		
+		if(arguments.length > 3)
+			func(arguments[1],arguments[2],arguments[3],arguments[4]);
+		else{
+			let dw = arguments[1]/2.0; let dh = arguments[2]/2.0;
+			func( dw, dw, dh, dh );
+		}
+	}
+	Rescale(){
+		let func = (arguments[0] == "percent")? this.RescaleInPercentage.bind(this) : this.RescaleInPixels.bind(this);
+		
+		if(arguments.length > 3)
+			func(arguments[1],arguments[2],arguments[3],arguments[4]);
+		else{
+			let dw = arguments[1]/2.0; let dh = arguments[2]/2.0;
+			func( dw, dw, dh, dh );
+		}
+	}
+	
+//----------------------------------------------------------------------
 	
 	CreateNew(w, h){
 		

@@ -174,11 +174,10 @@ export class CPaintableRasterLayer extends command.ICommandExecute{
 
 export class CLayer extends command.ICommandExecute{
 	
-	constructor(w,h){
+	constructor(){
 		super();
 		this.setType("CPaintableRasterLayer");
 		this.blendMode; //= new CBlendMode();
-		this.width = w; this.height = h;
 		this.type = "layer";
 		this.paint_layer = null;
 	}
@@ -198,7 +197,7 @@ export class CLayer extends command.ICommandExecute{
 export class CRasterLayer extends CLayer{
 	
 	constructor(w, h){
-		super(w,h);
+		super();
 		this.setType("CRasterLayer");
 		this.type = "raster";
 		this.paint_layer = new CPaintableRasterLayer(w, h, "byte", "rgb");
@@ -213,7 +212,7 @@ export class CRasterLayer extends CLayer{
 export class CVectorLayer extends CLayer{
 	
 	constructor(w, h){
-		super(w,h);
+		super();
 		this.setType("CVectorLayer");
 		this.type = "vector"
 	}
