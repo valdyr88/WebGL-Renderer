@@ -219,15 +219,9 @@ export function main(){
 	var txfbNormal= new glext.CTexture(6); txfbNormal.CreateEmptyRGBAubyte(fbo_width, fbo_height);
 	var txfbAoRSMt= new glext.CTexture(7); txfbAoRSMt.CreateEmptyRGBAubyte(fbo_width, fbo_height);
 	var fbo = new glext.CFramebuffer(true);   fbo.Create(); 
-	fbo.AttachTexture(txfbColor, 0);
-	fbo.AttachDepth(txfbDepth);
-	fbo.CheckStatus();
 	
 	var fboHdrMipBlur = new glext.CFramebuffer(true); fboHdrMipBlur.Create(); fboHdrMipBlur.Bind();
 	var txfbHdrMipBlur = new glext.CTexture(8); txfbHdrMipBlur.CreateEmptyWithMipsRGBAubyte(fbo_width, fbo_height);
-	fboHdrMipBlur.AttachTexture(txfbHdrMipBlur, 0);
-	fboHdrMipBlur.AttachDepth(txfbDepth);
-	fboHdrMipBlur.CheckStatus();
 	
 	glext.CFramebuffer.BindMainFB();	
 	//------------------------------------------------------------------------
@@ -285,6 +279,19 @@ export function main(){
 		light.AttachUniformBlockTo(simple_shader);
 		
 	txfbHdrMipBlur.setMinMagFilterLinearMipMapLinear();
+	//------------------------------------------------------------------------
+	
+	//------------------------------------------------------------------------
+	//attach textures to fbos
+	//------------------------------------------------------------------------
+	
+	fbo.AttachTexture(txfbColor, 0);
+	fbo.AttachDepth(txfbDepth);
+	fbo.CheckStatus();
+	
+	fboHdrMipBlur.AttachTexture(txfbHdrMipBlur, 0);
+	fboHdrMipBlur.AttachDepth(txfbDepth);
+	fboHdrMipBlur.CheckStatus();
 	//------------------------------------------------------------------------
 	
 	var fluidSim = null;
@@ -1039,15 +1046,14 @@ export function main(){
 			
 			//Render scene
 			fbo.Bind();
+			fbo.ActivateDrawBuffers(simple_shader);
 			
 			gl.viewport(0, 0, fbo.width, fbo.height);
 			// CCamera.setViewportWidthHeight(fbo.width, fbo.height);
 			
-			gl.clearColor(0.0, 0.0, 0.0, 1.0);
+			gl.clearColor(0.0, 0.0, 0.0, 0.0);
 			gl.clearDepth(1.0);
 			gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-			
-			light.RenderPosition();
 			
 			simple_shader.Bind();
 			
@@ -1064,6 +1070,8 @@ export function main(){
 				simple_shader.setCameraPositionUniform(CCamera.Position);
 				
 				sphere_model.RenderIndexedTriangles(simple_shader);
+			
+			light.RenderPosition();
 		}
 		
 		//Render fluidsim cloud

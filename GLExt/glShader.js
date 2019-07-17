@@ -422,8 +422,13 @@ export class CShader
 		
 		this.strVertexSource = vertexCode;
 		this.strFragmentSource = fragmentCode;
-
-		return this.isLinked();
+		
+		var bIsLinked = this.isLinked();
+		
+		if(bIsLinked == true){
+			this.queryFragmentDataLocations(fragmentCode);
+		}
+		return bIsLinked;
 	}
 	
 	CompileFromFile(vertexFile, fragmentFile){
@@ -864,41 +869,41 @@ export class CShader
 	
 	queryFragmentDataLocations(source){
 		
-		var lines = parseForLinesIncludingAtLeastOne(source, ["out","layout","location"]);
+		let lines = parseForLinesIncludingAtLeastOne(source, ["out","layout","location"]);
 		
-		var potentialOutputs = [];
-		var outputs = [];
+		let potentialOutputs = [];
+		let outputs = [];
 				
-		for(var l in lines){
-			var line = lines[l];
+		for(let l in lines){
+			let line = lines[l];
 			line = line.replace(";", " ");
 			line = line.replace("\t"," ");
-			var words = line.split(" ");
+			let words = line.split(" ");
 			
-			var words2 = words.filter(function(el){
+			let words2 = words.filter(function(el){
 				return el != null && el != "" && el != '';
 			});
 			
 			potentialOutputs[potentialOutputs.length] = words2[words2.length-1];
 		}
 		
-		for(var o in potentialOutputs){
-			var output = potentialOutputs[o];
-			var loc = gl.getFragDataLocation(this.program, output);
+		for(let o in potentialOutputs){
+			let output = potentialOutputs[o];
+			let loc = gl.getFragDataLocation(this.program, output);
 			
 			if(loc != -1){
-				var fragDataLoc = new CFragDataLocation();
+				let fragDataLoc = new CFragDataLocation();
 				fragDataLoc.set(output, loc);
 				this.FragDataLocations[this.FragDataLocations.length] = fragDataLoc;
 			}
 		}
 		
 		//ckeck for duplicated
-		for(var i = 0; i < this.FragDataLocations.length; ++i){
-			var loc = this.FragDataLocations[i];
+		for(let i = 0; i < this.FragDataLocations.length; ++i){
+			let loc = this.FragDataLocations[i];
 			
-			for(var j = i+1; j < this.FragDataLocations.length; ++j){
-				var loc2 = this.FragDataLocations[j];
+			for(let j = i+1; j < this.FragDataLocations.length; ++j){
+				let loc2 = this.FragDataLocations[j];
 				
 				if(loc.location == loc2.location){
 					loc2.location = -1;
@@ -909,9 +914,6 @@ export class CShader
 		this.FragDataLocations = this.FragDataLocations.filter(function (el){ return el.location != -1; });
 		//sort the array
 		this.FragDataLocations.sort(function(a, b){ return a.location - b.location; });
-		
-		var i = 0;
-		i = 1;
 	}
 }
 

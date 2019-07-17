@@ -424,11 +424,15 @@ inline int powi(const int b, const int ex){
 }
 //================================================================================================================
 
-inline bool getbit(int bits, const int bitno, const int nofbits){
+/*inline bool getbit(int bits, const int bitno, const int nofbits){
 	int bitpow = nofbits - (bitno+1);
 	bits = bits * powi(2, bitpow);
 	bits = bits / powi(2, nofbits-1);
 	return bits != 0;
+}*/
+inline bool getbit(int bits, const int bitno, const int nofbits){
+	int bitmask = 1<<bitno;
+	return (bits & bitmask) != 0;
 }
 #define uint_getbit(bits, bitno) getbit(bits, bitno, 32)
 

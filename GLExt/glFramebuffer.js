@@ -225,11 +225,12 @@ export class CFramebuffer{
 	
 	static ActivateDrawBuffers(shader){
 		if(gl.currentFramebuffer === 0) return; //can't activate draw buffers on default framebuffer
-		var fragDataLocations = shader.getFragDataLocations();
+		let fragDataLocations = shader.getFragDataLocations();
 		
-		var buffers = [];
-		for(let i = 0; i < fragDataLocations.length; ++i)
+		let buffers = [];
+		for(let i = 0; i < fragDataLocations.length; ++i){
 			buffers[buffers.length] = gl.COLOR_ATTACHMENT0+fragDataLocations[i].location;
+		}
 		gl.drawBuffers(buffers);
 	}
 	

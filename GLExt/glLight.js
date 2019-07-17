@@ -11,29 +11,29 @@ function InitPointShader(){
 	PointShader = new CShader(-1);
 	
 	var vsCode = 
-	"#version 300 es\n \
-	in vec4 aVertexPosition;\
-	uniform mat4 ViewMatrix;\
-	uniform mat4 ProjectionMatrix;\
-	uniform float PointSize;\
-	uniform vec3 VertexPosition;\
-	out vec3 oaVertexPosition;\
-	\
-	void main(void){ \
-		gl_Position = (ProjectionMatrix * (ViewMatrix * vec4(VertexPosition,1.0)));\
-		gl_PointSize = PointSize;\
-		oaVertexPosition = aVertexPosition.xyz;\
+	"#version 300 es\n\
+	in vec4 aVertexPosition;\n\
+	uniform mat4 ViewMatrix;\n\
+	uniform mat4 ProjectionMatrix;\n\
+	uniform float PointSize;\n\
+	uniform vec3 VertexPosition;\n\
+	out vec3 oaVertexPosition;\n\
+	\n \
+	void main(void){ \n\
+		gl_Position = (ProjectionMatrix * (ViewMatrix * vec4(VertexPosition,1.0)));\n\
+		gl_PointSize = PointSize;\n\
+		oaVertexPosition = aVertexPosition.xyz;\n\
 	}\
 	";
 	
 	var fsCode =
-	"#version 300 es\n \
-	precision mediump float;\
-	uniform vec4 Color;\
-	out vec4 glFragColor; \
-	\
-	void main(void){ \
-		glFragColor = Color;\
+	"#version 300 es\n\
+	precision mediump float;\n\
+	uniform vec4 Color;\n\
+	out vec4 glFragColor;\n\
+	\n\
+	void main(void){\n\
+		glFragColor = Color;\n\
 	}\
 	";
 	if(PointShader.Compile(vsCode, fsCode) == false) return false;

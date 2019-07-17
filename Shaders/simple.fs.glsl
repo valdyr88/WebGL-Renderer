@@ -8,8 +8,8 @@ precision mediump float;
 //------------------------------------------------------------------------------
 
 #if __VERSION__ >= 300
-	#define gl_FragColor glFragColor
-	out vec4 glFragColor;
+	#define gl_FragColor out_FragColor
+	layout(location = 0) out vec4 out_FragColor;
 #endif
 
 #if __VERSION__ >= 120
