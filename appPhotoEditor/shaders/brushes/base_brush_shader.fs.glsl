@@ -33,18 +33,21 @@ varyin vec2 TexCoords;
 
 void main(void)
 {	
-	float4 dither = 0.0275f*(randf4(TexCoords+vec2(Brush.offset_dt_rand.w, 1.0-Brush.offset_dt_rand.w)));
+	float4 dither = 0.0275f*(randf4(TexCoords+vec2(sBrush_getRandom(), 1.0-sBrush_getRandom())));
 	
 	vec4 old = texture2D(txDiffuse, TexCoords);
-	
-	float dT = Brush.offset_dt_rand.z;
-	vec2 toPos = Brush.position_rotation.xy - TexCoords.xy;
+			
+	float dT = sBrush_getdTime();
+	vec2 toPos = sBrush_getPosition().xy - TexCoords.xy;
 	float distToPos = length(toPos) * 500.0f;
 	float invDistToPos = 1.0f / max(0.01f, distToPos);
 	invDistToPos = saturate(invDistToPos-0.01f);
 	
-	vec4 add = (vec4(10.0)+150.0*dither)*dT*invDistToPos*Brush.color;
+	vec4 add = (vec4(10.0)+150.0*dither)*dT*invDistToPos*sBrush_getColor();
 	
-	gl_FragColor = old + add;
+	if(sBrush_isPressed() == true){
+		gl_FragColor = old + add; }
+	else {
+		gl_FragColor = old; }
 	gl_FragColor.a = length(glFragColor.xyz);
 }

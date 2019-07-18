@@ -162,7 +162,10 @@ export function main()
 		if(bBtnLeft == true){
 			cmd = new app.command.CCommand();
 			cmd.set(doc.objectId, "CDocument", "mouseEvent", bBtnLeft, mousePos, "absoluteMousePos");
+			abrush.setPressed(true);
 		}
+		else
+			abrush.setPressed(false);
 		
 		abrush.setColor(Math.cos(time)*0.5+0.5, Math.sin(time)*0.5+0.5, 1.0-Math.sin(time)*0.5+0.5);
 		abrush.setDeltaTime(Math.min(dTime, 1.0/15.0));

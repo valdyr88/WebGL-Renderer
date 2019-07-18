@@ -10,17 +10,24 @@ export class CBrush extends command.ICommandExecute{
 		this.setType("CBrush");
 		this.position = [0,0];
 		this.rotation = [0,0];
+		this.scale = [1,1];
 		this.color = [1,1,1,1];
 		this.offset = [0,0];
 		this.dt = 0.0;
 		this.time = 0.0;
 		this.random = 0.0;
+		this.intensity = 1.0;
+		this.flags = 0;
 		this.UniformBlock = null;
 		this.CreateUniformBlock();
 		this.shader = null;
 		this.shaderName = "";
 		this.bNeedsToUpdateUniformBlock = true;
 		this.bPressed = false; //is applied to document
+	}
+	
+	setPressed(bPressed){
+		this.flags = (this.flags & ~CBrush.bitmask_bPressed) | (bPressed << CBrush.bitnumb_bPressed);
 	}
 	
 	setPosition(pos){ this.position[0] = pos[0]; this.position[1] = 1.0 - pos[1]; this.bNeedsToUpdateUniformBlock = true; }
@@ -35,10 +42,12 @@ export class CBrush extends command.ICommandExecute{
 		var FloatUint8 = CUniformBlockBuffer.ConvertTypedArray( 
 							new Float32Array([this.position[0], this.position[1], this.rotation[0], this.rotation[1],
 											  this.color[0], this.color[1], this.color[2], this.color[3],
-											  this.offset[0], this.offset[1], this.dt, this.random]),
+											  this.offset[0], this.offset[1], this.dt, this.random,
+											  this.scale[0], this.scale[1], this.intensity]),
+							new Uint32Array( [this.flags] ),
 											Uint8Array);
-		var i = 0;
-		/* for(var b = 0; b < FloatUint8.length; ++b){
+		/* var i = 0;
+		for(var b = 0; b < FloatUint8.length; ++b){
 			this.UniformBlock.data[i] = FloatUint8[b]; ++i; } */
 		this.UniformBlock.setData(FloatUint8);
 	}
@@ -47,7 +56,7 @@ export class CBrush extends command.ICommandExecute{
 		if(this.UniformBlock != null) return;
 		
 		this.UniformBlock = new CUniformBlockBuffer();
-		this.UniformBlock.Create(3);
+		this.UniformBlock.Create(4);
 	}
 	
 	UpdateUniformBlock(){
@@ -129,6 +138,10 @@ CBrush.Type_Airbrush_Gauss = 1
 CBrush.Type_Airbrush_OneOverLength = 2
 CBrush.Type_Pencil_Aliased = 3
 CBrush.Type_Pencil_AntiAliased = 4
+
+CBrush.bitnumb_bPressed = 31;
+CBrush.bitmask_bPressed = (1 << CBrush.bitnumb_bPressed);//0x7fffffff
+
 
 //ToDo: continue this class
 export class CPencil extends CBrush{
