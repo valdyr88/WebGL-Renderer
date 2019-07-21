@@ -558,4 +558,14 @@ bool intersectRayBBox(const vec3 pos, const vec3 dir, const vec3 boxMin, const v
 
 //================================================================================================================
 
+float distancePointLine(vec3 pt, vec3 lnA, vec3 lnB){
+	return length( cross((pt-lnA),(pt-lnB)))/length(lnA-lnB); }
+float distancePointLine(vec2 pt, vec2 lnA, vec2 lnB){
+	return distancePointLine(vec3(pt.x,pt.y,0.0), vec3(lnA.x,lnA.y,0.0), vec3(lnB.x,lnB.y,0.0)); }
+
+float getClosestPointAlongLine(vec3 pt, vec3 T0, vec3 dir){
+	return -dot(T0-pt, dir) / dot(dir,dir); }
+float getClosestPointAlongLine(vec2 pt, vec2 T0, vec2 dir){
+	return -dot(T0-pt, dir) / dot(dir,dir); }
+
 #endif //GLSL_FUNCTIONS
