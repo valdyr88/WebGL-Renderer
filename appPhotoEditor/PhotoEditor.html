@@ -28,6 +28,7 @@
   <script id="pbr" src="./../Shaders/include/pbr.glsl" type="shader/fragment"></script>
   <script id="defines" src="./../Shaders/include/defines.glsl" type="shader/fragment"></script>
   <script id="sdfunctions" src="./../Shaders/include/sdfunctions.glsl" type="shader/fragment"></script>
+  <script id="splines" src="./../Shaders/include/splines.glsl" type="shader/fragment"></script>
   
   <script id="ubCamera" src="./../Shaders/include/uniformBuffers/ubCamera.glsl" type="shader/fragment"></script>
   <script id="ubLight" src="./../Shaders/include/uniformBuffers/ubLight.glsl" type="shader/fragment"></script>
@@ -42,6 +43,7 @@
    
   <script id="mipmapVS" src="./../Shaders/mipmapgen.vs.glsl" type="shader/vertex"></script>
   <script id="3x3MipGenFS" src="./../Shaders/3x3MipGen.fs.glsl" type="shader/fragment"></script>
+  
   
   <!-- <script id="navigatorModel" src="./../Models/Rock_6.OBJ" type="model/obj"></script> -->
   <!--<script id="navigatorModel" src="./../Models/quadNT.obj" type="model/obj"></script>-->
@@ -79,7 +81,7 @@
 	import { fetchImage } from "./../GLExt/glTexture.js";
 	function wait(ms){ const start = performance.now(); while(performance.now() - start < ms); }
 	
-	var extern_files_list = ["functions", "structs", "pbr", "defines", "sdfunctions", "ubCamera", "ubLight", "ubMaterial", "ubModel", 
+	var extern_files_list = ["functions", "structs", "pbr", "defines", "sdfunctions", "splines", "ubCamera", "ubLight", "ubMaterial", "ubModel", 
 							"simpleVS", "simpleFS", "mainFS", "baseBrushFS", "ubBrush"
 							];//, "tx128"
 	var extern_files_loaded_number = 0;
