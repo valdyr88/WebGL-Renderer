@@ -73,9 +73,8 @@ export function CubicBezier(t, P0, P1, P2, P3){
 	let B2 = 3.0*t2*omt;
 	let B3 = t3;
 	
-	let Pt = [...P0];
-	
 	let vMathVecLib = getvMathVecLib(P0);
+	let Pt = [...P0]; vMathVecLib.scale(Pt,Pt,0.0);
 	
 	vMathVecLib.scaleAndAdd(Pt, Pt,P0,B0);
 	vMathVecLib.scaleAndAdd(Pt, Pt,P1,B1);
@@ -87,11 +86,11 @@ export function CubicBezier(t, P0, P1, P2, P3){
 
 export function CubicBezier_getPointToMatchFirstDerivative(P0, P1, P2, P3, Q3){
 	//Q1 = 2.0*P3 - P1
-	let Q1 = [...P0];
 	
 	let vMathVecLib = getvMathVecLib(P0);
+	let Q1 = [...P0]; vMathVecLib.scale(Q1,Q1,0.0);
 	
-	vMathVecLib.scaleAndAdd(Q1, Q1,P3,2.0);
+	vMathVecLib.scale(Q1, P3,2.0);
 	vMathVecLib.subtract(Q1, Q1,P1);
 	
 	return Q1;
