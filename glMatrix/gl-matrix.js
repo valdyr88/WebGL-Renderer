@@ -55,4 +55,11 @@ export function lerp(a,b,t){
 	return a*(1.0-t)+b*t;
 }
 
+/*
+ fract
+*/
+export function fract(v){
+	return v%1;
+}
+
 export { glMatrix, mat2, mat2d, mat3, mat4, quat, quat2, vec2, vec3, vec4 };

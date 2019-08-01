@@ -4,6 +4,7 @@ import * as vMath from "./../glMatrix/gl-matrix.js"
 import * as img from "./source/layer.js"
 import * as brush from "./source/brush.js"
 import * as app from "./source/app.js"
+import * as splines from "./../GLext/splines.js"
 
 var gl = null;
 var bReplayCommands = false;
@@ -120,6 +121,36 @@ export function main()
 	
 	var commandList = [];
 	
+	var P0 = [0.0, 0.0];
+	var P1 = [0.1, 0.4];
+	var P2 = [0.3, 0.1];
+	var P3 = [0.7, 0.7];
+	var Q3 = [1.0, 1.0];
+	var Q0 = P3;
+	
+	var Q1 = splines.CubicBezier_getPointToMatchFirstDerivative(P0,P1,P2,P3);
+	var Q2 = splines.CubicBezier_getPointToMatchSecondDerivative(P0,P1,P2,P3,Q1);
+	
+	var Q1Q2 = splines.CubicBezier_ScaleMiddlePoints(Q0,Q1,Q2,Q3);
+	Q1 = Q1Q2[0]; Q2 = Q1Q2[1];
+	Q1 = [Q1[1],Q1[0]]; Q2 = [Q2[1],Q2[0]];
+	
+	function setPointToCmd(doc, cmd, Ct){
+		if(cmd != null && doc.cursor != null){
+			cmd.commandParams.params[1].value[0] = Ct[0]*doc.cursor.width*0.5+doc_paint_canvas.baseWindowOffset[0];
+			cmd.commandParams.params[1].value[1] = Ct[1]*doc.cursor.height*0.5+doc_paint_canvas.baseWindowOffset[1];
+		}
+	}
+	
+	function setControlPointToBrush(doc, brush, cmd, Ct, color){
+		brush.setColor(color[0],color[1],color[2]);
+		setPointToCmd(doc, cmd, Ct);
+	}
+	
+	let ControlPoints = [P0,P1,P2,P3,Q0,Q1,Q2,Q3];
+	
+	let frameNo = 0;
+	
 	setInterval( function(){ window.requestAnimationFrame(renderFrame); }, 5);
 	
 	//ToDo: how to design undo code for brush strokes -> every brush stroke needs to be undoable (to a certan history limit)
@@ -158,6 +189,9 @@ export function main()
 		if(sys.mouse.get().bLeftUp == true)
 			bBtnLeft = false;
 		
+		if(frameNo < 8)
+			bBtnLeft = true;
+		
 		let cmd = null;
 		if(bBtnLeft == true){
 			cmd = new app.command.CCommand();
@@ -170,6 +204,18 @@ export function main()
 		abrush.setColor(Math.cos(time)*0.5+0.5, Math.sin(time)*0.5+0.5, 1.0-Math.sin(time)*0.5+0.5);
 		abrush.setDeltaTime(Math.min(dTime, 1.0/15.0));
 		abrush.setRandom(Math.random());
+		
+		let t = vMath.fract(time/2.0)*2.0; let Ct = [];
+		if(t < 1.0)
+			Ct = splines.CubicBezier(t, P0, P1, P2, P3);
+		else
+			Ct = splines.CubicBezier(vMath.fract(t), Q0, Q1, Q2, Q3);
+		
+		setPointToCmd(doc, cmd, Ct);
+		
+		if(frameNo < 8){
+			setControlPointToBrush(doc, abrush, cmd, ControlPoints[frameNo], (frameNo<4)? [0.0,5.0,2.0] : [5.0,2.0,0.0]);
+		}
 		
 		doc.setBrush(abrush);
 		doc.Update(cmd); //mousePos[0], mousePos[1], bBtnLeft
@@ -197,6 +243,7 @@ export function main()
 		}
 		
 		bReplayCommands = false;
+		++frameNo;
 	}
 	return;
 }

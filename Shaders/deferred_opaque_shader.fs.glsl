@@ -1,6 +1,6 @@
 #version 300 es
 // #extension GL_EXT_shader_texture_lod : require
-precision mediump float;
+precision highp float;
 
 #global_defines
 #include "defines"
@@ -42,6 +42,12 @@ varyin vec2 TexCoords;
 varyin vec3 Position;
 varyin vec3 ViewVector;
 
+
+#define gammaValue (1.0/1.8)
+#define gammaScale (1.0/1.75)
+
+//ToDo: treba napravit vertex shader koji racuna tocan ViewVector
+
 #include "pbr"
 
 //------------------------------------------------------------------------------
@@ -57,13 +63,13 @@ vec3 shade_hdr_decode(vec4 rgbe){
 
 vec3 shade_pbr(vec4 diffuse, vec3 normal, vec4 AoRSMt, float depth, float2 texCoord, mat4 InvVPMat){
 	
-	float roughness = AoRSMt.y;
+	float roughness = clamp(AoRSMt.y,0.01f,0.99f);
 	float ambientOcclusion = AoRSMt.x;
 	
 	float metalness = 0.0f;
 	float3 specular = float3( AoRSMt.z*0.22f );
 	
-	normal = 2.0f*normal - 1.0f;
+	normal = 2.0f*normal - 1.0f; normal = normalize(normal);
 	vec3 position = PositionFromDepth(texCoord, depth, InvVPMat);
 	// vec3 position = Position;
 	
@@ -123,10 +129,15 @@ void main(void)
 	float dLNv95 = float(dLN > 0.1);
 	shade = vec3(shade.x,shade.y,shade.z+dLNv95);
 	// shade = vec3(dLN > 0.1);
-	 */
+	*/
 	// float d = desaturate(shade);
 	// shade = tovec3(d);
 	// if(d > 1.0f) shade = vec3(0.7,0.1,0.9);
+	
+	shade = gammaScale * gamma(shade, gammaValue);
+	
+	// shade = vec3(AoRSMt.g);
+	// shade = vec3(dot(normal.xyz, normalize(ViewVector)));
 	
 	// gl_FragColor = prepare_output(shade);	
 	#ifdef USE_HDR_RGBA8

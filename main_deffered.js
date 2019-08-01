@@ -265,6 +265,8 @@ export function main(){
 	var RightAdd = vMath.vec3.create();
 	var UpAdd = vMath.vec3.create();
 	
+	var bEnableRotation = false;
+	
 	function renderFrame()
 	{
 		time = sys.time.getSecondsSinceStart();
@@ -276,7 +278,7 @@ export function main(){
 			CCamera.setViewportWidthHeight(gl.viewportWidth,gl.viewportHeight);}
 		
 		vMath.mat4.identity(model.Transform);
-		vMath.mat4.rotate(model.Transform, model.Transform, vMath.deg2rad(time*10), [0,0,1]);/*  */
+		if(bEnableRotation) vMath.mat4.rotate(model.Transform, model.Transform, vMath.deg2rad(time*10), [0,0,1]);/*  */
 		
 		vMath.mat4.identity(navigatorModel.Transform);
 		vMath.mat4.setTranslation(navigatorModel.Transform, navigatorModel.Transform, [ -1.0, -ctime*0.5, 0.0]);
@@ -306,7 +308,7 @@ export function main(){
 		
 		if(sys.mouse.get().dz != 0)
 		{
-			orbital.radius = orbital.radius - orbital.radius*(sys.mouse.get().dz / 2000.0);
+			orbital.radius = orbital.radius - orbital.radius*(sys.mouse.get().dz / 20.0);
 			if(orbital.radius < 0.1) orbital.radius = 0.1;
 			if(orbital.radius > 100.0) orbital.radius = 100.0;
 			bUpdateCamera = true;

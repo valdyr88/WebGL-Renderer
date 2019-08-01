@@ -41,13 +41,15 @@ varyin vec2 TexCoords;
 varyin vec3 Position;
 varyin vec3 ViewVector;
 
+#define USE_HDR_RGBA8
+
 //------------------------------------------------------------------------------
 
 void main(void)
 {
 	vec4 Amb = textureCube(txAmbient, -Normal.xyz); 
-	Amb.xyz *= 0.25f;
-	Amb.xyz = gamma(Amb.xyz, 0.5f);
+	// Amb.xyz *= 0.25f;
+	Amb.xyz = gamma(Amb.xyz, 1.0f/1.0f);
 #ifdef USE_HDR_RGBA8
 	float4 rgbe = hdr_encode(Amb.xyz);	
 	gl_FragColor = rgbe / 255.0f;

@@ -47,7 +47,7 @@ varyin vec3 ViewVector;
 
 //------------------------------------------------------------------------------
 
-#define isAoRMt_bit 0
+#define isAoRMt_bit 0 //is AoRMt instead of AoRS
 
 // #define debug_PerfectReflection
 
@@ -63,20 +63,19 @@ void main(void)
 	// ambientOcclusion = 1.0f;
 	
 	float Metalness = float(uint_getbit(uFlags, isAoRMt_bit) == true);
-	float3 specular = float3( AoRS.z*0.22f );
 	
 	/* if(uint_getbit(uFlags, isAoRMt_bit) == true){
 		specular = float3( lerp( tofloat3(max(AoRS.z,0.22f)), diffuse.xyz, AoRS.z ));
 		Metalness = AoRS.z;
 	} */
-	
+		
 	#ifdef debug_PerfectReflection
 		diffuse = tovec4(1.0f);
 		AoRS = vec4(1.0f, 0.0f, 1.0f, 1.0f);
 		ambientOcclusion = 1.0f;
-		specular = vec3(1.0f,1.0f,1.0f);
 		Metalness = 1.0f;
 		roughness = 0.0f;
+		normaltx.xyz = vec3(0.5f,0.5f,1.0f);
 	#endif
 	
 	mat3 NormalMatrix = CreateRotationMatrix(Tangent, Bitangent, Normal);
