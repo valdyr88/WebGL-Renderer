@@ -74,7 +74,7 @@ export function CubicBezier(t, P0, P1, P2, P3){
 	let B3 = t3;
 	
 	let vMathVecLib = getvMathVecLib(P0);
-	let Pt = [...P0]; vMathVecLib.scale(Pt,Pt,0.0);
+	let Pt = vMathVecLib.create();
 	
 	vMathVecLib.scaleAndAdd(Pt, Pt,P0,B0);
 	vMathVecLib.scaleAndAdd(Pt, Pt,P1,B1);
@@ -85,28 +85,26 @@ export function CubicBezier(t, P0, P1, P2, P3){
 }
 
 export function CubicBezier_getPointToMatchFirstDerivative(P0, P1, P2, P3, Q3){
-	//Q1 = 2.0*P3 - P1
+	//Q1 = 2.0*P3 - P2
 	
 	let vMathVecLib = getvMathVecLib(P0);
-	let Q1 = [...P0]; vMathVecLib.scale(Q1,Q1,0.0);
+	let Q1 = vMathVecLib.create();
 	
 	vMathVecLib.scale(Q1, P3,2.0);
-	vMathVecLib.subtract(Q1, Q1,P1);
+	vMathVecLib.subtract(Q1, Q1,P2);
 	
 	return Q1;
 }
 
 export function CubicBezier_getPointToMatchSecondDerivative(P0, P1, P2, P3, Q1, Q3){
-	//Q2 = 4.0*P3-2.0*P2-P1
-	//Q2 = 2.0*Q1-2.0*P2+P1
-	let Q2 = [...P0];
-	let p3 = [...P3];
+	//Q2 = 4.0*P3-4.0*P2+P1
 	
 	let vMathVecLib = getvMathVecLib(P0);
+	let Q2 = vMathVecLib.create();
+	let p3 = vMathVecLib.create();
 	
-	vMathVecLib.scaleAndAdd(Q2, P1,P2,2.0);
-	vMathVecLib.scale(p3, P3,4.0);
-	vMathVecLib.subtract(Q2, p3,Q2);
+	vMathVecLib.scaleAndAdd(Q2, P1,P2,-4.0);
+	vMathVecLib.scaleAndAdd(Q2, Q2,P3, 4.0);
 	
 	return Q2;
 }
