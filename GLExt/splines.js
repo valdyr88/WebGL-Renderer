@@ -64,7 +64,7 @@ export function ICubicBezier(t, P){
 //cubic Bezier
 //-----------------------------------------------------------------------------
 
-export function CubicBezier(t, P0, P1, P2, P3){
+export function CubicBezier(t, P0, P1, P2, P3, vMathVecLib){
 	let t2 = t*t; let t3 = t2*t;
 	let omt = 1.0-t; let omt2 = omt*omt; let omt3 = omt2*omt;
 	
@@ -73,7 +73,8 @@ export function CubicBezier(t, P0, P1, P2, P3){
 	let B2 = 3.0*t2*omt;
 	let B3 = t3;
 	
-	let vMathVecLib = getvMathVecLib(P0);
+	if(vMathVecLib == undefined || vMathVecLib == null)
+		vMathVecLib = getvMathVecLib(P0);
 	let Pt = vMathVecLib.create();
 	
 	vMathVecLib.scaleAndAdd(Pt, Pt,P0,B0);
@@ -126,4 +127,66 @@ export function CubicBezier_ScaleMiddlePoints(Q0, Q1, Q2, Q3){
 	return [Q1,Q2];
 }
 
+// generate interpolated points
+//-----------------------------------------------------------------------------
+
+function getNormalizedLine(A,B,vMathVecLib){
+	let rtn = vMathVecLib.create();
+	vMathVecLib.subtract(rtn, B,A);
+	vMathVecLib.normalize(rtn, rtn);
+	return rtn;
+}
+
+export function CubicBezier_GenerateInterpolatedPoints(
+							P0, P1, P2, P3, 
+							initialDeltaT, minimalDeltaT, maxAngle, maxDistance)
+{
+	let cosMaxAngle = Math.cos(vMath.deg2rad(maxAngle));
+	let vMathVecLib = getvMathVecLib(P0);
+	
+	let dT = initialDeltaT;
+	let t = 0.0;
+	
+	let Pt = CubicBezier(dT, P0, P1, P2, P3, vMathVecLib);
+	let Pts = [P0,Pt];
+	
+	let prevLine = getNormalizedLine(P0, Pt, vMathVecLib);
+	
+	let i = 0;
+	
+	for(t = 2.0*dT; t < 1.0; t += dT){
+		Pt = CubicBezier(t, P0, P1, P2, P3, vMathVecLib);
+		let pPt = Pts[Pts.length-1];
+		
+		let line = getNormalizedLine(pPt, Pt, vMathVecLib);
+		let lineLengthSquared = vMathVecLib.squaredLength(line);
+		if(lineLengthSquared < 0.99 || lineLengthSquared > 1.01){
+			dT = 1.2*initialDeltaT; continue; }
+		let cosAngle = vMathVecLib.dot(line, prevLine); //aligment between lines
+		let dist = vMathVecLib.distance(pPt, Pt);
+		
+		if((cosAngle > cosMaxAngle) && (dist < maxDistance)){
+			Pts[Pts.length] = Pt;
+			prevLine = line; //store current line for next iteration
+			dT *= 1.2;
+		}
+		else{ //conditions don't hold, half the dT and try again
+			if(dT < minimalDeltaT){ //but if dT is low, then just store point and move on...
+				Pts[Pts.length] = Pt;
+				dT = minimalDeltaT;
+				prevLine = line; //store current line for next iteration
+			}
+			else{
+				t -= dT; //track back
+				dT *= 0.5; //half the step
+			}
+		}
+		++i;// if(i > 1000) break;
+	}
+	
+	console.log("GenerateInterpolatedPoints() : " + (Pts.length-1)/i + ", " + (Pts.length-1));
+	
+	Pts[Pts.length] = P3;
+	return Pts;
+}
 //-----------------------------------------------------------------------------
