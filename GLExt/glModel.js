@@ -334,7 +334,7 @@ export class CModel
 		shader.ALVertexTexCoord;
 		*/
 		
-		if(shader.isBinded() == false){ shader.Bind(); }
+		if(shader.isBound() == false){ shader.Bind(); }
         // gl.uniformMatrix4fv(shaderProgram.pMatrixUniform, false, pMatrix);
         if(shader.ULMatrixModel != -1 && shader.ULMatrixModel != null) gl.uniformMatrix4fv(shader.ULMatrixModel, false, this.Transform);
 		

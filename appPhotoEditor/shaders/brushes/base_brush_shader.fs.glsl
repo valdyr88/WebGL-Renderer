@@ -5,6 +5,7 @@ precision highp float;
 #include "defines"
 #include "functions"
 #include "structs"
+#include "splines"
 //------------------------------------------------------------------------------
 
 #if __VERSION__ >= 300
@@ -30,7 +31,7 @@ varyin vec2 TexCoords;
 
 //------------------------------------------------------------------------------
 #include "ubBrush"
-#include "splines"
+#include "ubBrushPoints"
 
 mat4x3 P =  ( 
 			mat4x3( 0.0, 0.0, 0.0,
@@ -94,7 +95,7 @@ void old_main(void)
 	gl_FragColor.a = 1.0;
 }
 
-void main(void)
+void main_old2(void)
 {
 	float4 dither = 0.0275f*(randf4(TexCoords+vec2(sBrush_getRandom(), 1.0-sBrush_getRandom())));
 	
@@ -107,10 +108,51 @@ void main(void)
 	invDistToPos = saturate(invDistToPos-0.01f);
 	
 	vec4 add = (vec4(10.0)+150.0*dither)*dT*invDistToPos*sBrush_getColor();
+	add = sBrush_getColor(); add.a = 1.0;
+	if(distToPos > 1.0) add = vec4(0.0);
 		
 	if(sBrush_isPressed() == true){
-		gl_FragColor = old + add; }
+		gl_FragColor = lerp(old, add, add.a); }
 	else {
 		gl_FragColor = old; }
 	gl_FragColor.a = 1.0;
 }
+
+void testIsLineFacingPoint(){
+	vec2 t = TexCoords.xy;
+	vec2 a = vec2(0.5,0.5); vec2 b = vec2(sin(Time),cos(Time))*0.5 + vec2(0.5);
+
+	if(isLineFacingPoint(t,a,b)) gl_FragColor.xyz = vec3(distancePointLine(t,a,b));
+	else gl_FragColor.xyz = vec3(0.0);
+	
+	if(distancePointLine(t,a,b) < 0.004) gl_FragColor.xyz = vec3(0.0,1.0,0.0);
+	if(length(t-a) < 0.004 || length(t-b) < 0.004) gl_FragColor.xyz = vec3(0.0,0.0,1.0);
+}
+
+void drawLineFacingPoint(vec2 t, vec2 a, vec2 b){
+	if(isLineFacingPoint(t,a,b)) gl_FragColor.xyz = vec3(distancePointLine(t,a,b));
+	
+	// if(distancePointLine(t,a,b) < 0.004) gl_FragColor.xyz = vec3(0.0,1.0,0.0);
+	if(length(t-a) < 0.004 || length(t-b) < 0.004) gl_FragColor.xyz = vec3(0.0,1.0,1.0);
+}
+
+void main(void)
+{
+	float4 dither = 0.0275f*(randf4(TexCoords+vec2(sBrush_getRandom(), 1.0-sBrush_getRandom())));
+	vec4 old = texture2D(txDiffuse, TexCoords);
+	float dT = sBrush_getdTime();
+	
+	// testIsLineFacingPoint();
+	vec2 a = vec2(0.0), b = vec2(0.0);
+	vec2 t = TexCoords.xy;
+	gl_FragColor.xyz = vec3(0.0);
+	
+	for(int i = 0; i < BrushPointCount; ++i){
+		if(getBrushPoints(i, a, b) == false) break;
+		drawLineFacingPoint(t, a, b);
+	}	
+	
+	gl_FragColor.a = 1.0;
+}
+
+

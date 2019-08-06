@@ -568,4 +568,9 @@ float getClosestPointAlongLine(vec3 pt, vec3 T0, vec3 dir){
 float getClosestPointAlongLine(vec2 pt, vec2 T0, vec2 dir){
 	return -dot(T0-pt, dir) / dot(dir,dir); }
 
+bool isLineFacingPoint(vec2 t, vec2 a, vec2 b){
+	return dot(t-a, b-a) > 0.0 && dot(t-b, a-b) > 0.0; }
+bool isLineFacingPoint(vec3 t, vec3 a, vec3 b){
+	return dot(t-a, b-a) > 0.0 && dot(t-b, a-b) > 0.0; }
+	
 #endif //GLSL_FUNCTIONS

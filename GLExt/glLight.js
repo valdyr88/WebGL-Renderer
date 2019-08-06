@@ -123,17 +123,17 @@ export class CLight{
 		PointShader.setProjectionMatrixUniform(Projection);
 	}
 	setDisplayColor(R, G, B, A){
-		if(PointShader.isBinded() == false) PointShader.Bind();
+		if(PointShader.isBound() == false) PointShader.Bind();
 		this.DisplayColor[0] = R; this.DisplayColor[1] = G; this.DisplayColor[2] = B; this.DisplayColor[3] = A;
 		gl.uniform4f(PointShader.ULColor, R, G, B, A);
 	}
 	setDisplaySize(Size){
-		if(PointShader.isBinded() == false) PointShader.Bind();
+		if(PointShader.isBound() == false) PointShader.Bind();
 		this.DisplaySize = Size;
 		gl.uniform1f(PointShader.ULPointSize, Size);
 	}
 	setPosition(x,y,z){
-		if(PointShader.isBinded() == false) PointShader.Bind();
+		if(PointShader.isBound() == false) PointShader.Bind();
 		this.Position[0] = x; this.Position[1] = y; this.Position[2] = z;
 		gl.uniform3f(PointShader.ULPosition, x, y, z);
 		this.bNeedsToUpdateUniformBlock = true;
@@ -159,7 +159,7 @@ export class CLight{
 	
 	UploadToShader(shader, uniformLocations){
 
-		if(shader.isBinded() == false) shader.Bind();
+		if(shader.isBound() == false) shader.Bind();
 		gl.uniform4f(uniformLocations.ULPosition, this.Position[0], this.Position[1], this.Position[2], 0.0f);
 		gl.uniform1f(uniformLocations.ULIntensity, this.Intensity);
 		gl.uniform4f(uniformLocations.ULColor, this.Color[0], this.Color[1], this.Color[2], 1.0f);
@@ -179,7 +179,7 @@ export class CLight{
 	}
 	
 	RenderPosition(){
-		if(PointShader.isBinded() == false) PointShader.Bind();
+		if(PointShader.isBound() == false) PointShader.Bind();
 			
 			CFramebuffer.ActivateDrawBuffers(PointShader);
 			

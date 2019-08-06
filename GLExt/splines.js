@@ -148,7 +148,7 @@ export function CubicBezier_GenerateInterpolatedPoints(
 	let t = 0.0;
 	
 	let Pt = CubicBezier(dT, P0, P1, P2, P3, vMathVecLib);
-	let Pts = [P0,Pt];
+	let Pts = [vMathVecLib.clone(P0),Pt];
 	
 	let prevLine = getNormalizedLine(P0, Pt, vMathVecLib);
 	
@@ -186,7 +186,7 @@ export function CubicBezier_GenerateInterpolatedPoints(
 	
 	console.log("GenerateInterpolatedPoints() : " + (Pts.length-1)/i + ", " + (Pts.length-1));
 	
-	Pts[Pts.length] = P3;
+	Pts[Pts.length] = vMathVecLib.clone(P3);
 	return Pts;
 }
 //-----------------------------------------------------------------------------

@@ -566,7 +566,7 @@ export class CShader
 	setVertexAttribLocations(position, normal, tangent, binormal, texture){
 		
 		if(this.program == null) return false;
-		// if(this.isBinded() == false) this.Bind();
+		// if(this.isBound() == false) this.Bind();
 		
 		this.ALVertexPosition = -1;
 		this.ALVertexNormal = -1;
@@ -591,7 +591,7 @@ export class CShader
 	setTransformMatricesUniformLocation(model, view, projection){
 		
 		if(this.program == null) return false;
-		// if(this.isBinded() == false) this.Bind();
+		// if(this.isBound() == false) this.Bind();
 		
 		this.ULMatrixProjection = -1;
 		this.ULMatrixModel = -1;
@@ -614,91 +614,119 @@ export class CShader
 	setViewMatrixUniform(viewMatrix){
 		if(this.ULMatrixView == undefined || this.ULMatrixView == -1) return false;
 		if(this.program == null) return false;
-		if(this.isBinded() == false) this.Bind();
+		if(this.isBound() == false) this.Bind();
 		
-        gl.uniformMatrix4fv(this.ULMatrixView, false, viewMatrix);
+        gl.uniformMatrix4fv(this.ULMatrixView, false, viewMatrix); return true;
 	}
 	
 	setProjectionMatrixUniform(projectionMatrix){
 		if(this.ULMatrixProjection == undefined || this.ULMatrixProjection == -1) return false;
 		if(this.program == null) return false;
-		if(this.isBinded() == false) this.Bind();
+		if(this.isBound() == false) this.Bind();
 		
-        gl.uniformMatrix4fv(this.ULMatrixProjection, false, projectionMatrix);
+        gl.uniformMatrix4fv(this.ULMatrixProjection, false, projectionMatrix); return true;
 	}
 	
 	
 	setMatrix4Uniform(uniform_location, matrix){
 		if(uniform_location == null ||uniform_location === -1) return false;
 		if(this.program == null) return false;
-		if(this.isBinded() == false) this.Bind();
+		if(this.isBound() == false) this.Bind();
 		
-        gl.uniformMatrix4fv(uniform_location, false, matrix);
+        gl.uniformMatrix4fv(uniform_location, false, matrix); return true;
 	}
 	setMatrix3Uniform(uniform_location, matrix){
 		if(uniform_location == null ||uniform_location === -1) return false;
 		if(this.program == null) return false;
-		if(this.isBinded() == false) this.Bind();
+		if(this.isBound() == false) this.Bind();
 		
-        gl.uniformMatrix3fv(uniform_location, false, matrix);
+        gl.uniformMatrix3fv(uniform_location, false, matrix); return true;
 	}
 	setIntUniform(uniform_location, value){
 		if(uniform_location == null ||uniform_location === -1) return false;
 		if(this.program == null) return false;
-		if(this.isBinded() == false) this.Bind();
+		if(this.isBound() == false) this.Bind();
 		
-		gl.uniform1i(uniform_location, value);
+		gl.uniform1i(uniform_location, value); return true;
 	}
 	setInt2Uniform(uniform_location, value){
 		if(uniform_location == null ||uniform_location === -1) return false;
 		if(this.program == null) return false;
-		if(this.isBinded() == false) this.Bind();
+		if(this.isBound() == false) this.Bind();
 		
-		gl.uniform2iv(uniform_location, value);
+		gl.uniform2iv(uniform_location, value); return true;
 	}
 	setInt3Uniform(uniform_location, value){
 		if(uniform_location == null ||uniform_location === -1) return false;
 		if(this.program == null) return false;
-		if(this.isBinded() == false) this.Bind();
+		if(this.isBound() == false) this.Bind();
 		
-		gl.uniform3iv(uniform_location, value);
+		gl.uniform3iv(uniform_location, value); return true;
 	}
 	setInt4Uniform(uniform_location, value){
 		if(uniform_location == null ||uniform_location === -1) return false;
 		if(this.program == null) return false;
-		if(this.isBinded() == false) this.Bind();
+		if(this.isBound() == false) this.Bind();
 		
-		gl.uniform4iv(uniform_location, value);
+		gl.uniform4iv(uniform_location, value); return true;
 	}
 	setFloatUniform(uniform_location, value){
 		if(uniform_location == null ||uniform_location === -1) return false;
 		if(this.program == null) return false;
-		if(this.isBinded() == false) this.Bind();
+		if(this.isBound() == false) this.Bind();
 		
-		gl.uniform1f(uniform_location, value);
+		gl.uniform1f(uniform_location, value); return true;
 	}
 	setFloat2Uniform(uniform_location, value){
 		if(uniform_location == null ||uniform_location === -1) return false;
 		if(this.program == null) return false;
-		if(this.isBinded() == false) this.Bind();
+		if(this.isBound() == false) this.Bind();
 		
-		gl.uniform2f(uniform_location, value[0],value[1]);
+		gl.uniform2f(uniform_location, value[0],value[1]); return true;
 	}
 	setFloat3Uniform(uniform_location, value){
 		if(uniform_location == null ||uniform_location === -1) return false;
 		if(this.program == null) return false;
-		if(this.isBinded() == false) this.Bind();
+		if(this.isBound() == false) this.Bind();
 		
-		gl.uniform3f(uniform_location, value[0],value[1],value[2]);
+		gl.uniform3f(uniform_location, value[0],value[1],value[2]); return true;
 	}
 	setFloat4Uniform(uniform_location, value){
 		if(uniform_location == null ||uniform_location === -1) return false;
 		if(this.program == null) return false;
-		if(this.isBinded() == false) this.Bind();
+		if(this.isBound() == false) this.Bind();
 		
-		gl.uniform4f(uniform_location, value[0],value[1],value[2],value[3]);
+		gl.uniform4f(uniform_location, value[0],value[1],value[2],value[3]); return true;
 	}
 	
+	setFloatUniformArray(uniform_location, values){
+		if(uniform_location == null ||uniform_location === -1) return false;
+		if(this.program == null) return false;
+		if(this.isBound() == false) this.Bind();
+		
+		gl.uniform1fv(uniform_location, values); return true;
+	}
+	setFloat2UniformArray(uniform_location, values){
+		if(uniform_location == null ||uniform_location === -1) return false;
+		if(this.program == null) return false;
+		if(this.isBound() == false) this.Bind();
+		
+		gl.uniform2fv(uniform_location, values); return true;
+	}
+	setFloat3UniformArray(uniform_location, values){
+		if(uniform_location == null ||uniform_location === -1) return false;
+		if(this.program == null) return false;
+		if(this.isBound() == false) this.Bind();
+		
+		gl.uniform3fv(uniform_location, values); return true;
+	}
+	setFloat4UniformArray(uniform_location, values){
+		if(uniform_location == null ||uniform_location === -1) return false;
+		if(this.program == null) return false;
+		if(this.isBound() == false) this.Bind();
+		
+		gl.uniform4fv(uniform_location, values); return true;
+	}
 	
 	setDefaultTextureUniformLocations(Diffuse, Normal, AoRS){
 		
@@ -814,7 +842,7 @@ export class CShader
 	setFlagsUniform(Flags){
 		if(this.ULFlags == undefined || this.ULFlags == -1) return false;
 		if(this.program == null) return false;
-		if(this.isBinded() == false) this.Bind();
+		if(this.isBound() == false) this.Bind();
 		
 		gl.uniform1i(this.ULFlags, Flags);
 		
@@ -824,7 +852,7 @@ export class CShader
 	setTimeUniform(Time){
 		if(this.ULTime == undefined || this.ULTime == -1) return false;
 		if(this.program == null) return false;
-		if(this.isBinded() == false) this.Bind();
+		if(this.isBound() == false) this.Bind();
 		
 		gl.uniform1f(this.ULTime, Time);
 		
@@ -834,7 +862,7 @@ export class CShader
 	setCameraPositionUniform(Position){
 		if(this.ULCameraPosition == undefined || this.ULCameraPosition == -1) return false;
 		if(this.program == null) return false;
-		if(this.isBinded() == false) this.Bind();
+		if(this.isBound() == false) this.Bind();
 		
 		gl.uniform3f(this.ULCameraPosition, Position[0], Position[1], Position[2]);
 		
@@ -861,7 +889,7 @@ export class CShader
 		gl.useProgram(null); gl.currentShaderProgram = null;
 	}
 	
-	isBinded(){ return this.program === gl.currentShaderProgram; }
+	isBound(){ return this.program === gl.currentShaderProgram; }
 	
 	getFragDataLocations(){
 		return this.FragDataLocations;

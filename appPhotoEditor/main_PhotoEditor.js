@@ -122,10 +122,10 @@ export function main()
 	var commandList = [];
 	
 	var P0 = [0.0, 0.0];
-	var P1 = [0.1, 0.4];
-	var P2 = [0.3, 0.1];
-	var P3 = [0.7, 0.7];
-	var Q3 = [1.0, 1.0];
+	var P1 = [0.2, 0.4];
+	var P2 = [0.2, 0.1];
+	var P3 = [0.5, 0.4];
+	var Q3 = [0.1, 1.0];
 	var Q0 = P3;
 	
 	var Q1 = splines.CubicBezier_getPointToMatchFirstDerivative(P0,P1,P2,P3);
@@ -133,7 +133,6 @@ export function main()
 	
 	var Q1Q2 = splines.CubicBezier_ScaleMiddlePoints(Q0,Q1,Q2,Q3);
 	Q1 = Q1Q2[0]; Q2 = Q1Q2[1];
-	Q1 = [Q1[1],Q1[0]]; Q2 = [Q2[1],Q2[0]];
 	
 	function setPointToCmd(doc, cmd, Ct){
 		if(cmd != null && doc.cursor != null){
@@ -149,9 +148,12 @@ export function main()
 	
 	let ControlPoints = [P0,P1,P2,P3,Q0,Q1,Q2,Q3];
 	
+	let PointsP = splines.CubicBezier_GenerateInterpolatedPoints(P0,P1,P2,P3, 0.02,0.0002,2.5,0.05);
+	let PointsQ = splines.CubicBezier_GenerateInterpolatedPoints(Q0,Q1,Q2,Q3, 0.02,0.0002,2.5,0.05);
+	
 	let frameNo = 0;
 	
-	setInterval( function(){ window.requestAnimationFrame(renderFrame); }, 5);
+	setInterval( function(){ window.requestAnimationFrame(renderFrame); }, 32);
 	
 	//ToDo: how to design undo code for brush strokes -> every brush stroke needs to be undoable (to a certan history limit)
 	/*
@@ -202,20 +204,26 @@ export function main()
 			abrush.setPressed(false);
 		
 		abrush.setColor(Math.cos(time)*0.5+0.5, Math.sin(time)*0.5+0.5, 1.0-Math.sin(time)*0.5+0.5);
+		abrush.setColor(0.2, 0.5, 1.0);
 		abrush.setDeltaTime(Math.min(dTime, 1.0/15.0));
 		abrush.setRandom(Math.random());
 		
-		let t = vMath.fract(time/2.0)*2.0; let Ct = [];
-		if(t < 1.0)
-			Ct = splines.CubicBezier(t, P0, P1, P2, P3);
-		else
-			Ct = splines.CubicBezier(vMath.fract(t), Q0, Q1, Q2, Q3);
+		/*let t = vMath.fract(time/2.0)*2.0; let Ct = [];
+		if(t < 1.0){
+			Ct = splines.CubicBezier(t, P0, P1, P2, P3); abrush.setColor(0.2, 0.5, 1.0); }
+		else{
+			Ct = splines.CubicBezier(vMath.fract(t), Q0, Q1, Q2, Q3); abrush.setColor(0.2, 1.0, 0.5); }
 		
-		setPointToCmd(doc, cmd, Ct);
+		setPointToCmd(doc, cmd, Ct);*/
 		
-		if(frameNo < 8){
-			setControlPointToBrush(doc, abrush, cmd, ControlPoints[frameNo], (frameNo<4)? [0.0,5.0,2.0] : [5.0,2.0,0.0]);
+		/*if(frameNo < PointsP.length){
+			setControlPointToBrush(doc, abrush, cmd, PointsP[frameNo], (true)? [0.0,1.0,0.4] : [1.0,0.4,0.0]);
 		}
+		else if(frameNo < PointsP.length+PointsQ.length){
+			setControlPointToBrush(doc, abrush, cmd, PointsQ[frameNo-PointsP.length], (false)? [0.0,1.0,0.4] : [1.0,0.4,0.0]);
+		}*/
+		
+		abrush.UploadPointListToShader(PointsP);
 		
 		doc.setBrush(abrush);
 		doc.Update(cmd); //mousePos[0], mousePos[1], bBtnLeft

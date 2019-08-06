@@ -83,6 +83,8 @@ export class CBrush extends command.ICommandExecute{
 		this.shader.InitDefaultUniformLocations();
 		this.shader.InitDefaultAttribLocations();
 		this.AttachUniformBlockTo(this.shader);
+		this.shader.ULBrushPoints = this.shader.getUniformLocation("BrushPoints");
+		this.shader.ULBrushPointCount = this.shader.getUniformLocation("BrushPointCount");
 		this.shaderName = str_brush_shader;
 	}
 	
@@ -132,12 +134,24 @@ export class CBrush extends command.ICommandExecute{
 		return true;
 	}
 	//------------------------------------------------------------------------
+	
+	UploadPointListToShader(points){
+		if(this.shader.ULBrushPoints == -1) return false;
+		if(points.length > CBrush.ubBrushPoints_MAX_BRUSH_POINTS) return false;
+		
+		let combinedArray = new Float32Array(points.length*2);
+		for(let i = 0; i < points.length; ++i){ combinedArray.set(points[i], i*2); }
+		
+		let rtn = this.shader.setFloat2UniformArray(this.shader.ULBrushPoints, combinedArray);
+		return rtn && this.shader.setIntUniform(this.shader.ULBrushPointCount, points.length);
+	}
 }
 
 CBrush.Type_Airbrush_Gauss = 1
 CBrush.Type_Airbrush_OneOverLength = 2
 CBrush.Type_Pencil_Aliased = 3
 CBrush.Type_Pencil_AntiAliased = 4
+CBrush.ubBrushPoints_MAX_BRUSH_POINTS = 256 //match this with constant in ubBrushPoints.glsl
 
 CBrush.bitnumb_bPressed = 31;
 CBrush.bitmask_bPressed = (1 << CBrush.bitnumb_bPressed);//0x7fffffff
@@ -150,6 +164,5 @@ export class CPencil extends CBrush{
 		super();
 		this.setType("CPencil");
 	}
-	
 	
 }

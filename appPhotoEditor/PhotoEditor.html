@@ -34,6 +34,7 @@
   <script id="ubLight" src="./../Shaders/include/uniformBuffers/ubLight.glsl" type="shader/fragment"></script>
   <script id="ubMaterial" src="./../Shaders/include/uniformBuffers/ubMaterial.glsl" type="shader/fragment"></script>
   <script id="ubModel" src="./../Shaders/include/uniformBuffers/ubModel.glsl" type="shader/fragment"></script>
+  <script id="ubBrushPoints" src="./shaders/uniformBuffers/ubBrushPoints.glsl" type="shader/fragment"></script>
   <script id="ubBrush" src="./shaders/uniformBuffers/ubBrush.glsl" type="shader/fragment"></script>
   
   <script id="simpleVS" src="./shaders/simple.vs.glsl" type="shader/vertex"></script>
@@ -82,7 +83,7 @@
 	function wait(ms){ const start = performance.now(); while(performance.now() - start < ms); }
 	
 	var extern_files_list = ["functions", "structs", "pbr", "defines", "sdfunctions", "splines", "ubCamera", "ubLight", "ubMaterial", "ubModel", 
-							"simpleVS", "simpleFS", "mainFS", "baseBrushFS", "ubBrush"
+							"simpleVS", "simpleFS", "mainFS", "baseBrushFS", "ubBrush", "ubBrushPoints"
 							];//, "tx128"
 	var extern_files_loaded_number = 0;
 	
