@@ -121,7 +121,7 @@ export function main()
 	
 	var commandList = [];
 	
-	var P0 = [0.0, 0.0];
+	var P0 = [0.1, 0.2];
 	var P1 = [0.2, 0.4];
 	var P2 = [0.2, 0.1];
 	var P3 = [0.5, 0.4];
@@ -207,6 +207,9 @@ export function main()
 		abrush.setColor(0.2, 0.5, 1.0);
 		abrush.setDeltaTime(Math.min(dTime, 1.0/15.0));
 		abrush.setRandom(Math.random());
+		
+		abrush.setStrokeStart();
+		abrush.setStrokeEnd();
 		
 		/*let t = vMath.fract(time/2.0)*2.0; let Ct = [];
 		if(t < 1.0){

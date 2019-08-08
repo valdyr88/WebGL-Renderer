@@ -32,10 +32,15 @@ vec2 sBrush_getScale(){ return sBrush_getScale(Brush.data); }
 float sBrush_getIntensity(sBrush brush){ return brush.scale_intensity.z; }
 float sBrush_getIntensity(){ return sBrush_getIntensity(Brush.data); }
 
-
 #define sBrushFlags_bitmask_isPressed (1<<31)
+#define sBrushFlags_bitmask_isStrokeStart (1<<0)
+#define sBrushFlags_bitmask_isStrokeEnd (1<<1)
 
 bool sBrush_isPressed(sBrush brush){ return (brush.flags & sBrushFlags_bitmask_isPressed) != 0; }
 bool sBrush_isPressed(){ return sBrush_isPressed(Brush.data); }
+bool sBrush_isStrokeStart(sBrush brush){ return (brush.flags & sBrushFlags_bitmask_isStrokeStart) != 0; }
+bool sBrush_isStrokeStart(){ return sBrush_isStrokeStart(Brush.data); }
+bool sBrush_isStrokeEnd(sBrush brush){ return (brush.flags & sBrushFlags_bitmask_isStrokeEnd) != 0; }
+bool sBrush_isStrokeEnd(){ return sBrush_isStrokeEnd(Brush.data); }	
 
 #endif //PHAPP_SBRUSH

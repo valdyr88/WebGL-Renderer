@@ -120,20 +120,22 @@ void main_old2(void)
 
 void testIsLineFacingPoint(){
 	vec2 t = TexCoords.xy;
-	vec2 a = vec2(0.5,0.5); vec2 b = vec2(sin(Time),cos(Time))*0.5 + vec2(0.5);
+	vec2 a = vec2(0.5,0.5);
+	//vec2 b = vec2(sin(Time),cos(Time))*0.5 + vec2(0.5);
+	vec2 b = vec2(0.75,0.75);
 
-	if(isLineFacingPoint(t,a,b)) gl_FragColor.xyz = vec3(distancePointLine(t,a,b));
+	if(isLineFacingPoint(t,a,b,0.1)) gl_FragColor.xyz = vec3(distancePointLine(t,a,b));
 	else gl_FragColor.xyz = vec3(0.0);
 	
 	if(distancePointLine(t,a,b) < 0.004) gl_FragColor.xyz = vec3(0.0,1.0,0.0);
 	if(length(t-a) < 0.004 || length(t-b) < 0.004) gl_FragColor.xyz = vec3(0.0,0.0,1.0);
 }
 
-void drawLineFacingPoint(vec2 t, vec2 a, vec2 b){
-	if(isLineFacingPoint(t,a,b)) gl_FragColor.xyz = vec3(distancePointLine(t,a,b));
+void drawLineFacingPoint(vec2 t, vec2 a, vec2 b, out float dist){
+	if(isLineFacingPoint(t,a,b,0.1)){ dist = min(dist, distancePointLine(t,a,b)); }
 	
 	// if(distancePointLine(t,a,b) < 0.004) gl_FragColor.xyz = vec3(0.0,1.0,0.0);
-	if(length(t-a) < 0.004 || length(t-b) < 0.004) gl_FragColor.xyz = vec3(0.0,1.0,1.0);
+	// if(length(t-a) < 0.004 || length(t-b) < 0.004) gl_FragColor.xyz = vec3(0.0,1.0,1.0);
 }
 
 void main(void)
@@ -146,12 +148,24 @@ void main(void)
 	vec2 a = vec2(0.0), b = vec2(0.0);
 	vec2 t = TexCoords.xy;
 	gl_FragColor.xyz = vec3(0.0);
-	
+	float dist = 1e32;
+		
 	for(int i = 0; i < BrushPointCount; ++i){
-		if(getBrushPoints(i, a, b) == false) break;
-		drawLineFacingPoint(t, a, b);
-	}	
+		if(sBrushPoints_getSegmentPoints(i, a, b) == false) break;
+		drawLineFacingPoint(t, a, b, dist);
+	}
 	
+	if(sBrush_isStrokeStart() == true){
+		sBrushPoints_getFirstPoint(a);
+		dist = min(dist, length(a-t));
+	}
+	if(sBrush_isStrokeEnd() == true){
+		sBrushPoints_getLastPoint(b);
+		dist = min(dist, length(b-t));
+	}
+	
+	gl_FragColor.xyz = vec3(gauss(2.0, dist*25.0));
+	// gl_FragColor.xyz = vec3(dist);
 	gl_FragColor.a = 1.0;
 }
 

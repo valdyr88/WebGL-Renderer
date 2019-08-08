@@ -29,6 +29,14 @@ export class CBrush extends command.ICommandExecute{
 	setPressed(bPressed){
 		this.flags = (this.flags & ~CBrush.bitmask_bPressed) | (bPressed << CBrush.bitnumb_bPressed);
 	}
+	setStrokeStart(bStart){
+		if(bStart == undefined) bStart = true;
+		this.flags = (this.flags & ~CBrush.bitmask_isStrokeStart) | (bStart << CBrush.bitnumb_isStrokeStart);
+	}
+	setStrokeEnd(bEnd){
+		if(bEnd == undefined) bEnd = true;
+		this.flags = (this.flags & ~CBrush.bitmask_isStrokeEnd) | (bEnd << CBrush.bitnumb_isStrokeEnd);
+	}
 	
 	setPosition(pos){ this.position[0] = pos[0]; this.position[1] = 1.0 - pos[1]; this.bNeedsToUpdateUniformBlock = true; }
 	setRotation(rot){ this.rotation[0] = rot[0]; this.rotation[1] = rot[1]; this.bNeedsToUpdateUniformBlock = true; }
@@ -147,15 +155,19 @@ export class CBrush extends command.ICommandExecute{
 	}
 }
 
-CBrush.Type_Airbrush_Gauss = 1
-CBrush.Type_Airbrush_OneOverLength = 2
-CBrush.Type_Pencil_Aliased = 3
-CBrush.Type_Pencil_AntiAliased = 4
-CBrush.ubBrushPoints_MAX_BRUSH_POINTS = 256 //match this with constant in ubBrushPoints.glsl
+CBrush.Type_Airbrush_Gauss = 1;
+CBrush.Type_Airbrush_OneOverLength = 2;
+CBrush.Type_Pencil_Aliased = 3;
+CBrush.Type_Pencil_AntiAliased = 4;
+
+CBrush.ubBrushPoints_MAX_BRUSH_POINTS = 256; //match this with constant in ubBrushPoints.glsl
 
 CBrush.bitnumb_bPressed = 31;
 CBrush.bitmask_bPressed = (1 << CBrush.bitnumb_bPressed);//0x7fffffff
-
+CBrush.bitnumb_isStrokeStart = 0;
+CBrush.bitmask_isStrokeStart = (1 << CBrush.bitnumb_isStrokeStart);
+CBrush.bitnumb_isStrokeEnd = 1;
+CBrush.bitmask_isStrokeEnd = (1 << CBrush.bitnumb_isStrokeEnd);
 
 //ToDo: continue this class
 export class CPencil extends CBrush{

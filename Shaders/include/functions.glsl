@@ -31,6 +31,9 @@
 #define FLT_MIN (1.175494351e-38)
 #define FLT_MAX (3.402823466e+38)
 
+#define deg2rad(a) ((a)*(PI/180.0))
+#define rad2deg(a) ((a)*(180.0/PI))
+
 #define LinearizeDepth(x,n,f) ((2.0 * n) / (f + n - x * (f - n)))
 #define LinearizeDepthAndSubtract(b,a,n,f) (LinearizeDepth(b,n,f) - LinearizeDepth(a,n,f))
 #define LinearizeDepth2(x,n,f) ((2.0 * n) / (f + lerp(n,f,-x)))
@@ -572,5 +575,15 @@ bool isLineFacingPoint(vec2 t, vec2 a, vec2 b){
 	return dot(t-a, b-a) > 0.0 && dot(t-b, a-b) > 0.0; }
 bool isLineFacingPoint(vec3 t, vec3 a, vec3 b){
 	return dot(t-a, b-a) > 0.0 && dot(t-b, a-b) > 0.0; }
-	
+
+bool isLineFacingPoint(vec2 t, vec2 a, vec2 b, float cosangle){
+	return dot(normalize(t-a), normalize(b-a)) > -cosangle && dot(normalize(t-b), normalize(a-b)) > -cosangle; }
+bool isLineFacingPoint(vec3 t, vec3 a, vec3 b, float cosangle){
+	return dot(normalize(t-a), normalize(b-a)) > -cosangle && dot(normalize(t-b), normalize(a-b)) > -cosangle; }
+
+float alphaLineFacingPoint(vec2 t, vec2 a, vec2 b, float cosangle){
+	float dta = dot(normalize(t-a), normalize(b-a)), dtb = dot(normalize(t-b), normalize(a-b));
+	float sta = saturate(-dta), stb = saturate(-dtb);
+	return 1.0-saturate((sta/cosangle)+(stb/cosangle));
+}
 #endif //GLSL_FUNCTIONS
