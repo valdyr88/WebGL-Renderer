@@ -10,7 +10,7 @@ export class CFramebuffer{
 	constructor(bindPrevFB){
 		this.framebuffer = -1;
 		this.attachedTextures = [];
-		this.attachedDepth = -1;
+		this.attachedDepth = null;
 		this.width = -1;
 		this.height = -1;
 		this.bRestorePrevFB = bindPrevFB;
@@ -30,7 +30,7 @@ export class CFramebuffer{
 		CFramebuffer.Bind(this.framebuffer);
 		
 		gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0+slot, gl.TEXTURE_2D, texture.texture, level);
-		this.attachedTextures[slot] = texture.SlotID;
+		this.attachedTextures[slot] = texture;
 		this.width = texture.width; this.height = texture.height;
 		if(this.bAutoSetupUsage == true) this.SetupUsage();
 		
@@ -49,7 +49,7 @@ export class CFramebuffer{
 		for(let slot = 0; slot < textures.length; ++slot){
 			let texture = textures[slot];
 			gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0+slot, gl.TEXTURE_2D, texture.texture, level);
-			this.attachedTextures[slot] = texture.SlotID;
+			this.attachedTextures[slot] = texture;
 		}
 		this.width = textures[0].width; this.height = textures[0].height;
 		if(this.bAutoSetupUsage == true) this.SetupUsage();
@@ -66,7 +66,7 @@ export class CFramebuffer{
 		CFramebuffer.Bind(this.framebuffer);
 		
 		gl.framebufferTextureLayer(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0+slot, texture.texture, level, nlayer);
-		this.attachedTextures[slot] = texture.SlotID;
+		this.attachedTextures[slot] = texture;
 		this.width = texture.width; this.height = texture.height;
 		if(this.bAutoSetupUsage == true) this.SetupUsage();
 		
@@ -85,7 +85,7 @@ export class CFramebuffer{
 		for(let slot = 0; slot < textures.length; ++slot){
 			let texture = textures[slot];
 			gl.framebufferTextureLayer(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0+slot, texture.texture, level, nlayer);
-			this.attachedTextures[slot] = texture.SlotID;
+			this.attachedTextures[slot] = texture;
 		}
 		this.width = textures[0].width; this.height = textures[0].height;
 		if(this.bAutoSetupUsage == true) this.SetupUsage();
@@ -108,7 +108,7 @@ export class CFramebuffer{
 		for(let s = 0; s < slots.length; ++s){
 			let slot = slots[s]; let nlayer = nlayers[s];
 			gl.framebufferTextureLayer(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0+slot, texture.texture, level, nlayer);
-			this.attachedTextures[slot] = texture.SlotID;
+			this.attachedTextures[slot] = texture;
 		}
 		this.width = texture.width; this.height = texture.height;
 		if(this.bAutoSetupUsage == true) this.SetupUsage();
@@ -125,7 +125,7 @@ export class CFramebuffer{
 		CFramebuffer.Bind(this.framebuffer);
 		
 		gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0+slot, gl.TEXTURE_2D, null, level);
-		this.attachedTextures[slot] = -1;
+		this.attachedTextures[slot] = null;
 		
 		if(this.bAutoSetupUsage == true) this.SetupUsage();
 		
@@ -145,7 +145,7 @@ export class CFramebuffer{
 			
 		for(let slot = 0; slot < this.attachedTextures.length; ++slot){
 			gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0+slot, gl.TEXTURE_2D, null, level);
-			// this.attachedTextures[slot] = -1;
+			// this.attachedTextures[slot] = null;
 		}
 		this.attachedTextures = [];
 		if(this.bAutoSetupUsage == true) this.SetupUsage();
@@ -159,7 +159,7 @@ export class CFramebuffer{
 		CFramebuffer.Bind(this.framebuffer);
 		
 		gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.TEXTURE_2D, texture.texture, 0); //gl.DEPTH_STENCIL_ATTACHMENT
-		this.attachedDepth = texture.SlotID;
+		this.attachedDepth = texture;
 				
 		if(this.bRestorePrevFB === true) CFramebuffer.Bind(oldFBO);
 	}
@@ -169,7 +169,7 @@ export class CFramebuffer{
 		CFramebuffer.Bind(this.framebuffer);
 		
 		gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.TEXTURE_2D, null, 0); //gl.DEPTH_STENCIL_ATTACHMENT
-		this.attachedDepth = -1;
+		this.attachedDepth = null;
 		
 		if(this.bRestorePrevFB === true) CFramebuffer.Bind(oldFBO);
 	}
@@ -236,6 +236,17 @@ export class CFramebuffer{
 	
 	ActivateDrawBuffers(shader){
 		CFramebuffer.ActivateDrawBuffers(shader);
+	}
+	
+	Delete(){
+		gl.deleteFramebuffer(this.framebuffer);
+		this.framebuffer = -1;
+		this.attachedTextures = [];
+		this.attachedDepth = -1;
+		this.width = -1;
+		this.height = -1;
+		this.bRestorePrevFB = bindPrevFB;
+		this.bAutoSetupUsage = true;
 	}
 }
 

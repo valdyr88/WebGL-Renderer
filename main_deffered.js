@@ -186,7 +186,7 @@ export function main(){
 		
 		AtmoSphereModel.setTexture(txAtmosphere, "txDiffuse");
 		AtmoSphereModel.setShader(atmosphere_shader);
-		AtmoSphereModel.setBlendMode(glext.BlendMode_AlphaBlend);
+		AtmoSphereModel.setBlendMode(glext.CBlendMode.Alpha);
 		
 		navigatorModel.setTexture(txGlassN,"txNormal");
 		navigatorModel.setTexture(txGlassAoRS,"txAoRS");

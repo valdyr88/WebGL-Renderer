@@ -1,6 +1,7 @@
 import { gl, getContentsFromFile, glPrintError } from "./glContext.js";
 import { CShader, CShaderList } from "./glShader.js";
 import { CTexture, CTextureList } from "./glTexture.js";
+import { CBlendMode } from "./glBlendMode.js"
 import * as vMath from "../glMatrix/gl-matrix.js";
 
 /*
@@ -54,126 +55,6 @@ class CTextureShaderLink
  
  gl.FUNC_ADD, gl.FUNC_SUBTRACT, gl.FUNC_REVERSE_SUBTRACT, gl.MIN, gl.MAX.
  */
- 
-var ActiveBlendMode = null;
-export var BlendMode_AlphaBlend    = null;
-export var BlendMode_Additive 	   = null;
-export var BlendMode_SrcOverride   = null;
-export var BlendMode_Default       = null;
-
-export class CBlendMode{
-	
-	static Zero(){ 					return gl.ZERO; }
-	static One(){					return gl.ONE; }
-	static SrcColor(){				return gl.SRC_COLOR; }
-	static OneMinusSrcColor(){		return gl.ONE_MINUS_SRC_COLOR; }
-	static DstColor(){				return gl.DST_COLOR; }
-	static OneMinusDstColor(){		return gl.ONE_MINUS_DST_COLOR; }
-	static SrcAlpha(){				return gl.SRC_ALPHA; }
-	static OneMinusSrcAlpha(){		return gl.ONE_MINUS_SRC_ALPHA; }
-	static DstAlpha(){				return gl.DST_ALPHA; }
-	static OneMinusDstAlpha(){		return gl.ONE_MINUS_DST_ALPHA; }
-	static ConstantColor(){			return gl.CONSTANT_COLOR; }
-	static OneMinusConstantColor(){ return gl.ONE_MINUS_CONSTANT_COLOR; }
-	static ConstantAlpha(){			return gl.CONSTANT_ALPHA; }
-	static OneMinusConstantAlpha(){ return gl.ONE_MINUS_CONSTANT_ALPHA; }
-	
-	static EqAdd(){				return gl.FUNC_ADD; }
-	static EqSubtract(){  		return gl.FUNC_SUBTRACT; }
-	static EqReverseSubtract(){	return gl.FUNC_REVERSE_SUBTRACT; }
-	static EqMin(){				return gl.MIN; }
-	static EqMax(){				return gl.MAX; }
-	
-	constructor(s,d,e)
-	{
-		if(s===undefined) this.src = CBlendMode.One();
-		else this.src = s;
-		if(d===undefined) this.dst = CBlendMode.Zero();
-		else this.dst = d;
-		if(e===undefined) this.eq = CBlendMode.EqAdd();
-		else this.eq = e;
-	}
-	
-	setBlendSrcDst(source, destination){
-		this.src = source; this.dst = destination;
-	}
-	
-	setBlendEquation(eq){
-		this.eq = eq;
-	}
-	
-	setBlendMode( b ){ this.setBlendSrcDst(b.getSrcBlend(), b.getDstBlend()); this.setBlendEquation( b.getEquation() ); }
-	
-	getSrcBlend(){ return this.src; }
-	getDstBlend(){ return this.dst; }
-	getEquation(){ return this.eq;  }
-	
-	isEqual(b){ return (this.getSrcBlend() == b.getSrcBlend() && this.getDstBlend() == b.getDstBlend() && this.getEquation() == b.getEquation()); }
-	
-	Bind(){
-		if(ActiveBlendMode instanceof CBlendMode)
-			if(this.isEqual(ActiveBlendMode) == true) return;
-		gl.blendFunc(this.src, this.dst);
-		gl.blendEquation(this.eq);
-		ActiveBlendMode = this;
-	}
-	
-	static getDefault(){ return BlendMode_Default; }
-	static setDefault(b){ BlendMode_Default.setBlendSrcDst(b.getSrcBlend(), b.getDstBlend()); BlendMode_Default.setBlendEquation(b.getEquation()); }
-	
-	static Init(){
-		BlendMode_AlphaBlend  = new CBlendMode( CBlendMode.SrcAlpha(), CBlendMode.OneMinusSrcAlpha(), CBlendMode.EqAdd() );
-		BlendMode_Additive 	  = new CBlendMode( CBlendMode.One(), CBlendMode.One(), CBlendMode.EqAdd() );
-		BlendMode_SrcOverride = new CBlendMode( CBlendMode.One(), CBlendMode.Zero(), CBlendMode.EqAdd() );
-		BlendMode_Default     = new CBlendMode( CBlendMode.One(), CBlendMode.Zero(), CBlendMode.EqAdd() );
-		
-		CBlendMode.Enable();
-		BlendMode_Default.Bind();
-		ActiveBlendMode = BlendMode_Default;
-	}
-	
-	static Enable(){
-		gl.enable(gl.BLEND);
-	}
-	static Disable(){
-		gl.disable(gl.BLEND);
-	}
-}
-
-class CBlendModeColorAttachment extends CBlendMode
-{
-	constructor(i,s,d,e){
-		super(s,d,e);
-		if(i===undefined) this.id = 0;
-		else this.id = i;
-	}
-		
-	setColorAttachmentNumber(i){ this.id = i; }
-	getColorAttachmentNumber(){ return this.id; }
-	
-	Bind(i){ if(i!==undefined) this.id = i; gl.blendFunci(this.id, this.src, this.dst); gl.blendEquationi(this.id, this.eq); ActiveBlendMode = this; }
-}
-
-export class CBlendModeColorAttachments
-{
-	constructor(){
-		this.blendModes = [];
-	}
-	
-	addBlendMode(slot, blendMode){
-		this.blendModes[slot] = new CBlendModeColorAttachment(slot, blendMode.getSrcBlend(), blendMode.getDstBlend(), blendMode.getEquation());
-	}
-	clearBlendMode(slot){
-		this.blendModes[slot] = null;
-	}
-	Bind(){
-		if(ActiveBlendMode === this) return;
-		
-		for(var i = 0; i < this.blendModes.length; ++i)
-			if(this.blendModes[i] != null) this.blendModes[i].Bind();
-		ActiveBlendMode = this;
-	}
-}
 
 export class CModel
 {
@@ -369,7 +250,7 @@ export class CModel
 		gl.drawElements( mode, this.glIndexBuffer.numItems, gl.UNSIGNED_SHORT, 0);
 		
 		if(this.blendMode != null)
-			CBlendMode.getDefault().Bind();
+			CBlendMode.Bind(CBlendMode.None);
 	}
 	
 	RenderIndexedTriangles(shader){

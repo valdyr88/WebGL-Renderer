@@ -141,13 +141,15 @@ void drawLineFacingPoint(vec2 t, vec2 a, vec2 b, out float dist){
 void main(void)
 {
 	float4 dither = 0.0275f*(randf4(TexCoords+vec2(sBrush_getRandom(), 1.0-sBrush_getRandom())));
-	vec4 old = texture2D(txDiffuse, TexCoords);
+	vec4 oldColor = texture2D(txDiffuse, TexCoords);
 	float dT = sBrush_getdTime();
+	
+	if(BrushPointCount == 0){
+		gl_FragColor = oldColor; return; }
 	
 	// testIsLineFacingPoint();
 	vec2 a = vec2(0.0), b = vec2(0.0);
 	vec2 t = TexCoords.xy;
-	gl_FragColor.xyz = vec3(0.0);
 	float dist = 1e32;
 		
 	for(int i = 0; i < BrushPointCount; ++i){
@@ -164,8 +166,14 @@ void main(void)
 		dist = min(dist, length(b-t));
 	}
 	
-	gl_FragColor.xyz = vec3(gauss(2.0, dist*25.0));
+	vec4 newColor = vec4(1.0);
+	newColor.a = gauss(2.0, dist*25.0);
+	// vec4 newColor = vec4(1.0 / pow(dist*100.0,2.0));
 	// gl_FragColor.xyz = vec3(dist);
+	// gl_FragColor.a = 1.0;
+	
+	gl_FragColor.rgb = lerp(oldColor.rgb, newColor.rgb, newColor.a);
+	gl_FragColor.a = lerp(oldColor.a, 1.0, newColor.a);
 	gl_FragColor.a = 1.0;
 }
 

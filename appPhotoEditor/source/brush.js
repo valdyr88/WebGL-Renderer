@@ -153,6 +153,11 @@ export class CBrush extends command.ICommandExecute{
 		let rtn = this.shader.setFloat2UniformArray(this.shader.ULBrushPoints, combinedArray);
 		return rtn && this.shader.setIntUniform(this.shader.ULBrushPointCount, points.length);
 	}
+	ClearShaderPointList(){
+		if(this.shader.ULBrushPoints == -1) return false;
+		this.shader.setIntUniform(this.shader.ULBrushPointCount, 0);
+		return true;
+	}
 }
 
 CBrush.Type_Airbrush_Gauss = 1;

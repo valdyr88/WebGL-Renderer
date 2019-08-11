@@ -12,6 +12,16 @@ default extensions:
 	 glext.glEnableExtension('EXT_shader_texture_lod');
 */
 
+var afterInitCallbacks = [];
+export function setOpenGLInitCallbacks(initfunc){
+	afterInitCallbacks[afterInitCallbacks.length] = initfunc;
+}
+function callAfterInitCallbacks(){
+	for(let i = 0; i < afterInitCallbacks.length; ++i){
+		afterInitCallbacks[i]();
+	}
+}
+
 //====================================================================================================
 //GL init
 //====================================================================================================
@@ -51,6 +61,8 @@ function glInitWebGLContext(canvas){
 	
 	// if(glContextName == "webgl2")
 		// isWGL2 = true;
+	
+	callAfterInitCallbacks();
 	
 	return gl;
 }
@@ -127,7 +139,6 @@ export function WriteDebug(str){
 		debug_text_dom.style.display = "inline";
 	}
 }
-
 
 //====================================================================================================
 

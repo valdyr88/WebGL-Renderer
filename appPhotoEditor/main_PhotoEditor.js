@@ -153,7 +153,7 @@ export function main()
 	
 	let frameNo = 0;
 	
-	setInterval( function(){ window.requestAnimationFrame(renderFrame); }, 32);
+	setInterval( function(){ window.requestAnimationFrame(renderFrame); }, 35);
 	
 	//ToDo: how to design undo code for brush strokes -> every brush stroke needs to be undoable (to a certan history limit)
 	/*
@@ -208,8 +208,6 @@ export function main()
 		abrush.setDeltaTime(Math.min(dTime, 1.0/15.0));
 		abrush.setRandom(Math.random());
 		
-		abrush.setStrokeStart();
-		abrush.setStrokeEnd();
 		
 		/*let t = vMath.fract(time/2.0)*2.0; let Ct = [];
 		if(t < 1.0){
@@ -226,7 +224,21 @@ export function main()
 			setControlPointToBrush(doc, abrush, cmd, PointsQ[frameNo-PointsP.length], (false)? [0.0,1.0,0.4] : [1.0,0.4,0.0]);
 		}*/
 		
-		abrush.UploadPointListToShader(PointsP);
+		if(frameNo == 10){
+			abrush.setStrokeStart();
+			abrush.setStrokeEnd(false);
+			abrush.UploadPointListToShader(PointsP);
+		}
+		else if(frameNo == 40){
+			abrush.setStrokeEnd();
+			abrush.setStrokeStart(false);
+			abrush.UploadPointListToShader(PointsQ);
+		}
+		else{
+			abrush.setStrokeEnd(false);
+			abrush.setStrokeStart(false);
+			abrush.ClearShaderPointList();
+		}
 		
 		doc.setBrush(abrush);
 		doc.Update(cmd); //mousePos[0], mousePos[1], bBtnLeft
