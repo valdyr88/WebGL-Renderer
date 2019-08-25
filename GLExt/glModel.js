@@ -1,4 +1,4 @@
-import { gl, getContentsFromFile, glPrintError } from "./glContext.js";
+import { gl, getContentsFromFile, glPrintError, CGLExtObject } from "./glContext.js";
 import { CShader, CShaderList } from "./glShader.js";
 import { CTexture, CTextureList } from "./glTexture.js";
 import { CBlendMode } from "./glBlendMode.js"
@@ -56,10 +56,11 @@ class CTextureShaderLink
  gl.FUNC_ADD, gl.FUNC_SUBTRACT, gl.FUNC_REVERSE_SUBTRACT, gl.MIN, gl.MAX.
  */
 
-export class CModel
+export class CModel extends CGLExtObject
 {
 	constructor(slotID)
 	{
+		super();
 		this.SlotID = slotID;
 		
 		this.VertexBuffer = [];

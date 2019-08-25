@@ -1,13 +1,14 @@
-import { gl } from "./glContext.js";
+import { gl, CGLExtObject } from "./glContext.js";
 import { CModel, GenCubeModel, GenQuadModel } from "./glModel.js";
 import { CTexture, CTextureCube, CTextureList, CalcNofMipLevels, FormatFromInternalFormat, TypeFromInternalFormat } from "./glTexture.js"
 import { CShader, CShaderList } from "./glShader.js";
 // import * as global from "./globalStorage.js"
 import * as sys from "./../System/sys.js"
 
-export class CFramebuffer{
+export class CFramebuffer extends CGLExtObject{
 	
 	constructor(bindPrevFB){
+		super();
 		this.framebuffer = -1;
 		this.attachedTextures = [];
 		this.attachedDepth = null;
@@ -250,9 +251,10 @@ export class CFramebuffer{
 	}
 }
 
-export class CMipMapGen{
+export class CMipMapGen extends CGLExtObject{
 	
 	constructor(){
+		super();
 		this.framebuffer = null;
 		this.quad_model = null;
 		this.shader = null;

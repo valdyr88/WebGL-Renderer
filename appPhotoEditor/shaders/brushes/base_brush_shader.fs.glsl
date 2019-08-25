@@ -131,11 +131,17 @@ void testIsLineFacingPoint(){
 	if(length(t-a) < 0.004 || length(t-b) < 0.004) gl_FragColor.xyz = vec3(0.0,0.0,1.0);
 }
 
-void drawLineFacingPoint(vec2 t, vec2 a, vec2 b, out float dist){
-	if(isLineFacingPoint(t,a,b,0.1)){ dist = min(dist, distancePointLine(t,a,b)); }
+void drawLineFacingPoint(vec2 t, vec2 a, vec2 b, float o, out float dist){
+	if(isLineFacingPoint(t,a,b,o)){ dist = min(dist, distancePointLine(t,a,b)); }
 	
 	// if(distancePointLine(t,a,b) < 0.004) gl_FragColor.xyz = vec3(0.0,1.0,0.0);
 	// if(length(t-a) < 0.004 || length(t-b) < 0.004) gl_FragColor.xyz = vec3(0.0,1.0,1.0);
+}
+
+vec4 blend(vec4 src, vec4 dst){
+	float a = lerp(dst.a, 1.0, src.a);
+	vec3 rgb = max(src.a, dst.a) * (lerp(dst.rgb, src.rgb, src.a)) / a;
+	return vec4(rgb,a);
 }
 
 void main(void)
@@ -143,38 +149,36 @@ void main(void)
 	float4 dither = 0.0275f*(randf4(TexCoords+vec2(sBrush_getRandom(), 1.0-sBrush_getRandom())));
 	vec4 oldColor = texture2D(txDiffuse, TexCoords);
 	float dT = sBrush_getdTime();
+	// oldColor.a = oldColor.x;
 	
 	if(BrushPointCount == 0){
-		gl_FragColor = oldColor; return; }
+		gl_FragColor = oldColor;
+		return; }
 	
 	// testIsLineFacingPoint();
 	vec2 a = vec2(0.0), b = vec2(0.0);
 	vec2 t = TexCoords.xy;
 	float dist = 1e32;
-		
+	
 	for(int i = 0; i < BrushPointCount; ++i){
 		if(sBrushPoints_getSegmentPoints(i, a, b) == false) break;
-		drawLineFacingPoint(t, a, b, dist);
+		drawLineFacingPoint(t, a, b, 0.1, dist);
 	}
 	
-	if(sBrush_isStrokeStart() == true){
+	// if(sBrush_isStrokeStart() == true)
+	{
 		sBrushPoints_getFirstPoint(a);
 		dist = min(dist, length(a-t));
 	}
-	if(sBrush_isStrokeEnd() == true){
+	// if(sBrush_isStrokeEnd() == true)
+	{
 		sBrushPoints_getLastPoint(b);
 		dist = min(dist, length(b-t));
 	}
 	
-	vec4 newColor = vec4(1.0);
-	newColor.a = gauss(2.0, dist*25.0);
-	// vec4 newColor = vec4(1.0 / pow(dist*100.0,2.0));
-	// gl_FragColor.xyz = vec3(dist);
-	// gl_FragColor.a = 1.0;
+	vec4 newColor = vec4(vec3(1.0), gauss(2.0, dist*25.0));
 	
-	gl_FragColor.rgb = lerp(oldColor.rgb, newColor.rgb, newColor.a);
-	gl_FragColor.a = lerp(oldColor.a, 1.0, newColor.a);
-	gl_FragColor.a = 1.0;
+	gl_FragColor = blend(newColor, oldColor);
 }
 
 

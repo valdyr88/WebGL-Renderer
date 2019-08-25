@@ -1,10 +1,10 @@
-import { gl, glPrintError, setOpenGLInitCallbacks } from "./glContext.js";
+import { gl, glPrintError, setOpenGLInitCallbacks, CGLExtObject } from "./glContext.js";
 import * as vMath from "../glMatrix/gl-matrix.js";
 import { CShader, CUniformBlockBuffer, CUniformBlockBinding } from "./glShader.js";
 import { CFramebuffer } from "./glFramebuffer.js";
 
-export class CBlendMode{
-		
+export class CBlendMode extends CGLExtObject{
+	
 	static Zero(){ 					return CBlendMode.zero; }
 	static One(){					return CBlendMode.one; }
 	static SrcColor(){				return CBlendMode.src_color; }
@@ -53,12 +53,18 @@ export class CBlendMode{
 		var BE = CBlendEquation;
 
 		CBlendMode.None = null;
-		CBlendMode.Alpha = new CBlendMode(BM.src_alpha, BM.one_minus_src_alpha); CBlendMode.Alpha.setEquation(BM.add);
-		CBlendMode.StoreAlpha = new CBlendMode(BM.src_alpha, BM.one_minus_src_alpha, BM.one, BM.one_minus_src_alpha, BM.add);
-		CBlendMode.Additive = new CBlendMode(BM.one, BM.one); CBlendMode.Additive.setEquation(BM.add);
+		CBlendMode.Alpha = new CBlendMode(BM.src_alpha, BM.one_minus_src_alpha); CBlendMode.Alpha.setEquation(BE.add);
+		CBlendMode.StoreAlpha = new CBlendMode(BM.src_alpha, BM.one_minus_src_alpha, BM.one, BM.one_minus_src_alpha, BE.add);
+		CBlendMode.ReplaceColor = new CBlendMode(BM.one, BM.zero, BM.one, BM.one_minus_src_alpha, BE.add); CBlendMode.ReplaceColor.setEquation(BE.add);
+		CBlendMode.ReplaceAll = new CBlendMode(BM.one, BM.zero); CBlendMode.ReplaceAll.setEquation(BE.add);
+		CBlendMode.Additive = new CBlendMode(BM.one, BM.one); CBlendMode.Additive.setEquation(BE.add);
+		// CBlendMode.TestMode = new CBlendMode(BM.one_minus_dst_alpha, BM.one_minus_src_alpha, BM.one, BM.one); CBlendMode.TestMode.setEquation(BE.add);
+		CBlendMode.TestMode = new CBlendMode(BM.src_alpha, BM.one_minus_src_alpha); CBlendMode.TestMode.setEquation(BE.add);
+		CBlendMode.Max = new CBlendMode(BM.one, BM.one); CBlendMode.Max.setEquation(BE.max);
 	}
 	
 	constructor(srcc, dstc, srca, dsta, eq){
+		super();
 		if(srcc != undefined){
 			if(srca == undefined) srca = srcc;
 			if(dsta == undefined) dsta = dstc;
@@ -76,7 +82,7 @@ export class CBlendMode{
 			this.enabled = false;
 		}
 		if(eq == undefined)
-			this.equation = CBlendMode.add;
+			this.equation = CBlendEquation.add;
 		else
 			this.equation = eq;
 	}
@@ -92,7 +98,7 @@ export class CBlendMode{
 		this.enabled = true;
 		
 		if(eq == undefined)
-			this.equation = CBlendMode.add;
+			this.equation = CBlendEquation.add;
 		else
 			this.equation = eq;
 	}
@@ -109,7 +115,8 @@ export class CBlendMode{
 		if(this.enabled == true){
 			gl.enable(gl.BLEND);
 			gl.blendFuncSeparate(this.src_color, this.dst_color, this.src_alpha, this.dst_alpha);
-			gl.blendEquation(this.equation);
+			if(this.equation != undefined)
+				gl.blendEquation(this.equation);
 		}else{
 			gl.disable(gl.BLEND);
 		}
@@ -133,9 +140,10 @@ export class CBlendMode{
 	}
 }
 
-export class CBlendEquation{
+export class CBlendEquation extends CGLExtObject{
 	
 	constructor(eq){
+		super();
 		this.equation = eq;
 	}
 	

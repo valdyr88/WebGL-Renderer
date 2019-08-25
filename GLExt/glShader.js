@@ -1,4 +1,4 @@
-import { gl, WriteDebug } from "./glContext.js";
+import { gl, WriteDebug, CGLExtObject } from "./glContext.js";
 	
 function parseForIncludes(source){
 	
@@ -210,9 +210,10 @@ export class CFragDataLocation
 	set(n, l){ this.name = n; this.location = l; }
 }
 
-export class CUniformBlockBuffer
+export class CUniformBlockBuffer extends CGLExtObject
 {
 	constructor(){
+		super();
 		this.name = "";
 		this.buffer = -1;
 		this.data = null;
@@ -288,9 +289,10 @@ export class CUniformBlockBuffer
 	}
 }
 
-export class CUniformBlockBinding
+export class CUniformBlockBinding extends CGLExtObject
 {
 		constructor(){
+			super();
 			this.name = "";
 			this.bindPoint = -1;
 			this.blockId = -1;
@@ -319,10 +321,10 @@ export class CUniformBlockBinding
 		}
 }
 
-export class CShader
+export class CShader extends CGLExtObject
 {
 	constructor(slotID){
-		
+		super();
 		this.SlotID = slotID;
 		this.program = -1;
 		this.vertex = -1;

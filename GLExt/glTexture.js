@@ -1,4 +1,4 @@
-import { gl, glPrintError } from "./glContext.js";
+import { gl, glPrintError, CGLExtObject } from "./glContext.js";
 // import * as global from "./globalStorage.js"
 import * as sys from "./../System/sys.js"
 
@@ -255,9 +255,10 @@ export function CalcNofMipLevels(width, height){
 	return ilevels;
 }
 
-export class CTexture{
+export class CTexture extends CGLExtObject{
 	
 	constructor(slotID){
+		super();
 		this.init();
 		this.SlotID = slotID;
 	}
@@ -543,9 +544,10 @@ export class CTexture{
 	}
 }
 
-export class CTextureCube{
+export class CTextureCube extends CGLExtObject{
 		
 	constructor(slotID){
+		super();
 		this.SlotID = slotID;
 		this.Type = "txC";
 		this.texture = -1;
@@ -711,9 +713,10 @@ export class CTextureCube{
 	}
 }
 
-export class CTexture3D{
+export class CTexture3D extends CGLExtObject{
 	
 	constructor(slotID){
+		super();
 		this.SlotID = slotID;
 		this.Type = "tx3D";
 		this.texture = -1;
@@ -873,7 +876,6 @@ var globalTextureList = null;
 
 export class CTextureList
 {
-	
 	constructor(){
 		this.textures = [];
 	}

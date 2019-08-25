@@ -142,6 +142,17 @@ export function WriteDebug(str){
 
 //====================================================================================================
 
+export class CGLExtObject{
+	constructor(){
+		this.uniqueID = CGLExtObject.Count++;
+	}		
+}
+
+CGLExtObject.Count = 0;
+
+//====================================================================================================
+
+
 export function getContentsFromFile(id){
 		var shaderScript = document.getElementById(id);
 		if(shaderScript == null) return null;

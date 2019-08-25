@@ -232,6 +232,7 @@ export class CDocument extends ui.CGUIElement{
 		shader.Bind();
 			this.getActivePaintLayer().texture.Bind(0, shader.ULTextureD);
 			glext.NDCQuadModel.RenderIndexedTriangles(shader);
+		this.getActivePaintLayer().texture.Unbind();
 	}
 		
 	getHMTLImageFromCanvas(){

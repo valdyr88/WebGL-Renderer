@@ -1,11 +1,12 @@
-import { gl, getContentsFromFile, glPrintError } from "./glContext.js";
+import { gl, getContentsFromFile, glPrintError, CGLExtObject } from "./glContext.js";
 import { CShader, CShaderList } from "./glShader.js";
 import * as vMath from "../glMatrix/gl-matrix.js";
 
-export class CCamera{
+export class CCamera extends CGLExtObject{
 	
 	constructor(slotID, viewWidth, viewHeight)
 	{
+		super();
 		this.SlotID = slotID;
 		this.ViewMatrix = vMath.mat4.create();
 		this.ProjectionMatrix = vMath.mat4.create();

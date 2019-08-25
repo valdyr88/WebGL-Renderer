@@ -63,10 +63,10 @@ export function main()
 	gl = glext.glInit("document_paint_canvas");
 	if(gl == null) return;
 	
-		 if(gl.isWGL2 == false && glext.glEnableExtension('OES_texture_float') == false) alert("no extension: OES_texture_float");
-		 if(gl.isWGL2 == false && glext.glEnableExtension('EXT_shader_texture_lod') == false) alert("no extension: EXT_shader_texture_lod");
-		 if(glext.glEnableExtension('EXT_color_buffer_float') == false) alert("no extension: EXT_color_buffer_float");
-		 if(glext.glEnableExtension('OES_texture_float_linear') == false) alert("no extension: OES_texture_float_linear");
+		if(gl.isWGL2 == false && glext.glEnableExtension('OES_texture_float') == false) alert("no extension: OES_texture_float");
+		if(gl.isWGL2 == false && glext.glEnableExtension('EXT_shader_texture_lod') == false) alert("no extension: EXT_shader_texture_lod");
+		if(glext.glEnableExtension('EXT_color_buffer_float') == false) alert("no extension: EXT_color_buffer_float");
+		if(glext.glEnableExtension('OES_texture_float_linear') == false) alert("no extension: OES_texture_float_linear");
 		
 	glext.InitDebugTextDOM("debug_text");
 	
@@ -86,8 +86,7 @@ export function main()
 	
 	gl.disable(gl.BLEND);
 	gl.depthFunc(gl.LESS);
-	
-	glext.CBlendMode.Init();
+	gl.disable(gl.SCISSOR_TEST);
 	
 	var projectionMatrix = vMath.mat4.create();
 	var viewMatrix = vMath.mat4.create();
@@ -177,7 +176,8 @@ export function main()
 		if(doc == null) return;
 		
 		if(doc_paint_canvas == null){
-			doc_paint_canvas = initPaintCanvas(doc, gl); }
+			doc_paint_canvas = initPaintCanvas(doc, gl);
+		}
 		
 		// resizePaintCavas(doc, doc_paint_canvas);
 		
@@ -207,8 +207,7 @@ export function main()
 		abrush.setColor(0.2, 0.5, 1.0);
 		abrush.setDeltaTime(Math.min(dTime, 1.0/15.0));
 		abrush.setRandom(Math.random());
-		
-		
+				
 		/*let t = vMath.fract(time/2.0)*2.0; let Ct = [];
 		if(t < 1.0){
 			Ct = splines.CubicBezier(t, P0, P1, P2, P3); abrush.setColor(0.2, 0.5, 1.0); }
@@ -229,7 +228,7 @@ export function main()
 			abrush.setStrokeEnd(false);
 			abrush.UploadPointListToShader(PointsP);
 		}
-		else if(frameNo == 40){
+		else if(frameNo == 20){
 			abrush.setStrokeEnd();
 			abrush.setStrokeStart(false);
 			abrush.UploadPointListToShader(PointsQ);
@@ -239,6 +238,8 @@ export function main()
 			abrush.setStrokeStart(false);
 			abrush.ClearShaderPointList();
 		}
+		
+		glext.CBlendMode.Bind(glext.CBlendMode.None);
 		
 		doc.setBrush(abrush);
 		doc.Update(cmd); //mousePos[0], mousePos[1], bBtnLeft
@@ -250,6 +251,8 @@ export function main()
 				doc.Update(icmd);
 			}
 		}
+		
+		glext.CBlendMode.Bind(glext.CBlendMode.None);
 		
 		doc.RenderVisibleLayersToCanvas();
 		

@@ -141,7 +141,7 @@ export class CPaintableRasterLayer extends command.ICommandExecute{
 		this.shader.Bind();
 		this.shader.BindUniforms();
 	}
-	
+	 
 	Draw(){		
 		this.shader.UpdateUniforms();
 		
@@ -157,6 +157,14 @@ export class CPaintableRasterLayer extends command.ICommandExecute{
 		this.texture = null;
 		this.framebuffer.Delete();
 		this.framebuffer = null;
+	}
+	
+	Clear(rgba){
+		glext.gl.viewport(0, 0, this.width, this.height);
+		this.framebuffer.Bind();
+		glext.gl.clearColor(rgba[0],rgba[1],rgba[2],rgba[3]);
+		glext.gl.clear(glext.gl.COLOR_BUFFER_BIT);
+		glext.CFramebuffer.BindMainFB();
 	}
 }
 
@@ -281,6 +289,25 @@ export class CDoubleBufferPaintableRasterLayer extends CPaintableRasterLayer{
 		this.framebuffer2 = null;
 		this.framebuffer = null;
 	}
+	
+	ClearRGBA(rgba){
+		glext.gl.viewport(0, 0, this.width, this.height);
+		glext.gl.clearColor(rgba[0],rgba[1],rgba[2],rgba[3]);
+		this.framebuffer0.Bind();
+		glext.gl.clear(glext.gl.COLOR_BUFFER_BIT);
+		this.framebuffer1.Bind();
+		glext.gl.clear(glext.gl.COLOR_BUFFER_BIT);
+		glext.CFramebuffer.BindMainFB();
+	}
+	
+	Clear(){
+		if(arguments.length == 0)
+			this.ClearRGBA([0.0,0.0,0.0,0.0]);
+		else if(arguments.length == 1) //assuming the argument is an array
+			this.ClearRGBA(arguments[0]);
+		else if(arguments.length == 4)
+			this.ClearRGBA([arguments[0],arguments[1],arguments[2],arguments[3]]);
+	}
 }
 
 //------------------------------------------------------------------------------------------
@@ -313,13 +340,13 @@ export class CRasterLayer extends CLayer{
 		super();
 		this.setType("CRasterLayer");
 		this.type = "raster";
-		this.paint_layer = new CDoubleBufferPaintableRasterLayer(w, h, "byte", "rgb");
+		this.paint_layer = new CDoubleBufferPaintableRasterLayer(w, h, "byte", "rgba");
+		this.paint_layer.Clear([0.0,0.0,0.0,0.0]);
 	}
 	
 	ResizeCanvas(dleft, dright, dup, ddown){
 		if(this.paint_layer != null) this.paint_layer.ResizeCanvas(dleft, dright, dup, ddown);
 	}
-	
 }
 
 export class CVectorLayer extends CLayer{

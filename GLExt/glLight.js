@@ -1,4 +1,4 @@
-import { gl, glPrintError } from "./glContext.js";
+import { gl, glPrintError, CGLExtObject } from "./glContext.js";
 import * as vMath from "../glMatrix/gl-matrix.js";
 import { CShader, CUniformBlockBuffer, CUniformBlockBinding } from "./glShader.js";
 import { CFramebuffer } from "./glFramebuffer.js";
@@ -48,10 +48,10 @@ function InitPointShader(){
 
 export var MAX_LIGHTS = 1;
 
-export class CLight{
+export class CLight extends CGLExtObject{
 	
 	constructor(slotID){
-		
+		super();
 		this.SlotID = slotID;
 		this.Position = vMath.vec3.create();
 		this.Intensity = 1.0;

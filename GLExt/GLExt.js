@@ -1,5 +1,5 @@
 // import * as glsh from "./glShader.js";
-import { glInit, glEnableExtension, InitDebugTextDOM, WriteDebug, ResizeCanvas, gl } from "./glContext.js"
+import { glInit, glEnableExtension, InitDebugTextDOM, WriteDebug, ResizeCanvas, gl, CGLExtObject } from "./glContext.js"
 import { CShader, CShaderList, CShaderDefines } from "./glShader.js";
 import { CModel, GenCubeModel, GenQuadModel, InitNDCQuadModel, NDCQuadModel } from "./glModel.js";
 import { CTexture, CTextureCube, CTextureList, CalcNofMipLevels, FormatFromInternalFormat, TypeFromInternalFormat } from "./glTexture.js"
@@ -19,4 +19,4 @@ export { CLight, CLightList, MAX_LIGHTS };
 export { CTexture, CTextureCube, CTextureList, CalcNofMipLevels, FormatFromInternalFormat, TypeFromInternalFormat };
 export { CModel, GenCubeModel, GenQuadModel, InitNDCQuadModel, NDCQuadModel };
 export { CShader, CShaderList, CShaderDefines };
-export { glInit, glEnableExtension, InitDebugTextDOM, WriteDebug, ResizeCanvas, gl };
+export { glInit, glEnableExtension, InitDebugTextDOM, WriteDebug, ResizeCanvas, gl, CGLExtObject };
