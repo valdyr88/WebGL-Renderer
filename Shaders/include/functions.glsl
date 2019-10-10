@@ -303,7 +303,8 @@ inline vec4 saturate2(vec4 x, float l){
 //================================================================================================================
 
 inline vec3 halfvec(in vec3 a, in vec3 b){
-	return -normalize(0.5*(a - b) - a);
+	// return -normalize(0.5*(a - b) - a);
+	return normalize(a + b);
 }
 inline vec4 reflectvec(in vec3 ray, in vec3 normal){
 	vec4 v = vec4(0.0,0.0,0.0, dot(ray,normal));
@@ -586,4 +587,123 @@ float alphaLineFacingPoint(vec2 t, vec2 a, vec2 b, float cosangle){
 	float sta = saturate(-dta), stb = saturate(-dtb);
 	return 1.0-saturate((sta/cosangle)+(stb/cosangle));
 }
+
+//================================================================================================================
+
+#define pack_fixed_point_min_prec (1e-7)
+
+vec2 pack_half_fxd(highp float v){
+    const highp vec2 rotl = vec2(256.0, 1.0);
+    const highp float lp = 1.0/256.0;
+    highp vec2 v2 = v * rotl;
+    v2.y = clamp(v2.y, 0.0, 1.0-pack_fixed_point_min_prec);
+    v2 = fract(v2);
+    v2.y -= v2.x * lp;
+    return v2;
+}
+
+highp float unpack_half_fxd(highp vec2 rgba){
+    const highp vec2 rotr = vec2(1.0/256.0, 1.0);
+    return dot(rgba, rotr);
+}
+
+vec4 packVec2ToRGBA8FixePoint( highp vec2 v, highp vec2 minv, highp vec2 maxv ){
+    v = (v - minv) / (maxv - minv);
+	
+    vec4 rtn;
+    rtn.xy = pack_half_fxd(v.x);
+    rtn.zw = pack_half_fxd(v.y);
+    return rtn;
+}
+vec4 packVec2ToRGBA8FixePoint( highp vec2 v ){
+    return packVec2ToRGBA8FixePoint( v, vec2(0.0), vec2(1.0) );
+}
+
+vec2 unpackVec2FromRGBA8FixePoint( highp vec4 r, highp vec2 minv, highp vec2 maxv ){
+    highp vec2 v;
+	
+    v.x = unpack_half_fxd(r.xy);
+    v.y = unpack_half_fxd(r.zw);
+    v = v * (maxv - minv) + minv;
+    return v;
+}
+vec2 unpackVec2FromRGBA8FixePoint( highp vec4 r ){
+    return unpackVec2FromRGBA8FixePoint( r, vec2(0.0), vec2(1.0) );
+}
+
+//================================================================================================================
+
+uint packNormalFindMaxComponent(highp vec3 n){
+	if(n.x >= n.y){
+		if(n.x >= n.z) //x najveci
+			return uint(1);
+		else //z najveci
+			return uint(3);
+	}
+	else {
+		if(n.y >= n.z) //y najveci
+			return uint(2);
+		else //z najveci
+			return uint(3);
+	}
+	return uint(0);
+}
+
+vec3 packNormalToRGB8(highp vec3 n){
+	n = normalize(n);
+	uint maxComponentId = packNormalFindMaxComponent(abs(n));
+	highp vec2 values = vec2(0.0);
+	bool maxComponentSign = false; //false = +, true = -
+	
+	switch(maxComponentId){
+		case uint(1): values = n.yz / abs(n.x); maxComponentSign = sign(n.x) < 0.0f; break;
+		case uint(2): values = n.xz / abs(n.y); maxComponentSign = sign(n.y) < 0.0f; break;
+		case uint(3): values = n.xy / abs(n.z); maxComponentSign = sign(n.z) < 0.0f; break;
+	}
+	
+	bvec2 valuesSign = bvec2(sign(values.x) < 0.0f, sign(values.y) < 0.0f);
+	values = abs(values);
+	
+	float scaleXY = floor(clamp( 1.0f/max(values.x,values.y), 1.0f, 8.0f));
+	values = scaleXY*values;
+	
+	uint packInfo = uint(maxComponentId << 6);
+	packInfo = packInfo | (uint(maxComponentSign) << 5);
+	packInfo = packInfo | (uint(valuesSign.x) << 4);
+	packInfo = packInfo | (uint(valuesSign.y) << 3);
+	packInfo = packInfo | (uint(scaleXY-1.0f));
+	
+	vec3 packed = vec3(0.0f);
+	
+	packed.xy = values;
+	packed.z = float(packInfo) / 255.0f;
+	
+	return packed;
+}
+
+vec3 unpackNormalFromRGB8(vec3 pn){
+	uint packInfo = uint(pn.z*255.0f);
+	uint maxComponentId = uint(packInfo >> 6);
+	
+	vec3 valuesSign = vec3(0.0f);
+	valuesSign.z = ((packInfo & uint(1 << 5)) != uint(0))? -1.0f : 1.0f;
+	valuesSign.x = ((packInfo & uint(1 << 4)) != uint(0))? -1.0f : 1.0f;
+	valuesSign.y = ((packInfo & uint(1 << 3)) != uint(0))? -1.0f : 1.0f;
+	
+	float scaleXY = 1.0f/(float(packInfo & uint(7))+1.0f);
+	
+	pn.xy = scaleXY*valuesSign.xy*pn.xy;
+	pn.z = valuesSign.z;
+	
+	vec3 values = vec3(0.0f);
+	
+	switch(maxComponentId){
+		case uint(1): values.yzx = pn.xyz; break;
+		case uint(2): values.xzy = pn.xyz; break;
+		case uint(3): values.xyz = pn.xyz; break;
+	}
+	
+	return normalize(values);
+}
+
 #endif //GLSL_FUNCTIONS

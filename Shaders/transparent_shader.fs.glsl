@@ -139,17 +139,17 @@ void main(void)
 	lights[0].intensity = 1.0f;
 	lights[0].color = tofloat4(1.0f);
 	
-	// float3 reflected = PBR_Sample(diffuse.xyz, normal.xyz, specular.xyz, roughness, Metalness, 1.0f, ambientOcclusion, ViewVector, txAmbient, AMBIENT_LIGHT_INCREASE_PERCENTAGE, lights, 1);
+	// float3 reflected = pbr_Sample(diffuse.xyz, normal.xyz, specular.xyz, roughness, Metalness, 1.0f, ambientOcclusion, ViewVector, txAmbient, AMBIENT_LIGHT_INCREASE_PERCENTAGE, lights, 1);
 		
 	/* float3 reflected = tofloat3(0.0f);
 	float3 lightdiff = tofloat3(0.0f);
 	float3 lightrefl = tofloat3(0.0f);
 	
 	for(int i = 0; i < 1; ++i)
-		PBR_SampleLight(Position.xyz, diffuse.xyz, normal.xyz, specular.xyz, roughness, Metalness, 1.0f, ViewVector, lights[i], lightdiff, lightrefl);
-	PBR_SampleAmbient(diffuse.xyz, normal.xyz, specular.xyz, roughness, Metalness, ambientOcclusion, ViewVector, txAmbient, AMBIENT_LIGHT_INCREASE_PERCENTAGE, lightdiff, lightrefl);
+		pbr_SampleLight(Position.xyz, diffuse.xyz, normal.xyz, specular.xyz, roughness, Metalness, 1.0f, ViewVector, lights[i], lightdiff, lightrefl);
+	pbr_SampleAmbient(diffuse.xyz, normal.xyz, specular.xyz, roughness, Metalness, ambientOcclusion, ViewVector, txAmbient, AMBIENT_LIGHT_INCREASE_PERCENTAGE, lightdiff, lightrefl);
 	
-	reflected = PBR_IntegrateSamples(diffuse.xyz, Metalness, lightdiff, lightrefl);
+	reflected = pbr_IntegrateSamples(diffuse.xyz, Metalness, lightdiff, lightrefl);
 	
 	gl_FragColor.xyz = reflected;
 	

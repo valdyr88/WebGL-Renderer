@@ -81,10 +81,10 @@ vec3 shade_pbr(vec4 diffuse, vec3 normal, vec4 AoRSMt, float depth, float2 texCo
 	float3 lightrefl = tofloat3(0.0f);
 	
 	for(int i = 0; i < 1; ++i)
-		PBR_SampleLight(position.xyz, diffuse.xyz, normal.xyz, specular.xyz, roughness, metalness, 1.0f, ViewVector, lights[i], lightdiff, lightrefl);
-	PBR_SampleAmbient(diffuse.xyz, normal.xyz, specular.xyz, roughness, metalness, ambientOcclusion, ViewVector, txAmbient, 0.0f, lightdiff, lightrefl);
+		pbr_SampleLight(position.xyz, diffuse.xyz, normal.xyz, specular.xyz, roughness, metalness, 1.0f, ViewVector, lights[i], lightdiff, lightrefl);
+	pbr_SampleAmbient(diffuse.xyz, normal.xyz, specular.xyz, roughness, metalness, ambientOcclusion, ViewVector, txAmbient, 0.0f, lightdiff, lightrefl);
 	
-	reflected = PBR_IntegrateSamples(diffuse.xyz, metalness, lightdiff, lightrefl);
+	reflected = pbr_IntegrateSamples(diffuse.xyz, metalness, lightdiff, lightrefl);
 	
 	return reflected;
 }

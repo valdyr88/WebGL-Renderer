@@ -57,6 +57,19 @@ float G_smith(in float roughness, in float dotNV, in float dotNL){
 	float k = roughness*roughness*0.5f;
 	return G1V(dotNL,k)*G1V(dotNV,k);
 }
+
+float G_schlickGGX(in float roughness, in float dotNV){
+	float k = roughness*roughness*0.5f;
+	return dotNV / (dotNV*(1.0f-k) + k);
+}
+float G_schlickGGX(in float roughness, in float dotNV, in float dotNL){ return G_schlickGGX(roughness, dotNV); }
+
+float G_smithGGX(in float roughness, in float dotNV, in float dotNL){
+	dotNV = max(dotNV,0.0f); dotNL = max(dotNL,0.0f);
+	float ggx2 = G_schlickGGX(roughness, dotNV);
+	float ggx1 = G_schlickGGX(roughness, dotNL);
+	return ggx1 * ggx2;
+}
 //--------------------------------------------------------------------------------------
 //	Rim lighting functions
 //--------------------------------------------------------------------------------------
@@ -66,7 +79,7 @@ float R1(float roughness, float dotNV, float param){
 //--------------------------------------------------------------------------------------
 //	specular functions
 //--------------------------------------------------------------------------------------
-float3 PBR_SampleSpecular(in float dotNL, in float dotNV, in float dotNH, in float3 F, in float roughness, in float rim_lighting){
+float3 pbr_SampleSpecular(in float dotNL, in float dotNV, in float dotNH, in float3 F, in float roughness, in float rim_lighting){
 
 	float D = D_GGX(roughness, dotNH);	
 	float G = G_schlick(roughness, dotNV, dotNL);
@@ -80,8 +93,9 @@ float3 PBR_SampleSpecular(in float dotNL, in float dotNV, in float dotNH, in flo
 	#define AMBIENT_LIGHT_INCREASE_PERCENTAGE 0.0f
 #endif
 
-#ifndef PBR_Sample_NofLights
-	#define PBR_Sample_NofLights 4
+
+#ifndef pbr_Sample_NofLights
+	#define pbr_Sample_NofLights 4
 #endif
 
 #define AmbientMult( percentage ) (1.0f + ((percentage)/100.0f))
@@ -89,23 +103,29 @@ float3 PBR_SampleSpecular(in float dotNL, in float dotNV, in float dotNH, in flo
 	#define AmbientMipMapLevels 7.0f
 #endif
 
-float4 PBR_SampleAmbient(float3 t, float roughness){
+float4 pbr_SampleAmbient(float3 t, float roughness){
 	return AmbientMult(AMBIENT_LIGHT_INCREASE_PERCENTAGE) * textureLod(txAmbient, t, AmbientMipMapLevels * roughness );
 }
-float4 PBR_SampleAmbient(const samplerCube AmbientTx, const float AmbientLightIncreasePercent, float3 t, float roughness){
+float4 pbr_SampleAmbient(const samplerCube AmbientTx, const float AmbientLightIncreasePercent, float3 t, float roughness){
 	return AmbientMult(AmbientLightIncreasePercent) * textureLod(AmbientTx, t, AmbientMipMapLevels * roughness );
 }
 
-float2 PBR_SampleBRDF(float2 t){
-	return texture2D(txBRDF, t*0.9925f + 0.00375f ).xy;
+#ifdef GAMMA_ENCODED_BRDF
+float2 pbr_SampleBRDF(float2 t){
+	return gamma(texture2D(txBRDF, 0.999f*vec2(t.x,1.0-t.y)+0.001f ).xy, 1.0f/GAMMA_ENCODED_BRDF);
 }
+#else
+float2 pbr_SampleBRDF(float2 t){
+	return texture2D(txBRDF, 0.999f*vec2(t.x,1.0-t.y)+0.001f ).xy;
+}
+#endif
 //--------------------------------------------------------------------------------------
 
 #define Light_isInfinite_bit 0
 
-float3 PBR_Sample(vec3 diffuse, vec3 normal, vec3 specular, float roughness, float metalness, 
-				  float shadows[PBR_Sample_NofLights], float ambientOcclusion, vec3 viewVector, const samplerCube AmbientTx,
-				  const float AmbientLightIncreasePercent, Light lights[PBR_Sample_NofLights], const int lightNo)
+float3 pbr_Sample(vec3 diffuse, vec3 normal, vec3 specular, float roughness, float metalness, 
+				  float shadows[pbr_Sample_NofLights], float ambientOcclusion, vec3 viewVector, const samplerCube AmbientTx,
+				  const float AmbientLightIncreasePercent, Light lights[pbr_Sample_NofLights], const int lightNo)
 {
 	float3 N = normalize(normal);
 	float3 V = normalize(-viewVector);
@@ -138,7 +158,7 @@ float3 PBR_Sample(vec3 diffuse, vec3 normal, vec3 specular, float roughness, flo
 		float dotLV = saturate(dot(L,V));
 		
 		float3 specfresnel = fresnel(specular, dotHV);
-		float3 spec = PBR_SampleSpecular(dotNL, dotNV, dotNH, specfresnel, roughness, 0.0f) * dotNL;//moze i dotiNL
+		float3 spec = pbr_SampleSpecular(dotNL, dotNV, dotNH, specfresnel, roughness, 0.0f) * dotNL;//moze i dotiNL
 		
 		float3 diff = (1.0f - specfresnel) * lambert_diffuse() * dotNL;
 		
@@ -149,11 +169,11 @@ float3 PBR_Sample(vec3 diffuse, vec3 normal, vec3 specular, float roughness, flo
 	
 	//	image based lighting 
 	//- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-	float2 brdf = PBR_SampleBRDF(float2(roughness, dotNV));
+	float2 brdf = pbr_SampleBRDF(float2(roughness, dotNV));
 	float3 iblspec = (fresnel(specular, dotNV) * brdf.x + brdf.y );
 	
-	float3 ambdiff = ambientOcclusion * PBR_SampleAmbient(AmbientTx, AmbientLightIncreasePercent, N, 0.99f ).xyz;//(ako cemo radit ikad vise ambijenata koji se blendaju onda treba lerpat ova dva parametra (ambdiff, i ambrefl))
-	float3 ambrefl = lerp(1.0f, ambientOcclusion, roughness ) * PBR_SampleAmbient(AmbientTx, AmbientLightIncreasePercent, R, roughness ).xyz;
+	float3 ambdiff = ambientOcclusion * pbr_SampleAmbient(AmbientTx, AmbientLightIncreasePercent, N, 0.99f ).xyz;//(ako cemo radit ikad vise ambijenata koji se blendaju onda treba lerpat ova dva parametra (ambdiff, i ambrefl))
+	float3 ambrefl = lerp(1.0f, ambientOcclusion, roughness ) * pbr_SampleAmbient(AmbientTx, AmbientLightIncreasePercent, R, roughness ).xyz;
 	
 	lightrefl += iblspec * ambrefl;
 	lightdiff += ambdiff * (tovec3(1.0f) - iblspec) * lambert_diffuse();
@@ -168,7 +188,7 @@ float3 PBR_Sample(vec3 diffuse, vec3 normal, vec3 specular, float roughness, flo
 
 //--------------------------------------------------------------------------------------
 
-void PBR_SampleLight(vec3 position, vec3 diffuse, vec3 normal, vec3 specular, float roughness, float metalness,
+void pbr_SampleLight(vec3 position, vec3 diffuse, vec3 normal, vec3 specular, float roughness, float metalness,
 					 float shadow, vec3 viewVector, Light light,
 					 out float3 lightdiff, out float3 lightrefl)
 {
@@ -195,8 +215,8 @@ void PBR_SampleLight(vec3 position, vec3 diffuse, vec3 normal, vec3 specular, fl
 	float dotHV = saturate(dot(H,V));
 	float dotLV = saturate(dot(L,V));
 	
-	float3 specfresnel = fresnel(specular, dotHV);
-	float3 spec = PBR_SampleSpecular(dotNL, dotNV, dotNH, specfresnel, roughness, 0.0f) * dotNL;//moze i dotiNL
+	float3 specfresnel = fresnel(specular, dotNV);
+	float3 spec = pbr_SampleSpecular(dotNL, dotNV, dotNH, specfresnel, roughness, 0.0f) * dotNL;//moze i dotiNL
 	
 	float3 diff = (1.0f - specfresnel) * lambert_diffuse() * dotNL;
 	
@@ -205,7 +225,7 @@ void PBR_SampleLight(vec3 position, vec3 diffuse, vec3 normal, vec3 specular, fl
 	//- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 }
 
-void PBR_SampleAmbient(vec3 diffuse, vec3 normal, vec3 specular, float roughness, float metalness,
+void pbr_SampleAmbient(vec3 diffuse, vec3 normal, vec3 specular, float roughness, float metalness,
 					   float ambientOcclusion, vec3 viewVector, const samplerCube AmbientTx, const float AmbientLightIncreasePercent,
 					   out float3 lightdiff, out float3 lightrefl)
 {
@@ -216,21 +236,137 @@ void PBR_SampleAmbient(vec3 diffuse, vec3 normal, vec3 specular, float roughness
 	
 	//	image based lighting 
 	//- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-	float2 brdf = PBR_SampleBRDF(float2(roughness, dotNV));
-	float3 iblspec = (fresnel(specular, dotNV) * brdf.x + brdf.y );
+	float2 brdf = pbr_SampleBRDF(float2(roughness, dotNV));
+	float3 f = fresnel(specular, dotNV);
+	float3 iblspec = (f * brdf.x + brdf.y );
 	
-	float3 ambdiff = ambientOcclusion * PBR_SampleAmbient(AmbientTx, AmbientLightIncreasePercent, N, 0.99f ).xyz;//(ako cemo radit ikad vise ambijenata koji se blendaju onda treba lerpat ova dva parametra (ambdiff, i ambrefl))
-	float3 ambrefl = lerp(1.0f, ambientOcclusion, roughness ) * PBR_SampleAmbient(AmbientTx, AmbientLightIncreasePercent, R, roughness ).xyz;
+	float3 ambdiff = ambientOcclusion * pbr_SampleAmbient(AmbientTx, AmbientLightIncreasePercent, N, 0.99f ).xyz;//(ako cemo radit ikad vise ambijenata koji se blendaju onda treba lerpat ova dva parametra (ambdiff, i ambrefl))
+	float3 ambrefl = lerp(1.0f, ambientOcclusion, roughness ) * pbr_SampleAmbient(AmbientTx, AmbientLightIncreasePercent, R, roughness ).xyz;
 	
 	lightrefl += iblspec * ambrefl;
-	lightdiff += ambdiff * (tovec3(1.0f) - iblspec) * lambert_diffuse();
+	lightdiff += ambdiff * (tovec3(1.0f) - f) * lambert_diffuse();
 	//- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -	
 }
 
-vec3 PBR_IntegrateSamples(vec3 diffuse, float metalness, vec3 lightdiff, vec3 lightrefl){
+vec3 pbr_IntegrateSamples(vec3 diffuse, float metalness, vec3 lightdiff, vec3 lightrefl){
 	lightdiff = lightdiff * lerp( diffuse.xyz, tofloat3(0.0f), metalness );
 	return lightdiff + lightrefl;
 }
+//--------------------------------------------------------------------------------------
+
+
+// Importance sample
+//--------------------------------------------------------------------------------------
+
+float VanDerCorpus(uint n, uint base)
+{
+    float invBase = 1.0 / float(base);
+    float denom   = 1.0;
+    float result  = 0.0;
+
+    for(uint i = 0u; i < 32u; ++i)
+    {
+        if(n > 0u)
+        {
+            denom   = mod(float(n), 2.0);
+            result += denom * invBase;
+            invBase = invBase / 2.0;
+            n       = uint(float(n) / 2.0);
+        }
+    }
+
+    return result;
+}
+// ----------------------------------------------------------------------------
+vec2 HammersleyNoBitOps(uint i, uint N)
+{
+    return vec2(float(i)/float(N), VanDerCorpus(i, 2u));
+}
+
+float RadicalInverse_VdC(uint bits) 
+{
+    bits = (bits << 16u) | (bits >> 16u);
+    bits = ((bits & 0x55555555u) << 1u) | ((bits & 0xAAAAAAAAu) >> 1u);
+    bits = ((bits & 0x33333333u) << 2u) | ((bits & 0xCCCCCCCCu) >> 2u);
+    bits = ((bits & 0x0F0F0F0Fu) << 4u) | ((bits & 0xF0F0F0F0u) >> 4u);
+    bits = ((bits & 0x00FF00FFu) << 8u) | ((bits & 0xFF00FF00u) >> 8u);
+    return float(bits) * 2.3283064365386963e-10; // / 0x100000000
+}
+vec2 Hammersley(uint i, uint N)
+{
+    // return vec2(float(i)/float(N), RadicalInverse_VdC(i));
+	return HammersleyNoBitOps(i,N);
+}
+
+// ----------------------------------------------------------------------------
+//Epic Games spherical sample 
+vec3 ImportanceSampleVector_GGX(vec2 Xi, vec3 N, float roughness)
+{
+    float a = roughness*roughness;
+	
+    float phi = 2.0 * PI * Xi.x;
+    float cosTheta = sqrt((1.0 - Xi.y) / (1.0 + (a*a - 1.0) * Xi.y));
+    float sinTheta = sqrt(1.0 - cosTheta*cosTheta);
+	
+    // from spherical coordinates to cartesian coordinates
+    vec3 H;
+    H.x = cos(phi) * sinTheta;
+    H.y = sin(phi) * sinTheta;
+    H.z = cosTheta;
+	
+    // from tangent-space vector to world-space sample vector
+    vec3 up        = abs(N.z) < 0.999 ? vec3(0.0, 0.0, 1.0) : vec3(1.0, 0.0, 0.0);
+    vec3 tangent   = normalize(cross(up, N));
+    vec3 bitangent = cross(N, tangent);
+	
+    vec3 sampleVec = tangent * H.x + bitangent * H.y + N * H.z;
+    return normalize(sampleVec);
+}
+
+#ifndef IntegrateBRDF_G_function
+#define IntegrateBRDF_G_function G_smithGGX
+#endif
+
+// ----------------------------------------------------------------------------
+vec2 IntegrateBRDF(float dotNV, float roughness)
+{
+    vec3 V;
+    V.x = sqrt(1.0 - dotNV*dotNV);
+    V.y = 0.0;
+    V.z = dotNV;
+	V = normalize(V);
+
+    float A = 0.0;
+    float B = 0.0;
+	
+    vec3 N = vec3(0.0, 0.0, 1.0);
+
+    const uint SAMPLE_COUNT = 32u;
+    for(uint i = 0u; i < SAMPLE_COUNT; ++i)
+    {
+        vec2 Xi = Hammersley(i, SAMPLE_COUNT);
+        vec3 H  = ImportanceSampleVector_GGX(Xi, N, roughness);
+        vec3 L  = normalize(2.0 * dot(V, H) * H - V);
+
+        float dotNL = max(L.z, 0.0);
+        float dotNH = max(H.z, 0.0);
+        float dotVH = max(dot(V, H), 0.0);
+		
+        if(dotNL > 0.0)
+        {
+            float G = IntegrateBRDF_G_function(roughness, dot(N,V), dot(N,L));
+            float G_Vis = (G * dotVH) / (dotNH * dotNV);
+            float Fc = pow(1.0 - dotVH, 5.0);
+
+            A += (1.0 - Fc) * G_Vis;
+            B += Fc * G_Vis;
+        }
+    }
+    A /= float(SAMPLE_COUNT);
+    B /= float(SAMPLE_COUNT);
+    return vec2(A, B);
+}
+
 //--------------------------------------------------------------------------------------
 
 //======================================================================================
