@@ -24,7 +24,7 @@ export function main(){
 	zA.AsyncFetchAndLoadFile("Textures/venice_hdr.zip", true, function(zB){
 		if(zB.isUnpacked() == false) alert("zB.isUnpacked() == false");
 	});
-		
+	
 	gl.clearColor(0.0, 1.0, 1.0, 1.0);
 	gl.blendColor(1.0, 1.0, 1.0, 1.0);
 	gl.enable(gl.DEPTH_TEST);
@@ -33,6 +33,8 @@ export function main(){
 	gl.disable(gl.CULL_FACE);
 	gl.frontFace(gl.CCW);
 	gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
+	
+	// gl.enable(gl.TEXTURE_CUBE_MAP_SEAMLESS);
 	
 	gl.disable(gl.BLEND);
 	gl.depthFunc(gl.LESS);
@@ -65,10 +67,13 @@ export function main(){
 	skybox_shader.InitDefaultAttribLocations();
 	
 	var deferred_opaque_shader = new glext.CShader(2);
-	if(deferred_opaque_shader.CompileFromFile("simpleVS", "deferred_opaque_shader") == false) alert("nije kompajliran shader!");
+	if(deferred_opaque_shader.CompileFromFile("viewquadVS", "deferred_opaque_shader") == false) alert("nije kompajliran shader!");
 	deferred_opaque_shader.InitDefaultAttribLocations();
 	deferred_opaque_shader.InitDefaultUniformLocations();
 	deferred_opaque_shader.ULInvViewProjMatrix = deferred_opaque_shader.getUniformLocation("InverseViewProjectionMatrix");
+	deferred_opaque_shader.ULCameraForwardDir = deferred_opaque_shader.getUniformLocation("CameraForwardDir");
+	deferred_opaque_shader.ULCameraRightDir = deferred_opaque_shader.getUniformLocation("CameraRightDir");
+	deferred_opaque_shader.ULCameraUpDir = deferred_opaque_shader.getUniformLocation("CameraUpDir");
 	
 	var transparent_shader = new glext.CShader(3);
 	if(transparent_shader.CompileFromFile("simpleVS", "transparent_shader") == false) alert("nije kompajliran shader!");
@@ -115,8 +120,9 @@ export function main(){
 	
 	var txAtmosphere = new glext.CTexture(-1); txAtmosphere.CreateFromFile("txAtmosphere");
 	
-	var txAmb = new glext.CTextureCube(0); txAmb.CreateFromDOMDataElements("tx128");	
-			
+	// var txAmb = new glext.CTextureCube(0); txAmb.CreateFromDOMDataElements("tx128");	
+	var txAmb = new glext.CTextureCube(0); txAmb.CreateFromMultipleElementsInDOM("txAmbHDRVenice");	
+	
 	var light = new glext.CLight(0);
 	// var lightUniforms = glext.CLight.getUniformLocationsFromShader(shader,"light0");
 	// var lightUniforms_backbuffer_shader = glext.CLight.getUniformLocationsFromShader(deferred_opaque_shader,"light0");
@@ -217,9 +223,16 @@ export function main(){
 	// vMath.mat4.identity(viewMatrix);
 	// vMath.mat4.translate(viewMatrix, viewMatrix, [0.0, 0.0, -7.0]);
 	
-	var CCamera = new glext.CCamera(0, gl.viewportWidth, gl.viewportHeight);
-	CCamera.setPositionAndDir(eyePt, [1.0,0.0,0.0], upDir);
-	CCamera.UpdateProjectionMatrix();
+	var Camera = new glext.CCamera(0, gl.viewportWidth, gl.viewportHeight);
+	Camera.setPositionAndDir(eyePt, [1.0,0.0,0.0], upDir);
+	Camera.UpdateProjectionMatrix();
+	
+	var CenterCamera = new glext.CCamera(1, gl.viewportWidth, gl.viewportHeight);
+	vMath.mat4.identity(CenterCamera.ViewMatrix);
+	CenterCamera.Position = [0.0,0.0,0.0];
+	CenterCamera.ProjectionMatrix = Camera.ProjectionMatrix;
+	vMath.mat4.copy(CenterCamera.ViewMatrix, Camera.ViewMatrix);
+	vMath.mat4.setTranslation(CenterCamera.ViewMatrix, CenterCamera.ViewMatrix, [0.0,0.0,0.0]);
 	
 	vMath.mat4.identity(model.Transform);
 	// vMath.mat4.scale(model.Transform, model.Transform, [4.0,4.0,4.0]);
@@ -275,7 +288,7 @@ export function main(){
 		var ctime10 = Math.cos(10*time);
 		
 		if(checkWindowsSizeAndResizeCanvas() == true){
-			CCamera.setViewportWidthHeight(gl.viewportWidth,gl.viewportHeight);}
+			Camera.setViewportWidthHeight(gl.viewportWidth,gl.viewportHeight);}
 		
 		vMath.mat4.identity(model.Transform);
 		if(bEnableRotation) vMath.mat4.rotate(model.Transform, model.Transform, vMath.deg2rad(time*10), [0,0,1]);/*  */
@@ -318,25 +331,28 @@ export function main(){
 		{			
 			// eyePt = vMath.sph2cart3D(orbital.azimuth, orbital.inclination, orbital.radius);
 			var sinA = Math.sin(vMath.deg2rad(orbital.dazimuth)); var sinI = Math.sin(vMath.deg2rad(orbital.dinclination));
-			vMath.vec3.scale(RightAdd, CCamera.RightDir, orbital.radius * sinA);
-			vMath.vec3.scale(UpAdd, CCamera.UpDir, orbital.radius * sinI);
+			vMath.vec3.scale(RightAdd, Camera.RightDir, orbital.radius * sinA);
+			vMath.vec3.scale(UpAdd, Camera.UpDir, orbital.radius * sinI);
 			vMath.vec3.add(eyePt, eyePt, RightAdd);
 			vMath.vec3.add(eyePt, eyePt, UpAdd);
 			
 			vMath.vec3.normalize(eyePt, eyePt);
 			vMath.vec3.scale(eyePt, eyePt, orbital.radius);
 			
-			CCamera.setPositionAndLookPt(eyePt, [0.0,0.0,0.0], upDir);
-			CCamera.CalcInverseViewProjectionMatrix();
+			Camera.setPositionAndLookPt(eyePt, [0.0,0.0,0.0], upDir);
+			Camera.CalcInverseViewProjectionMatrix();
 			
-			vMath.vec3.copy(upDir, CCamera.UpDir);
+			vMath.vec3.copy(upDir, Camera.UpDir);
+			
+			vMath.mat4.copy(CenterCamera.ViewMatrix, Camera.ViewMatrix);
+			vMath.mat4.setTranslation(CenterCamera.ViewMatrix, CenterCamera.ViewMatrix, [0.0,0.0,0.0]);
 		}
 		
 		/*
 		if(sys.mouse.get().btnLeft == true)
 			if(sys.mouse.get().dx != 0 || sys.mouse.get().dy != 0){
-				CCamera.Rotate(sys.mouse.get().dx / 100.0, sys.mouse.get().dy / 100.0);
-				CCamera.CalcInverseViewProjectionMatrix();
+				Camera.Rotate(sys.mouse.get().dx / 100.0, sys.mouse.get().dy / 100.0);
+				Camera.CalcInverseViewProjectionMatrix();
 			} 
 		*/
 		//-------------------------------------------------------------------------------------
@@ -354,12 +370,17 @@ export function main(){
 		gl.depthFunc(gl.LEQUAL);
 		gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 		
-		RenderModels(fbo, true, time, CCamera, [SkySphereModel, model]);
+		gl.disable(gl.DEPTH_TEST);
+		RenderModels(fbo, true, time, CenterCamera, [SkySphereModel]);
+		gl.clear(gl.DEPTH_BUFFER_BIT);
+		gl.enable(gl.DEPTH_TEST);
+		
+		RenderModels(fbo, false, time, Camera, [model]);
 		
 		light.setPosition(-2.0*ctime, 2.0, 2.0);
 		light.setDisplaySize(5.0);
 		light.setDisplayColor(0.5,0.79,1.0,1.0);
-		light.setMatrices( CCamera.ViewMatrix, CCamera.ProjectionMatrix );
+		light.setMatrices( Camera.ViewMatrix, Camera.ProjectionMatrix );
 		light.RenderPosition();
 		light.setIntensity(4.0);
 		light.setColor(0.5,0.79,1.0,1.0);
@@ -394,8 +415,11 @@ export function main(){
 				
 				deferred_opaque_shader.setTimeUniform(time);
 				
-				deferred_opaque_shader.setCameraPositionUniform(CCamera.Position);
-				deferred_opaque_shader.setMatrix4Uniform(deferred_opaque_shader.ULInvViewProjMatrix, CCamera.InverseViewProjectionMatrix);
+				deferred_opaque_shader.setCameraPositionUniform(Camera.Position);
+				deferred_opaque_shader.setFloat3Uniform(deferred_opaque_shader.ULCameraForwardDir, Camera.ForwardDir);
+				deferred_opaque_shader.setFloat3Uniform(deferred_opaque_shader.ULCameraRightDir, Camera.RightDir);
+				deferred_opaque_shader.setFloat3Uniform(deferred_opaque_shader.ULCameraUpDir, Camera.UpDir);
+				deferred_opaque_shader.setMatrix4Uniform(deferred_opaque_shader.ULInvViewProjMatrix, Camera.InverseViewProjectionMatrix);
 				
 				// light.UploadToShader(deferred_opaque_shader, lightUniforms_backbuffer_shader);
 				
@@ -404,7 +428,7 @@ export function main(){
 		//atmosphere render
 		fboHdrMipBlur.AttachDepth(txfbDepth);
 		// light.UploadToShader(atmosphere_shader, atmosphere_shader.lightUniforms);
-		// RenderModels(fboHdrMipBlur, false, time, CCamera, [AtmoSphereModel]);
+		// RenderModels(fboHdrMipBlur, false, time, Camera, [AtmoSphereModel]);
 		
 		//gen mipmapa za renderirani color buffer
 		glext.CFramebuffer.CopyTextureFromFBColorAttachment(txfbHdrMipBlur, 0, txfbColor, 0, MipGen.framebuffer, true);
@@ -413,7 +437,7 @@ export function main(){
 		gl.viewport(0, 0, txfbColor.width, txfbColor.height);
 		
 			fbo.AttachTexture(txfbColor, 0);
-			RenderModels(fbo, false, time, CCamera, [navigatorModel]);
+			RenderModels(fbo, false, time, Camera, [navigatorModel]);
 		
 		//render to main FB, sa shaderom koji prikazuje mipove.
 		glext.CFramebuffer.BindMainFB();	
@@ -427,7 +451,7 @@ export function main(){
 			backbuffer_shader.setViewMatrixUniform( IdentityMatrix );
 			backbuffer_shader.setProjectionMatrixUniform( IdentityMatrix );
 			backbuffer_shader.setTimeUniform(time);
-			backbuffer_shader.setCameraPositionUniform(CCamera.Position);
+			backbuffer_shader.setCameraPositionUniform(Camera.Position);
 			
 			quad_model.RenderIndexedTriangles(backbuffer_shader);
 		
@@ -488,6 +512,9 @@ export function recompileShader(fragment_name){
 				break;
 				case "deferred_opaque_shader":
 					shader.ULInvViewProjMatrix = shader.getUniformLocation("InverseViewProjectionMatrix");
+					shader.ULCameraForwardDir = shader.getUniformLocation("CameraForwardDir");
+					shader.ULCameraRightDir = shader.getUniformLocation("CameraRightDir");
+					shader.ULCameraUpDir = shader.getUniformLocation("CameraUpDir");
 					glext.CLightList.get(0).AttachUniformBlockTo(shader);
 				break;
 				case "deferred_BcNAoRSMt":

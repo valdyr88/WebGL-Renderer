@@ -25,6 +25,7 @@
   <script id="ubModel" src="./Shaders/include/uniformBuffers/ubModel.glsl" type="shader/fragment"></script>
   
   <script id="simpleVS" src="./Shaders/simple.vs.glsl" type="shader/vertex"></script>
+  <script id="viewquadVS" src="./Shaders/viewquad.vs.glsl" type="shader/vertex"></script>
   <script id="simpleFS" src="./Shaders/simple.fs.glsl" type="shader/fragment"></script>
   <script id="pbr_shader" src="./Shaders/pbr_shader.fs.glsl" type="shader/fragment"></script>
   <script id="skybox_shader" src="./Shaders/skybox.fs.glsl" type="shader/fragment"></script>
@@ -72,6 +73,10 @@
 										
   <!--<img id="tx128" src="./Textures/128.png"></img>-->
   <img id="tx128" src="./Textures/venice.hdr" style="display: none" type="txC/Amb:128/hdr"></img>
+  <!-- <img id="txAmbHDRVenice" src="./Textures/Cubemaps/Ambients/Venice/venice_hdr.zip" style="display: none" type="txC/Amb:128/hdr"></img> -->
+  <!-- <img id="txAmbHDRVenice" src="./Textures/Cubemaps/Ambients/Forest/epping_forest_hdr.zip" style="display: none" type="txC/Amb:128/hdr"></img> -->
+  <!-- <img id="txAmbHDRVenice" src="./Textures/Cubemaps/Ambients/ForestC/forest_c_hdr.zip" style="display: none" type="txC/Amb:512/hdr"></img> -->
+  <img id="txAmbHDRVenice" src="./Textures/Cubemaps/Ambients/Space/Turqoise/space_turqoise.zip" style="display: none" type="txC/Amb:512/hdr"></img>
   
   <img id="txBRDF_LUT" src="./Textures/BRDF_LUT.png" style="display: none" type="tx2D/LUT"></img>
   
@@ -98,7 +103,13 @@
 	import { fetchImage } from "./GLExt/glTexture.js";
 	function wait(ms){ const start = performance.now(); while(performance.now() - start < ms); }
 	
-	var extern_files_list = ["functions", "structs", "pbr", "defines", "ubCamera", "ubLight", "ubMaterial", "ubModel", "simpleVS", "simpleFS", "pbr_shader", "skybox_shader", "backbuffer_shader", "SphereModel", "deferred_opaque_shader", "deferred_BcNAoRSMt", "deferred_skybox", "transparent_shader", "atmosphere_shader", "navigatorModel", "mipmapVS", "3x3MipGenFS", "tx128"];
+	var extern_files_list = [
+		"functions", "structs", "pbr", "defines", "ubCamera", "ubLight",
+		"ubMaterial", "ubModel","simpleVS", "simpleFS", "pbr_shader", "skybox_shader",
+		"backbuffer_shader", "SphereModel", "deferred_opaque_shader", "deferred_BcNAoRSMt", "viewquadVS",
+		"deferred_skybox", "transparent_shader", "atmosphere_shader", "navigatorModel", "mipmapVS",
+		"3x3MipGenFS", "tx128", "txAmbHDRVenice"
+	];
 	var extern_files_loaded_number = 0;
 	
 	//function recompileShader(fragment_name)
