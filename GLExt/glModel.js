@@ -2,7 +2,9 @@ import { gl, getContentsFromFile, glPrintError, CGLExtObject } from "./glContext
 import { CShader, CShaderList } from "./glShader.js";
 import { CTexture, CTextureList } from "./glTexture.js";
 import { CBlendMode } from "./glBlendMode.js"
+import { CMaterialParam, CMaterial, CTextureShaderLink } from "./glMaterial.js";
 import * as vMath from "../glMatrix/gl-matrix.js";
+import * as sys from "./../System/sys.js"
 
 /*
 var RenderPrimitiveType = Object.freeze( {"POINTS":1,"LINES":2,"TRIANGLES":3,
@@ -32,14 +34,6 @@ function Float32ArrayFromBuffer(itemSize, Buffer){
 	return floatArray;
 }
 
-class CTextureShaderLink
-{
-	constructor(textureSlotID, strUniformLocation){
-		this.TextureSlotID = textureSlotID;
-		this.UniformLocationStr = strUniformLocation;
-	}
-}
-
  /*
  GL_ZERO, GL_ONE, GL_SRC_COLOR, GL_ONE_MINUS_SRC_COLOR, GL_DST_COLOR, GL_ONE_MINUS_DST_COLOR,
  GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_DST_ALPHA, GL_ONE_MINUS_DST_ALPHA. GL_CONSTANT_COLOR,
@@ -55,6 +49,7 @@ class CTextureShaderLink
  
  gl.FUNC_ADD, gl.FUNC_SUBTRACT, gl.FUNC_REVERSE_SUBTRACT, gl.MIN, gl.MAX.
  */
+
 
 export class CModel extends CGLExtObject
 {
@@ -88,6 +83,18 @@ export class CModel extends CGLExtObject
 		this.Transform = vMath.mat4.create();
 		
 		this.name = "";
+		
+		this.bIsLoaded = false;
+		
+		this.material = null;
+	}
+	
+	isLoaded(){ return this.bIsLoaded; }
+	
+	setMaterial(m){ 
+		this.material = m;
+		this.shaderID = this.material.shaderID;
+		this.textures = this.material.textureLinks;
 	}
 	
 	setBlendMode(b){
@@ -188,7 +195,6 @@ export class CModel extends CGLExtObject
 	}
 	
 	ImportFromObj(string){
-		this.name = string;
 		
 		var ObjModelImport = new CModelImport();
 		ObjModelImport.ImportOBJ(this, string);
@@ -196,18 +202,30 @@ export class CModel extends CGLExtObject
 		
 		this.CreateBuffers();
 		// delete ObjModelImport;
+		this.bIsLoaded = true;
 	}
 	
 	ImportFrom(id){
 		var str = getContentsFromFile(id);
 		if(str == null) return false;
+		this.name = id;
 		
 		this.ImportFromObj(str);
 		return true;
 	}
 	
-	RenderIndexed(shader, mode){
+	DelayedImportFromPath(src){
 		
+		let thisMdl = this;
+		
+		sys.fetch.fetchTextFileSrc(src, function(tekst){
+			thisMdl.ImportFromObj(tekst);
+			thisMdl.name = src;
+		});		
+	}
+	
+	RenderIndexed(shader, mode){
+		if(this.isLoaded == false) return;
 		/*
 		shader.ALVertexPosition;
 		shader.ALVertexNormal;
@@ -219,6 +237,12 @@ export class CModel extends CGLExtObject
 		if(shader.isBound() == false){ shader.Bind(); }
         // gl.uniformMatrix4fv(shaderProgram.pMatrixUniform, false, pMatrix);
         if(shader.ULMatrixModel != -1 && shader.ULMatrixModel != null) gl.uniformMatrix4fv(shader.ULMatrixModel, false, this.Transform);
+		
+		if(this.material != null){
+			for(let i = 0; i < this.material.params.length; ++i){
+				this.material.params[i].setUniformToShader(shader);
+			}
+		}
 		
 		if(this.glVertexBuffer != -1 && shader.ALVertexPosition != -1){
 			gl.bindBuffer(gl.ARRAY_BUFFER, this.glVertexBuffer);

@@ -277,6 +277,7 @@ export class CTexture extends CGLExtObject{
 		this.type = -1;
 		this.name = "-";
 		this.scr = "";
+		this.lodBias = -0.5;
 	}
 	
 	//------------------------------------------------------------------------------------------------------------------------------------------------
@@ -290,6 +291,7 @@ export class CTexture extends CGLExtObject{
 		gl.texParameteri(this.targetType, gl.TEXTURE_WRAP_T, gl.REPEAT);
 		gl.texParameteri(this.targetType, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR); //LINEAR_MIPMAP_LINEAR
 		gl.texParameteri(this.targetType, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+		// gl.texParameterf(this.targetType, gl.TEXTURE_LOD_BIAS, this.lodBias);
 		
 		// if(this.targetType == gl.TEXTURE_2D)
 			gl.texImage2D(this.targetType, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, tx);
@@ -304,11 +306,12 @@ export class CTexture extends CGLExtObject{
 		}
 		
 		this.src = tx.src;
+		this.name = tx.id;
 	}
 	
 	//------------------------------------------------------------------------------------------------------------------------------------------------
 	
-	CreateDelayed(tx_src){
+	CreateDelayed(tx_src, id){
 		
 		this.texture = gl.createTexture();
 		gl.bindTexture(this.targetType, this.texture);
@@ -318,28 +321,34 @@ export class CTexture extends CGLExtObject{
 		gl.texParameteri(this.targetType, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR); //LINEAR_MIPMAP_LINEAR
 		gl.texParameteri(this.targetType, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
 		
-			gl.texImage2D(this.type, 0, gl.RGBA, 1, 1, 0, gl.RGBA, gl.UNSIGNED_BYTE, new Uint8Array([0,0,0,255]));
+			gl.texImage2D(this.targetType, 0, gl.RGBA, 1, 1, 0, gl.RGBA, gl.UNSIGNED_BYTE, new Uint8Array([0,0,0,255]));
 				
 		gl.bindTexture(this.targetType, null);
 		
 		this.width = 1; this.height = 1; this.levels = 1;
+		this.format = gl.RGBA; this.internalFormat = gl.RGBA;
+		this.type = gl.UNSIGNED_BYTE;
+		
+		var thisTx = this;
 		
 		const tx = new Image();
 		tx.onload = function(){
-			gl.bindTexture(this.targetType, this.texture);
+			gl.bindTexture(thisTx.targetType, thisTx.texture);
 			
-				gl.texImage2D(this.targetType, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, tx);
-				gl.generateMipmap(this.targetType);
+				gl.texImage2D(thisTx.targetType, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, this);
+				gl.generateMipmap(thisTx.targetType);
 		
-			gl.bindTexture(this.targetType, null);
+			gl.bindTexture(thisTx.targetType, null);
 			
-			if( !(typeof tx.width === 'undefined') && !(typeof tx.height === 'undefined')){
-				this.width = tx.width; this.height = tx.height;
-				this.levels = CalcNofMipLevels(this.width,this.height);
+			if( !(typeof this.width === 'undefined') && !(typeof this.height === 'undefined')){
+				thisTx.width = this.width; thisTx.height = this.height;
+				thisTx.levels = CalcNofMipLevels(thisTx.width,thisTx.height);
 			}
 		}
 		tx.src = tx_src;
 		this.src = tx_src;
+		if(id !== undefined)
+			this.name = id;
 	}
 	
 	//------------------------------------------------------------------------------------------------------------------------------------------------
@@ -650,18 +659,18 @@ export class CTextureCube extends CGLExtObject{
 	
 	CreateFromDOMDataElements(id)
 	{	
-		var elm = document.getElementById(id);
+		let elm = document.getElementById(id);
 		if(elm == null) return false;
 		if(typeof elm.value === 'undefined' || elm.value == null) return false;
 		if(elm.type != "multiple_DOM_id") return false;
 		
-		var storeIDs = elm.value.split(":");
-		var storeIDsNo = storeIDs.length;
+		let storeIDs = elm.value.split(":");
+		let storeIDsNo = storeIDs.length;
 		if((storeIDsNo % 6) != 0) return false; //mora biti 6 strana
-		var mipCount = storeIDsNo / 6;
+		let mipCount = storeIDsNo / 6;
 		
 		var tx = [[],[],[],[],[],[]];
-		var side = 0; var level = 0;
+		let side = 0; var level = 0;
 		var format = gl.RGBA;
 		var dataType = gl.UNSIGNED_BYTE;
 		var width = 0;
@@ -669,19 +678,19 @@ export class CTextureCube extends CGLExtObject{
 		for(var i = 0; i < storeIDs.length; ++i)
 		{
 			// var obj = document.getElementById(storeIDs[i]);
-			var obj = sys.storage.CGlobalStorage.get(storeIDs[i]);
+			let obj = sys.storage.CGlobalStorage.get(storeIDs[i]);
 			if(typeof obj === 'undefined' || obj == null){
 				obj = sys.storage.CGlobalStorage.get(storeIDs[i]); }
 			if(typeof obj.value === 'undefined' || obj.value == null) return false;
 			
-			var strFileType = "";
-			var strType = obj.type.split("/");
+			let strFileType = "";
+			let strType = obj.type.split("/");
 			if(strType[0] != "txC") return false;
 			
 			if(strType.length > 2)
 				strFileType = strType[2];
 			else{
-				var ext = storeIDs[i].split("_");
+				let ext = storeIDs[i].split("_");
 				strFileType = ext[ext.length-1];
 			}
 			strFileType = strFileType.toLowerCase();
@@ -689,7 +698,7 @@ export class CTextureCube extends CGLExtObject{
 			switch(strFileType){
 				case "hdr":
 				{
-					var hdrImg = new CHDRImage(obj.value);
+					let hdrImg = new CHDRImage(obj.value);
 					hdrImg.DecodeRAWData();
 					tx[side][level] = hdrImg.getData();
 					
@@ -707,6 +716,57 @@ export class CTextureCube extends CGLExtObject{
 			if(level >= mipCount){ side++; level = 0; }
 			if(side > 6){
 				break;}
+		}
+		
+		this.Create(tx, width, format, dataType);
+	}
+
+	CreateFromMultipleElementsInDOM(id)
+	{
+		let obj = document.getElementById(id);
+		if(obj == null) return false;
+		if(typeof obj.value === 'undefined' || obj.value == null) return false;
+		if(obj.value.length != 6) return false;
+		
+		var tx = [[],[],[],[],[],[]];
+		let side = 0; var level = 0;
+		var format = gl.RGBA;
+		let dataType = gl.UNSIGNED_BYTE;
+		var width = 0;
+		
+		var sort_function = function(a,b){ return b.length - a.length;	}
+		for(let side = 0; side < obj.value.length; ++side){ obj.value[side].sort(sort_function); }
+		
+		let strFileType = "";
+		let strType = obj.type.split("/");
+		if(strType[0] != "txC") return false;
+
+		if(strType.length > 2)
+			strFileType = strType[2];
+		else
+			return false;
+		strFileType = strFileType.toLowerCase();
+		
+		for(let side = 0; side < obj.value.length; ++side){
+			for(let level = 0; level < obj.value[side].length; ++level){
+					
+				switch(strFileType){
+					case "hdr":
+					{
+						let hdrImg = new CHDRImage(obj.value[side][level]);
+						hdrImg.DecodeRAWData();
+						tx[side][level] = hdrImg.getData();
+						
+						dataType = gl.FLOAT;
+						format = gl.RGB;
+						// width = hdrImg.getWidth();
+						width = Math.max(width, hdrImg.getWidth());
+						break;
+					}
+					default:
+						break;
+				}
+			}
 		}
 		
 		this.Create(tx, width, format, dataType);
@@ -897,6 +957,14 @@ export class CTextureList
 		return null;
 	}
 	
+	static getByName(name){
+		for(let i = 0; i < CTextureList.singleton().textures.length; ++i){
+			let tx = CTextureList.singleton().textures[i];
+			if(tx.name == name || tx.src == name) return tx;
+		}
+		return null;
+	}
+	
 	static Init(){
 		if(globalTextureList == null)
 			globalTextureList = new CTextureList();
@@ -1008,6 +1076,30 @@ function fetchCubemap(obj, path, mipCount, fileType, onLoadFinish){
 	obj.type = "multiple_DOM_id";
 }
 
+function fetchCubemapZip(obj, zipPath, onLoadFinish){
+	
+	var zipFile = new sys.zip.CZip();
+	
+	zipFile.AsyncFetchAndLoadFile(zipPath, true, function(zB){
+		if(zB.isUnpacked() == false) alert("zB.isUnpacked() == false");
+		else{
+			var cubemaps = [[],[],[],[],[],[]];
+			if(zB.contents.dirs.length != 6) return;
+			
+			for(let side = 0; side < 6; ++side){
+				let dir = zB.contents.dirs[side];
+				
+				for(let level = 0; level < dir.files.length; ++level){
+					let file = dir.files[level];
+					cubemaps[side][level] = file.data;
+				}
+			}
+			
+			obj.value = cubemaps;
+			onLoadFinish();
+		}
+	});
+}
 // txC/Amb:128/hdr
 //ToDo: ucitavanje cubemape iz zip filea
 
@@ -1017,23 +1109,35 @@ function fetchImage_txC(obj, onLoadFinish){
 	
 	var strFilePathArray = splitFilePathExt(obj.src);
 	
-	var strUsage = [""]; var strFileType = ""; var strFilePath = "";
+	var strUsage = [""]; var strFileType = ""; var strFilePathNoExt = "";
 	var mipCount = -1;
 	
 	if(strType.length > 1)
 		strUsage = strType[1].split(":");
-	if(strType.length > 2)
-		strFileType = strType[2];
-	else if(strFilePathArray.length > 1)
-		strFileType = strFilePathArray[1];
-	if(strFilePathArray.length > 0)
-		strFilePath = strFilePathArray[0];
 	
+	//file type
+	if(strFilePathArray.length > 1)
+		strFileType = strFilePathArray[1];
+	else if(strType.length > 2)
+		strFileType = strType[2];
+	else
+		return false;
+	
+	//file path
+	if(strFilePathArray.length > 0)
+		strFilePathNoExt = strFilePathArray[0];
+	else
+		return false;
+	
+	//dimensions & mip count
 	if(strUsage.length > 1){
 		var dim = parseInt(strUsage[1]);
-		mipCount = Math.floor(Math.log(dim) / Math.log(2.0)) + 1;}
-		
-	fetchCubemap(obj, strFilePath, mipCount, strFileType, onLoadFinish);
+		mipCount = Math.floor(Math.log(dim) / Math.log(2.0)) + 1; }
+	
+	if(strFileType == "hdr")
+		fetchCubemap(obj, strFilePathNoExt, mipCount, strFileType, onLoadFinish);
+	else if(strFileType == "zip")
+		fetchCubemapZip(obj, obj.src, onLoadFinish);
 }
 
 //----------------------------------------------------------------------------

@@ -956,8 +956,8 @@ export class CShaderList
 	}
 	
 	static CreateShader(vertexFile, fragmentFile){
-		var SlotID = CShaderList.singleton().shaders.length;
-		var shader = new CShader(SlotID);
+		let SlotID = CShaderList.singleton().shaders.length;
+		let shader = new CShader(SlotID);
 		shader.CompileFromFile(vertexFile,fragmentFile);
 		CShaderList.singleton().shaders[SlotID] = shader;
 		return shader;
@@ -980,15 +980,28 @@ export class CShaderList
 		return null;
 	}
 	
+	static getByName(name){
+		let shaderList = CShaderList.singleton();
+		
+		for(let i = 0; i < shaderList.shaders.length; ++i){
+			let shader = shaderList.shaders[i];
+			if(shader.FragmentShaderName == name || shader.VertexShaderName == name){
+				return shader;
+			}
+		}
+		
+		return null;
+	}
+	
 	static getAllWithName(name){
 		if(name == null) return null;
 		if(name == "") return null;
 		
-		var rtnList = [];
-		var shaderList = CShaderList.singleton();
+		let rtnList = [];
+		let shaderList = CShaderList.singleton();
 		
-		for(var i = 0; i < shaderList.shaders.length; ++i){
-			var shader = shaderList.shaders[i];
+		for(let i = 0; i < shaderList.shaders.length; ++i){
+			let shader = shaderList.shaders[i];
 			if(shader.FragmentShaderName == name || shader.VertexShaderName == name){
 				rtnList[rtnList.length] = shader;
 			}
