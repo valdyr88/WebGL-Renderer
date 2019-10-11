@@ -49,6 +49,8 @@ export class CCamera extends CGLExtObject{
 	}
 	
 	Rotate(dx, dy){
+		if(dx == 0.0 && dy == 0.0) return;
+		
 		var v = vMath.vec3.create();
 		vMath.vec3.scale(v, this.RightDir, dx);
 		vMath.vec3.add(this.ForwardDir, v, this.ForwardDir);
@@ -65,6 +67,8 @@ export class CCamera extends CGLExtObject{
 	}
 	
 	Tilt(dt){
+		if(dt == 0.0) return;
+		
 		var v = vMath.vec3.create();
 		vMath.vec3.scale(v, this.RightDir, dt);
 		vMath.vec3.add(this.UpDir, v, this.UpDir);

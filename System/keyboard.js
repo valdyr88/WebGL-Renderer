@@ -24,8 +24,11 @@ export class CKeyboard{
 			keynum = e.key;
 		}
 		
-		this.AttachedKeyboard.lastKeyPressed = keynum.charCodeAt(0);
-		this.AttachedKeyboard.keysPressed[keynum.charCodeAt(0)] = true;
+		if(typeof keynum == "string")
+			keynum = keynum.charCodeAt(0);
+		
+		this.AttachedKeyboard.lastKeyPressed = keynum;
+		this.AttachedKeyboard.keysPressed[keynum] = true;
 		this.AttachedKeyboard.shiftPressed = e.shiftKey;
 		this.AttachedKeyboard.ctrlPressed = e.ctrlKey;
 		this.AttachedKeyboard.altPressed = e.altKey;

@@ -34,6 +34,10 @@ uniform sampler2D txBackground;
 uniform int uFlags;
 #define getBitFlag(bit) uint_getbit(uFlags, (bit))
 uniform float Time;
+
+uniform float emissionMult;
+uniform vec3 roughnessScaleOffsetPower;
+#define rSOP roughnessScaleOffsetPower
 //------------------------------------------------------------------------------
 #define varyin in
 
@@ -92,24 +96,27 @@ void main(void)
 	
 	vec4 diffuse = texture2D(txDiffuse, TexCoords);
 	vec4 normaltx = texture2D(txNormal, TexCoords);
-	vec4 AoRS = texture2D(txAoRS, TexCoords);
+	vec4 AoRSEm = texture2D(txAoRS, TexCoords);
 	// diffuse = tovec4(1.0f);
 	
-	float roughness = sqrt(AoRS.y);
-	float ambientOcclusion = AoRS.a;//1.0;//
+	float roughness = sqrt(AoRSEm.y);
+	float ambientOcclusion = AoRSEm.a;//1.0;//
 	ambientOcclusion = 1.0f;
+	float emission = gamma( 0.05f*emissionMult*AoRSEm.w, 1.0f/2.2f);
+	
+	roughness = pow( saturate( roughness*rSOP.x + rSOP.y ), rSOP.z );
 	
 	float Metalness = 0.0f;
-	float3 specular = float3( AoRS.z*0.22f );
+	float3 specular = float3( AoRSEm.z*0.22f );
 	
 	if(uint_getbit(uFlags, isAoRMt_bit) == true){
-		specular = float3( lerp( tofloat3(max(AoRS.z,0.22f)), diffuse.xyz, AoRS.z ));
-		Metalness = AoRS.z;
+		specular = float3( lerp( tofloat3(max(AoRSEm.z,0.22f)), diffuse.xyz, AoRSEm.z ));
+		Metalness = AoRSEm.z;
 	}
 	
 	#ifdef debug_PerfectReflection
 		diffuse = tovec4(1.0f);
-		AoRS = vec4(1.0f, 0.0f, 1.0f, 1.0f);
+		AoRSEm = vec4(1.0f, 0.0f, 1.0f, 1.0f);
 		ambientOcclusion = 1.0f;
 		specular = vec3(1.0f,1.0f,1.0f);
 		Metalness = 1.0f;
@@ -131,7 +138,7 @@ void main(void)
 	vec3 dir = Light_DirToLight(light0, Position);	
 	
 	float mipLevel = (cos(Time*0.4)+1.0)/2.0;
-	vec4 Amb = textureCubeLod(txAmbient, -normal.xyz, 7.0*AoRS.y);
+	vec4 Amb = textureCubeLod(txAmbient, -normal.xyz, 7.0*roughness);
 	float ambMult = 2.0*(cos(Time*0.4) + 1.0)+0.75;
 	
 	Light lights[1]; //{ light0, light0, light0, light0,};

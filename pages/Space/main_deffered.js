@@ -11,6 +11,7 @@ export function main(){
 	
 	var gs = sys.storage.CGlobalStorage.getSingleton();
 	sys.mouse.InitMouse(document);
+	sys.keyboard.InitKeyboard(document);
 	
 	gl = glext.glInit("glcanvas");
 		 if(glext.isWGL2 && glext.glEnableExtension('OES_texture_float') == false) alert("no extension: OES_texture_float");
@@ -242,11 +243,19 @@ export function main(){
 	txfbHdrMipBlur2.setMinMagFilterLinearMipMapLinear();
 	//------------------------------------------------------------------------
 	
-	var sovereign = new glext.CModelAssembly(0);
-	sovereign.LoadAssemblyFromXML("sovereignAsb");
+	// var sovereign = new glext.CModelAssembly(0);
+	// sovereign.LoadAssemblyFromXML("sovereignAsb");
 	
 	var galaxy = new glext.CModelAssembly(0);
 	galaxy.LoadAssemblyFromXML("galaxyAsb");
+	
+	var dderidex = new glext.CModelAssembly(0);
+	dderidex.LoadAssemblyFromXML("dderidexAsb");
+
+	dderidex.models[0].setTexture(txBRDF_LUT,"txBRDF");
+	dderidex.models[0].setTexture(txAmb,"txAmbient");
+	dderidex.models[0].setTexture(txfbHdrMipBlur,"txBackground");
+	// dderidex.models[0].setShader(transparent_shader);
 	
 	vMath.mat4.perspective(projectionMatrix, vMath.deg2rad(40.0), gl.viewportWidth/gl.viewportHeight, 0.1, 1000.0);
 	
@@ -282,6 +291,11 @@ export function main(){
 	vMath.mat4.rotate(navigatorModel.Transform, navigatorModel.Transform, vMath.deg2rad(180), [0,1,0]);
 	vMath.mat4.setTranslation(navigatorModel.Transform, navigatorModel.Transform, [ -5.0, 7.5, -15.0]);
 	// glext.CFramebuffer.BindMainFB();
+
+
+	vMath.mat4.identity(dderidex.models[0].Transform);
+	vMath.mat4.rotate(dderidex.models[0].Transform, dderidex.models[0].Transform, vMath.deg2rad(180), [0,1,0]);
+	vMath.mat4.setTranslation(dderidex.models[0].Transform, dderidex.models[0].Transform, [ -5.0, 12.5, -35.0]);
 	
 		
 	var time = 0.0;
@@ -314,9 +328,6 @@ export function main(){
 	orbital.dinclination = 0.0;
 	orbital.dazimuth = 0.0;
 	
-	var RightAdd = vMath.vec3.create();
-	var UpAdd = vMath.vec3.create();
-	
 	var bEnableRotation = false;
 	
 	function renderFrame()
@@ -331,66 +342,8 @@ export function main(){
 		
 		vMath.mat4.identity(model.Transform);
 		if(bEnableRotation) vMath.mat4.rotate(model.Transform, model.Transform, vMath.deg2rad(time*10), [0,0,1]);/*  */
-		
-		
-		//Calc camera view i proj
-		//-------------------------------------------------------------------------------------
-		var bUpdateCamera = false;
-		
-		var mousePos = sys.mouse.getPosition();
-		var mouseDelta = sys.mouse.getDeltaPosition();
 			
-		orbital.dinclination = 0.0;
-		orbital.dazimuth = 0.0;
-		
-		if(sys.mouse.get().btnLeft == true)
-		{
-			if(mouseDelta[0] != 0 || mouseDelta[1] != 0)
-			{
-				orbital.dazimuth = -mouseDelta[0];
-				orbital.dinclination = mouseDelta[1];
-				
-				bUpdateCamera = true;
-			}
-		}
-		
-		if(sys.mouse.get().dz != 0)
-		{
-			orbital.radius = orbital.radius - orbital.radius*(sys.mouse.get().dz / 20.0);
-			if(orbital.radius < 0.1) orbital.radius = 0.1;
-			if(orbital.radius > 100.0) orbital.radius = 100.0;
-			bUpdateCamera = true;
-		}
-		
-		if(bUpdateCamera == true)
-		{			
-			// eyePt = vMath.sph2cart3D(orbital.azimuth, orbital.inclination, orbital.radius);
-			var sinA = Math.sin(vMath.deg2rad(orbital.dazimuth)); var sinI = Math.sin(vMath.deg2rad(orbital.dinclination));
-			vMath.vec3.scale(RightAdd, Camera.RightDir, orbital.radius * sinA);
-			vMath.vec3.scale(UpAdd, Camera.UpDir, orbital.radius * sinI);
-			vMath.vec3.add(eyePt, eyePt, RightAdd);
-			vMath.vec3.add(eyePt, eyePt, UpAdd);
-			
-			vMath.vec3.normalize(eyePt, eyePt);
-			vMath.vec3.scale(eyePt, eyePt, orbital.radius);
-			
-			Camera.setPositionAndLookPt(eyePt, [0.0,0.0,0.0], upDir);
-			Camera.CalcInverseViewProjectionMatrix();
-			
-			vMath.vec3.copy(upDir, Camera.UpDir);
-			
-			vMath.mat4.copy(CenterCamera.ViewMatrix, Camera.ViewMatrix);
-			vMath.mat4.setTranslation(CenterCamera.ViewMatrix, CenterCamera.ViewMatrix, [0.0,0.0,0.0]);
-		}
-		
-		/*
-		if(sys.mouse.get().btnLeft == true)
-			if(sys.mouse.get().dx != 0 || sys.mouse.get().dy != 0){
-				Camera.Rotate(sys.mouse.get().dx / 100.0, sys.mouse.get().dy / 100.0);
-				Camera.CalcInverseViewProjectionMatrix();
-			} 
-		*/
-		//-------------------------------------------------------------------------------------
+		UpdateCamera(Camera, CenterCamera, orbital, "move");
 		
 		// render Color, Normal, AoRSMtEm buffera (i Depth isto)
 		//-------------------------------------------------------------------------------------
@@ -410,6 +363,8 @@ export function main(){
 		
 		// RenderModels(fboDeferred, false, time, Camera, [model]);
 		RenderModels(fboDeferred, false, time, Camera, galaxy.models);
+		
+		// RenderModels(fboDeferred, false, time, Camera, dderidex.models);
 		
 		light.setPosition(10.0*ctime + 2.0, 15.0, 10.0*stime + 20.0 );
 		light.setDisplaySize(5.0);
@@ -517,7 +472,8 @@ export function main(){
 		fboTransparent.Bind();
 		
 			// fbo.AttachTexture(txfbColor, 0);
-			RenderModels(fboTransparent, false, time, Camera, [navigatorModel]);
+			// RenderModels(fboTransparent, false, time, Camera, [navigatorModel]);
+			RenderModels(fboTransparent, false, time, Camera, dderidex.models);
 		
 		
 		//render to main FB, sa shaderom koji prikazuje mipove.
@@ -538,6 +494,7 @@ export function main(){
 			quad_model.RenderIndexedTriangles(backbuffer_shader);
 		
 		sys.mouse.Update();
+		sys.keyboard.Update();
 		gl.flush();
 		gs.Update();
 	}
@@ -573,6 +530,107 @@ function RenderModels(fbo, bClearFBO, time, camera, models){
 	}
 }
 
+function UpdateCamera(Camera, CenterCamera, orbital, mode){
+				
+	//Calc camera view i proj
+	//-------------------------------------------------------------------------------------
+	let bUpdateCamera = false;
+	
+	let mousePos = sys.mouse.getPosition();
+	let mouseDelta = sys.mouse.getDeltaPosition();
+	let moveDir = [0.0,0.0,0.0];
+	let tilt = 0.0;
+	
+	orbital.dinclination = 0.0;
+	orbital.dazimuth = 0.0;
+	
+	if(sys.mouse.get().btnLeft == true)
+	{
+		if(mouseDelta[0] != 0 || mouseDelta[1] != 0)
+		{
+			orbital.dazimuth = -mouseDelta[0];
+			orbital.dinclination = mouseDelta[1];
+			
+			bUpdateCamera = true;
+		}
+	}
+	
+	if(sys.mouse.get().dz != 0)
+	{
+		orbital.radius = orbital.radius - orbital.radius*(sys.mouse.get().dz / 20.0);
+		if(orbital.radius < 0.1) orbital.radius = 0.1;
+		if(orbital.radius > 100.0) orbital.radius = 100.0;
+		bUpdateCamera = true;
+	}
+	
+	if(sys.keyboard.isKeyPressed("w") != false){
+		vMath.vec3.scaleAndAdd(moveDir, moveDir, Camera.ForwardDir,  1.0/orbital.radius); bUpdateCamera = true; }
+	if(sys.keyboard.isKeyPressed("s") != false){
+		vMath.vec3.scaleAndAdd(moveDir, moveDir, Camera.ForwardDir, -1.0/orbital.radius); bUpdateCamera = true; }
+	if(sys.keyboard.isKeyPressed("a") != false){
+		vMath.vec3.scaleAndAdd(moveDir, moveDir, Camera.RightDir, -1.0/orbital.radius); bUpdateCamera = true; }
+	if(sys.keyboard.isKeyPressed("d") != false){
+		vMath.vec3.scaleAndAdd(moveDir, moveDir, Camera.RightDir,  1.0/orbital.radius); bUpdateCamera = true; }
+	if(sys.keyboard.isKeyPressed("f") != false){
+		vMath.vec3.scaleAndAdd(moveDir, moveDir, Camera.UpDir, -1.0/orbital.radius); bUpdateCamera = true; }
+	if(sys.keyboard.isKeyPressed("r") != false){
+		vMath.vec3.scaleAndAdd(moveDir, moveDir, Camera.UpDir,  1.0/orbital.radius); bUpdateCamera = true; }
+	if(sys.keyboard.isKeyPressed("q") != false){
+		tilt += -0.25/orbital.radius; bUpdateCamera = true; }
+	if(sys.keyboard.isKeyPressed("e") != false){
+		tilt += 0.25/orbital.radius; bUpdateCamera = true; }
+	
+	if(mode == "orbital"){
+		if(bUpdateCamera == true)
+		{
+			let RightAdd = vMath.vec3.create();
+			let UpAdd = vMath.vec3.create();
+						
+			let sinA = Math.sin(vMath.deg2rad(orbital.dazimuth)); let sinI = Math.sin(vMath.deg2rad(orbital.dinclination));
+			vMath.vec3.scale(RightAdd, Camera.RightDir, orbital.radius * sinA);
+			vMath.vec3.scale(UpAdd, Camera.UpDir, orbital.radius * sinI);
+			vMath.vec3.add(Camera.Position, Camera.Position, RightAdd);
+			vMath.vec3.add(Camera.Position, Camera.Position, UpAdd);
+			
+			vMath.vec3.normalize(Camera.Position, Camera.Position);
+			vMath.vec3.scale(Camera.Position, Camera.Position, orbital.radius);
+			
+			Camera.setPositionAndLookPt(Camera.Position, [0.0,0.0,0.0], Camera.UpDir);
+			Camera.CalcInverseViewProjectionMatrix();
+						
+			vMath.mat4.copy(CenterCamera.ViewMatrix, Camera.ViewMatrix);
+			vMath.mat4.setTranslation(CenterCamera.ViewMatrix, CenterCamera.ViewMatrix, [0.0,0.0,0.0]);
+		}
+	}
+	else if(mode == "move"){
+		if(bUpdateCamera == true)
+		{
+			vMath.vec3.add(Camera.Position, Camera.Position, moveDir);
+			
+			let RightAdd = vMath.vec3.create();
+			let UpAdd = vMath.vec3.create();
+			
+			let sinA = -Math.sin(vMath.deg2rad(orbital.dazimuth)); let sinI = -Math.sin(vMath.deg2rad(orbital.dinclination));
+			
+			Camera.Rotate(0.1*sinA, 0.1*sinI);
+			Camera.Tilt(0.1*tilt);
+			Camera.UpdateViewMatrix();
+			Camera.CalcInverseViewProjectionMatrix();
+			
+			vMath.mat4.copy(CenterCamera.ViewMatrix, Camera.ViewMatrix);
+			vMath.mat4.setTranslation(CenterCamera.ViewMatrix, CenterCamera.ViewMatrix, [0.0,0.0,0.0]);
+		}
+	}
+	
+	/*
+	if(sys.mouse.get().btnLeft == true)
+		if(sys.mouse.get().dx != 0 || sys.mouse.get().dy != 0){
+			Camera.Rotate(sys.mouse.get().dx / 100.0, sys.mouse.get().dy / 100.0);
+			Camera.CalcInverseViewProjectionMatrix();
+		} 
+	*/
+	//-------------------------------------------------------------------------------------
+}
 
 export function recompileShader(fragment_name){
 	if(gl == null) return;
