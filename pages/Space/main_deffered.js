@@ -141,7 +141,7 @@ export function main(){
 	
 	var eyePt = vMath.vec3.fromValues(-7.0,0.0,0.0);
 	var centerPt = vMath.vec3.fromValues(0.0,0.0,0.0);
-	var upDir = vMath.vec3.fromValues(0.0,0.0,1.0);
+	var upDir = vMath.vec3.fromValues(0.0,1.0,0.0);
 	
 	//framebuffer
 	//------------------------------------------------------------------------
@@ -263,8 +263,9 @@ export function main(){
 	// vMath.mat4.identity(viewMatrix);
 	// vMath.mat4.translate(viewMatrix, viewMatrix, [0.0, 0.0, -7.0]);
 	
+	var eyePt = vMath.vec3.fromValues(-37.0,1.5,22.0);
 	var Camera = new glext.CCamera(0, gl.viewportWidth, gl.viewportHeight);
-	Camera.setPositionAndDir(eyePt, [1.0,0.0,0.0], upDir);
+	Camera.setPositionAndDir(eyePt, [0.752,0.06,-0.656], upDir);
 	Camera.UpdateProjectionMatrix();
 	
 	var CenterCamera = new glext.CCamera(1, gl.viewportWidth, gl.viewportHeight);
@@ -585,7 +586,7 @@ function UpdateCamera(Camera, CenterCamera, orbital, mode){
 		{
 			let RightAdd = vMath.vec3.create();
 			let UpAdd = vMath.vec3.create();
-						
+			
 			let sinA = Math.sin(vMath.deg2rad(orbital.dazimuth)); let sinI = Math.sin(vMath.deg2rad(orbital.dinclination));
 			vMath.vec3.scale(RightAdd, Camera.RightDir, orbital.radius * sinA);
 			vMath.vec3.scale(UpAdd, Camera.UpDir, orbital.radius * sinI);
@@ -597,7 +598,7 @@ function UpdateCamera(Camera, CenterCamera, orbital, mode){
 			
 			Camera.setPositionAndLookPt(Camera.Position, [0.0,0.0,0.0], Camera.UpDir);
 			Camera.CalcInverseViewProjectionMatrix();
-						
+			
 			vMath.mat4.copy(CenterCamera.ViewMatrix, Camera.ViewMatrix);
 			vMath.mat4.setTranslation(CenterCamera.ViewMatrix, CenterCamera.ViewMatrix, [0.0,0.0,0.0]);
 		}
