@@ -81,12 +81,17 @@ export class CModel extends CGLExtObject
 		
 		this.Position = vMath.vec3.create();
 		this.Transform = vMath.mat4.create();
+		this.LocalTransform = vMath.mat4.create();
+		vMath.mat4.identity(this.Transform);
+		vMath.mat4.identity(this.LocalTransform);
 		
 		this.name = "";
 		
 		this.bIsLoaded = false;
 		
 		this.material = null;
+		
+		this.params = [];		
 	}
 	
 	isLoaded(){ return this.bIsLoaded; }
@@ -95,6 +100,30 @@ export class CModel extends CGLExtObject
 		this.material = m;
 		this.shaderID = this.material.shaderID;
 		this.textures = this.material.textureLinks;
+	}
+	
+	setParams(prms){
+		this.params = prms;
+		
+		let forward = null; let right = null; let up = null;
+		
+		for(let p = 0; p < this.params.length; ++p){
+			let param = this.params[p];
+			
+			switch(param.bindpoint){
+				case "forward": forward = vMath.vec3.clone(param.value); break;
+				case "right": right = vMath.vec3.clone(param.value); break;
+				case "up": up = vMath.vec3.clone(param.value); break;
+			}
+		}
+		
+		if(forward != null && right != null && up != null){
+			vMath.vec3.normalize(forward, forward);
+			vMath.vec3.normalize(right, right);
+			vMath.vec3.normalize(up, up);
+			
+			vMath.mat4.setForwardRightUp(this.LocalTransform, this.LocalTransform, forward, right, up);
+		}
 	}
 	
 	setBlendMode(b){
@@ -125,6 +154,7 @@ export class CModel extends CGLExtObject
 	setPosition(pos){
 		this.Position = pos;
 		vMath.mat4.setTranslation(this.Transform,this.Transform,pos);
+		vMath.mat4.multiply(this.Transform, this.Transform, this.LocalTransform);
 	}
 	
 	CreateBuffers(){

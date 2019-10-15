@@ -1,0 +1,55 @@
+<assembly id="planet">
+	
+	<param bindpoint="scale" value="0.1" type="float"></param>
+	<param bindpoint="position" value="0.0,0.0,0.0" type="vec3"></param> 
+	
+	<img id="planet_height" src="./T_Heightmap02.png" type="tx2D/D" style="display: none;"></img>
+	<img id="planet_diffuse" src="./AlbedoGradient03Variations.png" type="tx2D/AoRS" style="display: none;"></img>
+	<img id="planet_AoRS" src="./SREmM_Gradient.png" type="tx2D/N" style="display: none;"></img>
+	
+	<material shader="deferred_planet_BcNAoRSMt">
+		<param bindpoint="seaLevel" value="0.2" type="float"></param>
+		<param bindpoint="emissionMult" value="1.0" type="float"></param>
+		<param bindpoint="roughnessScaleOffsetPower" value="1.0,0.0,1.0" type="vec3"></param>
+		<texture bindpoint="txHeight" txid="planet_height" type="tx2D/D"></texture>
+		<texture bindpoint="txDiffuseGradient" txid="planet_diffuse" type="tx2D/N"></texture>
+		<texture bindpoint="txAoRSGradient" txid="planet_AoRS" type="tx2D/AoRS"></texture>
+	</material>
+	
+	<model id="right" src="./../SphereFromCubeSide.obj" type="model/obj">
+		<param bindpoint="forward" value="1,0,0" type="vec3"></param>
+		<param bindpoint="right" value="0,0,1" type="vec3"></param>
+		<param bindpoint="up" value="0,1,0" type="vec3"></param>
+	</model>
+	
+	<model id="left" src="./../SphereFromCubeSide.obj" type="model/obj">
+		<param bindpoint="forward" value="-1,0,0" type="vec3"></param>
+		<param bindpoint="right" value="0,0,-1" type="vec3"></param>
+		<param bindpoint="up" value="0,1,0" type="vec3"></param>
+	</model>
+	
+	<model id="top" src="./../SphereFromCubeSide.obj" type="model/obj">
+		<param bindpoint="forward" value="0,1,0" type="vec3"></param>
+		<param bindpoint="right" value="1,0,0" type="vec3"></param>
+		<param bindpoint="up" value="0,0,1" type="vec3"></param>
+	</model>
+	
+	<model id="bottom" src="./../SphereFromCubeSide.obj" type="model/obj">
+		<param bindpoint="forward" value="0,-1,0" type="vec3"></param>
+		<param bindpoint="right" value="-1,0,0" type="vec3"></param>
+		<param bindpoint="up" value="0,0,1" type="vec3"></param>
+	</model>
+	
+	<model id="back" src="./../SphereFromCubeSide.obj" type="model/obj">
+		<param bindpoint="forward" value="0,0,-1" type="vec3"></param>
+		<param bindpoint="right" value="0,-1,0" type="vec3"></param>
+		<param bindpoint="up" value="1,0,0" type="vec3"></param>
+	</model>
+	
+	<model id="front" src="./../SphereFromCubeSide.obj" type="model/obj">
+		<param bindpoint="forward" value="0,0,1" type="vec3"></param>
+		<param bindpoint="right" value="0,1,0" type="vec3"></param>
+		<param bindpoint="up" value="1,0,0" type="vec3"></param>
+	</model>
+	
+</assembly>

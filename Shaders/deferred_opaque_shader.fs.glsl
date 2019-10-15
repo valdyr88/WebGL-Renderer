@@ -104,6 +104,23 @@ vec3 shade_pbr(vec4 diffuse, vec3 normal, vec4 AoRSMtEm, float depth, float2 tex
 	return reflected + emissive;
 }
 
+float edgeDetect(sampler2D tx, vec2 t, vec2 dt){
+	vec2 s[9];// = { vec2(-1,-1), vec2(-1,0), vec2(-1,1), vec2(0,1), vec2(1,1), vec2(1,0), vec2(1,-1), vec2(0,-1), vec2(0,0) };
+	s[0]=vec2(-1,-1);s[1]=vec2(-1,0);s[2]=vec2(-1,1);s[3]=vec2(0,1);s[4]=vec2(1,1);s[5]=vec2(1,0);s[6]=vec2(1,-1);s[7]=vec2(0,-1);s[8]=vec2(0,0);
+	float samples[9];
+	
+	for(int i = 0; i < 9; ++i){
+		samples[i] = LinearizeDepth(textureLod(tx, t + dt*s[i], 0.0f).x, 0.1, 1000.0); }
+	
+	float maxdiff = 0.0;
+	
+	for(int i = 0; i < 8; ++i){
+		float diff = abs(samples[i] - samples[8]);
+		if(diff > maxdiff) maxdiff = diff;
+	}
+	
+	return 10.0f*maxdiff;
+}
 
 void main(void)
 {
@@ -165,7 +182,14 @@ void main(void)
 	// shade = vec3(AoRSMt.g);
 	// shade = vec3(dot(normal.xyz, normalize(ViewVector)));
 	
+	// shade = diffuse.xyz;
 	// shade = normal.xyz;
+	
+	// depth = LinearizeDepth(depth, 0.1, 1000.0);
+	// shade = vec3( pow(depth,0.20f) );
+	
+	// float maxdiff = edgeDetect(txDepth, vec2(TexCoords.x, 1.0f-TexCoords.y), 1.0f/vec2(1920.0f,1080.0f));
+	// shade = vec3(maxdiff);
 	
 	// gl_FragColor = prepare_output(shade);	
 	#ifdef USE_HDR_RGBA8

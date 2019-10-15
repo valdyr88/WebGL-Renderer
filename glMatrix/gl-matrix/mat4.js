@@ -544,6 +544,39 @@ export function setTranslation(out, a, v){
 }
 
 /**
+ * Set mat4 rotation part from forward, right and up
+ * 
+ * @param {mat4} out the receiving matrix
+ * @param {mat4} a the matrix to set rotation
+ * @param {vec3} f forward vector
+ * @param {vec3} r right vector
+ * @param {vec3} u up vector
+ * @returns {mat4} out
+ */
+export function setForwardRightUp(out, a, f, r, u){
+	out[0] = -r[0];
+	out[1] = -r[1];
+	out[2] = -r[2];
+	
+	out[4] = u[0];
+	out[5] = u[1];
+	out[6] = u[2];
+	
+	out[8] = f[0];
+	out[9] = f[1];
+	out[10] = f[2];
+	
+	if(out !== a){
+		out[3] = a[3];
+		out[7] = a[7];
+		out[11] = a[11];
+		out[15] = a[15];
+	}
+	
+	return out;
+}
+
+/**
  * Scales the mat4 by the dimensions in the given vec3 not using vectorization
  *
  * @param {mat4} out the receiving matrix

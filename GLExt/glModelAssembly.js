@@ -27,10 +27,12 @@ export class CModelAssembly extends CGLExtObject
 		
 		let parser = new DOMParser();
 		let xmlAsm = parser.parseFromString(lnk.text, "text/xml");
+		xmlAsm = xmlAsm.getElementsByTagName("assembly")[0];
+		xmlAsm.getElementsByTagNameImmediate = sys.utils.getElementsByTagNameImmediate;
 		
-		this.id = xmlAsm.getElementsByTagName("assembly")[0].id;
+		this.id = xmlAsm.id;
 		
-		let imgs = xmlAsm.getElementsByTagName("img");
+		let imgs = xmlAsm.getElementsByTagNameImmediate("img");
 		for(let i = 0; i < imgs.length; ++i){
 			let img = imgs[i];
 			let tx = CTextureList.getByName(folderPath + img.attributes.src.value);
@@ -43,17 +45,32 @@ export class CModelAssembly extends CGLExtObject
 			img.value = tx;
 		}
 		
-		let mdls = xmlAsm.getElementsByTagName("model");		
+		let defaultMaterial = null;
+		if(xmlAsm.getElementsByTagNameImmediate("material").length > 0){
+			defaultMaterial = new CMaterial();
+			defaultMaterial.LoadFromXMLDOM( xmlAsm.getElementsByTagNameImmediate("material")[0] );
+		}
+		
+		let mdls = xmlAsm.getElementsByTagNameImmediate("model");		
 		for(let i = 0; i < mdls.length; ++i){
 			let mdl = mdls[i];
+			mdl.getElementsByTagNameImmediate = sys.utils.getElementsByTagNameImmediate;
+			
 			let model = new CModel(0);
 			
 			model.DelayedImportFromPath(folderPath + mdl.attributes.src.value);
 			
-			let material = new CMaterial();
-			material.LoadFromXMLDOM( mdl.getElementsByTagName("material")[0] );
+			let material = defaultMaterial;
+			
+			if( mdl.getElementsByTagNameImmediate("material").length > 0 ){
+				material = new CMaterial();
+				material.LoadFromXMLDOM( mdl.getElementsByTagNameImmediate("material")[0] );
+			}
 			
 			model.setMaterial(material);
+			
+			let params = CMaterialParam.LoadParamsFromXMLDOM(mdl);
+			model.setParams(params);
 			
 			this.models[this.models.length] = model;
 		}

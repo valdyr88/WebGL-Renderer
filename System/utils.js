@@ -102,3 +102,12 @@ export function getAllByTagName(obj, tagName){
 		return (o.tagName == tagName);
 	});
 }
+
+export function getElementsByTagNameImmediate(tag){
+	
+	var nodes = this.childNodes;
+	nodes = Array.prototype.slice.call(nodes);
+	nodes = nodes.filter(function(v, i){
+			return v.tagName == tag; });
+	return nodes;
+}

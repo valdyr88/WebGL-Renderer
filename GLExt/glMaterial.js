@@ -41,8 +41,9 @@ export class CMaterialParam
 	
 	static LoadParamsFromXMLDOM(dom){
 		var params = [];
+		dom.getElementsByTagNameImmediate = sys.utils.getElementsByTagNameImmediate;
 		
-		let domParams = dom.getElementsByTagName("param");
+		let domParams = dom.getElementsByTagNameImmediate("param");
 		for(let p = 0; p < domParams.length; ++p){
 			let domparam = domParams[p];
 			
@@ -122,11 +123,12 @@ export class CMaterial extends CGLExtObject
 	}
 	
 	LoadFromXMLDOM(material){
+		material.getElementsByTagNameImmediate = sys.utils.getElementsByTagNameImmediate;
 		
 		this.shaderName = material.attributes.shader.value;
 		this.params = CMaterialParam.LoadParamsFromXMLDOM(material);
 		
-		let txs = material.getElementsByTagName("texture");
+		let txs = material.getElementsByTagNameImmediate("texture");
 		for(let j = 0; j < txs.length; ++j){
 			let t = txs[j];
 			

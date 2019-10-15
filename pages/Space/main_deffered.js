@@ -56,6 +56,18 @@ export function main(){
 	
 	shader.ULTextureAmb = shader.getUniformLocation("txAmbient");
 	
+	var deferred_planet_BcNAoRSMt_shader = new glext.CShader(0);
+	if(deferred_planet_BcNAoRSMt_shader.CompileFromFile("simpleVS", "deferred_planet_BcNAoRSMt") == false) alert("nije kompajliran shader!");
+	deferred_planet_BcNAoRSMt_shader.setVertexAttribLocations("aVertexPosition","aVertexNormal","aVertexTangent",null,"aTexCoords");
+	deferred_planet_BcNAoRSMt_shader.setTransformMatricesUniformLocation("ModelMatrix","ViewMatrix","ProjectionMatrix");
+	deferred_planet_BcNAoRSMt_shader.setDefaultTextureUniformLocations("txHeight","txDiffuseGradient","txAoRSGradient");
+	deferred_planet_BcNAoRSMt_shader.setBRDFLUTTextureUniformLocation("txBRDF");
+	deferred_planet_BcNAoRSMt_shader.setFlagsUniformLocation("uFlags");
+	deferred_planet_BcNAoRSMt_shader.setTimeUniformLocation("Time");
+	deferred_planet_BcNAoRSMt_shader.setCameraPositionUniformLocation("CameraPosition");
+	
+	deferred_planet_BcNAoRSMt_shader.ULTextureAmb = deferred_planet_BcNAoRSMt_shader.getUniformLocation("txAmbient");
+	
 	var skybox_shader = new glext.CShader(1);
 	if(skybox_shader.CompileFromFile("simpleVS", "deferred_skybox") == false) alert("nije kompajliran shader!");
 	skybox_shader.ULTextureAmb = skybox_shader.getUniformLocation("txAmbient");
@@ -205,6 +217,7 @@ export function main(){
 		glext.CShaderList.addShader(transparent_shader);
 		glext.CShaderList.addShader(backbuffer_shader);
 		glext.CShaderList.addShader(atmosphere_shader);
+		glext.CShaderList.addShader(deferred_planet_BcNAoRSMt_shader);
 		
 		model.setTexture(txD,"txDiffuse");
 		model.setTexture(txN,"txNormal");
@@ -257,6 +270,9 @@ export function main(){
 	dderidex.models[0].setTexture(txfbHdrMipBlur,"txBackground");
 	// dderidex.models[0].setShader(transparent_shader);
 	
+	var planet = new glext.CModelAssembly(0);
+	planet.LoadAssemblyFromXML("planet");
+	
 	vMath.mat4.perspective(projectionMatrix, vMath.deg2rad(40.0), gl.viewportWidth/gl.viewportHeight, 0.1, 1000.0);
 	
 	vMath.mat4.lookAt(viewMatrix, eyePt, centerPt, upDir);
@@ -298,7 +314,13 @@ export function main(){
 	vMath.mat4.rotate(dderidex.models[0].Transform, dderidex.models[0].Transform, vMath.deg2rad(180), [0,1,0]);
 	vMath.mat4.setTranslation(dderidex.models[0].Transform, dderidex.models[0].Transform, [ -5.0, 12.5, -35.0]);
 	
-		
+	
+	for(let i = 0; i < planet.models.length; ++i){
+		vMath.mat4.identity(planet.models[i].Transform);
+		vMath.mat4.setScale(planet.models[i].Transform, planet.models[i].Transform, [10.0,10.0,10.0]);
+		planet.models[i].setPosition([25.0, 12.5, 35.0]);
+	}
+	
 	var time = 0.0;
 	sys.time.init();
 	
@@ -364,6 +386,7 @@ export function main(){
 		
 		// RenderModels(fboDeferred, false, time, Camera, [model]);
 		RenderModels(fboDeferred, false, time, Camera, galaxy.models);
+		// RenderModels(fboDeferred, false, time, Camera, planet.models);
 		
 		// RenderModels(fboDeferred, false, time, Camera, dderidex.models);
 		
@@ -668,6 +691,14 @@ export function recompileShader(fragment_name){
 				break;
 				case "deferred_BcNAoRSMt":
 					shader.ULTextureAmb = shader.getUniformLocation("txAmbient");
+				break;
+				case "deferred_planet_BcNAoRSMt":
+					shader.ULTextureAmb = shader.getUniformLocation("txAmbient");
+					shader.setDefaultTextureUniformLocations("txHeight","txDiffuseGradient","txAoRSGradient");
+					shader.setBRDFLUTTextureUniformLocation("txBRDF");
+					shader.setFlagsUniformLocation("uFlags");
+					shader.setTimeUniformLocation("Time");
+					shader.setCameraPositionUniformLocation("CameraPosition");
 				break;
 				case "atmosphere_shader":
 					// shader.lightUniforms = glext.CLight.getUniformLocationsFromShader(shader, "light0");
