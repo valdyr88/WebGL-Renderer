@@ -16,14 +16,13 @@ uniform vec3 CameraForwardDir;
 uniform vec3 CameraRightDir;
 uniform vec3 CameraUpDir;
 
+uniform float Aspect;
+uniform float FOV;
+
 #define varyin out
 
-varyin vec3 Normal;
-varyin vec3 Tangent;
-varyin vec3 Bitangent;
 varyin vec3 PixelPosition;
 varyin vec2 TexCoords;
-varyin vec3 Position;
 varyin vec3 ViewVector;
 
 void main(void){
@@ -31,14 +30,13 @@ void main(void){
 	vec4 wPosition = (ModelMatrix * aVertexPosition);
 	gl_Position = (ProjectionMatrix * (ViewMatrix * wPosition));
 	PixelPosition = gl_Position.xyz / gl_Position.w; PixelPosition = PixelPosition*0.5f + 0.5f;
-	Position = wPosition.xyz;
 	
-	ViewVector = CameraForwardDir*5.0f + CameraRightDir*aVertexPosition.x + CameraUpDir*aVertexPosition.y;
-	ViewVector = normalize(ViewVector);
+	float d = 1.0f;
+	float w = tan(FOV/2.0f); //za d == 1.0f
+	float h = w; //za d == 1.0f
 	
-	Normal = normalize((ModelMatrix * vec4(aVertexNormal,0.0))).xyz;
-	Tangent = normalize((ModelMatrix * vec4(aVertexTangent,0.0))).xyz;
-	Bitangent = normalize(cross(Tangent, Normal));
+	ViewVector = d*CameraForwardDir + Aspect*w*aVertexPosition.x*CameraRightDir + h*aVertexPosition.y*CameraUpDir;
+	// ViewVector = normalize(ViewVector);
 	
 	TexCoords = vec2(aTexCoords.x, 1.0-aTexCoords.y);
 }

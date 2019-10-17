@@ -35,12 +35,8 @@ uniform float Time;
 //------------------------------------------------------------------------------
 #define varyin in
 
-varyin vec3 Normal;
-varyin vec3 Tangent;
-varyin vec3 Bitangent;
 varyin vec3 PixelPosition;
 varyin vec2 TexCoords;
-varyin vec3 Position;
 varyin vec3 ViewVector;
 
 
@@ -175,6 +171,9 @@ void main(void)
 		// shade.xyz = vec3(f);
 		// shade.xyz = vec3(brdf,0.0f);
 		// shade.xyz = vec3(dotNV);
+	
+	float3 f = fresnel(vec3(0.05f), dotNV);
+	shade = f;
 	
 	if(ShaderID != deferred_shader_pbr)
 		shade = vec3(0.0);

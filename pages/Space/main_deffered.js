@@ -82,6 +82,8 @@ export function main(){
 	deferred_opaque_shader.ULCameraForwardDir = deferred_opaque_shader.getUniformLocation("CameraForwardDir");
 	deferred_opaque_shader.ULCameraRightDir = deferred_opaque_shader.getUniformLocation("CameraRightDir");
 	deferred_opaque_shader.ULCameraUpDir = deferred_opaque_shader.getUniformLocation("CameraUpDir");
+	deferred_opaque_shader.ULAspect = deferred_opaque_shader.getUniformLocation("Aspect");
+	deferred_opaque_shader.ULFOV = deferred_opaque_shader.getUniformLocation("FOV");
 	
 	var transparent_shader = new glext.CShader(3);
 	if(transparent_shader.CompileFromFile("simpleVS", "transparent_shader") == false) alert("nije kompajliran shader!");
@@ -108,6 +110,8 @@ export function main(){
 	glow_integrate_shader.ULCameraForwardDir = glow_integrate_shader.getUniformLocation("CameraForwardDir");
 	glow_integrate_shader.ULCameraRightDir = glow_integrate_shader.getUniformLocation("CameraRightDir");
 	glow_integrate_shader.ULCameraUpDir = glow_integrate_shader.getUniformLocation("CameraUpDir");
+	glow_integrate_shader.ULAspect = glow_integrate_shader.getUniformLocation("Aspect");
+	glow_integrate_shader.ULFOV = glow_integrate_shader.getUniformLocation("FOV");
 	glow_integrate_shader.ULColor = glow_integrate_shader.getUniformLocation("txColor");
 	glow_integrate_shader.ULGlow = glow_integrate_shader.getUniformLocation("txGlow");
 		
@@ -386,7 +390,7 @@ export function main(){
 		
 		// RenderModels(fboDeferred, false, time, Camera, [model]);
 		RenderModels(fboDeferred, false, time, Camera, galaxy.models);
-		// RenderModels(fboDeferred, false, time, Camera, planet.models);
+		RenderModels(fboDeferred, false, time, Camera, planet.models);
 		
 		// RenderModels(fboDeferred, false, time, Camera, dderidex.models);
 		
@@ -428,13 +432,14 @@ export function main(){
 				deferred_opaque_shader.setFloat3Uniform(deferred_opaque_shader.ULCameraForwardDir, Camera.ForwardDir);
 				deferred_opaque_shader.setFloat3Uniform(deferred_opaque_shader.ULCameraRightDir, Camera.RightDir);
 				deferred_opaque_shader.setFloat3Uniform(deferred_opaque_shader.ULCameraUpDir, Camera.UpDir);
+				deferred_opaque_shader.setFloatUniform(deferred_opaque_shader.ULAspect, Camera.PixelAspect);
+				deferred_opaque_shader.setFloatUniform(deferred_opaque_shader.ULFOV, vMath.deg2rad(Camera.FOV));
 				deferred_opaque_shader.setMatrix4Uniform(deferred_opaque_shader.ULInvViewProjMatrix, Camera.InverseViewProjectionMatrix);
 				
 				// light.UploadToShader(deferred_opaque_shader, lightUniforms_backbuffer_shader);
 				
 				quad_model.RenderIndexedTriangles(deferred_opaque_shader);
-		
-		
+				
 		fboHdrMipBlur.AttachDepth(txfbDepth); //reatachamo "spaseni" depth
 		
 		//atmosphere render
@@ -479,6 +484,8 @@ export function main(){
 				glow_integrate_shader.setFloat3Uniform(glow_integrate_shader.ULCameraForwardDir, Camera.ForwardDir);
 				glow_integrate_shader.setFloat3Uniform(glow_integrate_shader.ULCameraRightDir, Camera.RightDir);
 				glow_integrate_shader.setFloat3Uniform(glow_integrate_shader.ULCameraUpDir, Camera.UpDir);
+				glow_integrate_shader.setFloatUniform(glow_integrate_shader.ULAspect, Camera.PixelAspect);
+				glow_integrate_shader.setFloatUniform(glow_integrate_shader.ULFOV, vMath.deg2rad(Camera.FOV));
 				glow_integrate_shader.setMatrix4Uniform(glow_integrate_shader.ULInvViewProjMatrix, Camera.InverseViewProjectionMatrix);
 				
 				quad_model.RenderIndexedTriangles(glow_integrate_shader);
@@ -679,6 +686,8 @@ export function recompileShader(fragment_name){
 					shader.ULCameraForwardDir = shader.getUniformLocation("CameraForwardDir");
 					shader.ULCameraRightDir = shader.getUniformLocation("CameraRightDir");
 					shader.ULCameraUpDir = shader.getUniformLocation("CameraUpDir");
+					shader.ULAspect = shader.getUniformLocation("Aspect");
+					shader.ULFOV = shader.getUniformLocation("FOV");
 					glext.CLightList.get(0).AttachUniformBlockTo(shader);
 				break;
 				case "glow_integrate_shader":
@@ -688,6 +697,8 @@ export function recompileShader(fragment_name){
 					shader.ULCameraUpDir = shader.getUniformLocation("CameraUpDir");
 					shader.ULColor = shader.getUniformLocation("txColor");
 					shader.ULGlow = shader.getUniformLocation("txGlow");
+					shader.ULAspect = shader.getUniformLocation("Aspect");
+					shader.ULFOV = shader.getUniformLocation("FOV");
 				break;
 				case "deferred_BcNAoRSMt":
 					shader.ULTextureAmb = shader.getUniformLocation("txAmbient");

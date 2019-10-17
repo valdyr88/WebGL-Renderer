@@ -123,7 +123,7 @@ float2 pbr_SampleBRDF(float2 t){
 
 #define Light_isInfinite_bit 0
 
-float3 pbr_Sample(vec3 diffuse, vec3 normal, vec3 specular, float roughness, float metalness, 
+float3 pbr_Sample(vec3 position, vec3 diffuse, vec3 normal, vec3 specular, float roughness, float metalness, 
 				  float shadows[pbr_Sample_NofLights], float ambientOcclusion, vec3 viewVector, const samplerCube AmbientTx,
 				  const float AmbientLightIncreasePercent, Light lights[pbr_Sample_NofLights], const int lightNo)
 {
@@ -143,7 +143,7 @@ float3 pbr_Sample(vec3 diffuse, vec3 normal, vec3 specular, float roughness, flo
 		Light light = lights[i]; 
 		if(light.intensity < 0.001f) continue;
 		
-		float3 L = light.position.xyz - Position.xyz; 
+		float3 L = light.position.xyz - position.xyz; 
 		float dL2 = dot(L,L); L = normalize(L);
 		float3 H = normalize(halfvec(V,L));
 		
@@ -151,7 +151,7 @@ float3 pbr_Sample(vec3 diffuse, vec3 normal, vec3 specular, float roughness, flo
 		float falloff = 1.0f / dL2;
 		float3 lightval = shadows[i] * light.color.xyz * light.intensity * falloff;
 		
-		float dotiNL= saturate(dot(Normal, L));
+		//float dotiNL= saturate(dot(Normal, L));
 		float dotNL = saturate(dot(N,L));
 		float dotNH = saturate(dot(N,H));
 		float dotHV = saturate(dot(H,V));
@@ -209,7 +209,7 @@ void pbr_SampleLight(vec3 position, vec3 diffuse, vec3 normal, vec3 specular, fl
 	float falloff = 1.0f / dL2;
 	float3 lightval = shadow * light.color.xyz * light.intensity * falloff;
 	
-	float dotiNL= saturate(dot(Normal, L));
+	//float dotiNL= saturate(dot(Normal, L));
 	float dotNL = saturate(dot(N,L));
 	float dotNH = saturate(dot(N,H));
 	float dotHV = saturate(dot(H,V));
