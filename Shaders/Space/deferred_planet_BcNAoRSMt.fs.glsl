@@ -113,7 +113,7 @@ void main(void)
 	float height = sampleHeight(txHeight, TexCoords);
 	vec3 normal = getNormalWithSea(txHeight, TexCoords, 1.0f, height, seaLevel);
 	
-	vec4 diffuse = sampleGradient(txDiffuseGradient, seaLevelHeight(height, seaLevel));
+	vec4 diffuse = gamma(sampleGradient(txDiffuseGradient, seaLevelHeight(height, seaLevel)), 1.0f/2.2f);
 	// vec4 diffuse = texture(txDiffuseGradient, TexCoords);
 	// diffuse.rgb = vec3(height);
 	vec4 AoRSEm = sampleGradient(txAoRSGradient, seaLevelHeight(height, seaLevel));

@@ -102,10 +102,15 @@ export class CModel extends CGLExtObject
 		this.textures = this.material.textureLinks;
 	}
 	
+	getRenderpass(){
+		if(this.material == null) return "-";
+		return this.material.renderpass;
+	}
+	
 	setParams(prms){
 		this.params = prms;
 		
-		let forward = null; let right = null; let up = null;
+		let forward = null; let right = null; let up = null; let scale = null;
 		
 		for(let p = 0; p < this.params.length; ++p){
 			let param = this.params[p];
@@ -114,6 +119,7 @@ export class CModel extends CGLExtObject
 				case "forward": forward = vMath.vec3.clone(param.value); break;
 				case "right": right = vMath.vec3.clone(param.value); break;
 				case "up": up = vMath.vec3.clone(param.value); break;
+				case "scale": scale = (param.type == "float")? [param.value,param.value,param.value] : vMath.vec3.clone(param.value); break;
 			}
 		}
 		
@@ -123,6 +129,9 @@ export class CModel extends CGLExtObject
 			vMath.vec3.normalize(up, up);
 			
 			vMath.mat4.setForwardRightUp(this.LocalTransform, this.LocalTransform, forward, right, up);
+		}
+		if(scale != null){
+			vMath.mat4.scale(this.LocalTransform, this.LocalTransform, scale);
 		}
 	}
 	
@@ -180,36 +189,41 @@ export class CModel extends CGLExtObject
 		this.glIndexBuffer = gl.createBuffer();
 		
 		if(this.glVertexBuffer != -1){
+			let f32array = Float32ArrayFromBuffer(this.VertexBuffer.itemSize, this.VertexBuffer);
 			gl.bindBuffer(gl.ARRAY_BUFFER, this.glVertexBuffer);
-			gl.bufferData(gl.ARRAY_BUFFER, Float32ArrayFromBuffer(this.VertexBuffer.itemSize, this.VertexBuffer), gl.STATIC_DRAW);
+			gl.bufferData(gl.ARRAY_BUFFER, f32array, gl.STATIC_DRAW);
 			this.glVertexBuffer.itemSize = this.VertexBuffer.itemSize;
 			this.glVertexBuffer.numItems = this.VertexBuffer.length;
 		}
 		
 		if(this.glNormalBuffer != -1){
+			let f32array = Float32ArrayFromBuffer(this.NormalBuffer.itemSize, this.NormalBuffer);
 			gl.bindBuffer(gl.ARRAY_BUFFER, this.glNormalBuffer);
-			gl.bufferData(gl.ARRAY_BUFFER, Float32ArrayFromBuffer(this.NormalBuffer.itemSize, this.NormalBuffer), gl.STATIC_DRAW);
+			gl.bufferData(gl.ARRAY_BUFFER, f32array, gl.STATIC_DRAW);
 			this.glNormalBuffer.itemSize = this.NormalBuffer.itemSize;
 			this.glNormalBuffer.numItems = this.NormalBuffer.length;
 		}
 		
 		if(this.glTexCoordBuffer != -1){
+			let f32array = Float32ArrayFromBuffer(this.TexCoordBuffer.itemSize, this.TexCoordBuffer);
 			gl.bindBuffer(gl.ARRAY_BUFFER, this.glTexCoordBuffer);
-			gl.bufferData(gl.ARRAY_BUFFER, Float32ArrayFromBuffer(this.TexCoordBuffer.itemSize, this.TexCoordBuffer), gl.STATIC_DRAW);
+			gl.bufferData(gl.ARRAY_BUFFER, f32array, gl.STATIC_DRAW);
 			this.glTexCoordBuffer.itemSize = this.TexCoordBuffer.itemSize;
 			this.glTexCoordBuffer.numItems = this.TexCoordBuffer.length;
 		}
 		
 		if(this.glTangentBuffer != -1){
+			let f32array = Float32ArrayFromBuffer(this.TangentBuffer.itemSize, this.TangentBuffer);
 			gl.bindBuffer(gl.ARRAY_BUFFER, this.glTangentBuffer);
-			gl.bufferData(gl.ARRAY_BUFFER, Float32ArrayFromBuffer(this.TangentBuffer.itemSize, this.TangentBuffer), gl.STATIC_DRAW);
+			gl.bufferData(gl.ARRAY_BUFFER, f32array, gl.STATIC_DRAW);
 			this.glTangentBuffer.itemSize = this.TangentBuffer.itemSize;
 			this.glTangentBuffer.numItems = this.TangentBuffer.length;
 		}
 		
 		if(this.glIndexBuffer != -1){
+			let ui32array = new Uint32Array(this.IndexBuffer);
 			gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.glIndexBuffer);
-			gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(this.IndexBuffer), gl.STATIC_DRAW);
+			gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, ui32array, gl.STATIC_DRAW);
 			this.glIndexBuffer.numItems = this.IndexBuffer.length;
 		}
 		
@@ -255,7 +269,7 @@ export class CModel extends CGLExtObject
 	}
 	
 	RenderIndexed(shader, mode){
-		if(this.isLoaded == false) return;
+		if(this.isLoaded() == false) return;
 		/*
 		shader.ALVertexPosition;
 		shader.ALVertexNormal;
@@ -302,7 +316,7 @@ export class CModel extends CGLExtObject
 			this.blendMode.Bind();
 		
         gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.glIndexBuffer);
-		gl.drawElements( mode, this.glIndexBuffer.numItems, gl.UNSIGNED_SHORT, 0);
+		gl.drawElements( mode, this.glIndexBuffer.numItems, gl.UNSIGNED_INT, 0);
 		
 		if(this.blendMode != null)
 			CBlendMode.Bind(CBlendMode.None);
@@ -623,6 +637,7 @@ export function GenCubeModel(model, min, max)
 
 	model.VertexType = "vn";
 	model.CreateBuffers();
+	model.bIsLoaded = true;
 }
 
 export function GenQuadModel(model, min, max)
@@ -655,6 +670,7 @@ export function GenQuadModel(model, min, max)
 
 	model.VertexType = "vt";
 	model.CreateBuffers();
+	model.bIsLoaded = true;
 }
 
 var NDCQuadModel = null;

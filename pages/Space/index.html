@@ -36,7 +36,7 @@
   <script id="deferred_planet_BcNAoRSMt" src="./../../Shaders/Space/deferred_planet_BcNAoRSMt.fs.glsl" type="shader/fragment"></script>
   <script id="deferred_skybox" src="./../../Shaders/deferred_skybox.fs.glsl" type="shader/fragment"></script>
   <script id="transparent_shader" src="./../../Shaders/transparent_shader.fs.glsl" type="shader/fragment"></script>
-  <script id="atmosphere_shader" src="./../../Shaders/atmosphere_shader.fs.glsl" type="shader/fragment"></script>
+  <script id="atmosphere_shader" src="./../../Shaders/Space/planet_atmosphere.fs.glsl" type="shader/fragment"></script>
   
   <script id="mipmapVS" src="./../../Shaders/mipmapgen.vs.glsl" type="shader/vertex"></script>
   <script id="3x3MipGenFS" src="./../../Shaders/3x3MipGen.fs.glsl" type="shader/fragment"></script>
@@ -45,6 +45,7 @@
   <!--<script id="navigatorModel" src="./../../Models/quadNT.obj" type="model/obj"></script>-->
   <script id="SphereModel" src="./../../Models/Sphere.obj" type="model/obj"></script>
   <script id="navigatorModel" src="./../../Models/navigatorModel2.obj" type="model/obj"></script>
+  <script id="bigModel" src="./Models/Planets/Icosphere7.obj" type="model/obj"></script>
   
   <!-- <img id="txRock_D" src="./../../Models/Rock_6_D.png" type="tx2D/D" style="display: none;"></img>
   <img id="txRock_AoRS" src="./../../Models/Rock_6_AoRS.png" type="tx2D/AoRS" style="display: none;"></img>
@@ -118,7 +119,7 @@
 		"ubMaterial", "ubModel","simpleVS", "simpleFS", "pbr_shader", "skybox_shader",
 		"backbuffer_shader", "SphereModel", "deferred_opaque_shader", "deferred_BcNAoRSMt", "viewquadVS", "deferred_planet_BcNAoRSMt",
 		"deferred_skybox", "transparent_shader", "atmosphere_shader", "navigatorModel", "mipmapVS", "planet",
-		"3x3MipGenFS", "tx128", "txAmbHDRVenice", "sovereignAsb", "galaxyAsb", "glow_integrate_shader", "dderidexAsb"
+		"3x3MipGenFS", "tx128", "txAmbHDRVenice", "sovereignAsb", "galaxyAsb", "glow_integrate_shader", "dderidexAsb", "bigModel"
 	];
 	var extern_files_loaded_number = 0;
 	

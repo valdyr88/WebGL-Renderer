@@ -6,6 +6,7 @@
 	<img id="planet_height" src="./T_Heightmap02.png" type="tx2D/D" style="display: none;"></img>
 	<img id="planet_diffuse" src="./AlbedoGradient03Variations.png" type="tx2D/AoRS" style="display: none;"></img>
 	<img id="planet_AoRS" src="./SREmM_Gradient.png" type="tx2D/N" style="display: none;"></img>
+	<img id="planet_atmosphere" src="./Atmosphere.png" type="tx2D/D" style="display: none;"></img>
 	
 	<material shader="deferred_planet_BcNAoRSMt">
 		<param bindpoint="seaLevel" value="0.2" type="float"></param>
@@ -50,6 +51,13 @@
 		<param bindpoint="forward" value="0,0,1" type="vec3"></param>
 		<param bindpoint="right" value="0,1,0" type="vec3"></param>
 		<param bindpoint="up" value="1,0,0" type="vec3"></param>
+	</model>
+	
+	<model id="atmosphere" src="./../Icosphere7.obj" type="model/obj">
+		<param bindpoint="scale" value="1.01" type="float"></param>
+		<material shader="atmosphere_shader" renderpass="transparent_blend">
+			<texture bindpoint="txAtmosphereGradient" txid="planet_atmosphere" type="tx2D/D"></texture>
+		</material>
 	</model>
 	
 </assembly>

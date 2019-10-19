@@ -203,9 +203,19 @@ void pbr_SampleLight(vec3 position, vec3 diffuse, vec3 normal, vec3 specular, fl
 	//- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 	float3 L = light.position.xyz - position.xyz; 
 	float dL2 = dot(L,L); L = normalize(L);
+	//- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+	
+	//  directional light
+	//- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+	if(Light_getLightType(light) == LightType_Direction){
+		L = normalize(light.position.xyz);
+		dL2 = 1.0f;
+	}
+	if( uint_getbit(light.flags, Light_isInfinite_bit) == true ){ dL2 = 2.0f; }
+	//- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+	
 	float3 H = normalize(halfvec(V,L));
 	
-	if( uint_getbit(light.flags, Light_isInfinite_bit) == true ){ dL2 = 2.0f; }
 	float falloff = 1.0f / dL2;
 	float3 lightval = shadow * light.color.xyz * light.intensity * falloff;
 	

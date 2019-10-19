@@ -122,6 +122,9 @@ export function main(){
 	var model = new glext.CModel(1);
 	model.ImportFrom("SphereModel");
 	
+	var bigModel = new glext.CModel(5);
+	bigModel.ImportFrom("bigModel");
+	
 	var navigatorModel = new glext.CModel(2);
 	navigatorModel.ImportFrom("navigatorModel");
 	
@@ -394,12 +397,13 @@ export function main(){
 		
 		// RenderModels(fboDeferred, false, time, Camera, dderidex.models);
 		
+		light.setLightType(glext.CLight.ELightType.Directional);
 		light.setPosition(10.0*ctime + 2.0, 15.0, 10.0*stime + 20.0 );
 		light.setDisplaySize(5.0);
 		light.setDisplayColor(0.5,0.79,1.0,1.0);
 		light.setMatrices( Camera.ViewMatrix, Camera.ProjectionMatrix );
 		light.RenderPosition();
-		light.setIntensity(917.0);
+		light.setIntensity(1.5);//917.0
 		light.setColor(0.5,0.79,1.0,1.0);
 		light.Update();
 		//-------------------------------------------------------------------------------------
@@ -445,12 +449,12 @@ export function main(){
 		//atmosphere render
 		//-------------------------------------------------------------------------------------
 		// light.UploadToShader(atmosphere_shader, atmosphere_shader.lightUniforms);
-		// RenderModels(fboHdrMipBlur, false, time, Camera, [AtmoSphereModel]);
+		RenderModels(fboHdrMipBlur, false, time, Camera, planet.models, "transparent_blend");
 		
 		//kopiranje iz mip blur u main color buffer
 		//-------------------------------------------------------------------------------------
 		glext.CFramebuffer.CopyTextureFromFBColorAttachment(txfbHdrMipBlur, 0, txfbColor, 0, MipGen.framebuffer, true);
-				
+		
 		//gen mipmapa za blured glow
 		//-------------------------------------------------------------------------------------
 		glext.CFramebuffer.CopyTextureFromFBColorAttachment(txfbHdrMipBlur2, 0, txfbAoRSMt, 0, MipGen.framebuffer, true);
@@ -533,17 +537,20 @@ export function main(){
 	return; /* */
 }
 
-function RenderModels(fbo, bClearFBO, time, camera, models){
+function RenderModels(fbo, bClearFBO, time, camera, models, renderpass){
 	
 	if(fbo != null){
 		fbo.Bind();
 		gl.viewport(0, 0, fbo.width, fbo.height);
 	}
 	
+	if(renderpass === undefined) renderpass = "-";
+	
 	if(bClearFBO == true){ gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);}
 	
 	for(var m = 0; m < models.length; ++m){
 		var model = models[m];
+		if(model.getRenderpass() != renderpass) continue;
 		var shader = glext.CShaderList.get(model.shaderID);
 		
 		if(fbo != null) fbo.ActivateDrawBuffers(shader);

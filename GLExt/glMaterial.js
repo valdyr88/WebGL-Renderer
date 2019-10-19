@@ -120,12 +120,15 @@ export class CMaterial extends CGLExtObject
 		this.shaderID = -1;
 		this.params = [];
 		this.textureLinks = [];
+		this.renderpass = "-";
 	}
 	
 	LoadFromXMLDOM(material){
 		material.getElementsByTagNameImmediate = sys.utils.getElementsByTagNameImmediate;
 		
 		this.shaderName = material.attributes.shader.value;
+		if(material.attributes.renderpass !== undefined)
+			this.renderpass = material.attributes.renderpass.value;
 		this.params = CMaterialParam.LoadParamsFromXMLDOM(material);
 		
 		let txs = material.getElementsByTagNameImmediate("texture");
