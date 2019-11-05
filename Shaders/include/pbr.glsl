@@ -136,18 +136,36 @@ float3 pbr_Sample(vec3 position, vec3 diffuse, vec3 normal, vec3 specular, float
 	float3 lightrefl = tofloat3(0.0f);
 	float3 lightdiff = tofloat3(0.0f);
 	
-	//	point lightovi
+	//	analytic lightovi
 	//- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 	for(int i = 0; i < lightNo; ++i){
 	
 		Light light = lights[i]; 
 		if(light.intensity < 0.001f) continue;
 		
-		float3 L = light.position.xyz - position.xyz; 
-		float dL2 = dot(L,L); L = normalize(L);
+		float3 L = vec3(0.0f,0.0f,0.0f); float dL2 = 1.0f;
+		
+		//	point light
+		//- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+		if(Light_getLightType(light) == LightType_Point){
+			L = light.position.xyz - position.xyz; 
+			dL2 = dot(L,L); L = normalize(L);
+		}
+		//- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+		
+		//  directional light
+		//- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+		if(Light_getLightType(light) == LightType_Direction){
+			L = normalize(light.position.xyz); //u position je sad smijer
+			dL2 = 1.0f;
+		}
+		//- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+		
+		//ToDo: provjeri ovo, jeli se koristi i dalje
+		if( uint_getbit(light.flags, Light_isInfinite_bit) == true ){ dL2 = 2.0f; }
+		
 		float3 H = normalize(halfvec(V,L));
 		
-		if( uint_getbit(light.flags, Light_isInfinite_bit) == true ){ dL2 = 2.0f; }
 		float falloff = 1.0f / dL2;
 		float3 lightval = shadows[i] * light.color.xyz * light.intensity * falloff;
 		
@@ -199,20 +217,26 @@ void pbr_SampleLight(vec3 position, vec3 diffuse, vec3 normal, vec3 specular, fl
 	
 	if(light.intensity < 0.001f) return;
 	
+	float3 L = vec3(0.0f,0.0f,0.0f); float dL2 = 1.0f;
+	
 	//	point light
 	//- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-	float3 L = light.position.xyz - position.xyz; 
-	float dL2 = dot(L,L); L = normalize(L);
+	if(Light_getLightType(light) == LightType_Point){
+		L = light.position.xyz - position.xyz; 
+		dL2 = dot(L,L); L = normalize(L);
+	}
 	//- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 	
 	//  directional light
 	//- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 	if(Light_getLightType(light) == LightType_Direction){
-		L = normalize(light.position.xyz);
+		L = normalize(light.position.xyz); //u position je sad smijer
 		dL2 = 1.0f;
 	}
-	if( uint_getbit(light.flags, Light_isInfinite_bit) == true ){ dL2 = 2.0f; }
 	//- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+	
+	//ToDo: provjeri ovo, jeli se koristi i dalje
+	if( uint_getbit(light.flags, Light_isInfinite_bit) == true ){ dL2 = 2.0f; }
 	
 	float3 H = normalize(halfvec(V,L));
 	

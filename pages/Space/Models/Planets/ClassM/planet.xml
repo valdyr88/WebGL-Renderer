@@ -9,9 +9,10 @@
 	<img id="planet_atmosphere" src="./Atmosphere.png" type="tx2D/D" style="display: none;"></img>
 	
 	<material shader="deferred_planet_BcNAoRSMt">
-		<param bindpoint="seaLevel" value="0.2" type="float"></param>
+		<param bindpoint="seaLevel" value="0.15" type="float"></param>
 		<param bindpoint="emissionMult" value="1.0" type="float"></param>
-		<param bindpoint="roughnessScaleOffsetPower" value="1.0,0.0,1.0" type="vec3"></param>
+		<param bindpoint="roughnessScaleOffsetPower" value="0.75,0.0,1.0" type="vec3"></param>
+		<param bindpoint="scaleNormalXY" value="4.0,4.0" type="vec2"></param>
 		<texture bindpoint="txHeight" txid="planet_height" type="tx2D/D"></texture>
 		<texture bindpoint="txDiffuseGradient" txid="planet_diffuse" type="tx2D/N"></texture>
 		<texture bindpoint="txAoRSGradient" txid="planet_AoRS" type="tx2D/AoRS"></texture>
@@ -54,7 +55,7 @@
 	</model>
 	
 	<model id="atmosphere" src="./../Icosphere7.obj" type="model/obj">
-		<param bindpoint="scale" value="1.01" type="float"></param>
+		<param bindpoint="scale" value="1.0175" type="float"></param>
 		<material shader="atmosphere_shader" renderpass="transparent_blend">
 			<texture bindpoint="txAtmosphereGradient" txid="planet_atmosphere" type="tx2D/D"></texture>
 		</material>

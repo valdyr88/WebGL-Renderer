@@ -398,7 +398,8 @@ export function main(){
 		// RenderModels(fboDeferred, false, time, Camera, dderidex.models);
 		
 		light.setLightType(glext.CLight.ELightType.Directional);
-		light.setPosition(10.0*ctime + 2.0, 15.0, 10.0*stime + 20.0 );
+		// light.setPosition(10.0*ctime, 15.0, 10.0*stime );
+		light.setPosition(7.04056, 15.0, 7.1014);
 		light.setDisplaySize(5.0);
 		light.setDisplayColor(0.5,0.79,1.0,1.0);
 		light.setMatrices( Camera.ViewMatrix, Camera.ProjectionMatrix );
@@ -449,7 +450,10 @@ export function main(){
 		//atmosphere render
 		//-------------------------------------------------------------------------------------
 		// light.UploadToShader(atmosphere_shader, atmosphere_shader.lightUniforms);
-		RenderModels(fboHdrMipBlur, false, time, Camera, planet.models, "transparent_blend");
+		// glext.CBlendMode.Bind(glext.CBlendMode.Additive);
+		glext.CBlendMode.Bind(glext.CBlendMode.Alpha);
+			RenderModels(fboHdrMipBlur, false, time, Camera, planet.models, "transparent_blend");
+		glext.CBlendMode.Bind(null);
 		
 		//kopiranje iz mip blur u main color buffer
 		//-------------------------------------------------------------------------------------
@@ -686,6 +690,10 @@ export function recompileShader(fragment_name){
 				case "transparent_shader":
 					shader.ULTextureAmb = shader.getUniformLocation("txAmbient");
 					shader.ULTextureBackground = shader.getUniformLocation("txBackground");
+					glext.CLightList.get(0).AttachUniformBlockTo(shader);
+				break;
+				case "atmosphere_shader":
+					shader.ULTextureAmb = shader.getUniformLocation("txAtmosphereGradient");
 					glext.CLightList.get(0).AttachUniformBlockTo(shader);
 				break;
 				case "deferred_opaque_shader":

@@ -46,6 +46,8 @@ uniform vec3 roughnessScaleOffsetPower;
 #define rSOP roughnessScaleOffsetPower
 
 uniform float seaLevel;
+
+uniform vec2 scaleNormalXY;
 //------------------------------------------------------------------------------
 #define varyin in
 
@@ -73,7 +75,7 @@ float sampleHeight(sampler2D txH, vec2 t){
 	return texture(txH, t).x;
 }
 
-vec3 sampleNormal(sampler2D txH, vec2 t, vec2 dt, float scaleXY){
+vec3 sampleNormal(sampler2D txH, vec2 t, vec2 dt, vec2 scaleXY){
 	vec3 s;
 	s.x = sampleHeight(txH, t + dt.x*vec2(1.0f,0.0f));
 	s.y = sampleHeight(txH, t + dt.y*vec2(0.0f,1.0f));
@@ -87,10 +89,10 @@ vec3 sampleNormal(sampler2D txH, vec2 t, vec2 dt, float scaleXY){
 	
 	return d;
 }
-vec3 getNormalWithSea(sampler2D txH, vec2 t, float scaleXY, float height, float seaHeight){
+vec3 getNormalWithSea(sampler2D txH, vec2 t, vec2 scaleXY, float height, float seaHeight){
 	vec3 n = vec3(0.0f,0.0f,1.0f);
 	if(height >= seaHeight)
-		n = sampleNormal(txH, t, vec2(dFdx(t.x),dFdy(t.y)), scaleXY);
+		n = sampleNormal(txH, t, vec2(1.0f/4096.0f)/* vec2(dFdx(t.x),dFdy(t.y)) */, scaleXY);
 	return n;
 }
 
@@ -101,19 +103,19 @@ vec4 sampleGradient(sampler2D txG, float t){
 float seaLevelHeight(float height, float seaLevel){	
 	height = height-seaLevel;
 	if(height > 0.0f)
-		height = height/(1.0f-seaLevel);
+		height = height/(1.0f-seaLevel) + 0.1f;
 	else
-		height = height/(seaLevel);
+		height = height/(seaLevel) - 0.01f;
 		
-	return height*0.5f+0.5f;
+	return saturate(height*0.5f+0.5f);
 }
 
 void main(void)
 {	
 	float height = sampleHeight(txHeight, TexCoords);
-	vec3 normal = getNormalWithSea(txHeight, TexCoords, 1.0f, height, seaLevel);
+	vec3 normal = getNormalWithSea(txHeight, TexCoords, -scaleNormalXY, height, seaLevel);
 	
-	vec4 diffuse = gamma(sampleGradient(txDiffuseGradient, seaLevelHeight(height, seaLevel)), 1.0f/2.2f);
+	vec4 diffuse = gamma(sampleGradient(txDiffuseGradient, seaLevelHeight(height, seaLevel)), 1.0f/1.33f);
 	// vec4 diffuse = texture(txDiffuseGradient, TexCoords);
 	// diffuse.rgb = vec3(height);
 	vec4 AoRSEm = sampleGradient(txAoRSGradient, seaLevelHeight(height, seaLevel));

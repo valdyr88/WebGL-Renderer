@@ -40,7 +40,7 @@ varyin vec2 TexCoords;
 varyin vec3 ViewVector;
 
 
-#define gammaValue (1.0/1.5)
+#define gammaValue (1.0/1.3)
 #define gammaScale (1.0/1.0)
 
 //ToDo: treba napravit vertex shader koji racuna tocan ViewVector
