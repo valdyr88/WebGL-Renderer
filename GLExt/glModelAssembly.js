@@ -46,12 +46,19 @@ export class CModelAssembly extends CGLExtObject
 		}
 		
 		let defaultMaterial = null;
-		if(xmlAsm.getElementsByTagNameImmediate("material").length > 0){
-			defaultMaterial = new CMaterial();
-			defaultMaterial.LoadFromXMLDOM( xmlAsm.getElementsByTagNameImmediate("material")[0] );
+		let globalMaterials = [];
+		let xmlDefaultMaterials = xmlAsm.getElementsByTagNameImmediate("material");
+		
+		if(xmlDefaultMaterials.length > 0){
+			for(let i = 0; i < xmlDefaultMaterials.length; ++i){
+				globalMaterials[i] = new CMaterial();
+				globalMaterials[i].LoadFromXMLDOM( xmlAsm.getElementsByTagNameImmediate("material")[i] );
+			}
+			defaultMaterial = globalMaterials[0];
 		}
 		
 		let mdls = xmlAsm.getElementsByTagNameImmediate("model");		
+		let matLinks = [];
 		for(let i = 0; i < mdls.length; ++i){
 			let mdl = mdls[i];
 			mdl.getElementsByTagNameImmediate = sys.utils.getElementsByTagNameImmediate;
@@ -64,7 +71,8 @@ export class CModelAssembly extends CGLExtObject
 			
 			if( mdl.getElementsByTagNameImmediate("material").length > 0 ){
 				material = new CMaterial();
-				material.LoadFromXMLDOM( mdl.getElementsByTagNameImmediate("material")[0] );
+				if(material.LoadFromXMLDOM( mdl.getElementsByTagNameImmediate("material")[0] ) == false)//if false it's material link
+					matLinks[matLinks.length] = this.models.length;
 			}
 			
 			model.setMaterial(material);
@@ -73,6 +81,36 @@ export class CModelAssembly extends CGLExtObject
 			model.setParams(params);
 			
 			this.models[this.models.length] = model;
+		}
+		
+		//material linking
+		for(let i = 0; i < matLinks.length; ++i){
+			let model = this.models[matLinks[i]];
+			
+			let material = null;
+			for(let m = 0; m < globalMaterials.length; ++m){
+				if(globalMaterials[m].id == model.material.id){
+					material = globalMaterials[m];
+					break;
+				}
+			}
+			if(material == null)
+			for(let m = 0; m < this.models.length; ++m){
+				if(m == matLinks[i]) continue;
+				
+				if(model.material.id == this.models[m].material.id && this.models[m].material.isMaterialLink() == false){
+					material = this.models[m].material;
+					break;
+				}
+			}
+			
+			if(material === null){
+				alert("LoadAssemblyFromXML(): material link not found! <" + model.material.id + ">");
+				continue;
+			}
+			
+			model.material.LinkFromMaterial(material);
+			model.setMaterial(model.material);
 		}
 	}
 }

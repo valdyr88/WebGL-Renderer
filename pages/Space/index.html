@@ -95,14 +95,15 @@
   </head>
 <body>
 	<img id="reload_shader_btn" onclick="reload_shader('deferred_opaque_shader')" title="deferred_opaque_shader" src="./../../misc/reload_ico.png"></img>
+	<img id="reload_shader_btn" onclick="reload_shader('pbr')" title="pbr" src="./../../misc/reload_ico.png"></img>
 	<img id="reload_shader_btn" onclick="reload_shader('deferred_BcNAoRSMt')" title="deferred_BcNAoRSMt" src="./../../misc/reload_ico.png"></img>
 	<img id="reload_shader_btn" onclick="reload_shader('deferred_planet_BcNAoRSMt')" title="deferred_planet_BcNAoRSMt" src="./../../misc/reload_ico.png"></img>
 	<img id="reload_shader_btn" onclick="reload_shader('transparent_shader')" title="transparent_shader" src="./../../misc/reload_ico.png"></img>
 	<img id="reload_shader_btn" onclick="reload_shader('glow_integrate_shader')" title="glow_integrate_shader" src="./../../misc/reload_ico.png"></img>
 	<img id="reload_shader_btn" onclick="reload_shader('deferred_skybox')" title="deferred_skybox" src="./../../misc/reload_ico.png"></img>
 	<img id="reload_shader_btn" onclick="reload_shader('atmosphere_shader')" title="atmosphere_shader" src="./../../misc/reload_ico.png"></img>
-  	<img id="reload_texture_btn" onclick="reload_texture('txGlass_AoRS')" title="txGlass_AoRS" src="./../../misc/reload_ico.png"></img>
-  	<img id="reload_texture_btn" onclick="reload_texture('txGlass_N')" title="txGlass_N" src="./../../misc/reload_ico.png"></img>
+  	<img id="reload_texture_btn" onclick="reload_texture('planet_AoRS')" title="planet_AoRS" src="./../../misc/reload_ico.png"></img>
+  	<img id="reload_texture_btn" onclick="reload_texture('planet_diffuse')" title="planet_diffuse" src="./../../misc/reload_ico.png"></img>
   
 	<div style="background-color:#0055ff">
 	  <canvas id="glcanvas" width="1920" height="1080">
@@ -111,7 +112,7 @@
 	</div>
 	
   <script type="module">
-	import { main, recompileShader, reloadTexture } from "./main_deffered.js";
+	import { main, recompileShader, reloadTexture, constructTextureDOMobj } from "./main_deffered.js";
 	import { fetchImage } from "./../../GLExt/glTexture.js";
 	function wait(ms){ const start = performance.now(); while(performance.now() - start < ms); }
 	
@@ -210,6 +211,8 @@
 	
 	window.reload_texture = function reload_texture(id){
 		var obj = document.getElementById(id);
+		if(obj == null)
+			obj = constructTextureDOMobj(id);
 		
 		var header = new Headers();
 		header.append('pragma', 'no-cache');

@@ -33,9 +33,9 @@ precision mediump float;
 
 // #define PI (3.14159265359)
 
-uniform sampler2D txDiffuseGradient;
-uniform sampler2D txAoRSGradient;
-uniform sampler2D txHeight;
+uniform sampler2D txDiffuseGradient; uniform float txDiffuseGradient_gamma_value;
+uniform sampler2D txAoRSGradient; uniform float txAoRSGradient_gamma_value;
+uniform sampler2D txHeight; uniform float txHeight_gamma_value;
 
 uniform int uFlags;
 #define getBitFlag(bit) uint_getbit(uFlags, (bit))
@@ -71,8 +71,11 @@ float encode_MetalnessBit(float value, bool bMetalness){
 }
 
 
+float sampleHeight(sampler2D txH, float gammavalue, vec2 t){
+	return gamma(texture(txH, t).x, gammavalue);
+}
 float sampleHeight(sampler2D txH, vec2 t){
-	return texture(txH, t).x;
+	return sampleHeight(txH, txHeight_gamma_value, t);
 }
 
 vec3 sampleNormal(sampler2D txH, vec2 t, vec2 dt, vec2 scaleXY){
@@ -96,8 +99,8 @@ vec3 getNormalWithSea(sampler2D txH, vec2 t, vec2 scaleXY, float height, float s
 	return n;
 }
 
-vec4 sampleGradient(sampler2D txG, float t){
-	return texture(txG, vec2(0.5f, 1.0f-t));
+vec4 sampleGradient(sampler2D txG, float gammavalue, float t){
+	return gamma(texture(txG, vec2(0.5f, 1.0f-t)), gammavalue);
 }
 
 float seaLevelHeight(float height, float seaLevel){	
@@ -112,13 +115,13 @@ float seaLevelHeight(float height, float seaLevel){
 
 void main(void)
 {	
-	float height = sampleHeight(txHeight, TexCoords);
+	float height = sampleHeight(txHeight, txHeight_gamma_value, TexCoords);
 	vec3 normal = getNormalWithSea(txHeight, TexCoords, -scaleNormalXY, height, seaLevel);
 	
-	vec4 diffuse = gamma(sampleGradient(txDiffuseGradient, seaLevelHeight(height, seaLevel)), 1.0f/1.33f);
+	vec4 diffuse = sampleGradient(txDiffuseGradient, txDiffuseGradient_gamma_value, seaLevelHeight(height, seaLevel));//gamma(, 1.0f/1.33f);
 	// vec4 diffuse = texture(txDiffuseGradient, TexCoords);
 	// diffuse.rgb = vec3(height);
-	vec4 AoRSEm = sampleGradient(txAoRSGradient, seaLevelHeight(height, seaLevel));
+	vec4 AoRSEm = sampleGradient(txAoRSGradient, txAoRSGradient_gamma_value, seaLevelHeight(height, seaLevel));
 	
 	float roughness = AoRSEm.y;
 	float ambientOcclusion = 1.0f;//

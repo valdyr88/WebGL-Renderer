@@ -7,8 +7,9 @@
 	<img id="planet_diffuse" src="./AlbedoGradient03Variations.png" type="tx2D/AoRS" style="display: none;"></img>
 	<img id="planet_AoRS" src="./SREmM_Gradient.png" type="tx2D/N" style="display: none;"></img>
 	<img id="planet_atmosphere" src="./Atmosphere.png" type="tx2D/D" style="display: none;"></img>
+	<img id="planet_clouds" src="./Atmosphere.png" type="tx2D/D" style="display: none;"></img>
 	
-	<material shader="deferred_planet_BcNAoRSMt">
+	<material id="planet_surface" shader="deferred_planet_BcNAoRSMt">
 		<param bindpoint="seaLevel" value="0.15" type="float"></param>
 		<param bindpoint="emissionMult" value="1.0" type="float"></param>
 		<param bindpoint="roughnessScaleOffsetPower" value="0.75,0.0,1.0" type="vec3"></param>
@@ -16,18 +17,30 @@
 		<texture bindpoint="txHeight" txid="planet_height" type="tx2D/D"></texture>
 		<texture bindpoint="txDiffuseGradient" txid="planet_diffuse" type="tx2D/N"></texture>
 		<texture bindpoint="txAoRSGradient" txid="planet_AoRS" type="tx2D/AoRS"></texture>
+		<param bindpoint="txHeight_gamma_value" value="1.0" type="float"></param>
+		<param bindpoint="txDiffuseGradient_gamma_value" value="2.2" type="float"></param>
+		<param bindpoint="txAoRSGradient_gamma_value" value="2.2" type="float"></param>
 	</material>
+	
+	<!-- <material id="planet_clouds" shader="clouds_shader"> -->
+	<!-- </material> -->
 	
 	<model id="right" src="./../SphereFromCubeSide.obj" type="model/obj">
 		<param bindpoint="forward" value="1,0,0" type="vec3"></param>
 		<param bindpoint="right" value="0,0,1" type="vec3"></param>
 		<param bindpoint="up" value="0,1,0" type="vec3"></param>
+		<material id="planet_surface">
+			<param bindpoint="scaleNormalXY" value="4.0,-4.0" type="vec2"></param>
+		</material>
 	</model>
 	
 	<model id="left" src="./../SphereFromCubeSide.obj" type="model/obj">
 		<param bindpoint="forward" value="-1,0,0" type="vec3"></param>
 		<param bindpoint="right" value="0,0,-1" type="vec3"></param>
 		<param bindpoint="up" value="0,1,0" type="vec3"></param>
+		<material id="planet_surface">
+			<param bindpoint="scaleNormalXY" value="-4.0,-4.0" type="vec2"></param>
+		</material>
 	</model>
 	
 	<model id="top" src="./../SphereFromCubeSide.obj" type="model/obj">
@@ -54,11 +67,73 @@
 		<param bindpoint="up" value="1,0,0" type="vec3"></param>
 	</model>
 	
+	
+	
+	
 	<model id="atmosphere" src="./../Icosphere7.obj" type="model/obj">
 		<param bindpoint="scale" value="1.0175" type="float"></param>
 		<material shader="atmosphere_shader" renderpass="transparent_blend">
 			<texture bindpoint="txAtmosphereGradient" txid="planet_atmosphere" type="tx2D/D"></texture>
 		</material>
 	</model>
+	
+	
+	
+	
+	<!-- <model id="right" src="./../SphereFromCubeSide.obj" type="model/obj"> -->
+		<!-- <param bindpoint="scale" value="1.005" type="float"></param> -->
+		<!-- <param bindpoint="forward" value="1,0,0" type="vec3"></param> -->
+		<!-- <param bindpoint="right" value="0,0,1" type="vec3"></param> -->
+		<!-- <param bindpoint="up" value="0,1,0" type="vec3"></param> -->
+		<!-- <material id="planet_clouds"> -->
+			<!-- <param bindpoint="scaleNormalXY" value="4.0,-4.0" type="vec2"></param> -->
+		<!-- </material> -->
+	<!-- </model> -->
+	
+	<!-- <model id="left" src="./../SphereFromCubeSide.obj" type="model/obj"> -->
+		<!-- <param bindpoint="scale" value="1.005" type="float"></param> -->
+		<!-- <param bindpoint="forward" value="-1,0,0" type="vec3"></param> -->
+		<!-- <param bindpoint="right" value="0,0,-1" type="vec3"></param> -->
+		<!-- <param bindpoint="up" value="0,1,0" type="vec3"></param> -->
+		<!-- <material id="planet_clouds"> -->
+			<!-- <param bindpoint="scaleNormalXY" value="-4.0,-4.0" type="vec2"></param> -->
+		<!-- </material> -->
+	<!-- </model> -->
+	
+	<!-- <model id="top" src="./../SphereFromCubeSide.obj" type="model/obj"> -->
+		<!-- <param bindpoint="scale" value="1.005" type="float"></param> -->
+		<!-- <param bindpoint="forward" value="0,1,0" type="vec3"></param> -->
+		<!-- <param bindpoint="right" value="1,0,0" type="vec3"></param> -->
+		<!-- <param bindpoint="up" value="0,0,1" type="vec3"></param> -->
+		<!-- <material id="planet_clouds"> -->
+		<!-- </material> -->
+	<!-- </model> -->
+	
+	<!-- <model id="bottom" src="./../SphereFromCubeSide.obj" type="model/obj"> -->
+		<!-- <param bindpoint="scale" value="1.005" type="float"></param> -->
+		<!-- <param bindpoint="forward" value="0,-1,0" type="vec3"></param> -->
+		<!-- <param bindpoint="right" value="-1,0,0" type="vec3"></param> -->
+		<!-- <param bindpoint="up" value="0,0,1" type="vec3"></param> -->
+		<!-- <material id="planet_clouds"> -->
+		<!-- </material> -->
+	<!-- </model> -->
+	
+	<!-- <model id="back" src="./../SphereFromCubeSide.obj" type="model/obj"> -->
+		<!-- <param bindpoint="scale" value="1.005" type="float"></param> -->
+		<!-- <param bindpoint="forward" value="0,0,-1" type="vec3"></param> -->
+		<!-- <param bindpoint="right" value="0,-1,0" type="vec3"></param> -->
+		<!-- <param bindpoint="up" value="1,0,0" type="vec3"></param> -->
+		<!-- <material id="planet_clouds"> -->
+		<!-- </material> -->
+	<!-- </model> -->
+	
+	<!-- <model id="front" src="./../SphereFromCubeSide.obj" type="model/obj"> -->
+		<!-- <param bindpoint="scale" value="1.005" type="float"></param> -->
+		<!-- <param bindpoint="forward" value="0,0,1" type="vec3"></param> -->
+		<!-- <param bindpoint="right" value="0,1,0" type="vec3"></param> -->
+		<!-- <param bindpoint="up" value="1,0,0" type="vec3"></param> -->
+		<!-- <material id="planet_clouds"> -->
+		<!-- </material> -->
+	<!-- </model>	 -->
 	
 </assembly>

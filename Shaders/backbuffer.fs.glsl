@@ -48,7 +48,7 @@ void main(void)
 #else
 	vec3 color = rgbe.xyz;
 #endif
-	gl_FragColor.xyz = color;//gamma(diffuse, 0.75f + 0.25f*cos(Time));
+	gl_FragColor.xyz = gamma(color, 1.0f/1.33f);//gamma(diffuse, 0.75f + 0.25f*cos(Time));
 	// gl_FragColor.xyz = vec3(0.7,0.4,0.7);
 	gl_FragColor.a = 1.0;
 }

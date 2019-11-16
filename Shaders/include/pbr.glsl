@@ -9,7 +9,21 @@
 //PBR funkcije
 //======================================================================================
 
-//bazirano na UE4. 
+//--------------------------------------------------------------------------------------
+//	Fresnel aprox functions
+//--------------------------------------------------------------------------------------
+vec3 F_schlick(vec3 f0, float dotNV){
+	return f0 + (vec3(1.0f)-f0)*pow(1.0f-dotNV,5.0f);
+}
+vec3 F_schlick(vec3 f0, float dotNV, float roughness){
+	return f0 + (max(vec3(1.0f-roughness),f0) - f0)*pow(1.0f-dotNV,5.0f);
+}
+
+vec3 F0_schlick(float IoR, vec3 albedo, float metalness){
+	vec3 f0 = vec3(abs((1.0f-IoR)/(1.0f+IoR)));
+	f0 = f0*f0;
+	return lerp(f0, albedo, metalness);
+}
 
 //--------------------------------------------------------------------------------------
 //	Diffuse term function
@@ -84,6 +98,15 @@ float3 pbr_SampleSpecular(in float dotNL, in float dotNV, in float dotNH, in flo
 	float D = D_GGX(roughness, dotNH);	
 	float G = G_schlick(roughness, dotNV, dotNL);
 	float R = R1(roughness, dotNV, rim_lighting);
+	
+	return R * F * D * G;
+}
+float3 pbr_SampleSpecular(in float dotNL, in float dotNV, in float dotNH, in float roughness, in vec3 f0, in float rim_lighting){
+
+	float D = D_GGX(roughness, dotNH);	
+	float G = G_schlick(roughness, dotNV, dotNL);
+	float R = R1(roughness, dotNV, rim_lighting);
+	vec3  F = F_schlick(f0, dotNV, roughness);
 	
 	return R * F * D * G;
 }
@@ -249,10 +272,10 @@ void pbr_SampleLight(vec3 position, vec3 diffuse, vec3 normal, vec3 specular, fl
 	float dotHV = saturate(dot(H,V));
 	float dotLV = saturate(dot(L,V));
 	
-	float3 specfresnel = fresnel(specular, dotNV);
-	float3 spec = pbr_SampleSpecular(dotNL, dotNV, dotNH, specfresnel, roughness, 0.0f) * dotNL;//moze i dotiNL
-	
-	float3 diff = (1.0f - specfresnel) * lambert_diffuse() * dotNL;
+	float3 f = fresnel(specular, dotNV);
+	// float3 f = F_schlick(specular, dotNV, roughness);
+	float3 spec = pbr_SampleSpecular(dotNL, dotNV, dotNH, f, roughness, 0.0f) * dotNL;//moze i dotiNL
+	float3 diff = (1.0f-f)*(1.0f-metalness) * dotNL;// * lambert_diffuse()
 	
 	lightrefl += lightval * spec;
 	lightdiff += lightval * diff;	
@@ -268,23 +291,26 @@ void pbr_SampleAmbient(vec3 diffuse, vec3 normal, vec3 specular, float roughness
 	float3 R = normalize(reflect(V,N));
 	float dotNV = saturate(dot(N,V));
 	
+	float3 f = fresnel(specular, dotNV);
+	// float3 f = F_schlick(specular, dotNV, roughness);
+	
 	//	image based lighting 
 	//- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 	float2 brdf = pbr_SampleBRDF(float2(roughness, dotNV));
-	float3 f = fresnel(specular, dotNV);
 	float3 iblspec = (f * brdf.x + brdf.y );
+	float3 ibldiff = (vec3(1.0f)-f)*(1.0f-metalness); //jeli potrebno za ambientalnu diffuznu refleksiju koristit 1.0-fresnel?, jer difuzija svjetla dolazi iz raznih smjerova (raznih kutuva izmedju povrsine i upadne zrake)
 	
 	float3 ambdiff = ambientOcclusion * pbr_SampleAmbient(AmbientTx, AmbientLightIncreasePercent, N, 0.99f ).xyz;//(ako cemo radit ikad vise ambijenata koji se blendaju onda treba lerpat ova dva parametra (ambdiff, i ambrefl))
 	float3 ambrefl = lerp(1.0f, ambientOcclusion, roughness ) * pbr_SampleAmbient(AmbientTx, AmbientLightIncreasePercent, R, roughness ).xyz;
 	
 	lightrefl += iblspec * ambrefl;
-	lightdiff += ambdiff * (tovec3(1.0f) - f) * lambert_diffuse();
+	lightdiff += ibldiff * ambdiff;// * lambert_diffuse(); //lambert_diffuse() izostavljen jer povrsina ispada dosta tamna
 	//- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -	
 }
 
 vec3 pbr_IntegrateSamples(vec3 diffuse, float metalness, vec3 lightdiff, vec3 lightrefl){
-	lightdiff = lightdiff * lerp( diffuse.xyz, tofloat3(0.0f), metalness );
-	return lightdiff + lightrefl;
+	// lightdiff = lightdiff * lerp( diffuse.xyz, tofloat3(0.0f), metalness );
+	return diffuse*lightdiff + lightrefl;
 }
 //--------------------------------------------------------------------------------------
 

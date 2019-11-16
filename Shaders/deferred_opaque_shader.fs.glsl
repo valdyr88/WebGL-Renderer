@@ -40,7 +40,7 @@ varyin vec2 TexCoords;
 varyin vec3 ViewVector;
 
 
-#define gammaValue (1.0/1.3)
+#define gammaValue (1.0/1.0)
 #define gammaScale (1.0/1.0)
 
 //ToDo: treba napravit vertex shader koji racuna tocan ViewVector
@@ -63,7 +63,7 @@ bool decode_MetalnessBit(float value){
 }
 float decode_Emissive(float value){
 	uint bits = uint(value*255.0f) >> 1;
-	return 20.0f*gamma( float(bits)/127.0f, 2.2f);
+	return 10.0f*gamma( float(bits)/127.0f, 2.2f);
 }
 
 vec3 shade_pbr(vec4 diffuse, vec3 normal, vec4 AoRSMtEm, float depth, float2 texCoord, mat4 InvVPMat){
@@ -78,7 +78,7 @@ vec3 shade_pbr(vec4 diffuse, vec3 normal, vec4 AoRSMtEm, float depth, float2 tex
 	vec3 position = PositionFromDepth(texCoord, depth, InvVPMat);
 	
 	if(decode_MetalnessBit(AoRSMtEm.a) == true){ //is metallic
-		specular = float3( lerp( tofloat3(max(AoRSMtEm.z,0.22f)), diffuse.xyz, AoRSMtEm.z ));
+		specular = float3( lerp( tofloat3(max(AoRSMtEm.z,0.22f)), diffuse.rgb, AoRSMtEm.z ));
 		metalness = AoRSMtEm.z;
 	}
 	
@@ -92,10 +92,10 @@ vec3 shade_pbr(vec4 diffuse, vec3 normal, vec4 AoRSMtEm, float depth, float2 tex
 	float3 lightrefl = tofloat3(0.0f);
 	
 	for(int i = 0; i < 1; ++i)
-		pbr_SampleLight(position.xyz, diffuse.xyz, normal.xyz, specular.xyz, roughness, metalness, 1.0f, ViewVector, lights[i], lightdiff, lightrefl);
-	pbr_SampleAmbient(diffuse.xyz, normal.xyz, specular.xyz, roughness, metalness, ambientOcclusion, ViewVector, txAmbient, 0.0f, lightdiff, lightrefl);
+		pbr_SampleLight(position.xyz, diffuse.rgb, normal.xyz, specular.rgb, roughness, metalness, 1.0f, ViewVector, lights[i], lightdiff, lightrefl);
+	pbr_SampleAmbient(diffuse.rgb, normal.xyz, specular.rgb, roughness, metalness, ambientOcclusion, ViewVector, txAmbient, 0.0f, lightdiff, lightrefl);
 	
-	reflected = pbr_IntegrateSamples(diffuse.xyz, metalness, lightdiff, lightrefl);
+	reflected = diffuse.rgb*lightdiff + lightrefl;
 	
 	return reflected + emissive;
 }
@@ -154,7 +154,7 @@ void main(void)
 	// shade = tovec3(d);
 	// if(d > 1.0f) shade = vec3(0.7,0.1,0.9);
 	
-	shade = gammaScale * gamma(shade, gammaValue);
+	vec3 gcshade = gammaScale * gamma(shade, gammaValue);
 	/*
 	float dotNV = dot(2.0f*normal.xyz-1.0f,normalize(-ViewVector.xyz));
 	float3 specular = float3( lerp( tofloat3(max(AoRSMt.z,0.22f)), diffuse.xyz, AoRSMt.z ));
@@ -192,13 +192,15 @@ void main(void)
 	
 	// gl_FragColor = prepare_output(shade);	
 	#ifdef USE_HDR_RGBA8
-		gl_FragColor = hdr_encode(shade.xyz);
+		gl_FragColor = hdr_encode(gcshade.xyz);
 	#else
-		gl_FragColor = tovec4(shade,1.0f);
+		gl_FragColor = tovec4(gcshade,1.0f);
 	#endif
 	
-	if(ShaderID == deferred_shader_pbr)
-		out_GlowColor.xyz = gamma( saturate( (shade-vec3(1.0f)) / 5.0f ), 1.0f/1.2f);
+	if(ShaderID == deferred_shader_pbr){
+		out_GlowColor.xyz = gamma( saturate( (shade-vec3(1.0f)) / 1.0f ), 1.0f);
+		// gl_FragColor.xyz = 1.0f*saturate(shade-vec3(1.0f));
+	}
 	else
 		out_GlowColor.xyz = vec3(0.0f);
 	out_GlowColor.a = 1.0f;

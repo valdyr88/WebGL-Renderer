@@ -346,7 +346,7 @@ export function main(){
 	// var time_of_start = sys.time.getTimeµs();
 	glext.CBlendMode.Enable();
 	
-	setInterval( function(){ window.requestAnimationFrame(renderFrame); }, 25);
+	setInterval( function(){ window.requestAnimationFrame(renderFrame); }, 13);
 		
 	// var circularMov = [0.0, 0.0]; //azimuth, inclination
 	// var distFromObject = 7.0;
@@ -404,7 +404,7 @@ export function main(){
 		light.setDisplayColor(0.5,0.79,1.0,1.0);
 		light.setMatrices( Camera.ViewMatrix, Camera.ProjectionMatrix );
 		light.RenderPosition();
-		light.setIntensity(1.5);//917.0
+		light.setIntensity(4.5);//917.0
 		light.setColor(0.5,0.79,1.0,1.0);
 		light.Update();
 		//-------------------------------------------------------------------------------------
@@ -750,6 +750,31 @@ export function reloadTexture(texture_name){
 			break;
 		}
 	}
+}
+
+export function constructTextureDOMobj(texture_name){
+	if(gl == null) return;
+	
+	let texture = null;
+	
+	for(var i = 0; i < glext.CTextureList.count(); ++i)
+	{
+		var tx = glext.CTextureList.get(i);
+		if(tx.name == texture_name){
+			texture = tx;
+			break;
+		}
+	}
+	
+	if(texture == null) return null;
+	
+	let obj = document.createElement("IMG");
+	obj.id = texture_name;
+	obj.src = texture.src;
+	obj.style.display = "none";
+	document.body.appendChild(obj);
+	
+	return obj;
 }
 
 function checkWindowsSizeAndResizeCanvas(){

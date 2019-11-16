@@ -44,7 +44,7 @@ vec4 sampleLodCombine(sampler2D tx, vec2 t, float LODStart, float dLOD, const in
 	float LOD = LODStart;
 	
 	for(int i = 0; i < LODCount; ++i){
-		sum += 5.0f*gamma(textureLod(tx, t, LOD),1.2f);
+		sum += textureLod(tx, t, LOD);
 		LOD += dLOD;
 	}
 	
@@ -56,7 +56,7 @@ void main(void)
 	vec4 color  = texture2D(txColor, vec2(TexCoords.x, 1.0f-TexCoords.y) );
 	vec4 glow   = sampleLodCombine(txGlow, vec2(TexCoords.x, 1.0f-TexCoords.y), 4.0f, 0.7f, 5 );
 	
-	color = color + 3.0f*glow;
+	color = color + 5.0f*glow;
 	// color = textureLod(txGlow, vec2(TexCoords.x, 1.0f-TexCoords.y), 4.0f);
 	
 	#ifdef USE_HDR_RGBA8

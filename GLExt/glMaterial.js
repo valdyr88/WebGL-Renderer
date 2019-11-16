@@ -17,6 +17,14 @@ export class CMaterialParam
 		this.uniformLocation = -1;
 	}
 	
+	CopyFrom(param){
+		this.name = param.name;
+		this.bindpoint = param.bindpoint;
+		this.value = param.value;
+		this.type = param.type;
+		this.uniformLocation = param.uniformLocation;
+	}
+	
 	setUniformToShader(shader){
 		if(shader == null) return;
 		
@@ -116,19 +124,27 @@ export class CMaterial extends CGLExtObject
 	constructor(slotID)
 	{
 		super();
+		this.id = "";
 		this.shaderName = "";
 		this.shaderID = -1;
 		this.params = [];
 		this.textureLinks = [];
 		this.renderpass = "-";
+		this.bIsMaterialLink = false;
 	}
+	
+	isMaterialLink(){ return this.bIsMaterialLink; }
 	
 	LoadFromXMLDOM(material){
 		material.getElementsByTagNameImmediate = sys.utils.getElementsByTagNameImmediate;
 		
-		this.shaderName = material.attributes.shader.value;
+		if(material.attributes.shader !== undefined)
+			this.shaderName = material.attributes.shader.value;
 		if(material.attributes.renderpass !== undefined)
 			this.renderpass = material.attributes.renderpass.value;
+		if(material.attributes.id !== undefined)
+			this.id = material.attributes.id.value;
+		
 		this.params = CMaterialParam.LoadParamsFromXMLDOM(material);
 		
 		let txs = material.getElementsByTagNameImmediate("texture");
@@ -142,6 +158,11 @@ export class CMaterial extends CGLExtObject
 			this.textureLinks[this.textureLinks.length] = texlink;
 		}
 		
+		if(material.attributes.shader === undefined){
+			this.bIsMaterialLink = true;
+			return false; //material link, needs to get params from other material
+		}
+		
 		let shader = CShaderList.getByName(this.shaderName);
 		if(shader != null){
 			this.shaderID = shader.SlotID;
@@ -151,6 +172,51 @@ export class CMaterial extends CGLExtObject
 				p.uniformLocation = shader.getUniformLocation(p.bindpoint);
 			}
 		}
-	}
 		
+		return true;
+	}
+	
+	LinkFromMaterial(material){
+		
+		let paramNo = this.params.length;
+		for(let p = 0; p < material.params.length; ++p){
+			let param = material.params[p];
+			let bHasParam = false;
+			for(let h = 0; h < paramNo; ++h){ 
+				if(this.params[h].name == param.name){
+					bHasParam = true; break; }
+			}
+			if(bHasParam == true) continue;
+			
+			this.params[this.params.length] = param;
+		}
+		
+		let texNo = this.textureLinks.length;
+		for(let t = 0; t < material.textureLinks.length; ++t){
+			let texlink = material.textureLinks[t];
+			let bHasTexLink = false;
+			for(let h = 0; h < texNo; ++h){
+				if(this.textureLinks[h].UniformLocationStr == texlink.UniformLocationStr){
+					bHasTexLink = true; break;
+				}
+			}
+			if(bHasTexLink == true) continue;
+			
+			this.textureLinks[this.textureLinks.length] = texlink;
+		}
+		
+		this.shaderName = material.shaderName;
+		
+		let shader = CShaderList.getByName(this.shaderName);
+		if(shader != null){
+			this.shaderID = shader.SlotID;
+			for(let i = 0; i < this.params.length; ++i){
+				let p = this.params[i];
+				
+				p.uniformLocation = shader.getUniformLocation(p.bindpoint);
+			}
+		}
+		
+		return true;
+	}
 }

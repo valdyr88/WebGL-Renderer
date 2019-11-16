@@ -276,7 +276,7 @@ export class CTexture extends CGLExtObject{
 		this.internalFormat = -1;
 		this.type = -1;
 		this.name = "-";
-		this.scr = "";
+		this.src = "";
 		this.lodBias = -0.5;
 	}
 	
@@ -790,7 +790,7 @@ export class CTexture3D extends CGLExtObject{
 		this.internalFormat = -1;
 		this.type = -1;
 		this.name = "-";
-		this.scr = "";
+		this.src = "";
 	}
 	
 	CreateEmpty(width, height, depth, internalFormat, format, type){

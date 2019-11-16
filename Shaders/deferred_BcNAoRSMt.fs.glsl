@@ -33,9 +33,9 @@ precision mediump float;
 
 // #define PI (3.14159265359)
 
-uniform sampler2D txDiffuse;
-uniform sampler2D txNormal;
-uniform sampler2D txAoRS;
+uniform sampler2D txDiffuse; uniform float txDiffuse_gamma_value;
+uniform sampler2D txNormal; uniform float txNormal_gamma_value;
+uniform sampler2D txAoRS; uniform float txAoRS_gamma_value;
 
 uniform int uFlags;
 #define getBitFlag(bit) uint_getbit(uFlags, (bit))
@@ -68,9 +68,9 @@ float encode_MetalnessBit(float value, bool bMetalness){
 
 void main(void)
 {	
-	vec4 diffuse = texture2D(txDiffuse, TexCoords);
-	vec4 normaltx = texture2D(txNormal, TexCoords);
-	vec4 AoRSEm = texture2D(txAoRS, TexCoords);
+	vec4 diffuse = gamma(texture2D(txDiffuse, TexCoords), txDiffuse_gamma_value);
+	vec4 normaltx = gamma(texture2D(txNormal, TexCoords), txNormal_gamma_value);
+	vec4 AoRSEm = gamma(texture2D(txAoRS, TexCoords), txAoRS_gamma_value);
 	// diffuse = tovec4(1.0f);
 	
 	float roughness = AoRSEm.y;

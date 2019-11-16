@@ -43,7 +43,7 @@ varyin vec3 ViewVector;
 // uniform Light light0;
 #include "ubLight"
 
-#define SUNLIGHT_PROPAGATION 0.25f
+#define SUNLIGHT_PROPAGATION 0.075f
 #define AtmosphereDensity (0.8f)
 
 void main(void)
@@ -72,10 +72,11 @@ void main(void)
 	
 	vec4 atmosphereColor = gamma(texture2D(txAtmosphereGradient, vec2(0.5f, 1.0f-0.99f*saturate(sdLN))), 2.2f);
 	gl_FragColor = pow(atmosphereColor, vec4(1.25f-pow(altitudeFade,4.0f)));
-	gl_FragColor.a = altitudeFade*(1.75f*(1.0f-1.0f*sqrt(sdVN)));
+	gl_FragColor.a = alpha*altitudeFade*(1.75f*(1.0f-1.0f*sqrt(sdVN)));
 	gl_FragColor.xyz *= saturate(alpha);
 	
 	// gl_FragColor = vec4(vec3(dVN),1.0f);
+	// gl_FragColor = vec4(0.0f);
 }
 
 void main_old(void)
