@@ -57,8 +57,23 @@ export function main(){
 	shader.setFlagsUniformLocation("uFlags");
 	shader.setTimeUniformLocation("Time");
 	shader.setCameraPositionUniformLocation("CameraPosition");
+
+/* uniform sampler2D txDiffuse; uniform float txDiffuse_gamma_value;
+uniform sampler2D txNormal; uniform float txNormal_gamma_value;
+uniform sampler2D txAoRS; uniform float txAoRS_gamma_value; */
 	
 	shader.ULTextureAmb = shader.getUniformLocation("txAmbient");
+	shader.ULTextureDiffuseGamma = shader.getUniformLocation("txDiffuse_gamma_value");
+	shader.ULTextureNormalGamma = shader.getUniformLocation("txNormal_gamma_value");
+	shader.ULTextureAoRSGamma = shader.getUniformLocation("txAoRS_gamma_value");
+	shader.ULRoughnessScaleOffsetPower = shader.getUniformLocation("roughnessScaleOffsetPower");
+	shader.ULEmissionMult = shader.getUniformLocation("emissionMult");
+	
+	shader.setFloatUniform(shader.ULTextureDiffuseGamma, 1.0);
+	shader.setFloatUniform(shader.ULTextureNormalGamma, 1.0);
+	shader.setFloatUniform(shader.ULTextureAoRSGamma, 1.0);
+	shader.setFloatUniform(shader.ULEmissionMult, 0.0);
+	shader.setFloat3Uniform(shader.ULRoughnessScaleOffsetPower, [2.75,0.0,1.0]);
 	
 	var skybox_shader = new glext.CShader(1);
 	if(skybox_shader.CompileFromFile("simpleVS", "deferred_skybox") == false) alert("nije kompajliran shader!");
@@ -377,12 +392,13 @@ export function main(){
 		
 		RenderModels(fbo, false, time, Camera, [model]);
 		
+		light.setLightType(glext.CLight.ELightType.Directional);
 		light.setPosition(-2.0*ctime, 2.0, 2.0);
 		light.setDisplaySize(5.0);
 		light.setDisplayColor(0.5,0.79,1.0,1.0);
 		light.setMatrices( Camera.ViewMatrix, Camera.ProjectionMatrix );
 		light.RenderPosition();
-		light.setIntensity(4.0);
+		light.setIntensity(1.0);
 		light.setColor(0.5,0.79,1.0,1.0);
 		light.Update();
 			
@@ -516,6 +532,19 @@ export function recompileShader(fragment_name){
 					shader.ULCameraRightDir = shader.getUniformLocation("CameraRightDir");
 					shader.ULCameraUpDir = shader.getUniformLocation("CameraUpDir");
 					glext.CLightList.get(0).AttachUniformBlockTo(shader);
+					
+					shader.ULTextureAmb = shader.getUniformLocation("txAmbient");
+					shader.ULTextureDiffuseGamma = shader.getUniformLocation("txDiffuse_gamma_value");
+					shader.ULTextureNormalGamma = shader.getUniformLocation("txNormal_gamma_value");
+					shader.ULTextureAoRSGamma = shader.getUniformLocation("txAoRS_gamma_value");
+					shader.ULRoughnessScaleOffsetPower = shader.getUniformLocation("roughnessScaleOffsetPower");
+					shader.ULEmissionMult = shader.getUniformLocation("emissionMult");
+	
+					shader.setFloatUniform(shader.ULTextureDiffuseGamma, 2.2);
+					shader.setFloatUniform(shader.ULTextureNormalGamma, 1.0);
+					shader.setFloatUniform(shader.ULTextureAoRSGamma, 2.2);
+					shader.setFloatUniform(shader.ULEmissionMult, 0.0);
+					shader.setFloat3Uniform(shader.ULRoughnessScaleOffsetPower, [2.75,0.0,1.0]);
 				break;
 				case "deferred_BcNAoRSMt":
 					shader.ULTextureAmb = shader.getUniformLocation("txAmbient");

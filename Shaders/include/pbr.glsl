@@ -116,7 +116,6 @@ float3 pbr_SampleSpecular(in float dotNL, in float dotNV, in float dotNH, in flo
 	#define AMBIENT_LIGHT_INCREASE_PERCENTAGE 0.0f
 #endif
 
-
 #ifndef pbr_Sample_NofLights
 	#define pbr_Sample_NofLights 4
 #endif
@@ -146,6 +145,8 @@ float2 pbr_SampleBRDF(float2 t){
 
 #define Light_isInfinite_bit 0
 
+#define pbr_SetupRoughness(x) (lerp(0.0f,0.85f,(x)))	//0.7f
+
 float3 pbr_Sample(vec3 position, vec3 diffuse, vec3 normal, vec3 specular, float roughness, float metalness, 
 				  float shadows[pbr_Sample_NofLights], float ambientOcclusion, vec3 viewVector, const samplerCube AmbientTx,
 				  const float AmbientLightIncreasePercent, Light lights[pbr_Sample_NofLights], const int lightNo)
@@ -158,6 +159,8 @@ float3 pbr_Sample(vec3 position, vec3 diffuse, vec3 normal, vec3 specular, float
 	float3 reflected = tofloat3(0.0f);
 	float3 lightrefl = tofloat3(0.0f);
 	float3 lightdiff = tofloat3(0.0f);
+	
+	roughness = pbr_SetupRoughness(roughness);
 	
 	//	analytic lightovi
 	//- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -213,7 +216,7 @@ float3 pbr_Sample(vec3 position, vec3 diffuse, vec3 normal, vec3 specular, float
 	float2 brdf = pbr_SampleBRDF(float2(roughness, dotNV));
 	float3 iblspec = (fresnel(specular, dotNV) * brdf.x + brdf.y );
 	
-	float3 ambdiff = ambientOcclusion * pbr_SampleAmbient(AmbientTx, AmbientLightIncreasePercent, N, 0.99f ).xyz;//(ako cemo radit ikad vise ambijenata koji se blendaju onda treba lerpat ova dva parametra (ambdiff, i ambrefl))
+	float3 ambdiff = ambientOcclusion * pbr_SampleAmbient(AmbientTx, AmbientLightIncreasePercent, -N, pbr_SetupRoughness(1.0f) ).xyz;//(ako cemo radit ikad vise ambijenata koji se blendaju onda treba lerpat ova dva parametra (ambdiff, i ambrefl))
 	float3 ambrefl = lerp(1.0f, ambientOcclusion, roughness ) * pbr_SampleAmbient(AmbientTx, AmbientLightIncreasePercent, R, roughness ).xyz;
 	
 	lightrefl += iblspec * ambrefl;
@@ -238,9 +241,11 @@ void pbr_SampleLight(vec3 position, vec3 diffuse, vec3 normal, vec3 specular, fl
 	// float3 R = normalize(reflect(V,N));
 	float dotNV = saturate(dot(N,V));
 	
+	roughness = pbr_SetupRoughness(roughness);
+	
 	if(light.intensity < 0.001f) return;
 	
-	float3 L = vec3(0.0f,0.0f,0.0f); float dL2 = 1.0f;
+	float3 L = vec3(0.0f); float dL2 = 1.0f;
 	
 	//	point light
 	//- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -272,13 +277,13 @@ void pbr_SampleLight(vec3 position, vec3 diffuse, vec3 normal, vec3 specular, fl
 	float dotHV = saturate(dot(H,V));
 	float dotLV = saturate(dot(L,V));
 	
-	float3 f = fresnel(specular, dotNV);
-	// float3 f = F_schlick(specular, dotNV, roughness);
+	// float3 f = fresnel(specular, dotNV);
+	float3 f = fresnel(specular, dotNV, roughness);
 	float3 spec = pbr_SampleSpecular(dotNL, dotNV, dotNH, f, roughness, 0.0f) * dotNL;//moze i dotiNL
-	float3 diff = (1.0f-f)*(1.0f-metalness) * dotNL;// * lambert_diffuse()
+	float3 diff = saturate((1.0f-f)*(1.0f-metalness) * dotNL);// * lambert_diffuse()
 	
 	lightrefl += lightval * spec;
-	lightdiff += lightval * diff;	
+	lightdiff += lightval * diff;
 	//- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 }
 
@@ -291,8 +296,10 @@ void pbr_SampleAmbient(vec3 diffuse, vec3 normal, vec3 specular, float roughness
 	float3 R = normalize(reflect(V,N));
 	float dotNV = saturate(dot(N,V));
 	
-	float3 f = fresnel(specular, dotNV);
-	// float3 f = F_schlick(specular, dotNV, roughness);
+	roughness = pbr_SetupRoughness(roughness);
+	
+	// float3 f = fresnel(specular, dotNV);
+	float3 f = fresnel(specular, dotNV, roughness);
 	
 	//	image based lighting 
 	//- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -300,7 +307,7 @@ void pbr_SampleAmbient(vec3 diffuse, vec3 normal, vec3 specular, float roughness
 	float3 iblspec = (f * brdf.x + brdf.y );
 	float3 ibldiff = (vec3(1.0f)-f)*(1.0f-metalness); //jeli potrebno za ambientalnu diffuznu refleksiju koristit 1.0-fresnel?, jer difuzija svjetla dolazi iz raznih smjerova (raznih kutuva izmedju povrsine i upadne zrake)
 	
-	float3 ambdiff = ambientOcclusion * pbr_SampleAmbient(AmbientTx, AmbientLightIncreasePercent, N, 0.99f ).xyz;//(ako cemo radit ikad vise ambijenata koji se blendaju onda treba lerpat ova dva parametra (ambdiff, i ambrefl))
+	float3 ambdiff = ambientOcclusion * pbr_SampleAmbient(AmbientTx, AmbientLightIncreasePercent, -N, pbr_SetupRoughness(1.0f) ).xyz;//(ako cemo radit ikad vise ambijenata koji se blendaju onda treba lerpat ova dva parametra (ambdiff, i ambrefl))
 	float3 ambrefl = lerp(1.0f, ambientOcclusion, roughness ) * pbr_SampleAmbient(AmbientTx, AmbientLightIncreasePercent, R, roughness ).xyz;
 	
 	lightrefl += iblspec * ambrefl;

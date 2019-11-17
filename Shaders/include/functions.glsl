@@ -315,8 +315,6 @@ inline vec4 reflectvec(in vec3 ray, in vec3 normal){
 //================================================================================================================
 
 inline vec3 fresnel(in vec3 f0, in float dotProduct){
-	//return lerp(f0, tovec3(1.0f), pow(1.0001f - dotProduct, 5.0f));
-	//float m = 1.0f - dotProduct; float m2 = m*m; float m5 = m2*m2*m;
 	return f0 + (1.0 - f0)*pow(1.0 - dotProduct, 5.0);
 }
 inline vec3 fresnel(in float f0, in float dotProduct){ return fresnel(tovec3(f0), dotProduct); }
@@ -327,8 +325,7 @@ inline vec3 fresnel(in vec3 f0, in vec3 view, in vec3 ray){
 inline vec3 fresnel(in float f0, in vec3 view, in vec3 ray){ return fresnel(tovec3(f0), view, ray); }
 
 inline vec3 fresnel(in vec3 f0, in float dotProduct, in float roughness){ //Schlick fresnel with roughness
-	return f0 + (max( tovec3(1.0 - 0.5*roughness), f0) - f0) * pow(1.0 - dotProduct, 5.0);
-	// return fresnel(f0, dotProduct);
+	return f0 + (max(vec3(1.0-/*0.5**/roughness),f0)-f0)*pow(1.0-dotProduct,5.0);
 }
 inline vec3 fresnel(in float f0, in float dotProduct, in float roughness){ return fresnel(tovec3(f0), dotProduct, roughness); }
 

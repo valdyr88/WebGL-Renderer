@@ -39,8 +39,9 @@ varyin vec3 PixelPosition;
 varyin vec2 TexCoords;
 varyin vec3 ViewVector;
 
+#define AmbientMipMapLevels 10.0
 
-#define gammaValue (1.0/1.0)
+#define gammaValue (1.0/1.2)
 #define gammaScale (1.0/1.0)
 
 //ToDo: treba napravit vertex shader koji racuna tocan ViewVector
@@ -63,10 +64,10 @@ bool decode_MetalnessBit(float value){
 }
 float decode_Emissive(float value){
 	uint bits = uint(value*255.0f) >> 1;
-	return 10.0f*gamma( float(bits)/127.0f, 2.2f);
+	return 20.0f*gamma( float(bits)/127.0f, 2.2f);
 }
 
-vec3 shade_pbr(vec4 diffuse, vec3 normal, vec4 AoRSMtEm, float depth, float2 texCoord, mat4 InvVPMat){
+vec3 shade_pbr(vec4 diffuse, vec3 normal, vec4 AoRSMtEm, float depth, float2 texCoord, mat4 InvVPMat, out float out_metalness){
 	
 	float roughness = clamp(AoRSMtEm.y,0.01f,0.99f);
 	float ambientOcclusion = AoRSMtEm.x;
@@ -81,6 +82,7 @@ vec3 shade_pbr(vec4 diffuse, vec3 normal, vec4 AoRSMtEm, float depth, float2 tex
 		specular = float3( lerp( tofloat3(max(AoRSMtEm.z,0.22f)), diffuse.rgb, AoRSMtEm.z ));
 		metalness = AoRSMtEm.z;
 	}
+	out_metalness = metalness;
 	
 	vec3 emissive = decode_Emissive(AoRSMtEm.a)*diffuse.rgb;
 	
@@ -132,9 +134,13 @@ void main(void)
 	vec3 position = PositionFromDepth(vec2(TexCoords.x, 1.0f-TexCoords.y), depth, InverseViewProjectionMatrix);
 	// 
 	vec3 shade = vec3(1.0, 0.6, 0.2);
+	float metallic = 0.0f;
+	
+	// AoRSMtEm = vec4(1.0f,0.25f,1.0f,1.0f/255.0f);
+	// AoRSMtEm.g = 0.75f;
 	
 	switch(ShaderID){
-		case deferred_shader_pbr: shade = shade_pbr(diffuse, normal.xyz, AoRSMtEm, depth, vec2(TexCoords.x, 1.0f-TexCoords.y), InverseViewProjectionMatrix); break;
+		case deferred_shader_pbr: shade = shade_pbr(diffuse, normal.xyz, AoRSMtEm, depth, vec2(TexCoords.x, 1.0f-TexCoords.y), InverseViewProjectionMatrix, metallic); break;
 		case deferred_shader_hdre: shade = shade_hdr_decode(diffuse); break;
 		case deferred_shader_simpleColor: shade = diffuse.xyz; break;
 		default: break;
@@ -203,5 +209,14 @@ void main(void)
 	}
 	else
 		out_GlowColor.xyz = vec3(0.0f);
+	
+	// gl_FragColor.xyz = vec3(AoRSMtEm.b);
+	// gl_FragColor.xyz = vec3(AoRSMtEm.g);
+	// gl_FragColor.xyz = vec3(metallic);
+	
+	// gl_FragColor.xyz = vec3(desaturate(shade.rgb) > 0.01);
+	
+	// gl_FragColor.xyz = diffuse.rgb;
+		
 	out_GlowColor.a = 1.0f;
 }
