@@ -51,7 +51,7 @@ bool isControlPoint( vec2 uv, mat4x3 mP, float size ){
 	return bIsControlPoint.x || bIsControlPoint.y || bIsControlPoint.z || bIsControlPoint.w;
 }
 
-void old_main(void)
+void main_old(void)
 {	
 	float4 dither = 0.0275f*(randf4(TexCoords+vec2(sBrush_getRandom(), 1.0-sBrush_getRandom())));
 	
@@ -144,7 +144,7 @@ vec4 blend(vec4 src, vec4 dst){
 	return vec4(rgb,a);
 }
 
-void main(void)
+void main_new(void)
 {
 	float4 dither = 0.0275f*(randf4(TexCoords+vec2(sBrush_getRandom(), 1.0-sBrush_getRandom())));
 	vec4 oldColor = texture2D(txDiffuse, TexCoords);
@@ -176,9 +176,11 @@ void main(void)
 		dist = min(dist, length(b-t));
 	}
 	
-	vec4 newColor = vec4(vec3(1.0), gauss(2.0, dist*25.0));
+	vec4 newColor = vec4(vec3(1.0), gauss(2.0, dist*225.0));
 	
-	gl_FragColor = blend(newColor, oldColor);
+	gl_FragColor = blend(newColor, oldColor*0.975f);
 }
 
-
+void main(void){
+	main_new();
+}

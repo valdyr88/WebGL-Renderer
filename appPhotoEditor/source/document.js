@@ -3,6 +3,7 @@ import * as sys from "./../../System/sys.js"
 import * as vMath from "./../../glMatrix/gl-matrix.js";
 import * as ui from "./ui.js"
 import * as command from "./command.js"
+import * as brushInterpolator from "./brushInterpolator.js"
 
 import { CLayer, CRasterLayer, CVectorLayer } from "./layer.js";
 
@@ -38,15 +39,21 @@ class CCursor extends command.ICommandExecute{
 		this.y = 0.0;
 		this.Pos = [0.0,0.0];
 		this.pos = [0.0,0.0];
+		let bBtnLeft = false;
+		let bLeftDown = false;
+		let bLeftUp = false;
 	}
 	
-	set(posX, posY){
+	set(posX, posY, bBtnLeft, bLeftDown, bLeftUp){
 		this.X = posX;
 		this.Y = posY;
 		this.x = this.X / this.width;
 		this.y = this.Y / this.height;
 		this.Pos = [this.X, this.Y];
 		this.pos = [this.x, this.y];
+		this.bBtnLeft = bBtnLeft;
+		this.bLeftDown = bLeftDown;
+		this.bLeftUp = bLeftUp;
 	}
 }
 
@@ -83,6 +90,8 @@ export class CDocument extends ui.CGUIElement{
 		
 		this.brush = null;
 		this.cursor = null;
+			
+		this.interpolator = new brushInterpolator.CBrushInterpolator();
 	}
 	
 	setBrush(brsh){
@@ -343,12 +352,12 @@ export class CDocument extends ui.CGUIElement{
 //	Update()
 //----------------------------------------------------------------------
 	
-	updateCursor(X, Y){
+	updateCursor(X, Y, bBtnLeft, bLeftDown, bLeftUp){
 		if(this.cursor == null) return;
-		this.cursor.set(X, Y);
+		this.cursor.set(X, Y, bBtnLeft, bLeftDown, bLeftUp);
 	}
 	
-	updateBrush(bPressed){
+	updateBrush(){
 		if(this.brush == null) return;
 		if(this.cursor == null) return;
 		/*
@@ -357,10 +366,36 @@ export class CDocument extends ui.CGUIElement{
 		document only cares about position where to draw with brush, 
 		and brush gets it color/size/type from other places (i.e. palette...)
 		*/
-		if(bPressed == false){
+		if(this.cursor.bBtnLeft == false){
 			this.brush.setColor(0.0,0.0,0.0); } //ToDo: make brush disabling with other option, color value should be kept by the brush
 		else{			
 			this.brush.setPosition( this.cursor.pos ); }
+		
+		let pos = [this.cursor.pos[0],1.0-this.cursor.pos[1]];
+		
+		if(this.cursor.bLeftDown == true)
+			this.interpolator.Start(pos);
+		else if(this.cursor.bLeftUp == true)
+			this.interpolator.End(pos);
+		else
+			this.interpolator.Next(pos);
+		
+		//initialDeltaT, minimalDeltaT, maxAngle, maxDistance, minDistance
+		//		0.02, 			0.0002,		2.5,		0.05,		0.02
+		let PointsI = this.interpolator.Interpolate(0.2, 0.02, 2.5, 0.1, 0.05);
+		
+		if(PointsI != undefined && PointsI.length > 0){
+			this.brush.setStrokeStart();
+			this.brush.setStrokeEnd();
+			this.brush.UploadPointListToShader(PointsI);
+		}
+		else{
+			this.brush.setStrokeEnd(false);
+			this.brush.setStrokeStart(false);
+			this.brush.ClearShaderPointList();
+		}
+		
+		glext.CBlendMode.Bind(glext.CBlendMode.None);
 		
 		this.brush.Update();
 	}
@@ -388,16 +423,19 @@ export class CDocument extends ui.CGUIElement{
 	
 	execMouseEvent(cmd){
 		let cmdP = cmd.commandParams;
+		//cmd.set(doc.objectId, "CDocument", "mouseEvent", "absoluteMousePos", mousePos, bBtnLeft, sys.mouse.get().bLeftDown, sys.mouse.get().bLeftUp);
 		
-		let bPressed = cmdP.params[0].value;
 		let pos = cmdP.params[1].value;
-		if(cmdP.params[2].value == "absoluteMousePos"){
+		if(cmdP.params[0].value == "absoluteMousePos"){
 			this.uiObj.paintCanvas.transformMouseCoords(pos);
-			cmdP.params[2].value = "relativeMousePos";
+			cmdP.params[0].value = "relativeMousePos";
 		}
+		let bBtnLeft = cmdP.params[2].value;
+		let bLeftDown = cmdP.params[3].value;
+		let bLeftUp = cmdP.params[4].value;
 		
-		this.updateCursor(pos[0], pos[1]);
-		this.updateBrush(bPressed);
+		this.updateCursor(pos[0], pos[1], bBtnLeft, bLeftDown, bLeftUp);
+		this.updateBrush();
 		this.updateLayers();
 	}
 	

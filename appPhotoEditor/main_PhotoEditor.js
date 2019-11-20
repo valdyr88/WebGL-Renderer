@@ -5,6 +5,7 @@ import * as img from "./source/layer.js"
 import * as brush from "./source/brush.js"
 import * as app from "./source/app.js"
 import * as splines from "./../GLext/splines.js"
+import * as brushInterpolator from "./source/brushInterpolator.js"
 
 var gl = null;
 var bReplayCommands = false;
@@ -127,16 +128,19 @@ export function main()
 	var Q3 = [0.1, 1.0];
 	var Q0 = P3;
 	
-	var Q1 = splines.CubicBezier_getPointToMatchFirstDerivative(P0,P1,P2,P3);
-	var Q2 = splines.CubicBezier_getPointToMatchSecondDerivative(P0,P1,P2,P3,Q1);
+	var Q1 = splines.CubicBezier_getControlPointToMatchFirstDerivative(P0,P1,P2,P3);
+	var Q2 = splines.CubicBezier_getControlPointToMatchSecondDerivative(P0,P1,P2,P3,Q1);
 	
-	var Q1Q2 = splines.CubicBezier_ScaleMiddlePoints(Q0,Q1,Q2,Q3);
+	var Q1Q2 = splines.CubicBezier_ScaleMiddleControlPoints(Q0,Q1,Q2,Q3);
 	Q1 = Q1Q2[0]; Q2 = Q1Q2[1];
 	
 	function setPointToCmd(doc, cmd, Ct){
 		if(cmd != null && doc.cursor != null){
-			cmd.commandParams.params[1].value[0] = Ct[0]*doc.cursor.width*0.5+doc_paint_canvas.baseWindowOffset[0];
-			cmd.commandParams.params[1].value[1] = Ct[1]*doc.cursor.height*0.5+doc_paint_canvas.baseWindowOffset[1];
+			let mousePos = [0.0,0.0];
+			mousePos[0] = Ct[0]*doc.cursor.width*0.5+doc_paint_canvas.baseWindowOffset[0];
+			mousePos[1] = Ct[1]*doc.cursor.height*0.5+doc_paint_canvas.baseWindowOffset[1];
+			
+			cmd.set(doc.objectId, "CDocument", "mouseEvent", "absoluteMousePos", mousePos, true, sys.mouse.get().bLeftDown, sys.mouse.get().bLeftUp);
 		}
 	}
 	
@@ -152,13 +156,19 @@ export function main()
 	
 	let frameNo = 0;
 	
-	setInterval( function(){ window.requestAnimationFrame(renderFrame); }, 35);
+	var interpolator = new brushInterpolator.CBrushInterpolator();
+	
+	setInterval( function(){ window.requestAnimationFrame(renderFrame); }, 1);
 	
 	//ToDo: how to design undo code for brush strokes -> every brush stroke needs to be undoable (to a certan history limit)
 	/*
 		for filters that operate with settings:
 			call method: createExecutableCommand() which returns new CCommand() with current settings as params
 	*/
+	
+	var testControlPoints = [[0.0, 0.0],
+							 [0.0, 0.0]];
+	
 	function renderFrame()
 	{
 		let time = sys.time.Update();
@@ -194,10 +204,10 @@ export function main()
 		if(frameNo < 8)
 			bBtnLeft = true;
 		
-		let cmd = null;
+		let cmd = null;/**/
 		if(bBtnLeft == true){
 			cmd = new app.command.CCommand();
-			cmd.set(doc.objectId, "CDocument", "mouseEvent", bBtnLeft, mousePos, "absoluteMousePos");
+			cmd.set(doc.objectId, "CDocument", "mouseEvent", "absoluteMousePos", mousePos, bBtnLeft, sys.mouse.get().bLeftDown, sys.mouse.get().bLeftUp);
 			abrush.setPressed(true);
 		}
 		else
@@ -215,29 +225,36 @@ export function main()
 			Ct = splines.CubicBezier(vMath.fract(t), Q0, Q1, Q2, Q3); abrush.setColor(0.2, 1.0, 0.5); }
 		
 		setPointToCmd(doc, cmd, Ct);*/
-		
-		/*if(frameNo < PointsP.length){
+		/*
+		if(frameNo < PointsP.length){
 			setControlPointToBrush(doc, abrush, cmd, PointsP[frameNo], (true)? [0.0,1.0,0.4] : [1.0,0.4,0.0]);
 		}
 		else if(frameNo < PointsP.length+PointsQ.length){
 			setControlPointToBrush(doc, abrush, cmd, PointsQ[frameNo-PointsP.length], (false)? [0.0,1.0,0.4] : [1.0,0.4,0.0]);
-		}*/
-		
-		if(frameNo == 10){
-			abrush.setStrokeStart();
-			abrush.setStrokeEnd(false);
-			abrush.UploadPointListToShader(PointsP);
 		}
-		else if(frameNo == 20){
+		else if(frameNo < PointsP.length+PointsQ.length+ControlPoints.length){
+			setControlPointToBrush(doc, abrush, cmd, ControlPoints[frameNo-PointsP.length-PointsQ.length], [0.5,0.0,1.0]);
+		}
+		*/
+		/*if(sys.mouse.get().bLeftDown == true)
+			interpolator.Start([mousePos[0]/500,mousePos[1]/500]);
+		else if(sys.mouse.get().bLeftUp == true)
+			interpolator.End([mousePos[0]/500,mousePos[1]/500]);
+		else
+			interpolator.Next([mousePos[0]/500,mousePos[1]/500]);
+		
+		let PointsI = interpolator.Interpolate();
+		
+		if(PointsI != undefined && PointsI.length > 0){
+			abrush.setStrokeStart();
 			abrush.setStrokeEnd();
-			abrush.setStrokeStart(false);
-			abrush.UploadPointListToShader(PointsQ);
+			abrush.UploadPointListToShader(PointsI);
 		}
 		else{
 			abrush.setStrokeEnd(false);
 			abrush.setStrokeStart(false);
 			abrush.ClearShaderPointList();
-		}
+		}*/
 		
 		glext.CBlendMode.Bind(glext.CBlendMode.None);
 		
@@ -250,6 +267,11 @@ export function main()
 				abrush.LoadFromCommand(icmd);
 				doc.Update(icmd);
 			}
+		}
+		
+		for(let i = 0; i < doc.interpolator.points.length; ++i){
+			setControlPointToBrush(doc, abrush, cmd, doc.interpolator.points[i], [0.0,1.0,0.4]);
+			AjdeSamoCrtaj(cmd); //mousePos[0], mousePos[1], bBtnLeft
 		}
 		
 		glext.CBlendMode.Bind(glext.CBlendMode.None);

@@ -85,10 +85,10 @@ export function CubicBezier(t, P0, P1, P2, P3, vMathVecLib){
 	return Pt;
 }
 
-export function CubicBezier_getPointToMatchFirstDerivative(P0, P1, P2, P3, Q3){
+export function CubicBezier_getControlPointToMatchFirstDerivative(P0, P1, P2, P3, Q3){
 	//Q1 = 2.0*P3 - P2
 	
-	let vMathVecLib = getvMathVecLib(P0);
+	let vMathVecLib = getvMathVecLib(P2);
 	let Q1 = vMathVecLib.create();
 	
 	vMathVecLib.scale(Q1, P3,2.0);
@@ -97,12 +97,11 @@ export function CubicBezier_getPointToMatchFirstDerivative(P0, P1, P2, P3, Q3){
 	return Q1;
 }
 
-export function CubicBezier_getPointToMatchSecondDerivative(P0, P1, P2, P3, Q1, Q3){
+export function CubicBezier_getControlPointToMatchSecondDerivative(P0, P1, P2, P3, Q1, Q3){
 	//Q2 = 4.0*P3-4.0*P2+P1
 	
-	let vMathVecLib = getvMathVecLib(P0);
+	let vMathVecLib = getvMathVecLib(P1);
 	let Q2 = vMathVecLib.create();
-	let p3 = vMathVecLib.create();
 	
 	vMathVecLib.scaleAndAdd(Q2, P1,P2,-4.0);
 	vMathVecLib.scaleAndAdd(Q2, Q2,P3, 4.0);
@@ -110,7 +109,7 @@ export function CubicBezier_getPointToMatchSecondDerivative(P0, P1, P2, P3, Q1, 
 	return Q2;
 }
 
-export function CubicBezier_ScaleMiddlePoints(Q0, Q1, Q2, Q3){
+export function CubicBezier_ScaleMiddleControlPoints(Q0, Q1, Q2, Q3){
 	let vecN = getvMathVecLib(Q0);
 	// let Nlen = getDirAndDist(Q0, Q3);
 	// let thirdLen = Nlen[1] / 3.0;
@@ -127,6 +126,29 @@ export function CubicBezier_ScaleMiddlePoints(Q0, Q1, Q2, Q3){
 	return [Q1,Q2];
 }
 
+
+export function CubicBezier_ScaleFirstControlPoint(Q0, Q1, Q3, value){
+	if(value == undefined || value == null) value = 0.5;
+	let vecN = getvMathVecLib(Q0);
+	
+	let dist = vecN.distance(Q0,Q3);
+	let distQ0Q1 = vecN.distance(Q0,Q1);
+	
+	// Q1 = scaleEndPoint(Q0, Q1, (dist*value));
+	Q1 = vecN.lerp(Q1, Q0, Q1, value*(dist/distQ0Q1));
+	return Q1;
+}
+
+export function CubicBezier_CalcSecondControlPoint(Q0, Q1, Q3, value){
+	if(value == undefined || value == null) value = 0.75;
+	let vecN = getvMathVecLib(Q0);
+	
+	let Q2 = vecN.create();
+	Q2 = vecN.lerp(Q2, Q1, Q3, value);
+	
+	return Q2;
+}
+
 // generate interpolated points
 //-----------------------------------------------------------------------------
 
@@ -140,7 +162,7 @@ function getNormalizedLine(A,B,vMathVecLib){
 export function CubicBezier_GenerateInterpolatedPoints(
 							P0, P1, P2, P3, 
 							initialDeltaT, minimalDeltaT, maxAngle, maxDistance)
-{
+{	
 	let cosMaxAngle = Math.cos(vMath.deg2rad(maxAngle));
 	let vMathVecLib = getvMathVecLib(P0);
 	
@@ -165,11 +187,15 @@ export function CubicBezier_GenerateInterpolatedPoints(
 		let cosAngle = vMathVecLib.dot(line, prevLine); //aligment between lines
 		let dist = vMathVecLib.distance(pPt, Pt);
 		
-		if((cosAngle > cosMaxAngle) && (dist < maxDistance)){
+		if((cosAngle > cosMaxAngle) && (dist < maxDistance)/*  && (dist >= minDistance) */){
 			Pts[Pts.length] = Pt;
 			prevLine = line; //store current line for next iteration
 			dT *= 1.2;
 		}
+		/* else if((dist < minDistance) && !(cosAngle > cosMaxAngle)){ //increase dist
+			t -= dT; //track back
+			dT *= 2.0;
+		} */
 		else{ //conditions don't hold, half the dT and try again
 			if(dT < minimalDeltaT){ //but if dT is low, then just store point and move on...
 				Pts[Pts.length] = Pt;
