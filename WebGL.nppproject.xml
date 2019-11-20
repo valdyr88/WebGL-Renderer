@@ -1,14 +1,18 @@
 <NotepadPlus>
     <Project name="WebGL">
         <Folder name="GLExt">
+            <File name="GLExt\glBlendMode.js" />
             <File name="GLExt\glCamera.js" />
             <File name="GLExt\glContext.js" />
             <File name="GLExt\GLExt.js" />
             <File name="GLExt\glFramebuffer.js" />
             <File name="GLExt\glLight.js" />
+            <File name="GLExt\glMaterial.js" />
             <File name="GLExt\glModel.js" />
+            <File name="GLExt\glModelAssembly.js" />
             <File name="GLExt\glShader.js" />
             <File name="GLExt\glTexture.js" />
+			<File name="GLExt\spline.js" />
 			<File name="GLExt\fluidsim.js" />
         </Folder>
         <Folder name="System">
@@ -20,6 +24,7 @@
             <File name="System\zip.js" />
             <File name="System\html.js" />
             <File name="System\fetch.js" />
+            <File name="System\utils.js" />
         </Folder>
         <Folder name="glMatrix">
             <File name="glMatrix\gl-matrix.js" />
@@ -33,12 +38,19 @@
             <File name="glMatrix\gl-matrix\vec2.js" />
             <File name="glMatrix\gl-matrix\vec3.js" />
             <File name="glMatrix\gl-matrix\vec4.js" />
+            <File name="glMatrix\gl-matrix\mat4x3.js" />
         </Folder>
         <File name="main.js" />
         <File name="main_deffered.js" />
         <File name="main_volumetric.js" />
         <File name="index.html" />
         <File name="index_volumetric.html" />
+		<Folder name="pages">
+			<Folder name="Space">
+				<File name="pages\Space\main_deffered.js"/>
+				<File name="pages\Space\index.html"/>
+			</Folder>
+		</Folder>
         <Folder name="Shaders">
 			<Folder name="FluidSim">
 				<Folder name="2D">
@@ -72,16 +84,26 @@
             <File name="Shaders\volume_clouds_shader.fs.glsl" />
             <File name="Shaders\volume_clouds_shader.vs.glsl" />
             <File name="Shaders\backbuffer.fs.glsl" />
-            <File name="Shaders\deferred_opaque_shade.fs.glsl" />
+            <File name="Shaders\deferred_backbuffer.fs.glsl" />
+            <File name="Shaders\deferred_hdre.fs.glsl" />
+            <File name="Shaders\deferred_opaque_shader.fs.glsl" />
             <File name="Shaders\deferred_BcNAoRSMt.fs.glsl" />
             <File name="Shaders\deferred_skybox.fs.glsl" />
+            <File name="Shaders\deferred_cubemap_hdre.fs.glsl" />
             <File name="Shaders\pbr_shader.fs.glsl" />
             <File name="Shaders\transparent_shader.fs.glsl" />
+            <File name="Shaders\glow_integrate_shader.fs.glsl" />
             <File name="Shaders\3x3MipGen.fs.glsl" />
+            <File name="Shaders\hdrMipGen.fs.glsl" />
             <File name="Shaders\mipmapgen.vs.glsl" />
             <File name="Shaders\simple.fs.glsl" />
             <File name="Shaders\simple.vs.glsl" />
+            <File name="Shaders\viewquad.vs.glsl" />
             <File name="Shaders\skybox.fs.glsl" />
+			<Folder name="Space">
+				<File name="Shaders\Space\deferred_planet_BcNAoRSMt.fs.glsl" />
+				<File name="Shaders\Space\planet_atmosphere.fs.glsl" />
+			</Folder>
             <Folder name="include">
 				<Folder name="uniformBuffers">
 					<File name="Shaders\include\uniformBuffers\ubCamera.glsl" />
@@ -94,6 +116,7 @@
                 <File name="Shaders\include\sdfunctions.glsl" />
                 <File name="Shaders\include\pbr.glsl" />
                 <File name="Shaders\include\structs.glsl" />
+                <File name="Shaders\include\splines.glsl" />
             </Folder>
         </Folder>
 		<Folder name="styles">
@@ -132,9 +155,12 @@
 					<File name="appPhotoEditor\shaders\simple.vs.glsl"/>
 					<File name="appPhotoEditor\shaders\simple.fs.glsl"/>
 					<File name="appPhotoEditor\shaders\main.fs.glsl"/>
-					<File name="appPhotoEditor\shaders\base_brush_shader.fs.glsl"/>
+					<Folder name="brushes">
+						<File name="appPhotoEditor\shaders\brushes\base_brush_shader.fs.glsl"/>
+					</Folder>
 					<Folder name="uniformBuffers">
 						<File name="appPhotoEditor\shaders\uniformBuffers\ubBrush.glsl"/>
+						<File name="appPhotoEditor\shaders\uniformBuffers\ubBrushPoints.glsl"/>
 					</Folder>
 				</Folder>
 				<Folder name="source">
@@ -142,6 +168,17 @@
 					<File name="appPhotoEditor\source\document.js"/>
 					<File name="appPhotoEditor\source\layer.js"/>
 					<File name="appPhotoEditor\source\brush.js"/>
+					<File name="appPhotoEditor\source\app.js"/>
+					<File name="appPhotoEditor\source\ui.js"/>
+					<File name="appPhotoEditor\source\command.js"/>
+					<File name="appPhotoEditor\source\brushInterpolator.js"/>
+				</Folder>
+				<Folder name="styles">
+					<Folder name="default">
+						<File name="appPhotoEditor\styles\default\main.css"/>
+						<File name="appPhotoEditor\styles\default\panel.css"/>
+						<File name="appPhotoEditor\styles\default\slider.css"/>
+					</Folder>
 				</Folder>
 			</Folder>
 		</Folder>
