@@ -49,6 +49,24 @@
 			<Folder name="Space">
 				<File name="pages\Space\main_deffered.js"/>
 				<File name="pages\Space\index.html"/>
+				<Folder name="Models">
+					<Folder name="Ships">
+						<Folder name="Galaxy">
+							<File name="pages\Space\Models\Ships\Galaxy\ship.xml"/>
+						</Folder>
+						<Folder name="Sovereign">
+							<File name="pages\Space\Models\Ships\Sovereign\ship.xml"/>
+						</Folder>
+						<Folder name="DDeridex">
+							<File name="pages\Space\Models\Ships\DDeridex\ship.xml"/>
+						</Folder>
+					</Folder>
+					<Folder name="Planets">
+						<Folder name="ClassM">
+							<File name="pages\Space\Models\Planets\ClassM\planet.xml"/>
+						</Folder>
+					</Folder>
+				</Folder>
 			</Folder>
 		</Folder>
         <Folder name="Shaders">
