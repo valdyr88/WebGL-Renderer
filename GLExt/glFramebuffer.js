@@ -183,6 +183,7 @@ export class CFramebuffer extends CGLExtObject{
 	}
 	
 	CheckStatus(){
+		if(CFramebuffer.bStatusChecksEnabled == false) return true;
 		var oldFBO = gl.currentFramebuffer;
 		CFramebuffer.Bind(this.framebuffer);
 		var rtn = gl.checkFramebufferStatus(gl.FRAMEBUFFER);
@@ -203,6 +204,7 @@ export class CFramebuffer extends CGLExtObject{
 	
 	static CopyTextureFromFBColorAttachment(src, src_level, dst, dest_level, fb, bUnbind)
 	{
+		//in Mozilla glCopyTexSubImage2D() checks framebuffer status internally by calling CheckFramebufferStatus(), so it's slow...
 		CFramebuffer.Bind(fb.framebuffer);
 		gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, src.texture, 0);//src_level
 		gl.bindTexture(gl.TEXTURE_2D, dst.texture);
@@ -250,6 +252,8 @@ export class CFramebuffer extends CGLExtObject{
 		this.bAutoSetupUsage = true;
 	}
 }
+
+CFramebuffer.bStatusChecksEnabled = false;
 
 export class CMipMapGen extends CGLExtObject{
 	

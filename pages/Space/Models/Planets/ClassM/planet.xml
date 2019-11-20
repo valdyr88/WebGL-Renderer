@@ -12,7 +12,7 @@
 	<material id="planet_surface" shader="deferred_planet_BcNAoRSMt">
 		<param bindpoint="seaLevel" value="0.15" type="float"></param>
 		<param bindpoint="emissionMult" value="1.0" type="float"></param>
-		<param bindpoint="roughnessScaleOffsetPower" value="0.75,0.0,1.0" type="vec3"></param>
+		<param bindpoint="roughnessScaleOffsetPower" value="1.0,0.0,1.0" type="vec3"></param>
 		<param bindpoint="scaleNormalXY" value="4.0,4.0" type="vec2"></param>
 		<texture bindpoint="txHeight" txid="planet_height" type="tx2D/D"></texture>
 		<texture bindpoint="txDiffuseGradient" txid="planet_diffuse" type="tx2D/N"></texture>

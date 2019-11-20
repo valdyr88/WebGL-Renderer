@@ -628,8 +628,7 @@ export class CShader extends CGLExtObject
 		
         gl.uniformMatrix4fv(this.ULMatrixProjection, false, projectionMatrix); return true;
 	}
-	
-	
+		
 	setMatrix4Uniform(uniform_location, matrix){
 		if(uniform_location == null ||uniform_location === -1) return false;
 		if(this.program == null) return false;
@@ -883,6 +882,7 @@ export class CShader extends CGLExtObject
 	}
 	
 	Bind(){
+		if(gl.currentShaderProgram == this.program) return;
 		gl.useProgram(this.program); gl.currentShaderProgram = this.program;
 		this.BindUniformBlocks();
 	}

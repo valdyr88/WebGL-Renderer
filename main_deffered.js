@@ -112,7 +112,7 @@ uniform sampler2D txAoRS; uniform float txAoRS_gamma_value; */
 	// glext.GenCubeModel(model);
 	
 	var model = new glext.CModel(1);
-	model.ImportFrom("SphereModel");
+	model.ImportFrom("displayModel");
 	
 	var navigatorModel = new glext.CModel(2);
 	navigatorModel.ImportFrom("navigatorModel");
@@ -251,7 +251,8 @@ uniform sampler2D txAoRS; uniform float txAoRS_gamma_value; */
 	
 	vMath.mat4.identity(model.Transform);
 	// vMath.mat4.scale(model.Transform, model.Transform, [4.0,4.0,4.0]);
-	vMath.mat4.rotate(model.Transform, model.Transform, vMath.deg2rad(-90.0), [1,0,0]);
+	vMath.mat4.rotate(model.Transform, model.Transform, vMath.deg2rad(180.0), [1,0,0]);
+	vMath.mat4.rotate(model.Transform, model.Transform, vMath.deg2rad(90.0), [0,1,0]);
 	
 	vMath.mat4.identity(AtmoSphereModel.Transform); var atmoScale = 1.012;
 	vMath.mat4.scale(AtmoSphereModel.Transform, AtmoSphereModel.Transform, [atmoScale,atmoScale,atmoScale]);
@@ -305,8 +306,10 @@ uniform sampler2D txAoRS; uniform float txAoRS_gamma_value; */
 		if(checkWindowsSizeAndResizeCanvas() == true){
 			Camera.setViewportWidthHeight(gl.viewportWidth,gl.viewportHeight);}
 		
-		vMath.mat4.identity(model.Transform);
-		if(bEnableRotation) vMath.mat4.rotate(model.Transform, model.Transform, vMath.deg2rad(time*10), [0,0,1]);/*  */
+		if(bEnableRotation){
+			vMath.mat4.identity(model.Transform);
+			vMath.mat4.rotate(model.Transform, model.Transform, vMath.deg2rad(time*10), [0,0,1]);/*  */
+		}
 		
 		vMath.mat4.identity(navigatorModel.Transform);
 		vMath.mat4.setTranslation(navigatorModel.Transform, navigatorModel.Transform, [ -1.0, -ctime*0.5, 0.0]);
