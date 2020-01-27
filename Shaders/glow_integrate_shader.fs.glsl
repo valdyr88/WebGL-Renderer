@@ -20,6 +20,7 @@ precision highp float;
 
 uniform sampler2D txColor;
 uniform sampler2D txGlow;
+uniform sampler2D txVFogShadows;
 
 uniform mat4 InverseViewProjectionMatrix;
 
@@ -55,8 +56,9 @@ void main(void)
 {
 	vec4 color  = texture2D(txColor, vec2(TexCoords.x, 1.0f-TexCoords.y) );
 	vec4 glow   = sampleLodCombine(txGlow, vec2(TexCoords.x, 1.0f-TexCoords.y), 4.0f, 0.7f, 5 );
+	float vfshadows = texture2D(txVFogShadows, vec2(TexCoords.x, 1.0f-TexCoords.y) ).x;
 	
-	color = color + 5.0f*glow;
+	color.rgb = pow(color.rgb, vec3(2.0f-1.0f*vfshadows)) + 5.0f*glow.rgb;
 	// color = textureLod(txGlow, vec2(TexCoords.x, 1.0f-TexCoords.y), 4.0f);
 	
 	#ifdef USE_HDR_RGBA8

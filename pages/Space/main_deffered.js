@@ -7,6 +7,8 @@ var gl = null;
 var bUseHDR = false;
 var bStoreHDRinRGBA8 = true;
 
+var VolumetricFogShadowScale = 0.25;
+
 export function main(){
 	
 	var gs = sys.storage.CGlobalStorage.getSingleton();
@@ -84,7 +86,7 @@ export function main(){
 	deferred_opaque_shader.ULCameraUpDir = deferred_opaque_shader.getUniformLocation("CameraUpDir");
 	deferred_opaque_shader.ULAspect = deferred_opaque_shader.getUniformLocation("Aspect");
 	deferred_opaque_shader.ULFOV = deferred_opaque_shader.getUniformLocation("FOV");
-	
+		
 	var transparent_shader = new glext.CShader(3);
 	if(transparent_shader.CompileFromFile("simpleVS", "transparent_shader") == false) alert("nije kompajliran shader!");
 	transparent_shader.InitDefaultAttribLocations();
@@ -114,7 +116,21 @@ export function main(){
 	glow_integrate_shader.ULFOV = glow_integrate_shader.getUniformLocation("FOV");
 	glow_integrate_shader.ULColor = glow_integrate_shader.getUniformLocation("txColor");
 	glow_integrate_shader.ULGlow = glow_integrate_shader.getUniformLocation("txGlow");
+	glow_integrate_shader.ULVFogShadows = glow_integrate_shader.getUniformLocation("txVFogShadows");
 		
+	var volumetric_fog_shadows_shader = new glext.CShader(6);
+	if(volumetric_fog_shadows_shader.CompileFromFile("viewquadVS", "volumetric_fog_shadows_shader") == false) alert("nije kompajliran shader!");
+	volumetric_fog_shadows_shader.InitDefaultAttribLocations();
+	volumetric_fog_shadows_shader.InitDefaultUniformLocations();
+	// volumetric_fog_shadows_shader.ULInvViewProjMatrix = volumetric_fog_shadows_shader.getUniformLocation("InverseViewProjectionMatrix");
+	// volumetric_fog_shadows_shader.ULCameraForwardDir = volumetric_fog_shadows_shader.getUniformLocation("CameraForwardDir");
+	// volumetric_fog_shadows_shader.ULCameraRightDir = volumetric_fog_shadows_shader.getUniformLocation("CameraRightDir");
+	// volumetric_fog_shadows_shader.ULCameraUpDir = volumetric_fog_shadows_shader.getUniformLocation("CameraUpDir");
+	// volumetric_fog_shadows_shader.ULAspect = volumetric_fog_shadows_shader.getUniformLocation("Aspect");
+	// volumetric_fog_shadows_shader.ULFOV = volumetric_fog_shadows_shader.getUniformLocation("FOV");
+	volumetric_fog_shadows_shader.ULDepthTexture = volumetric_fog_shadows_shader.getUniformLocation("txDepth");
+	volumetric_fog_shadows_shader.ULCenterPoint = volumetric_fog_shadows_shader.getUniformLocation("center");
+	
 	var SkySphereModel = new glext.CModel(0);
 	SkySphereModel.ImportFrom("SphereModel");
 	// glext.GenCubeModel(model);
@@ -198,6 +214,11 @@ export function main(){
 	fboGlowIntegrate.AttachTexture(txfbColor, 0);
 	fboGlowIntegrate.CheckStatus();
 	
+	var txfbVFogShadows = new glext.CTexture(9); txfbVFogShadows.CreateEmptyRubyte(fbo_width*VolumetricFogShadowScale,fbo_height*VolumetricFogShadowScale);
+	var fboVFogShadows = new glext.CFramebuffer(true); fboVFogShadows.Create();
+	fboVFogShadows.AttachTexture(txfbVFogShadows, 0);
+	fboVFogShadows.CheckStatus();
+	
 	glext.CFramebuffer.BindMainFB();	
 	//------------------------------------------------------------------------
 		glext.CLightList.addLight(light);
@@ -216,6 +237,7 @@ export function main(){
 		glext.CTextureList.addTexture(txfbHdrMipBlur);
 		glext.CTextureList.addTexture(txfbHdrMipBlur2);
 		glext.CTextureList.addTexture(txAtmosphere);
+		glext.CTextureList.addTexture(txfbVFogShadows);
 		
 		glext.CShaderList.addShader(shader);
 		glext.CShaderList.addShader(skybox_shader);
@@ -225,6 +247,7 @@ export function main(){
 		glext.CShaderList.addShader(backbuffer_shader);
 		glext.CShaderList.addShader(atmosphere_shader);
 		glext.CShaderList.addShader(deferred_planet_BcNAoRSMt_shader);
+		glext.CShaderList.addShader(volumetric_fog_shadows_shader);
 		
 		model.setTexture(txD,"txDiffuse");
 		model.setTexture(txN,"txNormal");
@@ -360,6 +383,8 @@ export function main(){
 	
 	var bEnableRotation = false;
 	
+	let lightPosScreenSpace = [0.0,0.0,0.0,0.0];
+	
 	function renderFrame()
 	{
 		time = sys.time.getSecondsSinceStart();
@@ -407,6 +432,12 @@ export function main(){
 		light.setIntensity(4.5);//917.0
 		light.setColor(0.5,0.79,1.0,1.0);
 		light.Update();
+		
+		vMath.vec3.normalize(lightPosScreenSpace, light.Position); lightPosScreenSpace[3] = 0.0;
+		vMath.vec3.scaleAndAdd(lightPosScreenSpace, [0,0,0], lightPosScreenSpace, 500.0);
+		vMath.vec4.transformMat4(lightPosScreenSpace, lightPosScreenSpace, Camera.ViewMatrix );
+		vMath.vec4.transformMat4(lightPosScreenSpace, lightPosScreenSpace, Camera.ProjectionMatrix );
+		vMath.vec3.scale(lightPosScreenSpace, lightPosScreenSpace, 1.0/lightPosScreenSpace[3]);
 		//-------------------------------------------------------------------------------------
 		
 		//render opaque sa pbr shaderom
@@ -455,6 +486,31 @@ export function main(){
 			RenderModels(fboHdrMipBlur, false, time, Camera, planet.models, "transparent_blend");
 		glext.CBlendMode.Bind(null);
 		
+		//render volumetric fog shadowsa
+		//-------------------------------------------------------------------------------------
+		fboVFogShadows.Bind();
+			gl.viewport(0, 0, fboVFogShadows.width, fboVFogShadows.height);
+			
+			gl.clearColor(0.5, 0.5, 0.5, 1.0);
+			gl.clearDepth(1.0);
+			gl.enable(gl.DEPTH_TEST);
+			gl.depthFunc(gl.LEQUAL);
+			gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+			
+			volumetric_fog_shadows_shader.Bind();
+				txfbDepth.Bind(0, volumetric_fog_shadows_shader.ULDepthTexture);
+				
+				volumetric_fog_shadows_shader.setViewMatrixUniform( IdentityMatrix );
+				volumetric_fog_shadows_shader.setProjectionMatrixUniform( IdentityMatrix );
+				volumetric_fog_shadows_shader.setFloat4Uniform( volumetric_fog_shadows_shader.ULCenterPoint, lightPosScreenSpace );
+				
+				volumetric_fog_shadows_shader.setTimeUniform(time);
+				
+				quad_model.RenderIndexedTriangles(volumetric_fog_shadows_shader);
+				
+		glext.CFramebuffer.BindMainFB();	
+		//-------------------------------------------------------------------------------------
+		
 		//kopiranje iz mip blur u main color buffer
 		//-------------------------------------------------------------------------------------
 		glext.CFramebuffer.CopyTextureFromFBColorAttachment(txfbHdrMipBlur, 0, txfbColor, 0, MipGen.framebuffer, true);
@@ -467,6 +523,7 @@ export function main(){
 		//integriranje blured glowa u main txfbHdrMipBlur
 		//-------------------------------------------------------------------------------------
 		fboGlowIntegrate.Bind();
+			gl.viewport(0, 0, fboGlowIntegrate.width, fboGlowIntegrate.height);
 			
 			gl.clearColor(0.5, 0.5, 0.5, 1.0);
 			gl.clearDepth(1.0);
@@ -482,6 +539,7 @@ export function main(){
 				
 				txfbHdrMipBlur.Bind(0, glow_integrate_shader.ULColor);
 				txfbHdrMipBlur2.Bind(1, glow_integrate_shader.ULGlow);
+				txfbVFogShadows.Bind(2, glow_integrate_shader.ULVFogShadows);
 				
 				glow_integrate_shader.setViewMatrixUniform( IdentityMatrix );
 				glow_integrate_shader.setProjectionMatrixUniform( IdentityMatrix );
@@ -513,8 +571,7 @@ export function main(){
 			// fbo.AttachTexture(txfbColor, 0);
 			// RenderModels(fboTransparent, false, time, Camera, [navigatorModel]);
 			RenderModels(fboTransparent, false, time, Camera, dderidex.models);
-		
-		
+			
 		//render to main FB, sa shaderom koji prikazuje mipove.
 		//-------------------------------------------------------------------------------------
 		glext.CFramebuffer.BindMainFB();	
@@ -714,6 +771,19 @@ export function recompileShader(fragment_name){
 					shader.ULGlow = shader.getUniformLocation("txGlow");
 					shader.ULAspect = shader.getUniformLocation("Aspect");
 					shader.ULFOV = shader.getUniformLocation("FOV");
+					shader.ULVFogShadows = shader.getUniformLocation("txVFogShadows");
+				break;
+				case "volumetric_fog_shadows_shader":
+					// shader.ULInvViewProjMatrix = shader.getUniformLocation("InverseViewProjectionMatrix");
+					// shader.ULCameraForwardDir = shader.getUniformLocation("CameraForwardDir");
+					// shader.ULCameraRightDir = shader.getUniformLocation("CameraRightDir");
+					// shader.ULCameraUpDir = shader.getUniformLocation("CameraUpDir");
+					// shader.ULColor = shader.getUniformLocation("txColor");
+					// shader.ULGlow = shader.getUniformLocation("txGlow");
+					// shader.ULAspect = shader.getUniformLocation("Aspect");
+					// shader.ULFOV = shader.getUniformLocation("FOV");
+					shader.ULDepthTexture = shader.getUniformLocation("txDepth");
+					shader.ULCenterPoint = shader.getUniformLocation("center");
 				break;
 				case "deferred_BcNAoRSMt":
 					shader.ULTextureAmb = shader.getUniformLocation("txAmbient");
@@ -737,7 +807,6 @@ export function recompileShader(fragment_name){
 		}
 	}	
 }
-
 
 export function reloadTexture(texture_name){
 	if(gl == null) return;

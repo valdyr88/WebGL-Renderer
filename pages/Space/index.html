@@ -37,6 +37,7 @@
   <script id="deferred_skybox" src="./../../Shaders/deferred_skybox.fs.glsl" type="shader/fragment"></script>
   <script id="transparent_shader" src="./../../Shaders/transparent_shader.fs.glsl" type="shader/fragment"></script>
   <script id="atmosphere_shader" src="./../../Shaders/Space/planet_atmosphere.fs.glsl" type="shader/fragment"></script>
+  <script id="volumetric_fog_shadows_shader" src="./../../Shaders/volumetric_fog_shadows_shader.fs.glsl" type="shader/fragment"></script>
   
   <script id="mipmapVS" src="./../../Shaders/mipmapgen.vs.glsl" type="shader/vertex"></script>
   <script id="3x3MipGenFS" src="./../../Shaders/3x3MipGen.fs.glsl" type="shader/fragment"></script>
@@ -98,6 +99,7 @@
 	<img id="reload_shader_btn" onclick="reload_shader('pbr')" title="pbr" src="./../../misc/reload_ico.png"></img>
 	<img id="reload_shader_btn" onclick="reload_shader('deferred_BcNAoRSMt')" title="deferred_BcNAoRSMt" src="./../../misc/reload_ico.png"></img>
 	<img id="reload_shader_btn" onclick="reload_shader('deferred_planet_BcNAoRSMt')" title="deferred_planet_BcNAoRSMt" src="./../../misc/reload_ico.png"></img>
+	<img id="reload_shader_btn" onclick="reload_shader('volumetric_fog_shadows_shader')" title="volumetric_fog_shadows_shader" src="./../../misc/reload_ico.png"></img>
 	<img id="reload_shader_btn" onclick="reload_shader('transparent_shader')" title="transparent_shader" src="./../../misc/reload_ico.png"></img>
 	<img id="reload_shader_btn" onclick="reload_shader('glow_integrate_shader')" title="glow_integrate_shader" src="./../../misc/reload_ico.png"></img>
 	<img id="reload_shader_btn" onclick="reload_shader('deferred_skybox')" title="deferred_skybox" src="./../../misc/reload_ico.png"></img>
@@ -119,7 +121,7 @@
 	var extern_files_list = [
 		"functions", "structs", "pbr", "defines", "ubCamera", "ubLight",
 		"ubMaterial", "ubModel","simpleVS", "simpleFS", "pbr_shader", "skybox_shader",
-		"backbuffer_shader", "SphereModel", "deferred_opaque_shader", "deferred_BcNAoRSMt", "viewquadVS", "deferred_planet_BcNAoRSMt",
+		"backbuffer_shader", "SphereModel", "deferred_opaque_shader", "deferred_BcNAoRSMt", "volumetric_fog_shadows_shader", "viewquadVS", "deferred_planet_BcNAoRSMt",
 		"deferred_skybox", "transparent_shader", "atmosphere_shader", "navigatorModel", "mipmapVS", "planet",
 		"3x3MipGenFS", "tx128", "txAmbHDRVenice", "sovereignAsb", "galaxyAsb", "glow_integrate_shader", "dderidexAsb", "bigModel"
 	];

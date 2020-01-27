@@ -26,9 +26,10 @@ function InitPointShader(){
 	#define getLightType(f) ((f) >> 29)\n \
 	\n \
 	void main(void){ \n\
-		gl_Position.xyz = ((getLightType(flags) == LightType_Direction)? 500.0*normalize(VertexPosition.xyz) : VertexPosition.xyz);\n\
-		gl_Position = (ViewMatrix * vec4(gl_Position.xyz,1.0));\n\
+		gl_Position = ((getLightType(flags) == LightType_Direction)? vec4(normalize(VertexPosition.xyz),0.0f) : vec4(VertexPosition.xyz,1.0f));\n\
+		gl_Position = (ViewMatrix * gl_Position);\n\
 		gl_Position = (ProjectionMatrix * gl_Position);\n\
+		if(getLightType(flags) == LightType_Direction) gl_Position.z = 0.99999f*gl_Position.w;\n\
 		gl_PointSize = PointSize;\n\
 		oaVertexPosition = aVertexPosition.xyz;\n\
 	}\
