@@ -147,7 +147,7 @@ uniform sampler2D txAoRS; uniform float txAoRS_gamma_value; */
 	var projectionMatrix = vMath.mat4.create();
 	var viewMatrix = vMath.mat4.create();
 	
-	var eyePt = vMath.vec3.fromValues(-7.0,0.0,0.0);
+	var eyePt = vMath.vec3.fromValues(-2.75,0.0,0.0);
 	var centerPt = vMath.vec3.fromValues(0.0,0.0,0.0);
 	var upDir = vMath.vec3.fromValues(0.0,0.0,1.0);
 	
@@ -252,8 +252,9 @@ uniform sampler2D txAoRS; uniform float txAoRS_gamma_value; */
 	vMath.mat4.identity(model.Transform);
 	// vMath.mat4.scale(model.Transform, model.Transform, [4.0,4.0,4.0]);
 	vMath.mat4.rotate(model.Transform, model.Transform, vMath.deg2rad(180.0), [1,0,0]);
-	vMath.mat4.rotate(model.Transform, model.Transform, vMath.deg2rad(90.0), [0,1,0]);
-	
+	// vMath.mat4.rotate(model.Transform, model.Transform, vMath.deg2rad(90.0), [0,1,0]);
+	vMath.mat4.rotate(model.Transform, model.Transform, vMath.deg2rad(90.0), [0,0,1]);
+
 	vMath.mat4.identity(AtmoSphereModel.Transform); var atmoScale = 1.012;
 	vMath.mat4.scale(AtmoSphereModel.Transform, AtmoSphereModel.Transform, [atmoScale,atmoScale,atmoScale]);
 	
@@ -285,7 +286,7 @@ uniform sampler2D txAoRS; uniform float txAoRS_gamma_value; */
 	// var distFromObject = 7.0;
 	
 	var orbital = [];
-	orbital.radius = 7.0;
+	orbital.radius = 2.75;
 	orbital.inclination = 0.0;
 	orbital.azimuth = 0.0;
 	orbital.dinclination = 0.0;
