@@ -116,7 +116,16 @@
   	<!-- <img id="reload_texture_btn" onclick="reload_texture('txGlass_N')" title="txGlass_N" src="./misc/reload_ico.png"></img> -->
   	<!-- <img id="reload_texture_btn" onclick="reload_texture('txNoiseRGB')" title="txNoiseRGB" src="./misc/reload_ico.png"></img> -->
 
-	<div style="position: absolute; top: 32px; right: 32px;" >
+	<div>
+	<div style="background-color:#333;">
+		<canvas id="glcanvas" width="640" height="480" style="border-radius: 5%;">
+			Your browser doesn't appear to support the HTML5 <code>&lt;canvas&gt;</code> element.
+		</canvas>
+		<div id="barriermove_kvadrat" style="cursor: move; background-color:#55aaff00; width:128px; height:128px; position:absolute"></div>
+		<div id="lightmove_kvadrat" style="cursor: move; background-color:#aaff5500; width:16px; height:16px; position:absolute"></div>
+	</div>
+
+	<div style="position: absolute; top: 32px; right: 32px; margin-right:25%;">
 		<p style="font-family:verdana; color:white;" id="label_FPS">0</p>
 		<!-- <p style="font-family:verdana; color:white;">FPS</p> -->
 		<!-- <div class="slidecontainer" title="FPS">
@@ -257,13 +266,6 @@
 		</p> -->
 	
 	</div>
-	
-	<div style="background-color:#333; text-align:center; margin-top:5em">
-		<canvas id="glcanvas" width="640" height="480">
-			Your browser doesn't appear to support the HTML5 <code>&lt;canvas&gt;</code> element.
-		</canvas>
-		<div id="barriermove_kvadrat" style="cursor: move; background-color:#55aaff00; width:128px; height:128px; position:absolute"></div>
-		<div id="lightmove_kvadrat" style="cursor: move; background-color:#aaff5500; width:16px; height:16px; position:absolute"></div>
 	</div>
 	<!-- <div id="debug_kvadrat" style="background-color:#55aaff; width:128px; height:128px; position:absolute"></div> -->
   <script type="module">
