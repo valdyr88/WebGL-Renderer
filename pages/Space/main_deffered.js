@@ -488,7 +488,7 @@ export function main(){
 		
 		//render volumetric fog shadowsa
 		//-------------------------------------------------------------------------------------
-		fboVFogShadows.Bind();
+		/*fboVFogShadows.Bind();
 			gl.viewport(0, 0, fboVFogShadows.width, fboVFogShadows.height);
 			
 			gl.clearColor(0.5, 0.5, 0.5, 1.0);
@@ -506,7 +506,7 @@ export function main(){
 				
 				volumetric_fog_shadows_shader.setTimeUniform(time);
 				
-				quad_model.RenderIndexedTriangles(volumetric_fog_shadows_shader);
+				quad_model.RenderIndexedTriangles(volumetric_fog_shadows_shader);*/
 				
 		glext.CFramebuffer.BindMainFB();	
 		//-------------------------------------------------------------------------------------
@@ -539,7 +539,7 @@ export function main(){
 				
 				txfbHdrMipBlur.Bind(0, glow_integrate_shader.ULColor);
 				txfbHdrMipBlur2.Bind(1, glow_integrate_shader.ULGlow);
-				txfbVFogShadows.Bind(2, glow_integrate_shader.ULVFogShadows);
+				// txfbVFogShadows.Bind(2, glow_integrate_shader.ULVFogShadows);
 				
 				glow_integrate_shader.setViewMatrixUniform( IdentityMatrix );
 				glow_integrate_shader.setProjectionMatrixUniform( IdentityMatrix );
