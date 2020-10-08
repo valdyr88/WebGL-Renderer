@@ -75,6 +75,7 @@ export function glEnableExtension(extension_name){
 }
 
 export function glPrintError(){
+	return;
 	
 	var errorID = gl.getError();
 	switch(errorID)
@@ -83,25 +84,25 @@ export function glPrintError(){
 			
 			break;
 		case gl.INVALID_ENUM:
-			alert("WebGL: INVALID_ENUM");
+			console.log("WebGL: INVALID_ENUM");
 			break;
 		case gl.INVALID_VALUE:
-			alert("WebGL: INVALID_VALUE");
+			console.log("WebGL: INVALID_VALUE");
 			break;
 		case gl.INVALID_OPERATION:
-			alert("WebGL: INVALID_OPERATION");
+			console.log("WebGL: INVALID_OPERATION");
 			break;
 		case gl.INVALID_FRAMEBUFFER_OPERATION:
-			alert("WebGL: INVALID_FRAMEBUFFER_OPERATION");
+			console.log("WebGL: INVALID_FRAMEBUFFER_OPERATION");
 			break;
 		case gl.OUT_OF_MEMORY:
-			alert("WebGL: OUT_OF_MEMORY");
+			console.log("WebGL: OUT_OF_MEMORY");
 			break;
 		case gl.CONTEXT_LOST_WEBGL:
-			alert("WebGL: CONTEXT_LOST_WEBGL");
+			console.log("WebGL: CONTEXT_LOST_WEBGL");
 			break;
 		default:
-			alert("WebGL: unknown error");
+			console.log("WebGL: unknown error");
 			break;
 	}	
 }
