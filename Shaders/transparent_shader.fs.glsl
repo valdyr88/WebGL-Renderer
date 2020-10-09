@@ -162,7 +162,7 @@ void main(void)
 	
 	gl_FragColor.a = 1.0; */
 	
-	vec2 offset =  - (normal.xy)*abs(normal.xy)*0.05f;
+	vec2 offset =  - (normal.xy)*abs(normal.xy)*0.15f; //ToDo: pretvorit 0.15f u parametar
 	// vec2 offset = -normal.xy * 0.05f;
 	vec3 background = sampleBackground(txBackground, PixelPosition.xy + offset, (roughness*roughness));
 	

@@ -96,6 +96,9 @@ uniform sampler2D txAoRS; uniform float txAoRS_gamma_value; */
 	transparent_shader.InitDefaultUniformLocations();
 	transparent_shader.ULTextureAmb = transparent_shader.getUniformLocation("txAmbient");
 	transparent_shader.ULTextureBackground = transparent_shader.getUniformLocation("txBackground");
+	transparent_shader.ULroughnessScaleOffsetPower = transparent_shader.getUniformLocation("roughnessScaleOffsetPower");
+	
+	transparent_shader.setFloat3Uniform(transparent_shader.ULroughnessScaleOffsetPower, [1.7,0.125,1.0]);
 	
 	var backbuffer_shader = new glext.CShader(4);
 	if(backbuffer_shader.CompileFromFile("simpleVS", "backbuffer_shader") == false) alert("nije kompajliran shader!");
@@ -114,8 +117,8 @@ uniform sampler2D txAoRS; uniform float txAoRS_gamma_value; */
 	var model = new glext.CModel(1);
 	model.ImportFrom("displayModel");
 	
-	var navigatorModel = new glext.CModel(2);
-	navigatorModel.ImportFrom("navigatorModel");
+	var modelGlass = new glext.CModel(2);
+	modelGlass.ImportFrom("displayModel");
 	
 	var quad_model = new glext.CModel(2);
 	glext.GenQuadModel(quad_model);
@@ -130,8 +133,8 @@ uniform sampler2D txAoRS; uniform float txAoRS_gamma_value; */
 	var txN = new glext.CTexture(1); txN.CreateFromFile("txRock_N");
 	var txAoRS = new glext.CTexture(2); txAoRS.CreateFromFile("txRock_AoRS");
 	
-	var txGlassAoRS = new glext.CTexture(-1); txGlassAoRS.CreateFromFile("txGlass_AoRS");
-	var txGlassN = new glext.CTexture(-1); txGlassN.CreateFromFile("txGlass_N");
+	var txGlassAoRS = new glext.CTexture(-1); txGlassAoRS.CreateFromFile("txRock_AoRS");
+	var txGlassN = new glext.CTexture(-1); txGlassN.CreateFromFile("txRock_N");
 	
 	var txAtmosphere = new glext.CTexture(-1); txAtmosphere.CreateFromFile("txAtmosphere");
 	
@@ -150,6 +153,9 @@ uniform sampler2D txAoRS; uniform float txAoRS_gamma_value; */
 	var eyePt = vMath.vec3.fromValues(-2.75,0.0,0.0);
 	var centerPt = vMath.vec3.fromValues(0.0,0.0,0.0);
 	var upDir = vMath.vec3.fromValues(0.0,0.0,1.0);
+	
+	eyePt = [ -1.156, -2.035, 1.444 ];
+	upDir = [ -0.907, 0.352, -0.230 ];
 	
 	//framebuffer
 	//------------------------------------------------------------------------
@@ -209,13 +215,13 @@ uniform sampler2D txAoRS; uniform float txAoRS_gamma_value; */
 		AtmoSphereModel.setShader(atmosphere_shader);
 		AtmoSphereModel.setBlendMode(glext.CBlendMode.Alpha);
 		
-		navigatorModel.setTexture(txGlassN,"txNormal");
-		navigatorModel.setTexture(txGlassAoRS,"txAoRS");
-		navigatorModel.setTexture(txfbDepth,"txDepth");
-		navigatorModel.setTexture(txBRDF_LUT,"txBRDF");
-		navigatorModel.setTexture(txAmb,"txAmbient");
-		navigatorModel.setTexture(txfbHdrMipBlur,"txBackground");
-		navigatorModel.setShader(transparent_shader);
+		modelGlass.setTexture(txGlassN,"txNormal");
+		modelGlass.setTexture(txGlassAoRS,"txAoRS");
+		modelGlass.setTexture(txfbDepth,"txDepth");
+		modelGlass.setTexture(txBRDF_LUT,"txBRDF");
+		modelGlass.setTexture(txAmb,"txAmbient");
+		modelGlass.setTexture(txfbHdrMipBlur,"txBackground");
+		modelGlass.setShader(transparent_shader);
 		
 		quad_model.setTexture(txfbColor,"txDiffuse");
 		quad_model.setTexture(txfbNormal,"txNormal");
@@ -254,6 +260,11 @@ uniform sampler2D txAoRS; uniform float txAoRS_gamma_value; */
 	vMath.mat4.rotate(model.Transform, model.Transform, vMath.deg2rad(180.0), [1,0,0]);
 	// vMath.mat4.rotate(model.Transform, model.Transform, vMath.deg2rad(90.0), [0,1,0]);
 	vMath.mat4.rotate(model.Transform, model.Transform, vMath.deg2rad(90.0), [0,0,1]);
+	
+	vMath.mat4.identity(modelGlass.Transform);
+	vMath.mat4.rotate(modelGlass.Transform, modelGlass.Transform, vMath.deg2rad(180.0), [1,0,0]);
+	vMath.mat4.rotate(modelGlass.Transform, modelGlass.Transform, vMath.deg2rad(90.0), [0,0,1]);
+	vMath.mat4.translate(modelGlass.Transform, modelGlass.Transform, [0.0, 0.0, 1.5]);
 
 	vMath.mat4.identity(AtmoSphereModel.Transform); var atmoScale = 1.012;
 	vMath.mat4.scale(AtmoSphereModel.Transform, AtmoSphereModel.Transform, [atmoScale,atmoScale,atmoScale]);
@@ -296,6 +307,7 @@ uniform sampler2D txAoRS; uniform float txAoRS_gamma_value; */
 	var UpAdd = vMath.vec3.create();
 	
 	var bEnableRotation = false;
+	var bUpdateCamera = true;
 	
 	function renderFrame()
 	{
@@ -312,14 +324,16 @@ uniform sampler2D txAoRS; uniform float txAoRS_gamma_value; */
 			vMath.mat4.rotate(model.Transform, model.Transform, vMath.deg2rad(time*10), [0,0,1]);/*  */
 		}
 		
-		vMath.mat4.identity(navigatorModel.Transform);
-		vMath.mat4.setTranslation(navigatorModel.Transform, navigatorModel.Transform, [ -1.0, -ctime*0.5, 0.0]);
-		vMath.mat4.rotate(navigatorModel.Transform, navigatorModel.Transform, vMath.deg2rad(90), [0,1,0]);
+		if(false){
+			vMath.mat4.identity(modelGlass.Transform);
+			vMath.mat4.setTranslation(modelGlass.Transform, modelGlass.Transform, [ -1.0, -ctime*0.5, 0.0]);
+			vMath.mat4.rotate(modelGlass.Transform, modelGlass.Transform, vMath.deg2rad(90), [0,1,0]);
+		}
 		// glext.CFramebuffer.BindMainFB();
 		
 		//Calc camera view i proj
 		//-------------------------------------------------------------------------------------
-		var bUpdateCamera = false;
+		
 		
 		var mousePos = sys.mouse.getPosition();
 		var mouseDelta = sys.mouse.getDeltaPosition();
@@ -457,7 +471,7 @@ uniform sampler2D txAoRS; uniform float txAoRS_gamma_value; */
 		gl.viewport(0, 0, txfbColor.width, txfbColor.height);
 		
 			fbo.AttachTexture(txfbColor, 0);
-			RenderModels(fbo, false, time, Camera, [navigatorModel]);
+			RenderModels(fbo, false, time, Camera, [modelGlass]);
 		
 		//render to main FB, sa shaderom koji prikazuje mipove.
 		glext.CFramebuffer.BindMainFB();	
@@ -478,6 +492,7 @@ uniform sampler2D txAoRS; uniform float txAoRS_gamma_value; */
 		sys.mouse.Update();
 		gl.flush();
 		gs.Update();
+		bUpdateCamera = false;
 	}
 	
 	return; /* */
@@ -528,6 +543,7 @@ export function recompileShader(fragment_name){
 				case "transparent_shader":
 					shader.ULTextureAmb = shader.getUniformLocation("txAmbient");
 					shader.ULTextureBackground = shader.getUniformLocation("txBackground");
+					shader.ULroughnessScaleOffsetPower = shader.getUniformLocation("roughnessScaleOffsetPower");
 					glext.CLightList.get(0).AttachUniformBlockTo(shader);
 				break;
 				case "deferred_opaque_shader":
