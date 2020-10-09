@@ -218,6 +218,10 @@
 			<p style="font-family:verdana; color:white; font-size:75%;">Resets the simulation to start condition, but the sphere keeps its position.</p>
 			<!-- <p style="font-family:verdana; color:white; font-size:75%;">Postavlja simulaciju u startni položaj, no sfera zadržava trenutnu poziciju.</p> -->
 		
+			<!-- <button id="toggle_fb_fluidsim", onclick="on_fluidsim_toggle_framebuffer()" style="transform: translate(25%, 0%);"></button>
+			<p style="font-family:verdana; color:white; font-size:75%;">Toggle FluidSim multiple or single framebuffer usage.</p> -->
+			<!-- <p style="font-family:verdana; color:white; font-size:75%;">Toggla FluidSim korištenje više ili jednog framebuffer.</p> -->
+
 		<!-- <p style="font-family:verdana; color:white; font-size:100%;" >
 			Simulacija interakcije fluida sa solidnim objektom<br>
 		</p>
@@ -269,7 +273,7 @@
 	</div>
 	<!-- <div id="debug_kvadrat" style="background-color:#55aaff; width:128px; height:128px; position:absolute"></div> -->
   <script type="module">
-	import { main, recompileShader, reloadTexture, onShaderDefineChanged, SetAutoQualitySelection, ReloadFluidSimShaders, FluidSimDisplayChanged, FluidSimSetKinematicViscosity, FluidSimReset, FluidSimTogglePause } from "./main_volumetric.js";
+	import { main, recompileShader, reloadTexture, onShaderDefineChanged, SetAutoQualitySelection, ReloadFluidSimShaders, FluidSimDisplayChanged, FluidSimSetKinematicViscosity, FluidSimReset, FluidSimTogglePause, FluidSimToggleFramebuffer } from "./main_volumetric.js";
 	import { fetchImage } from "./GLExt/glTexture.js";
 	function wait(ms){ const start = performance.now(); while(performance.now() - start < ms); }
 	
@@ -466,6 +470,9 @@
 			button.innerHTML = "Resume FluidSim";
 		else
 			button.innerHTML = "Pause FluidSim";
+	}
+	window.on_fluidsim_toggle_framebuffer = function on_fluidsim_toggle_framebuffer(){
+		FluidSimToggleFramebuffer();
 	}
 
 //-------------------------------------------------------------------------------------------

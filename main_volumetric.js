@@ -334,6 +334,17 @@ export function main(){
 		return v;
 	}
 	
+	var fluidsimFramebufferToggleButton = document.getElementById("toggle_fb_fluidsim");
+	if(fluidsimFramebufferToggleButton != null){
+		fluidsimFramebufferToggleButton.addEventListener("click", function(){
+			if(gFluidSim.bUseMultipleFramebuffers)
+				fluidsimFramebufferToggleButton.innerHTML = "Multiple Framebuffers ON";
+			else
+				fluidsimFramebufferToggleButton.innerHTML = "Multiple Framebuffers OFF";
+		});
+		fluidsimFramebufferToggleButton.innerHTML = "Multiple Framebuffers ON";
+	}
+
 	var lightIntenitySlider = document.getElementById("light_intensity_slider");
 	if(lightIntenitySlider != null){
 		lightIntenitySlider.fvalue = function(){
@@ -817,7 +828,7 @@ export function main(){
 	var bCtrlToggle = false;
 	var bShiftToggle = false;
 	
-	var delay_ms = 17;
+	var delay_ms = 34;
 /*  
 	let testv3D_1 = [0.0,0.0,0.0];
 	let testv2D_1 = [250.0,250.0];
@@ -831,9 +842,9 @@ export function main(){
 	function renderFrame()
 	{
 		time = sys.time.getSecondsSinceStart();
-		var frame_time = time - oldframe_time;
+		let frame_time = time - oldframe_time;
 		
-		var avg_FPS = 1.0 / avg_frame_time;
+		let avg_FPS = 1.0 / avg_frame_time;
 		
 		if(oldframe_time > 0.0 && frame_time > 1.0 / 70.0){
 			avg_frame_time = vMath.lerp(avg_frame_time, frame_time, 1.0 / 30.0);
@@ -861,9 +872,9 @@ export function main(){
 		// FPSlabel.textContent = (1.0/avg_frame_time).toString();
 		FPSlabel.textContent = Number.parseFloat(avg_FPS).toFixed(2) + " FPS";
 		
-		var ctime = Math.cos(time);
-		var stime = Math.sin(time);
-		var ctime10 = Math.cos(10*time);
+		let ctime = Math.cos(time);
+		let stime = Math.sin(time);
+		let ctime10 = Math.cos(10*time);
 		
 		// if(checkWindowsSizeAndResizeCanvas() == true){
 			// CCamera.setViewportWidthHeight(gl.viewportWidth,gl.viewportHeight);}
@@ -872,12 +883,12 @@ export function main(){
 		
 		//Calc camera view i proj
 		//-------------------------------------------------------------------------------------
-		var bUpdateCamera = false;
+		let bUpdateCamera = false;
 		
-		var mousePos = sys.mouse.getPosition();
-		var mouseDelta = sys.mouse.getDeltaPosition();
+		let mousePos = sys.mouse.getPosition();
+		let mouseDelta = sys.mouse.getDeltaPosition();
 		
-		var SphereBarrierPositionOffset = [0.0,0.0,0.0];
+		let SphereBarrierPositionOffset = [0.0,0.0,0.0];
 		
 		if(gl.canvasObject.bIsMouseOver == true)
 		{
@@ -907,7 +918,7 @@ export function main(){
 			if(bUpdateCamera == true)
 			{			
 				// eyePt = vMath.sph2cart3D(orbital.azimuth, orbital.inclination, orbital.radius);
-				var sinA = Math.sin(vMath.deg2rad(orbital.dazimuth)); var sinI = Math.sin(vMath.deg2rad(orbital.dinclination));
+				let sinA = Math.sin(vMath.deg2rad(orbital.dazimuth)); var sinI = Math.sin(vMath.deg2rad(orbital.dinclination));
 				vMath.vec3.scale(RightAdd, CCamera.RightDir, orbital.radius * sinA);
 				vMath.vec3.scale(UpAdd, CCamera.UpDir, orbital.radius * sinI);
 				vMath.vec3.add(eyePt, eyePt, RightAdd);
@@ -1170,6 +1181,9 @@ export function FluidSimReset(){
 export function FluidSimTogglePause(){
 	bFluidSimPass = !bFluidSimPass;
 	return !bFluidSimPass;
+}
+export function FluidSimToggleFramebuffer(){
+	gFluidSim.ToggleFramebufferUsage();
 }
 
 function RenderModels(fbo, bClearFBO, time, camera, models){

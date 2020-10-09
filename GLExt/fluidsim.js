@@ -494,6 +494,14 @@ export class CFluidSim3D
 				divergence, pressure, divfree_velocity, display)
 	{
 		this.NumOutBuffers = 8;
+		this.bUseMultipleFramebuffers = true;
+		
+		this.fbVelocity0 = [];
+		this.fbVelocity1 = [];
+		this.fbVelocity2 = [];
+		this.fbPressure0 = [];
+		this.fbPressure1 = [];
+		this.fbDivergence = [];
 		
 		this.quad_model = new CModel(-1);
 		GenQuadModel(this.quad_model);
@@ -711,6 +719,91 @@ export class CFluidSim3D
 		this.framebuffer = new CFramebuffer(false); this.framebuffer.Create();
 		// this.framebuffer.AttachDepth(this.txDepth);
 		
+		//framebuffers
+		/*
+			this.fbVelocity0 = [];
+			this.fbVelocity1 = [];
+			this.fbVelocity2 = [];
+			this.fbPressure0 = [];
+			this.fbPressure1 = [];
+			this.fbDivergence = [];
+		*/
+		//---------------------------------------------------------------------
+		let fb = 0;
+		
+		for(let z = 0; z < this.depth; z += this.NumOutBuffers)
+		{
+			this.fbVelocity0[fb] = new CFramebuffer(false); this.fbVelocity0[fb].Create();
+			this.fbVelocity0[fb].bAutoSetupUsage = false;
+		
+			for(let l = 0; l < this.NumOutBuffers; ++l)
+				this.fbVelocity0[fb].AttachTextureLayer(this.txVelocity0, l, z+l);
+			this.fbVelocity0[fb].SetupUsage();
+			++fb;
+		}
+		fb = 0;
+		
+		for(let z = 0; z < this.depth; z += this.NumOutBuffers)
+		{
+			this.fbVelocity1[fb] = new CFramebuffer(false); this.fbVelocity1[fb].Create();
+			this.fbVelocity1[fb].bAutoSetupUsage = false;
+			
+			for(let l = 0; l < this.NumOutBuffers; ++l)
+				this.fbVelocity1[fb].AttachTextureLayer(this.txVelocity1, l, z+l);
+			this.fbVelocity1[fb].SetupUsage();
+			++fb;
+		}
+		fb = 0;
+		
+		for(let z = 0; z < this.depth; z += this.NumOutBuffers)
+		{
+			this.fbVelocity2[fb] = new CFramebuffer(false); this.fbVelocity2[fb].Create();
+			this.fbVelocity2[fb].bAutoSetupUsage = false;
+			
+			for(let l = 0; l < this.NumOutBuffers; ++l)
+				this.fbVelocity2[fb].AttachTextureLayer(this.txVelocity2, l, z+l);
+			this.fbVelocity2[fb].SetupUsage();
+			++fb;
+		}
+		fb = 0;
+		
+		for(let z = 0; z < this.depth; z += this.NumOutBuffers)
+		{
+			this.fbPressure0[fb] = new CFramebuffer(false); this.fbPressure0[fb].Create();
+			this.fbPressure0[fb].bAutoSetupUsage = false;
+			
+			for(let l = 0; l < this.NumOutBuffers; ++l)
+				this.fbPressure0[fb].AttachTextureLayer(this.txPressure0, l, z+l);
+			this.fbPressure0[fb].SetupUsage();
+			++fb;
+		}
+		fb = 0;
+		
+		for(let z = 0; z < this.depth; z += this.NumOutBuffers)
+		{
+			this.fbPressure1[fb] = new CFramebuffer(false); this.fbPressure1[fb].Create();
+			this.fbPressure1[fb].bAutoSetupUsage = false;
+			
+			for(let l = 0; l < this.NumOutBuffers; ++l)
+				this.fbPressure1[fb].AttachTextureLayer(this.txPressure1, l, z+l);
+			this.fbPressure1[fb].SetupUsage();
+			++fb;
+		}
+		fb = 0;
+		
+		for(let z = 0; z < this.depth; z += this.NumOutBuffers)
+		{
+			this.fbDivergence[fb] = new CFramebuffer(false); this.fbDivergence[fb].Create();
+			this.fbDivergence[fb].bAutoSetupUsage = false;
+			
+			for(let l = 0; l < this.NumOutBuffers; ++l)
+				this.fbDivergence[fb].AttachTextureLayer(this.txDivergence, l, z+l);
+			this.fbDivergence[fb].SetupUsage();
+			++fb;
+		}
+		fb = 0;		
+		//---------------------------------------------------------------------
+		
 		this.kinematicViscosity = 1.0;
 		
 		this.strDisplayType = "";
@@ -719,6 +812,10 @@ export class CFluidSim3D
 		this.displayBrightness = 1.0;
 		
 		this.NofPressureIterations = 1;
+	}
+
+	ToggleFramebufferUsage(){
+		this.bUseMultipleFramebuffers = !this.bUseMultipleFramebuffers;
 	}
 	
 	ClearBuffers()
@@ -769,18 +866,25 @@ export class CFluidSim3D
 		gl.viewport(0, 0, this.width, this.height);
 		this.dt = dT;
 		gl.disable(gl.BLEND);
+		let fb = 0;
 		
 		//0. swap textura: velocity i pressure. ovo je na pocetku SimStep samo.
 		{
-			var temp = this.txVelocity0;
+			let temp = this.txVelocity0;
 			this.txVelocity0 = this.txVelocity2;
 			this.txVelocity2 = temp;
+			temp = this.fbVelocity0;
+			this.fbVelocity0 = this.fbVelocity2;
+			this.fbVelocity2 = temp;
 			
 			this.txOldVelocity = this.txVelocity0;
 			
 			temp = this.txPressure0;
 			this.txPressure0 = this.txPressure1;
 			this.txPressure1 = temp;
+			temp = this.fbPressure0;
+			this.fbPressure0 = this.fbPressure1;
+			this.fbPressure1 = temp;
 			
 			this.txOldPressure = this.txPressure0;
 		}
@@ -788,6 +892,8 @@ export class CFluidSim3D
 		//1. viscosity pass: input je txOldVelocity, output je txDiffusedVelocity
 		{
 			this.txDiffusedVelocity = this.txVelocity1;
+			this.fbDiffusedVelocity = this.fbVelocity1;
+			fb = 0;
 			
 			this.viscosity_shader.Bind();
 				this.txOldVelocity.Bind(0, this.viscosity_shader.ULTextureVelocity);
@@ -800,19 +906,24 @@ export class CFluidSim3D
 			
 			for(let z = 0; z < this.depth; z += this.NumOutBuffers)
 			{
-				for(let l = 0; l < this.NumOutBuffers; ++l)
-					this.framebuffer.AttachTextureLayer(this.txDiffusedVelocity, l, z+l);
-				this.framebuffer.SetupUsage();
-				
+				if(this.bUseMultipleFramebuffers == true){
+					this.fbDiffusedVelocity[fb].Bind(); fb++; }
+				else{
+					for(let l = 0; l < this.NumOutBuffers; ++l)
+						this.framebuffer.AttachTextureLayer(this.txDiffusedVelocity, l, z+l);
+					this.framebuffer.SetupUsage();
+				}				
 				this.viscosity_shader.setIntUniform(this.viscosity_shader.ULz, z);
 				this.quad_model.RenderIndexedTriangles(this.viscosity_shader);	
 			}
 		}
-		this.framebuffer.DetachAllTextures();
+		// this.framebuffer.DetachAllTextures();
 		
 		//2. advection pass: input je txDiffusedVelocity, output je txAdvectedVelocity
 		{
 			this.txAdvectedVelocity = this.txVelocity2;
+			this.fbAdvectedVelocity = this.fbVelocity2;
+			fb = 0;
 					
 			this.advection_shader.Bind();
 				this.txDiffusedVelocity.Bind(0, this.advection_shader.ULTextureVelocity);
@@ -823,19 +934,24 @@ export class CFluidSim3D
 			
 			for(let z = 0; z < this.depth; z += this.NumOutBuffers)
 			{
-				for(let l = 0; l < this.NumOutBuffers; ++l)
-					this.framebuffer.AttachTextureLayer(this.txAdvectedVelocity, l, z+l);
-				this.framebuffer.SetupUsage();
-					
+				if(this.bUseMultipleFramebuffers == true){
+					this.fbAdvectedVelocity[fb].Bind(); ++fb;}
+				else{
+					for(let l = 0; l < this.NumOutBuffers; ++l)
+						this.framebuffer.AttachTextureLayer(this.txAdvectedVelocity, l, z+l);
+					this.framebuffer.SetupUsage();
+				}				
 				this.advection_shader.setIntUniform(this.advection_shader.ULz, z);
 				this.quad_model.RenderIndexedTriangles(this.advection_shader);
 			}
 		}
-		this.framebuffer.DetachAllTextures();
+		// this.framebuffer.DetachAllTextures();
 		
 		//3. advection correction pass: input je txAdvectedVelocity i txDiffusedVelocity, output je txAdvectedCorrectedVelocity
 		{
 			this.txAdvectedCorrectedVelocity = this.txVelocity0;
+			this.fbAdvectedCorrectedVelocity = this.fbVelocity0;
+			fb = 0;
 					
 				this.advection_correction_shader.Bind();
 					this.txAdvectedVelocity.Bind(0, this.advection_correction_shader.ULTextureAdvectedVelocity);
@@ -847,19 +963,24 @@ export class CFluidSim3D
 					
 			for(let z = 0; z < this.depth; z += this.NumOutBuffers)
 			{	
-				for(let l = 0; l < this.NumOutBuffers; ++l)
-					this.framebuffer.AttachTextureLayer(this.txAdvectedCorrectedVelocity, l, z+l);
-				this.framebuffer.SetupUsage();
-					
+				if(this.bUseMultipleFramebuffers == true){
+					this.fbAdvectedCorrectedVelocity[fb].Bind(); ++fb;}
+				else{
+					for(let l = 0; l < this.NumOutBuffers; ++l)
+						this.framebuffer.AttachTextureLayer(this.txAdvectedCorrectedVelocity, l, z+l);
+					this.framebuffer.SetupUsage();
+				}					
 				this.advection_correction_shader.setIntUniform(this.advection_correction_shader.ULz, z);
 				this.quad_model.RenderIndexedTriangles(this.advection_correction_shader);
 			}
 		}
-		this.framebuffer.DetachAllTextures();
+		// this.framebuffer.DetachAllTextures();
 		
 		//4. divergence pass na velocity: input je txAdvectedCorrectedVelocity, output je txDivergence
 		{
 			this.txDivergence;
+			this.fbDivergence;
+			fb = 0;
 			
 			this.divergence_shader.Bind();
 				this.txAdvectedCorrectedVelocity.Bind(0, this.divergence_shader.ULTexture);
@@ -867,18 +988,21 @@ export class CFluidSim3D
 				this.divergence_shader.setFloat3Uniform( this.divergence_shader.ULaspect, this.aspect);
 			
 			this.pre_divergence_pass_function();
-								
+			
 			for(let z = 0; z < this.depth; z += this.NumOutBuffers)
 			{	
-				for(let l = 0; l < this.NumOutBuffers; ++l)
-					this.framebuffer.AttachTextureLayer(this.txDivergence, l, z+l);
-				this.framebuffer.SetupUsage();
-					
+				if(this.bUseMultipleFramebuffers == true){
+					this.fbDivergence[fb].Bind(); ++fb;}
+				else{
+					for(let l = 0; l < this.NumOutBuffers; ++l)
+						this.framebuffer.AttachTextureLayer(this.txDivergence, l, z+l);
+					this.framebuffer.SetupUsage();
+				}
 				this.divergence_shader.setIntUniform(this.divergence_shader.ULz, z);
 				this.quad_model.RenderIndexedTriangles(this.divergence_shader);
 			}
 		}
-		this.framebuffer.DetachAllTextures();
+		// this.framebuffer.DetachAllTextures();
 		
 		//5. pressure calc pass: input je txDivergence i txOldPressure, output je txPressure. Jacobi iteration. (vise puta izvrsavanje)
 		{
@@ -896,35 +1020,45 @@ export class CFluidSim3D
 			{
 				this.txPressure = this.txPressure1;
 				this.txOldPressure.Bind(1, this.pressure_shader.ULTexturePressure);
+				this.fbPressure = this.fbPressure1;
+				fb = 0;
 				
 				/* itime = itime + dt;
 				this.pressure_shader.setFloatUniform( this.pressure_shader.ULTime, itime); */
 				
 				for(let z = 0; z < this.depth; z += this.NumOutBuffers)
 				{
-					for(let l = 0; l < this.NumOutBuffers; ++l)
-						this.framebuffer.AttachTextureLayer(this.txPressure, l, z+l);
-					this.framebuffer.SetupUsage();					
-						
+					if(this.bUseMultipleFramebuffers == true){
+						this.fbPressure[fb].Bind(); ++fb;}
+					else{
+						for(let l = 0; l < this.NumOutBuffers; ++l)
+							this.framebuffer.AttachTextureLayer(this.txPressure, l, z+l);
+						this.framebuffer.SetupUsage();
+					}
 					this.pressure_shader.setIntUniform(this.pressure_shader.ULz, z);
 					this.quad_model.RenderIndexedTriangles(this.pressure_shader);
 						
 				}
 				//swap pressure
 				if(i > 1){
-					var temp = this.txPressure0;
+					let temp = this.txPressure0;
 					this.txPressure0 = this.txPressure1;
 					this.txPressure1 = temp;
+					temp = this.fbPressure0;
+					this.fbPressure0 = this.fbPressure1;
+					this.fbPressure1 = temp;
 					
 					this.txOldPressure = this.txPressure0;
 				}
 			}
 		}
-		this.framebuffer.DetachAllTextures();
+		// this.framebuffer.DetachAllTextures();
 		
 		//6. divergence free velocity pass: input je txPressure i txAdvectedCorrectedVelocity, output je txVelocity
 		{
 			this.txVelocity = this.txVelocity2;
+			this.fbVelocity = this.fbVelocity2;
+			fb = 0;
 			
 			this.divfree_velocity_shader.Bind();
 				this.txPressure.Bind(0, this.divfree_velocity_shader.ULTexturePressure);
@@ -936,16 +1070,19 @@ export class CFluidSim3D
 			
 			for(let z = 0; z < this.depth; z += this.NumOutBuffers)
 			{	
-				for(let l = 0; l < this.NumOutBuffers; ++l)
-					this.framebuffer.AttachTextureLayer(this.txVelocity, l, z+l);
-				this.framebuffer.SetupUsage();
-					
+				if(this.bUseMultipleFramebuffers == true){
+					this.fbVelocity[fb].Bind(); ++fb;}
+				else{
+					for(let l = 0; l < this.NumOutBuffers; ++l)
+						this.framebuffer.AttachTextureLayer(this.txVelocity, l, z+l);
+					this.framebuffer.SetupUsage();
+				}
 				this.divfree_velocity_shader.setIntUniform(this.divfree_velocity_shader.ULz, z);
 				this.quad_model.RenderIndexedTriangles(this.divfree_velocity_shader);
 			}
 		}
-		this.framebuffer.DetachAllTextures();
-		this.framebuffer.bAutoSetupUsage = true;
+		// this.framebuffer.DetachAllTextures();
+		// this.framebuffer.bAutoSetupUsage = true;
 		
 		CFramebuffer.Bind(oldFB);
 		
@@ -1027,6 +1164,10 @@ export class CFluidSim3D
 		this.txMass0 = new CTexture3D(-1);
 		this.txMass1 = new CTexture3D(-1);
 		this.txMass2 = new CTexture3D(-1);
+		
+		this.fbMass0 = [];
+		this.fbMass1 = [];
+		this.fbMass2 = [];
 		
 		if(bColorAndDensity == true){
 			if(bFloat == true){
@@ -1139,6 +1280,46 @@ export class CFluidSim3D
 		CTextureList.addTexture(this.txMass1);
 		CTextureList.addTexture(this.txMass2);
 		
+		//---------------------------------------------------------------------
+		let fb = 0;
+		
+		for(let z = 0; z < this.depth; z += this.NumOutBuffers)
+		{
+			this.fbMass0[fb] = new CFramebuffer(false); this.fbMass0[fb].Create();
+			this.fbMass0[fb].bAutoSetupUsage = false;
+			
+			for(let l = 0; l < this.NumOutBuffers; ++l)
+				this.fbMass0[fb].AttachTextureLayer(this.txMass0, l, z+l);
+			this.fbMass0[fb].SetupUsage();
+			++fb;
+		}
+		fb = 0;
+		
+		for(let z = 0; z < this.depth; z += this.NumOutBuffers)
+		{
+			this.fbMass1[fb] = new CFramebuffer(false); this.fbMass1[fb].Create();
+			this.fbMass1[fb].bAutoSetupUsage = false;
+			
+			for(let l = 0; l < this.NumOutBuffers; ++l)
+				this.fbMass1[fb].AttachTextureLayer(this.txMass1, l, z+l);
+			this.fbMass1[fb].SetupUsage();
+			++fb;
+		}
+		fb = 0;
+		
+		for(let z = 0; z < this.depth; z += this.NumOutBuffers)
+		{
+			this.fbMass2[fb] = new CFramebuffer(false); this.fbMass2[fb].Create();
+			this.fbMass2[fb].bAutoSetupUsage = false;
+			
+			for(let l = 0; l < this.NumOutBuffers; ++l)
+				this.fbMass2[fb].AttachTextureLayer(this.txMass2, l, z+l);
+			this.fbMass2[fb].SetupUsage();
+			++fb;
+		}
+		fb = 0;
+		//---------------------------------------------------------------------
+				
 		this.ResetMass();
 	}
 	
@@ -1184,6 +1365,8 @@ export class CFluidSim3D
 		
 		this.txMass = this.txMass1;
 		this.txOldMass = this.txMass0;
+		this.fbMass = this.fbMass1;
+		let fb = 0;
 		
 		this.mass_advect_shader.Bind();
 			this.txOldMass.Bind(0, this.mass_advect_shader.ULTextureMass);
@@ -1194,16 +1377,21 @@ export class CFluidSim3D
 			
 			for(let z = 0; z < this.mass_depth; z += this.NumOutBuffers)
 			{
-				for(let l = 0; l < this.NumOutBuffers; ++l)
-					this.framebuffer.AttachTextureLayer(this.txMass, l, z+l);
-				this.framebuffer.SetupUsage();
-				
+				if(this.bUseMultipleFramebuffers == true){
+					this.fbMass[fb].Bind(); ++fb;}
+				else{
+					for(let l = 0; l < this.NumOutBuffers; ++l)
+						this.framebuffer.AttachTextureLayer(this.txMass, l, z+l);
+					this.framebuffer.SetupUsage();
+				}
 				this.mass_advect_shader.setIntUniform(this.mass_advect_shader.ULz, z);
 				this.quad_model.RenderIndexedTriangles(this.mass_advect_shader);	
 			}
+			fb = 0;
 		
 		this.txAdvectedMass = this.txMass;
 		this.txMass = this.txMass2;
+		this.fbMass = this.fbMass2;
 		
 		this.mass_advect_correction_shader.Bind();
 			this.txOldMass.Bind(0, this.mass_advect_correction_shader.ULTextureMass);
@@ -1215,21 +1403,29 @@ export class CFluidSim3D
 			
 			for(let z = 0; z < this.mass_depth; z += this.NumOutBuffers)
 			{
-				for(let l = 0; l < this.NumOutBuffers; ++l)
-					this.framebuffer.AttachTextureLayer(this.txMass, l, z+l);
-				this.framebuffer.SetupUsage();
-				
+				if(this.bUseMultipleFramebuffers == true){
+					this.fbMass[fb].Bind(); ++fb;}
+				else{
+					for(let l = 0; l < this.NumOutBuffers; ++l)
+						this.framebuffer.AttachTextureLayer(this.txMass, l, z+l);
+					this.framebuffer.SetupUsage();
+				}
 				this.mass_advect_correction_shader.setIntUniform(this.mass_advect_correction_shader.ULz, z);
 				this.quad_model.RenderIndexedTriangles(this.mass_advect_correction_shader);	
-			}		
+			}
+			fb = 0;	
 		
 		
 		CFramebuffer.Bind(oldFB);
 		
 		{
-			var tmp = this.txMass2;
+			let tmp = this.txMass2;
 			this.txMass2 = this.txMass0;
 			this.txMass0 = tmp;
+			
+			tmp = this.fbMass2;
+			this.fbMass2 = this.fbMass0;
+			this.fbMass0 = tmp;
 		}
 	}
 	
