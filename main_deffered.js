@@ -98,7 +98,7 @@ uniform sampler2D txAoRS; uniform float txAoRS_gamma_value; */
 	transparent_shader.ULTextureBackground = transparent_shader.getUniformLocation("txBackground");
 	transparent_shader.ULroughnessScaleOffsetPower = transparent_shader.getUniformLocation("roughnessScaleOffsetPower");
 	
-	transparent_shader.setFloat3Uniform(transparent_shader.ULroughnessScaleOffsetPower, [1.7,0.125,1.0]);
+	transparent_shader.setFloat3Uniform(transparent_shader.ULroughnessScaleOffsetPower, [0.58,0.25,1.0]);
 	
 	var backbuffer_shader = new glext.CShader(4);
 	if(backbuffer_shader.CompileFromFile("simpleVS", "backbuffer_shader") == false) alert("nije kompajliran shader!");
@@ -113,7 +113,7 @@ uniform sampler2D txAoRS; uniform float txAoRS_gamma_value; */
 	var SkySphereModel = new glext.CModel(0);
 	SkySphereModel.ImportFrom("SphereModel");
 	// glext.GenCubeModel(model);
-	
+	 
 	var model = new glext.CModel(1);
 	model.ImportFrom("displayModel");
 	
@@ -133,8 +133,8 @@ uniform sampler2D txAoRS; uniform float txAoRS_gamma_value; */
 	var txN = new glext.CTexture(1); txN.CreateFromFile("txRock_N");
 	var txAoRS = new glext.CTexture(2); txAoRS.CreateFromFile("txRock_AoRS");
 	
-	var txGlassAoRS = new glext.CTexture(-1); txGlassAoRS.CreateFromFile("txRock_AoRS");
-	var txGlassN = new glext.CTexture(-1); txGlassN.CreateFromFile("txRock_N");
+	var txGlassAoRS = new glext.CTexture(-1); txGlassAoRS.CreateFromFile("txGlass_AoRS");
+	var txGlassN = new glext.CTexture(-1); txGlassN.CreateFromFile("txGlass_N");
 	
 	var txAtmosphere = new glext.CTexture(-1); txAtmosphere.CreateFromFile("txAtmosphere");
 	
@@ -493,6 +493,8 @@ uniform sampler2D txAoRS; uniform float txAoRS_gamma_value; */
 		gl.flush();
 		gs.Update();
 		bUpdateCamera = false;
+		
+		// transparent_shader.setFloat3Uniform(transparent_shader.ULroughnessScaleOffsetPower, [0.55+ctime*0.1,0.25,1.0]);
 	}
 	
 	return; /* */

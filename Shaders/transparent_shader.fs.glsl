@@ -38,6 +38,9 @@ uniform float Time;
 uniform float emissionMult;
 uniform vec3 roughnessScaleOffsetPower;
 #define rSOP roughnessScaleOffsetPower
+
+uniform highp mat4 ViewMatrix;
+uniform highp mat4 ProjectionMatrix;
 //------------------------------------------------------------------------------
 #define varyin in
 
@@ -89,15 +92,10 @@ inline vec3 sampleBackground(sampler2D tx, vec2 t, float r){
 void main(void)
 {
 	Light light0 = Lights[0].light;
-
-	gl_FragColor = vec4(Normal.xyz*0.5+0.5, 1.0);
-	// Light light = CreateLight(vec3(0.0, 0.0, 10.0), 20.0);
-	float I = Light_Calculate(light0, Position);
 	
 	vec4 diffuse = texture2D(txDiffuse, TexCoords);
 	vec4 normaltx = texture2D(txNormal, TexCoords);
 	vec4 AoRSEm = texture2D(txAoRS, TexCoords);
-	// diffuse = tovec4(1.0f);
 	
 	float roughness = sqrt(AoRSEm.y);
 	float ambientOcclusion = AoRSEm.a;//1.0;//
@@ -123,19 +121,15 @@ void main(void)
 		roughness = 0.0f;
 	#endif
 	
-	// roughness = 0.0f;
+	float3 V = normalize(-ViewVector);
+	float3 N = normalize(Normal);
+	float3 R = reflect(N,V);
 	
-	mat3 NormalMatrix = CreateRotationMatrix(Tangent, Bitangent, Normal);
+	mat3 NormalMatrix = CreateRotationMatrix(normalize(Tangent), normalize(Bitangent), N);
 	
-	// if(uFlags == 1) normaltx.y = 1.0-normaltx.y;
-	// if(uint_getbit(uFlags, 2) == true) normaltx.y = 1.0-normaltx.y;
-	// if(getBitFlag(2) == true) normaltx.y = 1.0-normaltx.y;
 	vec3 normal = normaltx.xyz*2.0 - 1.0;
-	normal = NormalMatrix * normal;
-	
-	float l = dot(normal.xyz, Light_DirToLight(light0, Position))*0.5+0.5;
-	
-	vec3 dir = Light_DirToLight(light0, Position);	
+	normal.xy *= 0.25f;
+	normal = normalize(NormalMatrix * normal);
 	
 	float mipLevel = (cos(Time*0.4)+1.0)/2.0;
 	vec4 Amb = textureCubeLod(txAmbient, -normal.xyz, 7.0*roughness);
@@ -143,14 +137,11 @@ void main(void)
 	
 	Light lights[1]; //{ light0, light0, light0, light0,};
 	lights[0] = light0;
-	lights[0].intensity = 1.0f;
-	lights[0].color = tofloat4(1.0f);
 	
-	// float3 reflected = pbr_Sample(diffuse.xyz, normal.xyz, specular.xyz, roughness, Metalness, 1.0f, ambientOcclusion, ViewVector, txAmbient, AMBIENT_LIGHT_INCREASE_PERCENTAGE, lights, 1);
-		
-	/* float3 reflected = tofloat3(0.0f);
+	float3 reflected = tofloat3(0.0f);
 	float3 lightdiff = tofloat3(0.0f);
 	float3 lightrefl = tofloat3(0.0f);
+	diffuse.xyz = vec3(1.0f);
 	
 	for(int i = 0; i < 1; ++i)
 		pbr_SampleLight(Position.xyz, diffuse.xyz, normal.xyz, specular.xyz, roughness, Metalness, 1.0f, ViewVector, lights[i], lightdiff, lightrefl);
@@ -158,26 +149,18 @@ void main(void)
 	
 	reflected = pbr_IntegrateSamples(diffuse.xyz, Metalness, lightdiff, lightrefl);
 	
-	gl_FragColor.xyz = reflected;
+	vec3 viewspaceNormal = (ProjectionMatrix * (ViewMatrix * tovec4(normal,0.0f))).xyz;
 	
-	gl_FragColor.a = 1.0; */
-	
-	vec2 offset =  - (normal.xy)*abs(normal.xy)*0.15f; //ToDo: pretvorit 0.15f u parametar
-	// vec2 offset = -normal.xy * 0.05f;
+	vec2 offset = -(viewspaceNormal.xy)*abs(viewspaceNormal.xy)*0.05f; //ToDo: pretvorit 0.15f u parametar
 	vec3 background = sampleBackground(txBackground, PixelPosition.xy + offset, (roughness*roughness));
 	
-	// gl_FragColor = rgbe / 255.0f;
-	// gl_FragColor.xyz = background;
-	// gl_FragColor.a = 1.0f;
-	
-	// gl_FragColor = prepare_output(background);
-	
-	// background.xy = offset*0.5f+0.5f;
-	// background.xyz = -normal.xyz*0.5+0.5;
+	float dotVN = dot(V,N);
+	vec3 refl = fresnel(0.025f, saturate(dotVN), saturate(roughness));
+	vec3 outcolor = lerp(background, reflected, refl);
 	
 	#ifdef USE_HDR_RGBA8
-		gl_FragColor = hdr_encode(background.xyz);
+		gl_FragColor = hdr_encode(outcolor.xyz);
 	#else
-		gl_FragColor = tovec4(background,1.0f);
+		gl_FragColor = tovec4(outcolor,1.0f);
 	#endif
 }
