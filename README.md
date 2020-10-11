@@ -6,8 +6,8 @@ Utah teapot example models rendered with pbr shader and a transparent glass shad
 
 [<img src="misc/projects/PBR.png" width="200" height="200"/>](https://valdyr88.github.io/WebGL-Renderer/index_pbr.html)
 
-## Fluidsim 3D example
-Interactive fluid simulation
+## Fluid simulation 3D example
+Interactive fluid simulation. This example uses a volume of 128x128x128 pixels to simulate fluid velocity, pressure and divergence. The velocity is then used to advect the same size mass volume, which is what eventualy gets displayed on screen. The example also lets you see the velocity, pressure and divergence. 
 
 [<img src="https://iili.io/26l6LN.gif" width="200" height="200"/>](https://valdyr88.github.io/WebGL-Renderer/index_volumetric.html)
 
