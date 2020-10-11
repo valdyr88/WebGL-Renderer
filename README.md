@@ -1,12 +1,12 @@
 # WebGL-Renderer
-A 3D renderer which has implementations of realtime 3D fluid simulation, pbr shading, deferred rendering and other using WebGL2
+A 3D renderer which has implementations of real-time 3D fluid simulation, pbr shading, deferred rendering and other using WebGL2
 
 ## PBR example
 Utah teapot example models rendered with pbr shader and a transparent glass shader
 
 [<img src="misc/projects/PBR.png" width="200" height="200"/>](https://valdyr88.github.io/WebGL-Renderer/index_pbr.html)
 
-## Realtime fluid simulation 3D example
+## Real-time fluid simulation 3D example
 Interactive fluid simulation. This example uses a volume of 128x128x128 pixels to simulate fluid velocity, pressure and divergence. The velocity is then used to advect the same size mass volume, which is what eventualy gets displayed on screen. The example also lets you see the velocity, pressure and divergence. 
 
 [<img src="https://iili.io/26l6LN.gif" width="200" height="200"/>](https://valdyr88.github.io/WebGL-Renderer/index_volumetric.html)
